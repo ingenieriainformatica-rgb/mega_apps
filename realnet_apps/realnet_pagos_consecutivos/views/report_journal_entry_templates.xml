@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Journal Entry PDF to display CE/CI number instead of native name when available -->
+    <template id="report_journal_entry_template_inherit_ceci" inherit_id="custom_accounting_reports.report_journal_entry_template">
+        <!-- Replace ONLY the header number with CE/CI when available (inline in H2 for same size) -->
+        <xpath expr="//h2/p[@t-field='doc.name']" position="replace">
+            <t t-if="doc.x_ceci_number">
+                <span t-esc="doc.x_ceci_number"/>
+            </t>
+            <t t-else="">
+                <span t-field="doc.name"/>
+            </t>
+        </xpath>
+
+        <!-- Remove the 'Referencia:' label and its value block to avoid confusion -->
+        <xpath expr="//strong[normalize-space()='Referencia:']/following-sibling::p[1]" position="replace"/>
+        <xpath expr="//strong[normalize-space()='Referencia:']" position="replace"/>
+    </template>
+
+    <!-- Update report file name to include CE/CI when available -->
+    <record id="custom_accounting_reports.action_report_journal_entry" model="ir.actions.report">
+        <field name="print_report_name">'Asiento Contable - %s' % (object.x_ceci_number or object.name)</field>
+    </record>
+</odoo>

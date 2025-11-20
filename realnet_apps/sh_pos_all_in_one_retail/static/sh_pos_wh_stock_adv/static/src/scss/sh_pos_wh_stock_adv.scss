@@ -1,0 +1,30 @@
+.sh-popup-stock{
+    .sh_wh_stock_popup{
+        .modal-header{
+            justify-content: center;
+        }
+        #sh_table_id{
+            table{
+                tbody{
+                    tr{
+                        &:nth-child(odd){
+                            background: #e5e5e5 !important;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+.sh_pos_custom_stock_display{
+    .product-list{
+        .product-content{
+            .sh_product_box_icon{
+                position: absolute; bottom:7px; right:5px;
+            }
+            .sh_product_qty{
+                top:0; left:0; position: absolute; padding:3px 5px; background:o-color(o-color-1); color:#fff;
+            }
+        }
+    }
+}

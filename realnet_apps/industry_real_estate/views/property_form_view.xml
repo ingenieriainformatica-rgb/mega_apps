@@ -1,0 +1,403 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <record id="property_form_add_header_if_missing" model="ir.ui.view">
+        <field name="name">account.analytic.account.form.property.add.header</field>
+        <field name="model">account.analytic.account</field>
+        <field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
+        <!-- Menor prioridad: crear header si no existe -->
+        <field name="priority" eval="20"/>
+        <field name="arch" type="xml">
+            <!-- Inserta <header/> solo si no existe aún -->
+            <xpath expr="//form[not(header)]/sheet" position="before">
+                <header/>
+            </xpath>
+        </field>
+    </record>
+    <record id="industry_real_estate.property_form_view" model="ir.ui.view">
+        <field name="name">account.analytic.account.form.property</field>
+        <field name="model">account.analytic.account</field>
+        <field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
+        <field name="priority" eval="30"/>
+        <field name="arch" type="xml">
+
+            <!-- 1) Cambiar atributos del form base -->
+            <xpath expr="//form" position="attributes">
+                <attribute name="string">Property</attribute>
+                <attribute name="name">form_property</attribute>
+            </xpath>
+
+            <xpath expr="//form//field[@name='partner_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Ocultar Plan -->
+            <xpath expr="//form//field[@name='plan_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Ocultar Moneda -->
+            <xpath expr="//form//field[@name='currency_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Ocultar Referencia -->
+            <xpath expr="//form//field[@name='code']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+
+            <!-- 2) Botón de cabecera -->
+            <xpath expr="//form/header" position="inside">
+                <button name="action_create_invoice_meters"
+                        type="object"
+                        string="Create Invoice"
+                        invisible="['|', ('x_rental_contract_id','=',False), ('x_invoice_status','!=','to_invoice')]"/>
+            </xpath>
+
+            <!-- 3) Botonera estadística arriba del sheet -->
+            <!-- La insertamos antes del primer grupo para asegurar visibilidad -->
+            <xpath expr="//form//sheet/group[1]" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button class="oe_stat_button" type="object" name="action_view_invoice" icon="fa-pencil-square-o"
+                            invisible="[('invoice_count', '=', 0)]">
+                        <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                    </button>
+                    <button class="oe_stat_button" type="object" name="action_view_vendor_bill" icon="fa-file-text-o"
+                            invisible="[('vendor_bill_count', '=', 0)]">
+                        <field name="vendor_bill_count" widget="statinfo" string="Vendor Bills"/>
+                    </button>
+                    <button class="oe_stat_button" type="object" name="action_open_rental_contracts" icon="fa-book"
+                            invisible="[('subscription_count', '=', 0)]">
+                        <field name="subscription_count" widget="statinfo" string="Rental Contracts"/>
+                    </button>
+                </div>
+            </xpath>
+
+            <!-- 4) Imagen de propiedad junto al título -->
+            <xpath expr="//form//sheet/div[@class='oe_title']" position="before">
+                <field name="x_property_image" widget="image" class="oe_avatar ml-3 mr-3"
+                    options="{'size': [0, 180]}"/>
+            </xpath>
+
+            <!-- 5) Ajustes del título: etiqueta y sólo lectura del nombre (si aplica) -->
+            <xpath expr="//form//sheet/div[@class='oe_title']/label[@for='name']" position="attributes">
+                <attribute name="string">Property</attribute>
+            </xpath>
+            <xpath expr="//form//sheet/div[@class='oe_title']//field[@name='name']" position="attributes">
+                <attribute name="readonly">1</attribute>
+                <attribute name="placeholder">e.g. Apartment Oxford Street</attribute>
+                <attribute name="class">oe_inline</attribute>
+            </xpath>
+
+            <!-- 6) Bloque de grupos generales (se añaden al final del sheet) -->
+            <xpath expr="//form//sheet" position="inside" priority="10">
+                <group col="2">
+                    <group string="General">
+                        <field name="x_rental_contract_id"/>
+                        <field name="x_property_registration_id"/>
+                        <field name="x_property_building_id"/>
+                        <field name="currency_id" groups="base.group_multi_currency" invisible="1"/>
+                        <field name="x_property_type" required="[('x_is_property','=',True)]"/>
+                        <field name="x_is_published"/>
+                        <field name="x_is_available"/>
+                        <field name="plan_id"
+                            invisible="[('plan_id','=', 'properties')]"
+                            readonly="[('plan_id','=', 'properties')]"
+                            groups="analytic.group_analytic_accounting,industry_real_estate.group_property_manager"/>
+                        <field name="x_cons_inm" string="Consecutivo"/>
+                    </group>
+
+                    <group string="Localización">
+                        <group colspan="2">
+                            <field name="x_country_id" placeholder="Seleccione País"/>
+                            <field name="x_state_id" domain="[('country_id','=',x_country_id)]" placeholder="Seleccione estado"/>
+                            <field name="x_city_id" domain="[('state_id','=',x_state_id)]" placeholder="Seleccione ciudad"/>
+                            <field name="sector" placeholder="Digite el barrio o el sector"/>
+                        </group>
+                    </group>
+
+                    <group string="Dirección del Inmueble">
+                        <field name="x_tipo_via" placeholder="Sobre..." required="True"/>
+                        <field name="x_nombre_via" placeholder="Ej: 45b"/>
+                        <field name="x_tipo_via_2" placeholder="Con..." required="True"/>
+                        <field name="x_numero_principal" placeholder="Ej: 70b sur"/>
+                        <field name="x_numero_secundario" string="Número" placeholder="Ej: 56aa"/>
+                        <field name="x_complemento" placeholder="Edificio X, Apto 301"/>
+                    </group>
+
+                    <group string="Ubicación geográfica">
+                        <field name="x_property_address" string="Dirección generada" readonly="1"/>
+                        <button name="action_geolocalizar" type="object" string="Geolocalizar" class="btn-secondary" icon="fa-map-marker"/>
+                        <field name="x_dummy_map" readonly="1" nolabel="1"/>
+                        <group><field name="x_latitude" readonly="1" invisible="1"/></group>
+                        <group><field name="x_longitude" readonly="1" invisible="1"/></group>
+                    </group>
+                </group>
+            </xpath>
+
+             <!-- 7) Pestañas dentro del notebook existente -->
+            <xpath expr="//form//sheet//notebook" position="inside" priority="20">
+                <page string="Description">
+                    <field name="x_website_description" placeholder="Describe your property here"/>
+                </page>
+
+                <page string="Gallery">
+                    <field name="x_property_attachment_image_ids" widget="many2many_binary"
+                        options="{'accepted_file_extensions': 'image/*'}"
+                        string="Add Images"/>
+                </page>
+
+                <page string="Documents">
+                    <field name="x_property_attachment_doc_ids" widget="many2many_binary"/>
+                </page>
+
+                <page string="Meter Readings">
+                    <field name="x_property_meter_reading_ids" context="{'default_x_account_analytic_account_id': id}">
+                        <list editable="bottom">
+                            <field name="x_meter_id" required="True"/>
+                            <field name="x_date"/>
+                            <field name="x_month"/>
+                            <field name="x_quantity"/>
+                            <field name="x_usage" optional="show"/>
+                            <field name="x_unit_cost" widget="monetary" optional="show"/>
+                            <field name="x_usage_cost" widget="monetary" optional="show"/>
+                            <field name="x_description" optional="show"/>
+                            <field name="x_invoice_id" optional="hide"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Caracteristicas" name="property_delivery">
+                    <group string="Información básica">
+                        <group col="2">
+                            <field name="x_bedrooms"/>
+                            <field name="x_bathrooms"/>
+                            <field name="x_area_m2"/>
+                            <field name="x_parking_spaces"/>
+                            <field name="estrato"/>
+                            <field name="tipo_inmueble"/>
+                        </group>
+                        <group col="2">
+                            <field name="cuarto_util"/>
+                            <field name="terraza"/>
+                            <field name="jardin"/>
+                            <field name="pisos"/>
+                            <field name="radicado_epm"/>
+                        </group>
+                    </group>
+                    <group string="Variables contables">
+                        <group col="2">
+                            <field name="canon"/>
+                            <field name="monto_administracion"/>
+                        </group>
+                        <group>
+                            <field name="uso_destino" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- PROPIETARIOS -->
+                <page string="Propietarios" name="property_owners">
+                    <group>
+                        <field name="non_beneficiary_line_ids" nolabel="1"
+                            context="{'default_is_property_owner': 1, 'default_supplier_rank': 1, 'default_is_main_payee': 0}"
+                            domain="[('is_main_payee', '=', False), ('parent_owner_line_id', '=', False)]">
+                            <list editable="bottom">
+                                <field name="owner_id" context="{'default_is_property_owner': 1}" required="True"/>
+                                <field name="participation_percent"/>
+                                <field name="comision_personalizada"/>
+                                <field name="is_main_payee" string="Es beneficiario"/>
+                                <field name="notes"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+
+                <!-- BENEFICIARIOS -->
+                <page string="Beneficiarios" name="property_beneficiaries">
+                    <group>
+                        <field name="beneficiary_line_ids" nolabel="1"
+                            context="{'default_is_property_owner': 1, 'default_supplier_rank': 1, 'default_is_main_payee': 1}"
+                            domain="[('is_main_payee', '=', False), ('parent_owner_line_id', '=', False)]">
+                            <list editable="bottom">
+                                <field name="owner_id" context="{'default_is_property_owner': 0}" string="Beneficiarios"/>
+                                <field name="parent_owner_line_id"/>
+                                <field name="beneficial_porcentage"/>
+                                <field name="is_main_payee" string="Es beneficiario"/>
+                                <field name="notes"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="property_kanban_view" model="ir.ui.view">
+        <field name="name">property.kanban</field>
+        <field name="model">account.analytic.account</field>
+        <field name="active" eval="True"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column" default_order="name">
+            <!-- Campos que el renderer debe cargar -->
+            <field name="name"/>
+            <field name="x_property_image"/>
+            <field name="x_is_available"/>            
+            <field name="x_rental_contract_id"/>
+            <field name="x_property_registration_id"/>
+            <field name="x_property_building_id"/>
+            <field name="currency_id"/>
+            <field name="x_property_type"/>
+            <field name="x_is_published"/>
+            <field name="plan_id"/>
+            <field name="x_country_id"/>
+            <field name="x_state_id"/>
+            <field name="x_city_id"/>
+            <field name="x_tipo_via"/>
+            <field name="x_nombre_via"/>
+            <field name="x_tipo_via_2"/>
+            <field name="x_numero_principal"/>
+            <field name="x_numero_secundario"/>
+            <field name="x_complemento"/>
+            <field name="x_property_address"/>
+            <field name="x_dummy_map"/>
+            <field name="x_latitude"/>
+            <field name="x_longitude"/>
+            <field name="x_bedrooms"/>
+            <field name="x_bathrooms"/>
+            <field name="x_area_m2"/>
+            <field name="x_parking_spaces"/>
+            <field name="subscription_count"/>
+            <field name="invoice_count"/>
+            <field name="vendor_bill_count"/>
+
+            <templates>
+                <!-- Template moderno para la tarjeta -->
+                <t t-name="card">
+                <div class="oe_kanban_global_click o_kanban_record p-2">
+                    <!-- Imagen -->
+                    <t t-if="record.x_property_image and record.x_property_image.raw_value">
+                    <div class="o_kanban_image mb-2">
+                        <img t-att-src="kanban_image('account.analytic.account','x_property_image', record.id.value)"
+                            alt="Imagen de la propiedad"/>
+                    </div>
+                    </t>
+
+                    <!-- Título + estado -->
+                    <div class="o_kanban_primary_left mb-1">
+                    <strong t-esc="record.name.value or 'Property'"/>
+                    <t t-if="record.x_is_published.value">
+                        <span class="badge badge-success ml-2">Publicado</span>
+                    </t>
+                    <t t-if="record.x_is_available.value">
+                        <span class="badge badge-success ml-2">Disponible</span>
+                    </t>
+                    </div>
+
+                    <!-- Ubicación corta -->
+                    <div class="text-muted mb-2">
+                    <t t-esc="record.x_city_id.value and record.x_city_id.value[1] or ''"/>
+                    <t t-if="record.x_state_id.value">· <t t-esc="record.x_state_id.value[1]"/></t>
+                    <t t-if="record.x_country_id.value">· <t t-esc="record.x_country_id.value[1]"/></t>
+                    </div>
+
+                    <!-- Dirección generada -->
+                    <t t-if="record.x_property_address.value">
+                    <div class="o_kanban_secondary_left mb-2">
+                        <i class="fa fa-map-marker mr-1" title="Dirección"></i>
+                        <span t-esc="record.x_property_address.value"/>
+                    </div>
+                    </t>
+
+                    <!-- Datos rápidos -->
+                    <div class="o_kanban_details mb-2">
+                    <div class="row">
+                        <div class="col-6">
+                        <small class="text-muted">Registro</small><br/>
+                        <span t-esc="record.x_property_registration_id.value or '-'"/>
+                        </div>
+                        <div class="col-6">
+                        <small class="text-muted">Edificio</small><br/>
+                        <span t-esc="record.x_property_building_id.value and record.x_property_building_id.value[1] or '-'"/>
+                        </div>
+                    </div>
+                    </div>
+
+                    <!-- Características -->
+                    <div class="o_kanban_details mb-2 d-flex flex-wrap">
+                    <span class="badge mr-1 mb-1">
+                        <i class="fa fa-bed mr-1" title="Habitaciones"></i>
+                        <t t-esc="record.x_bedrooms.value or 0"/> Hab
+                    </span>
+                    <span class="badge mr-1 mb-1">
+                        <i class="fa fa-bath mr-1" title="Baños"></i>
+                        <t t-esc="record.x_bathrooms.value or 0"/> Baños
+                    </span>
+                    <span class="badge mr-1 mb-1">
+                        <i class="fa fa-square-o mr-1" title="Área"></i>
+                        <t t-esc="record.x_area_m2.value or 0"/> m²
+                    </span>
+                    <span class="badge mr-1 mb-1">
+                        <i class="fa fa-car mr-1" title="Parqueaderos"></i>
+                        <t t-esc="record.x_parking_spaces.value or 0"/> Parq.
+                    </span>
+                    </div>
+
+                    <!-- Contadores -->
+                    <div class="o_kanban_details mb-2 d-flex flex-wrap">
+                    <span class="badge badge-light mr-2 mb-1">
+                        <i class="fa fa-book mr-1" title="Contratos"></i>
+                        <t t-esc="record.subscription_count.value or 0"/> contratos
+                    </span>
+                    <t t-if="record.invoice_count">
+                        <span class="badge badge-light mr-2 mb-1">
+                        <i class="fa fa-file-text-o mr-1" title="Facturas"></i>
+                        <t t-esc="record.invoice_count.value or 0"/> facturas
+                        </span>
+                    </t>
+                    <t t-if="record.vendor_bill_count">
+                        <span class="badge badge-light mr-2 mb-1">
+                        <i class="fa fa-file-text-o mr-1" title="Compras"></i>
+                        <t t-esc="record.vendor_bill_count.value or 0"/> compras
+                        </span>
+                    </t>
+                    </div>
+
+                    <!-- “Acciones” visuales (el click global ya abre el form) -->
+                    <div class="mt-2 d-flex flex-wrap">
+                    <span class="text-primary small mr-3">
+                        <i class="fa fa-folder-open mr-1" title="Abrir"></i>Abrir
+                    </span>
+                    <t t-if="record.x_rental_contract_id.value">
+                        <span class="text-secondary small">
+                        <i class="fa fa-external-link mr-1" title="Ver contrato"></i>Contrato
+                        </span>
+                    </t>
+                    </div>
+                </div>
+                </t>
+            </templates>
+            </kanban>
+        </field>
+    </record>
+
+
+    <record id="property_list_view" model="ir.ui.view">
+        <field name="name">property.list</field>
+        <field name="model">account.analytic.account</field>
+        <field name="arch" type="xml">
+            <list string="Propiedades" default_order="name">
+                <field name="name" string="Inmueble"/>
+                <field name="x_is_available"/>
+                <field name="x_property_registration_id"/>
+                <field name="x_city_id"/>
+                <field name="x_state_id"/>
+                <field name="x_country_id"/>
+                <field name="subscription_count" string="Contratos"/>
+            </list>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,77 @@
+/* ---------------------
+new scss code start hear 
+------------------------*/
+.o-main-components-container .modal-dialog .modal-content:has(.sh-return-order-popup) {width: 50%;margin: auto;
+    @include media-breakpoint-down(lg){width: 100%;}
+}
+.modal-title{text-align: center;font-size: 18px;font-weight: 600;color: #495057c2 !important;}
+.o-main-components-container .modal-dialog .modal-content .modal-body:has(.sh-return-order-popup) {padding: 0 !important;}
+.o-main-components-container .modal-dialog .modal-content .modal-body .sh_return_order_table{width: 100%;}
+.o-main-components-container .modal-dialog .modal-content .modal-body:has(.sh-return-order-popup) {
+    div.modal-body{
+        height: 300px;
+    }
+}
+
+.sh_return_order_thead{text-align: center;background-color:$sh_pos_primary_color;color: white;
+    @if $sh_header_sticky =="True" {
+        position: sticky;top: 0;z-index: 1;
+    }
+}
+.sh_return_order_thead th{font-size: 16px;font-weight: 600;padding-top: 9px;padding-bottom: 9px;}
+.sh_return_order_thead th,
+.sh_return_order_rqty_td{padding-right: 10px;}
+.sh_return_order_qty_td{text-align: center;}
+.sh_return_order_product_td{padding-left: 10px;}
+.sh_return_order_product_th{text-align: left;padding-left: 20px;}
+.sh_return_order_rqty_th{width: 20%;}
+.sh_cust_checkbox{margin: 10px;}
+#sh_input_qty{margin: 5px 0;background-color: white;
+    &:hover,
+    &:focus{box-shadow: none !important;border-color: $sh_pos_primary_color !important;}
+}
+.sh_return_order_tbody{
+    tr{
+        &:nth-child(odd) {
+            background: $sh_odd_row_color !important;
+        }
+        &:nth-child(even) {
+            background: $sh_even_row_color!important;
+        }
+        @if $sh_list_row_hover == "True" {
+            &:hover {
+                background: $sh_hover_background_color !important;
+            }
+        }       
+    }
+}
+// <--------------------------->
+// ORDER LIST BUTTONS SCSS START 
+// <--------------------------->
+body .pos .pos-content .shorderlist-screen .top-content .sh_header_buttons .d-flex .btn-secondary{
+    // color: #212529;
+    font-weight: 500;
+    color: $sh_pos_primary_color;
+    border-color: $sh_pos_primary_color;
+    &:hover{
+        background: $sh_pos_primary_color !important;
+        color: #fff;      
+    }
+}
+// <--------------------------->
+// ORDER LIST BUTTONS SCSS END 
+// <--------------------------->
+
+// <------------------------------------->
+// ORDER LINE ODD AND EVEN ROW FIELD START
+// <------------------------------------->
+// .pos-content .shorderlist-screen .top-content .sh_full_content_service_management.sh_order_list_full_content .sh_order_list .sh_order_list_contents{
+    
+// }
+// <------------------------------------>
+// ORDER LINE ODD AND EVEN ROW FIELD END  
+// <------------------------------------>
+
+body .o-main-components-container .o-overlay-container .o-overlay-item .o_dialog .modal .modal-dialog .modal-content .modal-body input[type="checkbox"]{
+    background-color: $sh_pos_primary_color;
+}

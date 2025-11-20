@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Vista heredada que inserta el TAB completo -->
+    <record id="view_property_inventory_tab" model="ir.ui.view">
+        <field name="name">property.account.property.inventory.tab</field>
+        <field name="model">account.analytic.account</field>
+        <field name="inherit_id" ref="industry_real_estate.property_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Inserta la pestaña completa -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Inventario de la Propiedad" name="property_inventory">
+                    <group>
+                        <div class="alert alert-info" role="alert">
+                            <strong>ℹ️ Inventario Independiente:</strong> Este inventario es específico de esta propiedad y es independiente del stock general de la empresa.
+                        </div>
+
+                        <field name="property_item_ids" context="{'default_property_id': id}">
+                            <list editable="bottom" create="true" delete="true">
+                                <field name="product_id" required="1"/>
+                                <field name="quantity" sum="Total Items"/>
+                                <field name="condition" widget="badge" 
+                                    decoration-success="condition == 'good'"
+                                    decoration-warning="condition == 'for_repair'"
+                                    decoration-danger="condition in ('damaged', 'missing')"/>
+                                <field name="value" sum="Valor Total" widget="monetary"/>
+                                <field name="purchase_date" optional="show"/>
+                                <field name="notes" optional="hide"/>
+                                <field name="last_delivery_date" readonly="1" optional="hide"/>
+                                <field name="last_reception_date" readonly="1" optional="hide"/>
+                                <button name="action_open_history" type="object" icon="fa-clock-o" string="Historial" class="btn-secondary"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+            </xpath>            
+        </field>
+    </record>
+    <record id="action_property_item_history" model="ir.actions.act_window">
+        <field name="name">Historial de Inventario</field>
+        <field name="res_model">property.item.history</field>
+        <field name="view_mode">list,form</field>
+        <field name="target">current</field>
+    </record>
+</odoo>

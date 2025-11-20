@@ -1,0 +1,155 @@
+// theme style scss 
+@if $sh_pos_theme_style == "style_4" {
+    @if $sh_pos_body_background_type == "bg_img" {
+        body{
+            .pos-content{
+                .receipt-screen{
+                    .top-content{
+                        .btn-secondary{@include bg_type_image_style_4;
+                            &:hover,
+                            &:active{@include theme_4_bg_color;}
+                        }
+                    }
+                }
+                .screen-content{
+                    .centered-content{
+                        .pos-receipt-container{
+                            .sh_pos_statement_receipt{
+                                border-color: #ffffff;color: #ffffff;
+                                @include media-breakpoint-down(sm){overflow-x: scroll !important;}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    body{
+        .pos{
+            .pos-content{
+                .receipt-screen{
+                    .screen-content{
+                        .centered-content {
+                            .pos-receipt-container{
+                                &::-webkit-slider-thumb {
+                                    @include theme_4_bg_color;
+                                }
+                            }
+                        }
+                        .btn-primary{
+                            @include theme_4_bg_color;
+                            &:active{
+                                @include theme_4_bg_color;
+                            }
+                        }
+                    }
+                    .top-content{
+                        .btn-secondary{
+                            border-color:$sh_pos_primary_color;color: $sh_pos_primary_color;background-color: transparent;
+                            &:hover,
+                            &:focus{
+                                @include theme_4_bg_color;
+                                color: #ffffff;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .o-main-components-container{
+            .o-overlay-container{
+                .o-overlay-item{
+                    .o_dialog{
+                        .modal{
+                            .modal-dialog {
+                                .modal-content{
+                                    .modal-body{
+                                        .sh_cash_in_out_option_modal_dialog{
+                                            .popup{
+                                                .modal-body {
+                                                    .main_div_sh_payment_table{
+                                                        &::-webkit-scrollbar-thumb{
+                                                            @include theme_4_bg_color;
+                                                        }
+                                                        .sh_payment_table {
+                                                            width: 100%;
+                                                            thead {
+                                                                @include theme_4_bg_color;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .popup{
+                                            .modal-body{
+                                                .main_sub_div_sh_statement {
+                                                    .sh_statement_option , .sh_print_statement_option{
+                                                        div{
+                                                            input{
+                                                                &:checked{
+                                                                    + 
+                                                                    label{
+                                                                        &::after{
+                                                                            border: 5px solid $sh_pos_primary_color;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            label{
+                                                                &:hover{
+                                                                    &::after{
+                                                                        border-color: $sh_pos_primary_color;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                .sh_statement_date{
+                                                    .sh_start_date , .sh_end_date{
+                                                        div{
+                                                            input{
+                                                                &:focus{
+                                                                    border-color: $sh_pos_primary_color;
+                                                                }
+                                                                &:hover{
+                                                                    border-color: $sh_pos_primary_color;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+// BUTTON STYLE SCSS 
+@if $sh_pos_button_style == "style_4" {
+    body{
+        .pos{
+            .pos-content{
+                .receipt-screen{
+                    .screen-content{
+                        .btn-primary{
+                            border-radius: 50px;border: 0;
+                        }
+                    }
+                    .top-content{
+                        .btn-secondary{
+                            border-radius:50px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

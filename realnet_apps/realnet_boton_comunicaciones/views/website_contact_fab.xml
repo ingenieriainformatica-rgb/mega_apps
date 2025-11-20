@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <template id="contact_fab" inherit_id="website.layout" name="Contact FAB Injector">
+    <xpath expr="//body" position="inside">
+      <t t-call="realnet_boton_comunicaciones.fab_snippet"/>
+    </xpath>
+  </template>
+
+  <template id="fab_snippet" name="Contact FAB Snippet">
+    <t t-set="_page" t-value="main_object if main_object and main_object._name == 'website.page' else False"/>
+    <t t-set="_website" t-value="website"/>
+    <t t-set="_fab_phone" t-value="(_page and _page.fab_phone) or (_website and _website.fab_phone)"/>
+    <t t-set="_fab_wa" t-value="(_page and _page.fab_whatsapp) or (_website and _website.fab_whatsapp)"/>
+
+    <div id="fab-root" data-motion="on" aria-live="polite">
+      <div id="fab-overlay" aria-hidden="true"></div>
+      <button id="fab-main" class="fab-btn fab-layer btn-ctb" aria-label="Abrir chat y opciones" aria-controls="fab-menu" aria-expanded="false" type="button">
+        <img id="fab-main-icon" t-att-src="'/realnet_boton_comunicaciones/static/src/img/operador.png'" data-icon-default="/realnet_boton_comunicaciones/static/src/img/operador.png" data-icon-open="/realnet_boton_comunicaciones/static/src/img/cerca.png" alt="Abrir chat" loading="lazy"/>
+      </button>
+      <nav id="fab-menu" class="fab-layer" aria-hidden="true">
+        <a class="fab-item" t-if="_fab_wa" t-att-href="'https://wa.me/' + _fab_wa" target="_blank" rel="noopener">
+          <span class="fab-label">Hablemos por WhatsApp</span>
+          <span class="fab-icon">
+            <img t-att-src="'/realnet_boton_comunicaciones/static/src/img/chat.png'" alt="WhatsApp" loading="lazy"/>
+          </span>
+        </a>
+        <a class="fab-item" href="#" id="fab-chatbot-link" data-livechat="open">
+          <span class="fab-label">Habla con el chatbot</span>
+          <span class="fab-icon">
+            <img t-att-src="'/realnet_boton_comunicaciones/static/src/img/conversacion.png'" alt="Chatbot" loading="lazy"/>
+          </span>
+        </a>
+        <a class="fab-item" t-if="_fab_phone" t-att-href="'tel:' + _fab_phone" id="fab-call-link">
+          <span class="fab-label">¿Prefieres que te llamemos?</span>
+          <span class="fab-icon">
+            <img t-att-src="'/realnet_boton_comunicaciones/static/src/img/llamada.png'" alt="Te llamamos" loading="lazy"/>
+          </span>
+        </a>
+      </nav>
+      <div id="fab-bubble" class="fab-layer" role="status" aria-live="polite">
+        <p>¡Agenda disponible!<br/>¿Quieres hablar ahora?</p>
+        <span class="bubble-tail"></span>
+      </div>
+    </div>
+  </template>
+
+</odoo>

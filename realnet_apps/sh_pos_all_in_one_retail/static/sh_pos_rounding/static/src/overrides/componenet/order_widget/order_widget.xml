@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+        <t t-extend="OrderWidget" t-inherit="point_of_sale.OrderWidget" t-inherit-mode="extension" >
+            <xpath expr="//div[hasclass('text-muted')]" position="after">
+                <t t-if="env.services.pos.config.sh_enable_rounding">
+                    <div  class="fs-6 text-muted subentry sh_pos_rounding_text">
+                        Rounding: <span t-esc="env.services.pos.get_order().get_rounding_amount()" class="tax"/>
+                    </div>
+                </t>
+                
+            </xpath>
+        </t>
+</templates>

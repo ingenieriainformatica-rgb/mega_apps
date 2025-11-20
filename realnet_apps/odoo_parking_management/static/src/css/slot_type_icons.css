@@ -1,0 +1,24 @@
+.o_slot_type_icons .o_slot_icon_btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 72px;
+  margin: 0 6px 6px 0;
+  border: 1px solid var(--o-brand-300, #ccc);
+  border-radius: 8px;
+  background: var(--o-view-background, #fff);
+  cursor: pointer;
+  user-select: none;
+}
+.o_field_slot_type_icons .o_field_many2one_selection,
+.o_field_slot_type_icons .o_field_many2one_extra {
+  display: none !important;
+}
+.o_slot_type_icons .o_slot_icon_btn i { font-size: 28px; }
+.o_slot_type_icons .o_slot_icon_btn.active,
+.o_slot_type_icons .o_slot_icon_btn:focus {
+  background: var(--o-brand-200, #eef3ff);
+  border-color: var(--o-brand-500, #6b7dda);
+}

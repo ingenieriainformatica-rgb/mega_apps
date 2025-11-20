@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_order_list.Orderlistbutton" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//t[@t-if='props.showRemainingButtons']/div/OrderlineNoteButton" position="after">
+            <button class="control-button btn btn-secondary rounded-0 fw-bolder" t-if="pos.config.sh_enable_order_list" t-on-click="() => this.sh_pos_order_list_btn()">
+                <i class="fa fa-sticky-note me-1" />
+                <span></span>
+                <span>Order List</span>
+            </button>
+        </xpath>
+
+    </t>
+
+</templates>

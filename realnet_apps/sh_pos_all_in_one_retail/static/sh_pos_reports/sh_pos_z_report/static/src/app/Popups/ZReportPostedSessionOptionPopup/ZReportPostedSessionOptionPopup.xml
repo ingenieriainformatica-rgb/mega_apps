@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_all_in_one_retail.ZReportPostedSessionOptionPopup">
+        <Dialog title.translate="Posted Session Z-Report" bodyClass="'d-flex flex-column'" size="lg">
+            <div class="popup sh_z_report_posted_session_modal_dialog_popup">
+                <main class="modal-body">
+                    <t t-if="posted_session_list">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <span class="sh_selection_lbl">Select Session : </span>
+                            <select class="sh_session_selection o_input" t-model="state.selectedSession">
+                                <option value="" selected="selected" disabled="disabled">Select Session</option>
+                                <t t-foreach="posted_session_list" t-as="each_session" t-key="each_session.id">
+                                    <option t-att-value="each_session.id"><t t-esc="each_session.name"/></option>
+                                </t>
+                            </select>
+                        </div>
+                    </t>
+                    <t t-if="pos and pos.config and pos.config.sh_allow_z_report_type and pos.config.sh_allow_z_report_type == 'both'">
+                        <div class="sh_print_statement_option d-flex gap-5 pt-4">
+                            <div class="sh_pdf_div sh_custom_radio_btn">
+                                <input class="sh_print_input form-check-input o_radio_input me-2" type="radio" t-model="state.selectedoption" id="pdf_statement" name="print_option" value="pdf" checked="true" />
+                                <label class="sh_print_lbl" for="pdf_statement">Generate PDF</label>
+                            </div>
+                            <div class="sh_receipt_div sh_custom_radio_btn">
+                                <input class="sh_print_input form-check-input o_radio_input me-2" type="radio" t-model="state.selectedoption" id="receipt_statement" name="print_option" value="receipt" />
+                                <label class="sh_print_lbl" for="receipt_statement">Generate Receipt</label>
+                            </div>
+                        </div>
+                    </t>
+                </main>
+
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary btn-lg lh-lg o-default-button"  t-on-click="print">Print</button>
+                <button class="btn btn-primary btn-lg lh-lg o-default-button"  t-on-click="close">Close</button>
+            </t>
+        </Dialog>
+    </t>
+    
+</templates>

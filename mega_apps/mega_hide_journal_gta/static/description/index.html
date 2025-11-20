@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mega - Hide Journal GTO</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="icon.png" />
+
+  <!-- Bootstrap 5 -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  />
+</head>
+<body class="bg-light">
+
+  <!-- HEADER -->
+  <header class="bg-success text-white py-4 mb-4">
+    <div class="container d-flex align-items-center gap-3">
+      <img src="icon.png" alt="Mega - Hide Journal GTO" class="img-fluid" style="width: 48px; height: 48px;">
+
+      <div>
+        <h1 class="h3 mb-1">Mega - Hide Journal GTO</h1>
+        <p class="mb-0">
+          Controla qué usuarios pueden ver el diario de gastos (GTO) en Contabilidad.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mb-5">
+
+    <!-- DESCRIPCIÓN -->
+    <section class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Descripción general</h2>
+          <p class="mb-2">
+            Este módulo permite ocultar el diario de gastos (u otros diarios
+            seleccionados) para la mayoría de usuarios, mostrando dicho diario
+            únicamente a los usuarios autorizados mediante un grupo de seguridad.
+          </p>
+          <p class="mb-0">
+            Es ideal cuando se manejan facturas especiales (por ejemplo, gastos
+            administrativos, GTO, etc.) que solo cierto personal debe visualizar.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARACTERÍSTICAS -->
+    <section class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Características principales</h2>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              Oculta el diario de gastos para usuarios sin permisos especiales.
+            </li>
+            <li class="list-group-item">
+              Respeta la visibilidad configurada en el diario (campo <strong>Visible</strong> /
+              <strong>Mostrado en el tablero</strong>).
+            </li>
+            <li class="list-group-item">
+              Basado en grupos de usuarios: fácil de administrar desde Ajustes &gt; Usuarios y compañías.
+            </li>
+            <li class="list-group-item">
+              Compatible con Odoo 18 / 19 Enterprise (contabilidad).
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- PASO 1: VISIBILIDAD DEL DIARIO -->
+    <section class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Paso 1. Activar la visibilidad del diario en Contabilidad</h2>
+          <p>
+            Primero verifica que el diario que quieres controlar (por ejemplo, <strong>Gastos / GTO</strong>)
+            esté marcado como visible en el tablero de diarios.
+          </p>
+          <ol class="mb-3">
+            <li>Ve a <strong>Contabilidad &gt; Configuración &gt; Diarios</strong>.</li>
+            <li>Abre el diario de gastos (GTO) que deseas controlar.</li>
+            <li>
+              Asegúrate de que el campo equivalente a
+              <strong>Mostrar en el tablero / Visible</strong> esté en <strong>True</strong>.
+            </li>
+            <li>Guarda los cambios.</li>
+          </ol>
+          <div class="text-center">
+            <img src="visible.png" alt="Diario visible en contabilidad" class="img-fluid rounded shadow-sm">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PASO 2: GRUPO DE PERMISOS -->
+    <section class="mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Paso 2. Revisar el grupo de permisos del módulo</h2>
+          <p class="mb-3">
+            El módulo crea un grupo específico (:
+            <strong>Show GTA</strong>) que se usa
+            para determinar quién puede ver el diario.
+          </p>
+          <p class="mb-3">
+            Desde el menú de grupos de seguridad podrás revisar el grupo y los usuarios
+            asociados.
+          </p>
+          <div class="row g-3">
+            <div class="col-md-6 text-center">
+              <h3 class="h6 mb-2">Usuarios sin grupo</h3>
+              <img src="no_estan_grupo.png" alt="Grupo de seguridad del módulo" class="img-fluid rounded shadow-sm">
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-md-6 text-center">
+              <h3 class="h6 mb-2">Vista de grupos en Odoo</h3>
+              <img src="muestra__grupo.png" alt="Grupo de seguridad del módulo" class="img-fluid rounded shadow-sm">
+            </div>
+            <div class="col-md-6 text-center">
+              <h3 class="h6 mb-2">Usuario dentro del grupo</h3>
+              <img src="esta_en_grupo.png" alt="Usuario que pertenece al grupo" class="img-fluid rounded shadow-sm">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTADO -->
+    <section>
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Resultado final</h2>
+          <p class="mb-3">
+            Una vez configurado:
+          </p>
+          <ul class="mb-3">
+            <li>Los usuarios con el grupo asignado verán el diario de gastos (GTO) normalmente.</li>
+            <li>Los usuarios sin el grupo no verán el diario en la lista ni en el tablero de Contabilidad.</li>
+          </ul>
+          <div class="text-center">
+            <img src="muestra__grupo.png" alt="Icono del módulo Mega - Hide Journal GTO" class="img-fluid">
+            <p class="mt-3 mb-0">
+              <strong>Mega - Hide Journal GTO</strong><br>
+              Control sencillo y seguro sobre quién puede ver tus diarios de gastos.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>>
+</body>
+</html>

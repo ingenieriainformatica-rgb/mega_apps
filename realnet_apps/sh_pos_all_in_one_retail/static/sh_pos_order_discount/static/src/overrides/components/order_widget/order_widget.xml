@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-extend="OrderWidget" t-inherit="point_of_sale.OrderWidget" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('order-summary')]" position="attributes">
+            <attribute name="t-attf-class">{{ ((pos and pos.config and pos.config.sh_allow_order_line_discount) || (pos and pos.config and pos.config.sh_allow_global_discount))  ? 'sh_summary' : '' }}</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('order-summary')]" position="inside">
+            <div class="line global_discount_line">
+                <t t-if="pos.config.sh_allow_order_line_discount or pos.config.sh_allow_global_discount">
+                    <span class="total badge sh_global_title">Global Discount</span>
+                    <div class="entry total global_fixed_discount">
+                        <span class="subentry">
+                            <span class="sh_cart_amount_label">Amount : </span>
+                            <t t-if="pos_discount and props and !props.global_discount">
+                                <t t-esc="pos_discount()" />
+                            </t>
+                            <t t-else="">
+                                <t t-esc="props.global_discount" />
+                            </t>
+                        </span>
+                    </div>
+                </t>
+            </div>
+        </xpath>
+    </t>
+
+</templates>

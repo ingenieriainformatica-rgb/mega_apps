@@ -1,0 +1,14 @@
+.modal.odpm-guard .modal-header .btn-close,
+.modal.odpm-guard .modal-header [data-bs-dismiss="modal"],
+.modal.odpm-guard .modal-header .o_close,
+.modal.odpm-guard .modal-header .o_dialog_close,
+.modal.odpm-guard .modal-header .o_modal_close,
+.modal.odpm-guard .modal-header button[aria-label="Close"] {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Also hide header entirely when our form is present (Chrome supports :has) */
+.o_dialog .modal:has(.odpm-guard-form) .modal-header {
+  display: none !important;
+}

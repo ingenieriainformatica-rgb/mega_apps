@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="rental_form_hide_native_create_invoice" model="ir.ui.view">
+    <field name="name">rental.form.hide.native.create.invoice</field>
+    <field name="model">sale.order</field>
+    <!-- SOLO tu formulario ya personalizado -->
+    <field name="inherit_id" ref="industry_real_estate.rental_form_view"/>
+    <field name="priority">999</field>
+    <field name="arch" type="xml">
+
+      <!-- Quita el botón por su acción (funciona aunque esté en <header>) -->
+      <xpath expr="//button[@type='action' and @name='%(sale.action_view_sale_advance_payment_inv)d']"
+            position="replace"/>
+
+      <!-- Red de seguridad por la firma del context (por si otro módulo lo inyecta) -->
+      <xpath expr="//button[@type='action' and contains(@context, 'default_advance_payment_method')]"
+            position="replace"/>
+
+    </field>
+  </record>
+</odoo>

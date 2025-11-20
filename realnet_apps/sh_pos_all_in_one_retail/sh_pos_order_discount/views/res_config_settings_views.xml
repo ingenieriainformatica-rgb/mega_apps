@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="sh_res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sh_pos_order_list</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <block id="pos_interface_section" position="after">
+                <block title="POS Order Discount">
+                    <setting>
+                        <field name="pos_sh_allow_order_line_discount" />
+                    </setting>
+                    <setting>
+                        <field name="pos_sh_allow_global_discount" />
+                    </setting>
+                </block>
+            </block>
+        </field>
+    </record>
+</odoo>

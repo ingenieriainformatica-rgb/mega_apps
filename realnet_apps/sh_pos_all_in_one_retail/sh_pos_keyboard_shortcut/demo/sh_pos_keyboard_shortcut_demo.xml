@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sh_pos_keyboard_shortcut_1" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">go_payment_screen</field>
+        <field name="sh_shortcut_screen_type">product_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_1')),(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_2'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_2" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">go_customer_Screen</field>
+        <field name="sh_shortcut_screen_type">all</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_3')),(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_4'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_3" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">go_order_Screen</field>
+        <field name="sh_shortcut_screen_type">product_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_5')),(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_6'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_4" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">validate_order</field>
+        <field name="sh_shortcut_screen_type">payment_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_7'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_5" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">next_order</field>
+        <field name="sh_shortcut_screen_type">receipt_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_8'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_6" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">go_to_previous_screen</field>
+        <field name="sh_shortcut_screen_type">all</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_9'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_7" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_quantity_mode</field>
+        <field name="sh_shortcut_screen_type">product_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_10'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_8" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_discount_mode</field>
+        <field name="sh_shortcut_screen_type">product_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_11'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_9" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_price_mode</field>
+        <field name="sh_shortcut_screen_type">product_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_12'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_10" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">search_product</field>
+        <field name="sh_shortcut_screen_type">product_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_13'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_12" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">search_order</field>
+        <field name="sh_shortcut_screen_type">order_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_14'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_13" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">add_new_order</field>
+        <field name="sh_shortcut_screen_type">all</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_15'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_14" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">destroy_current_order</field>
+        <field name="sh_shortcut_screen_type">all</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_16')),(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_17'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_15" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">delete_orderline</field>
+        <field name="sh_shortcut_screen_type">product_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_18'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_16" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_up_orderline</field>
+        <field name="sh_shortcut_screen_type">product_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_19'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_17" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_down_orderline</field>
+        <field name="sh_shortcut_screen_type">product_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_20'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_18" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">search_customer</field>
+        <field name="sh_shortcut_screen_type">customer_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_21'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_19" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_up_customer</field>
+        <field name="sh_shortcut_screen_type">customer_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_22'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_20" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_down_customer</field>
+        <field name="sh_shortcut_screen_type">customer_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_23'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_22" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">set_customer</field>
+        <field name="sh_shortcut_screen_type">customer_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_24'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_23" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">edit_customer</field>
+        <field name="sh_shortcut_screen_type">customer_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_25'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_24" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">save_customer</field>
+        <field name="sh_shortcut_screen_type">customer_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_26'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_25" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">create_customer</field>
+        <field name="sh_shortcut_screen_type">customer_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_27'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_26" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">delete_payment_line</field>
+        <field name="sh_shortcut_screen_type">payment_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_28')),(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_29'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_27" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_up_payment_line</field>
+        <field name="sh_shortcut_screen_type">payment_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_30'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_28" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_down_payment_line</field>
+        <field name="sh_shortcut_screen_type">payment_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_31'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_29" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">+10</field>
+        <field name="sh_shortcut_screen_type">payment_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_32'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_30" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">+20</field>
+        <field name="sh_shortcut_screen_type">payment_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_33'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_31" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">+50</field>
+        <field name="sh_shortcut_screen_type">payment_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_34'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_32" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_up_order</field>
+        <field name="sh_shortcut_screen_type">order_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_35'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_33" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_down_order</field>
+        <field name="sh_shortcut_screen_type">order_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_36'))])]"></field>
+    </record>
+    <record id="sh_pos_keyboard_shortcut_34" model="sh.pos.keyboard.shortcut">
+        <field name="sh_shortcut_screen">select_order</field>
+        <field name="sh_shortcut_screen_type">order_screen</field>
+        <field name="config_id" ref="point_of_sale.pos_config_main" />
+        <field name="sh_key_ids" eval="[(6,0,[(ref('sh_pos_all_in_one_retail.sh_keyboard_key_temp_37'))])]"></field>
+    </record>
+</odoo>

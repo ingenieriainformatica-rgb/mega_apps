@@ -1,0 +1,72 @@
+body {
+	.pos {
+		.pos-content {
+			.receipt-screen {
+				.screen-content {
+					.default-view {
+						.actions {
+							.o_payment_successful {
+                                width: 100% !important;
+								.receipt-options {
+                                    .d-flex:has(.sh_send_by_whatsapp_btn){
+                                        .print{
+                                            width:50% !important;
+                                        }
+                                    }
+                                    .d-flex.gap-1{
+                                        @include media-breakpoint-down(xxl){flex-direction: column;}
+                                        @include media-breakpoint-down(lg){flex-direction: row;}
+                                        @include media-breakpoint-down(md){flex-direction: column;}
+                                        .print{
+                                            @include media-breakpoint-down(xxl){width: 100% !important;}
+                                        }
+                                    }
+									.d-flex {
+										.sh_buttons_group {
+											justify-content: center;
+											align-items: center;
+                                        }
+                                        .btn.btn-secondary {
+                                            border:1px solid $sh_pos_primary_color;   
+                                            color:$sh_pos_primary_color;
+                                            background-color:transparent;    
+                                            &:hover{
+                                                background-color: $sh_pos_primary_color;
+                                                color: #fff;
+                                            }                                             
+                                        }
+                                        @if $sh_pos_theme_style == "style_4" {
+                                            .btn{
+                                                border: 0 !important;
+                                                outline: 1px solid $sh_pos_primary_color;
+                                                &:hover{
+                                                    @include theme_4_bg_color;
+                                                    color: #fff;
+                                                    outline-color: transparent;
+                                                    border: 0 !important;
+                                                }
+                                            }
+                                            @if $sh_pos_body_background_type == "bg_img" {
+                                                .btn{
+                                                    border-color: transparent !important;
+                                                    transition: all 0.5s;
+                                                    outline: transparent !important;
+                                                    &:hover{
+                                                        @include theme_4_bg_color;
+                                                    }
+                                                }
+                                            }
+                                        }
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+body .o-main-components-container .o-overlay-container .o-overlay-item .o_dialog .modal .modal-dialog .modal-content .modal-body .table tbody tr:nth-child(even){
+    background-color: transparent !important;
+}

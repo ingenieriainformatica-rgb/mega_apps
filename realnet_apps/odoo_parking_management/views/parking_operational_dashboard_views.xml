@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Vista del Tablero Operativo -->
+        <record id="parking_operational_dashboard_view_form" model="ir.ui.view">
+            <field name="name">parking.operational.dashboard.form</field>
+            <field name="model">parking.operational.dashboard</field>
+            <field name="arch" type="xml">
+                <form string="Tablero Operativo del Parqueadero">
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" type="object" name="action_view_entries_period"
+                                    icon="fa-list" string="Ver Entradas"/>
+                            <button class="oe_stat_button" type="object" name="action_view_overstays"
+                                    icon="fa-exclamation-triangle" string="Ver Sobreestancias"/>
+                        </div>
+
+                        <group>
+                            <group>
+                                <field name="all_sites" string="Todas las sedes"/>
+                                <field name="site_ids" string="Sedes" widget="many2many_tags" invisible="all_sites"/>
+                                <field name="site_id" invisible="1"/>
+                                <field name="date_from"/>
+                                <field name="date_to"/>
+                            </group>
+                        </group>
+
+                        <!-- Ocupación actual -->
+                        <div class="row mt-3">
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-dark text-white">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Ocupación Actual</h6>
+                                        <h2 class="card-title mb-0">
+                                            <field name="occupancy_rate" readonly="1" widget="percentage"/>
+                                        </h2>
+                                        <p class="card-text">
+                                            <field name="occupied_slots_count" readonly="1"/> /
+                                            <field name="total_slots_count" readonly="1"/> cupos
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-secondary text-white">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Motos en Parqueo</h6>
+                                        <h2 class="card-title mb-0">
+                                            <field name="occupied_moto_count" readonly="1"/>
+                                        </h2>
+                                        <p class="card-text">
+                                            Ocupación <field name="occupancy_rate_moto" readonly="1" widget="percentage"/>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Autos en Parqueo</h6>
+                                        <h2 class="card-title mb-0">
+                                            <field name="occupied_auto_count" readonly="1"/>
+                                        </h2>
+                                        <p class="card-text">
+                                            Ocupación <field name="occupancy_rate_auto" readonly="1" widget="percentage"/>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Vehículos Dentro Ahora</h6>
+                                        <h2 class="card-title mb-0">
+                                            <field name="active_now_count" readonly="1"/>
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pico de ocupación y rotación -->
+                        <div class="row mt-3">
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Ocupación Pico</h6>
+                                        <h2 class="card-title mb-0">
+                                            <field name="peak_occupancy_rate" readonly="1" widget="percentage"/>
+                                        </h2>
+                                        <p class="card-text">Hora pico: <strong><field name="peak_occupancy_hour" readonly="1"/></strong></p>
+                                        <button type="object" name="action_view_flow_by_hour" class="btn btn-sm btn-outline-primary">Ver Entradas por Hora</button>
+                                        <button type="object" name="action_view_checkout_by_hour" class="btn btn-sm btn-outline-secondary mt-2">Ver Salidas por Hora</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Rotación</h6>
+                                        <p class="card-text mb-1">Periodo: <strong><field name="rotation_period" readonly="1" digits="[16, 2]"/></strong></p>
+                                        <p class="card-text">Diaria por cupo: <strong><field name="rotation_daily_per_space" readonly="1" digits="[16, 3]"/></strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Tiempo Promedio Ingreso</h6>
+                                        <h2 class="card-title mb-0"><field name="avg_entry_time_mins" readonly="1" digits="[16, 1]"/> min</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Tiempo Promedio Salida→Pago</h6>
+                                        <h2 class="card-title mb-0"><field name="avg_exit_payment_time_mins" readonly="1" digits="[16, 1]"/> min</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flujo y tiempos -->
+                        <div class="row mt-3">
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card">
+                                    <div class="card-header"><h5 class="card-title mb-0">Entradas por Tipo</h5></div>
+                                    <div class="card-body">
+                                        <p>Total periodo: <strong><field name="entries_count_period_total" readonly="1"/></strong></p>
+                                        <p>Mensualidades: <strong><field name="entries_count_monthly_period" readonly="1"/></strong></p>
+                                        <p>Ordinarios: <strong><field name="entries_count_regular_period" readonly="1"/></strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card">
+                                    <div class="card-header"><h5 class="card-title mb-0">Tiempo Promedio de Estadia</h5></div>
+                                    <div class="card-body">
+                                        <p>General: <strong><field name="avg_duration_hours_all" readonly="1" digits="[16, 2]"/> h</strong></p>
+                                        <p>Mensualidades: <strong><field name="avg_duration_hours_monthly" readonly="1" digits="[16, 2]"/> h</strong></p>
+                                        <p>Ordinarios: <strong><field name="avg_duration_hours_regular" readonly="1" digits="[16, 2]"/> h</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card">
+                                    <div class="card-header"><h5 class="card-title mb-0">Promedio por Vehículo</h5></div>
+                                    <div class="card-body">
+                                        <p>Motos: <strong><field name="avg_duration_hours_moto" readonly="1" digits="[16, 2]"/> h</strong></p>
+                                        <p>Autos: <strong><field name="avg_duration_hours_auto" readonly="1" digits="[16, 2]"/> h</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sobreestancias -->
+                        <div class="row mt-3">
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card">
+                                    <div class="card-header"><h5 class="card-title mb-0">Sobreestancias</h5></div>
+                                    <div class="card-body">
+                                        <p>Casos: <span class="badge bg-danger"><field name="overstay_count" readonly="1"/></span></p>
+                                        <p>Tasa: <strong><field name="overstay_rate" readonly="1" widget="percentage"/></strong></p>
+                                        <button type="object" name="action_view_overstays" class="btn btn-sm btn-danger">Ver Detalle</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card">
+                                    <div class="card-header"><h5 class="card-title mb-0">Duración por Tipo</h5></div>
+                                    <div class="card-body">
+                                        <button type="object" name="action_view_duration_by_vehicle" class="btn btn-sm btn-outline-primary">Ver Gráfico</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card">
+                                    <div class="card-header"><h5 class="card-title mb-0">Pagos Digitales vs. Efectivo</h5></div>
+                                    <div class="card-body">
+                                        <p>Digitales: <strong><field name="payments_digital_count" readonly="1"/></strong> (<field name="payments_digital_pct" readonly="1" widget="percentage"/>)</p>
+                                        <p>Efectivo: <strong><field name="payments_cash_count" readonly="1"/></strong> (<field name="payments_cash_pct" readonly="1" widget="percentage"/>)</p>
+                                        <button type="object" name="action_view_payments_share" class="btn btn-sm btn-outline-secondary">Ver Gráfico</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Acción -->
+        <record id="parking_operational_dashboard_action" model="ir.actions.act_window">
+            <field name="name">Tablero Operativo</field>
+            <field name="res_model">parking.operational.dashboard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="parking_operational_dashboard_view_form"/>
+            <field name="target">current</field>
+            <field name="context">{'form_view_initial_mode': 'edit'}</field>
+        </record>
+    </data>
+</odoo>

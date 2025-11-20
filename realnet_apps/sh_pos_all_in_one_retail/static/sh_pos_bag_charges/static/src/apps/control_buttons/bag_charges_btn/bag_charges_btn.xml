@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_bag_charges.BagChargesBtn" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//t[@t-if='props.showRemainingButtons']/div/OrderlineNoteButton" position="after">
+            <t t-if="showCarryButton"> 
+                <button class="btn btn-secondary btn-lg py-5 flex-shrink-0" t-on-click="onClickButton">
+                    <span>
+                        Carry Bag
+                    </span>
+                </button>
+            </t>
+        </xpath>
+    </t>
+</templates>

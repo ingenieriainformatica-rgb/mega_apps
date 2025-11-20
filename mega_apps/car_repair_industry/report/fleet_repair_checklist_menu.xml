@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+
+        <record id="fleet_repair_checklist_id" model="ir.actions.report">
+            <field name="name">Car Repair Checklist</field>
+            <field name="model">fleet.repair</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">car_repair_industry.machi_repa_checklist_temp_id</field>
+            <field name="report_file">car_repair_industry.machi_repa_checklist_temp_id</field>
+            <field name="binding_type">report</field>
+            <field name="binding_model_id" ref="model_fleet_repair"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Website Settings form: add default numbers on the website record -->
+  <record id="view_website_form_fab" model="ir.ui.view">
+    <field name="name">website.view.form.fab.settings</field>
+    <field name="model">website</field>
+    <field name="inherit_id" ref="website.view_website_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook" position="inside">
+        <page string="Contact FAB">
+          <group>
+            <div class="row mt8">
+              <label class="col-lg-3" for="fab_phone" string="Teléfono"/>
+              <field name="fab_phone"/>
+            </div>
+            <div class="row mt8">
+              <label class="col-lg-3" for="fab_whatsapp" string="WhatsApp"/>
+              <field name="fab_whatsapp" placeholder="573001112233"/>
+            </div>
+          </group>
+        </page>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- General Website Settings (Email & Marketing block) - expose per-website defaults -->
+  <record id="res_config_settings_view_form_fab" model="ir.ui.view">
+    <field name="name">res.config.settings.view.form.website.fab</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//block[@id='website_email_marketing']" position="inside">
+        <setting string="FAB Phone/WhatsApp" help="Números por sitio web que usa el botón flotante. Se pueden sobrescribir por página desde Propiedades de la página.">
+          <div class="content-group">
+            <div class="row mt8">
+              <label class="col-lg-3" for="fab_phone" string="Teléfono"/>
+              <field name="fab_phone"/>
+            </div>
+            <div class="row mt8">
+              <label class="col-lg-3" for="fab_whatsapp" string="WhatsApp"/>
+              <field name="fab_whatsapp" placeholder="Incluya indicativo país, p. ej. 573001112233"/>
+            </div>
+          </div>
+        </setting>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Page properties dialog: add per-page overrides -->
+  <record id="website_page_properties_view_form_fab" model="ir.ui.view">
+    <field name="name">website.page.properties.form.view.fab</field>
+    <field name="inherit_id" ref="website.website_page_properties_view_form"/>
+    <field name="model">website.page.properties</field>
+    <field name="arch" type="xml">
+      <xpath expr="//group/*[last()]" position="after">
+        <label for="fab_phone" string="FAB Teléfono"/>
+        <field name="fab_phone" placeholder="Vacío = usa el valor del sitio"/>
+        <label for="fab_whatsapp" string="FAB WhatsApp"/>
+        <field name="fab_whatsapp" placeholder="Vacío = usa el valor del sitio"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-extend="ShOrderWidget" t-inherit="point_of_sale.OrderWidget" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('order-summary')]" position="inside">
+            <div class="items_counter text-end">
+                <t t-if="this.env.services.pos.config.enable_pos_item_counter">
+                   
+                        Total Items : <span class="value"><t t-esc="props.lines.length"/></span>
+                    
+                </t>
+                <t t-if="this.env.services.pos.config.enable_pos_item_counter and  this.env.services.pos.config.enable_pos_qty_counter">
+                    <b> | </b>
+                </t>
+                <t t-if=" this.env.services.pos.config.enable_pos_qty_counter">
+                    
+                        Total Qty : <span class="value"><t t-esc="this.env.services.pos.get_order().get_total_qty()"/></span>
+                    
+                </t>
+            </div>
+        </xpath>
+    </t>
+
+</templates>

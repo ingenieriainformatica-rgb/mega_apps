@@ -1,0 +1,106 @@
+body{
+    .o-main-components-container{
+        .o-overlay-container{
+            .o-overlay-item{
+                .o_dialog{
+                    .modal{
+                        .modal-dialog {
+                            .modal-content{
+                                .modal-body{
+                                    .product-list{
+                                        &::-webkit-scrollbar-thumb {
+                                            background: $sh_pos_primary_color;
+                                        }
+                                        article{
+                                            @include form_element_radius;
+                                            @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                                .product-information-tag {
+                                                    border-color: transparent $sh_pos_primary_color transparent transparent !important;
+                                                }
+                                                &:active{
+                                                    border-color: $sh_pos_primary_color;
+                                                    background: #fff !important;
+                                                }
+                                            }
+                                            img{
+                                                @include form_element_radius;
+                                            }
+                                        }
+                                    }
+                                    .sh_alternative_products{
+                                        .sh_alternative_products_title{
+                                            @include btn_border_radius;
+                                            @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                                background: $sh_pos_primary_color;
+                                            }
+                                        }
+                                        .product-list{
+                                            &::-webkit-scrollbar-thumb {
+                                                background: $sh_pos_primary_color;
+                                            }
+                                            article{
+                                                @include form_element_radius;
+                                                @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                                    .product-information-tag {
+                                                        border-color: transparent $sh_pos_primary_color transparent transparent !important;
+                                                    }
+                                                    &:active{
+                                                        border-color: $sh_pos_primary_color;
+                                                        background: #fff !important;
+                                                    }
+                                                }
+                                                img{
+                                                    @include form_element_radius;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@if $sh_form_element_style == "style_2" {
+    body{
+        .o-main-components-container{
+            .o-overlay-container{
+                .o-overlay-item{
+                    .o_dialog{
+                        .modal{
+                            .modal-dialog {
+                                .modal-content{
+                                    .modal-body{
+                                        .product-list{
+                                            article{
+                                              border-radius: 15px  0;
+                                              img{
+                                                border-radius: 15px 0;
+                                              }
+                                            }
+                                        }
+                                        .sh_alternative_products{
+                                            .product-list{
+                                                article{
+                                                    border-radius: 15px 0;
+                                                    img{
+                                                        border-radius: 15px 0;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

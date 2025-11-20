@@ -1,0 +1,27 @@
+<odoo>
+  <data>
+    <record id="view_move_partner_bank_readonly_group" model="ir.ui.view">
+      <field name="name">account.move.partner_bank.readonly.group</field>
+      <field name="model">account.move</field>
+      <field name="inherit_id" ref="account.view_move_form"/>
+      <field name="priority" eval="999"/>
+      <field name="arch" type="xml">
+
+        <!-- Reemplazamos el nodo por 2 versiones -->
+        <xpath expr="//sheet//field[@name='partner_bank_id']" position="replace">
+          <!-- A) Normal para todos EXCEPTO el grupo -->
+          <field name="partner_bank_id"
+                 groups="!sale_and_purchasing_override.group_update_accounts_user"
+                 readonly="is_move_sent and state != 'draft'"/>
+
+          <!-- B) Solo lectura para el grupo (sin abrir, sin nada) -->
+          <field name="partner_bank_id"
+                 groups="sale_and_purchasing_override.group_update_accounts_user"
+                 options="{'no_open': true}"
+                 readonly="1"/>
+        </xpath>
+
+      </field>
+    </record>
+  </data>
+</odoo>

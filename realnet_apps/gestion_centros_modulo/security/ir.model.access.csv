@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_gestion_centro,access_gestion_centro,model_gestion_centro,,1,1,1,1
+access_gestion_alumno,gestion.alumno,model_gestion_alumno,,1,1,1,1

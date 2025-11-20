@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="sh_pos_bag_charges.BagCategory_list_popup">
+
+        <Dialog title="props.title" size="'md'">
+
+            <div class="sh_display_product d-flex">
+                <t t-if="props.products" t-foreach="props.products" t-as="sh_product" t-key="sh_product.id">
+
+                    <ProductCard name="sh_product.display_name" class="'flex-column h-100 border d-flex'" productId="sh_product.id" product="sh_product" price="sh_product.lst_price.toString()" imageUrl="sh_product.getImageUrl()" onClick="(ev) => this.addProductToOrder(sh_product)" />
+
+
+                </t>
+            </div>
+        </Dialog>
+
+    </t>
+
+</templates>

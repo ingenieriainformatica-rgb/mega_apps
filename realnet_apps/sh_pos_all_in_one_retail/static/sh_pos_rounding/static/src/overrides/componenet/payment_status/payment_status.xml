@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+        <t t-extend="PaymentScreenStatus" t-inherit="point_of_sale.PaymentScreenStatus" t-inherit-mode="extension" >
+            <xpath expr="//div[@t-if='props.order.payment_ids.length == 0']" position="before">
+                <t t-if="env.services.pos.config.sh_enable_rounding and props.order.payment_ids.length == 0">
+                    <div class="sh_rounding_div">
+                        <div class="rounding_label"><b>Rounding :</b></div>
+                        <div class="sh_toggle">
+                        <input class="tgl tgl-flat" id="cb4" type="checkbox" t-on-click="click" t-att-checked="env.services.pos.get_order().is_payment_round ? 'checked' : '' "/>
+                        <label class="tgl-btn cb4_label" for="cb4"></label>
+                    </div>
+                    </div>
+                </t>       
+            </xpath>
+        </t>
+
+</templates>

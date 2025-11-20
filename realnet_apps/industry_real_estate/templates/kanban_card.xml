@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="kanban_card">
+        <div t-attf-class="o_kanban_card #{card_class or ''}">
+            <!-- Header -->
+            <div class="o_kanban_card_header" t-if="header_config">
+                <strong t-if="header_config.get('title')">
+                    <field t-att-name="header_config['title']['field']"
+                        t-att-widget="header_config['title'].get('widget', '')" />
+                </strong>
+                <div class="float-end" t-if="header_config.get('right')">
+                    <field t-att-name="header_config['right']['field']"
+                        t-att-widget="header_config['right'].get('widget', '')" />
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="o_kanban_card_body" t-if="body_config">
+                <div t-foreach="body_config" t-as="field_config">
+                    <div t-att-class="field_config.get('class', '')">
+                        <t t-if="field_config.get('icon')">
+                            <i t-attf-class="fa fa-#{field_config['icon']}" />
+                        </t>
+                        <t t-if="field_config.get('label')">
+                            <t t-esc="field_config['label']" />: </t>
+                        <field t-att-name="field_config['field']"
+                            t-att-widget="field_config.get('widget', '')" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="o_kanban_card_footer" t-if="footer_config">
+                <div t-foreach="footer_config" t-as="footer_field">
+                    <field t-att-name="footer_field['field']"
+                        t-att-widget="footer_field.get('widget', '')" />
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>

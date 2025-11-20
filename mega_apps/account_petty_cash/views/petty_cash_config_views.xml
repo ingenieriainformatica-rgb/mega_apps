@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- LISTA -->
+  <record id="view_pc_cashbox_balance_type_tree" model="ir.ui.view">
+    <field name="name">pc.cashbox.balance.tree</field>
+    <field name="model">pc.cashbox.balance</field>
+    <field name="arch" type="xml">
+      <list string="Tipos de saldo">
+        <field name="name"/>
+        <field name="quantity" widget="monetary"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- FORM -->
+  <record id="view_pc_cashbox_balance_type_form" model="ir.ui.view">
+    <field name="name">pc.cashbox.balance.form</field>
+    <field name="model">pc.cashbox.balance</field>
+    <field name="arch" type="xml">
+      <form string="Tipo de saldo">
+        <sheet>
+          <group>
+            <group>
+              <field name="name" required="1"/>
+              <field name="quantity" widget="monetary"/>
+            </group>
+          </group>
+          <!-- opcional: como el modelo hereda mail.thread -->
+        </sheet>
+        <div class="o_attachment_preview" />
+        <chatter reload_on_attachment="True"/>
+      </form>
+    </field>
+  </record>
+
+  <!-- (Opcional) BÚSQUEDA -->
+  <record id="view_pc_cashbox_balance_type_search" model="ir.ui.view">
+    <field name="name">pc.cashbox.balance.search</field>
+    <field name="model">pc.cashbox.balance</field>
+    <field name="arch" type="xml">
+      <search string="Buscar tipos de saldo">
+        <field name="name"/>
+      </search>
+    </field>
+  </record>
+
+
+  <record id="action_pc_cashbox_balance_type" model="ir.actions.act_window">
+    <field name="name">Saldos</field>
+    <field name="res_model">pc.cashbox.balance</field>
+    <field name="view_mode">list,form</field>
+    <field name="target">current</field>
+  </record>
+
+  <menuitem id="menu_mega_tools_config_root"
+    name="Saldos iniciales"
+    parent="account.menu_finance_configuration"
+    groups="account_petty_cash.group_pc_user"
+    sequence="999"/>
+
+  <menuitem id="menu_reclass_receivable_saldos_iniciales"
+    name="Configuración de saldos iniciales"
+    parent="menu_mega_tools_config_root"
+    action="action_pc_cashbox_balance_type"
+    groups="account_petty_cash.group_pc_user"
+    sequence="20"/>
+
+</odoo>

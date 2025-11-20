@@ -1,0 +1,8 @@
+body .o-main-components-container .o-overlay-container .o-overlay-item .o_dialog .modal .modal-dialog .modal-content .modal-body .o_form_view .o_form_view_container .o_content .o_form_renderer .o_form_sheet_bg .o_form_sheet .o_inner_group .o_wrap_field .o_cell .o_field_widget .o_vertical .o_radio_item input:checked,
+body .o-main-components-container .o-overlay-container .o-overlay-item .o_dialog .modal .modal-dialog .modal-content .modal-body .o_form_view .o_form_view_container .o_content .o_form_renderer .o_form_sheet_bg .o_form_sheet .o_inner_group .o_wrap_field .o_cell .o_field_widget .o-checkbox .form-check-input:checked{
+    background-color: $sh_pos_primary_color;
+}
+body .o-main-components-container .o-overlay-container .o-overlay-item .o_dialog .modal .modal-dialog .modal-content .modal-body .o_form_view .o_form_view_container .o_content .o_form_renderer .o_form_sheet_bg .o_form_sheet .o_inner_group .o_wrap_field .o_cell .o_field_widget .o_vertical .o_radio_item input:focus,
+body .o-main-components-container .o-overlay-container .o-overlay-item .o_dialog .modal .modal-dialog .modal-content .modal-body .o_form_view .o_form_view_container .o_content .o_form_renderer .o_form_sheet_bg .o_form_sheet .o_inner_group .o_wrap_field .o_cell .o_field_widget .o-checkbox .form-check-input:focus{
+    box-shadow: none !important;
+}

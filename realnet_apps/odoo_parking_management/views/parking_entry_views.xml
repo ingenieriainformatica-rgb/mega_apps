@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Kanban view for public parking entry-->
+    <record id="parking_entry_view_kanban" model="ir.ui.view">
+        <field name="name">parking.entry.view.kanban</field>
+        <field name="model">parking.entry</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="slot_id"/>
+                <field name="vehicle_id"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="oe_kanban_details">
+                                <strong>
+                                    Placa:
+                                    <field name="vehicle_number"/>
+                                    <br/>
+                                    Ingreso:
+                                    <field name="check_in"/>
+                                    <br/>
+                                    Salida:
+                                    <field name="check_out"/>
+                                    <br/>
+                                </strong>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    
+    <!-- Simplified form view for Operators: standalone form with group on node -->
+    <record id="parking_entry_view_form_operator" model="ir.ui.view">
+        <field name="name">parking.entry.view.form.operator</field>
+        <field name="model">parking.entry</field>
+        <field name="priority" eval="10"/>
+        <field name="groups_id" eval="[(4, ref('odoo_parking_management.group_site_operator'))]"/>
+        <field name="arch" type="xml">
+            <form string="Parking Entry">
+                <header>
+                    <button name="action_check_in" string="Registrar Entrada"
+                            type="object" class="oe_highlight"
+                            data-hotkey="v" invisible="state != 'draft'"/>
+                    <button name="action_print_ticket" string="Imprimir Ticket"
+                            type="object" class="btn-secondary"
+                            data-hotkey="p" invisible="state != 'check_in'"/>
+                    <button name="action_check_out" string="Registrar Salida"
+                            type="object" class="oe_highlight"
+                            data-hotkey="v" invisible="state != 'check_in'"/>
+                    <button name="action_register_payment_improved" string="Registrar Pago"
+                            type="object" class="oe_highlight" data-hotkey="v"
+                            invisible="state != 'check_out' or is_monthly"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,check_in,check_out,payment"
+                           invisible="1"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Salio"
+                            bg_color="bg-danger"
+                            invisible="check_out_bool ==  False"/>
+                    <widget name="web_ribbon" title="Ingreso"
+                            bg_color="bg-success"
+                            invisible="check_in_bool == False"/>
+                    <widget name="web_ribbon" title="Pagado"
+                            bg_color="bg-success" invisible="paid_bool == False"/>
+                    <h1>
+                        <field name="name"/>
+                    </h1>
+                    <group readonly="state != 'draft'">
+                        <group>
+                            <field name="vehicle_number" string="Placa"/>
+                            <field name="slot_type_id" string="Tipo de Vehículo" widget="slot_type_icons" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/>
+                            <field name="slot_id"
+                                   domain="[('slot_type_id', '=', slot_type_id), ('current_parking_entry_id', '=', False), ('is_available', '=', True), ('site_id', '=', site_id)]"
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   required="site_requires_slot"
+                                   invisible="not site_requires_slot"
+                                   placeholder="Selección automática basada en la sede"/>
+                              <!-- Con Sello se muestra fuera del grupo readonly -->
+                      </group>
+                      <!-- Convenio (editable en check_in/check_out) -->
+                          <group>
+                              <field name="with_stamp" string="Con Sello" invisible="state not in ('check_in','check_out')"/>
+                              <field name="reference_id"
+                                     invisible="with_stamp == False or state not in ('check_in','check_out')"
+                                     domain="[('active','=',True), ('company_id','=', company_id), '|', ('site_ids','=', False), ('site_ids','in', site_id)]"/>
+                          </group>
+                        <group>
+                            <!-- Visible only for Parking Administrators inside operator form -->
+                            <field name="site_id"
+                                   string="Sede"
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   groups="odoo_parking_management.group_parking_admin"
+                                   required="1"/>
+                            <field name="location_id"
+                                   string="Ubicación"
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   groups="odoo_parking_management.group_parking_admin"
+                                   readonly="1"/>
+                        </group>
+
+                        <!-- Hidden fields to keep defaults/logic -->
+                        <group invisible="1">
+                            <field name="partner_id"/>
+                            <field name="vehicle_id"/>
+                            <field name="site_id"/>
+                            <field name="location_id"/>
+                            <field name="user_id"/>
+                            <field name="company_id"/>
+                            <field name="currency_id"/>
+                            <field name="product_id"/>
+                            <field name="invoice_id"/>
+                            <field name="monthly_contract_id"/>
+                            <field name="monthly_invoice_id"/>
+                            <field name="monthly_period"/>
+                            <field name="is_monthly"/>
+                            <field name="check_in_bool"/>
+                            <field name="check_out_bool"/>
+                            <field name="paid_bool"/>
+                            <field name="state"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <!--Kanban view for parking entry which are allocated-->
+    <record id="parking_entry_view_kanban_allocated" model="ir.ui.view">
+        <field name="name">parking.entry.view.kanban.allocated</field>
+        <field name="model">parking.entry</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="slot_type_id" class="o_kanban_small_column o_kanban_project_tasks"
+                    records_draggable="false" default_order="slot_type_id"
+                    examples="project" js_class="project_task_kanban" sample="1" create="0" edit="0" group_create="0">
+                <field name="slot_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="oe_kanban_global_click" style="background:lightgray;">
+                            <div class="oe_kanban_details">
+                                <strong>
+                                    <field name="slot_id"/>
+                                    <br/>
+                                </strong>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--Kanban view for parking entry which are not allocated-->
+    <record id="parking_entry_view_kanban_non_allocated" model="ir.ui.view">
+        <field name="name">parking.entry.view.kanban.non.allocated</field>
+        <field name="model">parking.entry</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="slot_type_id" class="o_kanban_small_column o_kanban_project_tasks"
+                    records_draggable="false" default_order="slot_type_id"
+                    examples="project" js_class="project_task_kanban" sample="1" create="0" edit="0" group_create="0">
+                <field name="slot_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="oe_kanban_global_click" style="background:lightgray;">
+                            <div class="oe_kanban_details">
+                                <strong>
+                                    <field name="slot_id"/>
+                                    <br/>
+                                </strong>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!--Tree view for parking entry-->
+    <record id="parking_entry_view_tree" model="ir.ui.view">
+        <field name="name">parking.entry.view.tree</field>
+        <field name="model">parking.entry</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="site_id"/>
+                <field name="partner_id"/>
+                <field name="vehicle_id"/>
+                <field name="is_monthly" optional="show"/>
+                <field name="monthly_period" optional="hide"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
+                <field name="duration" widget="float_time"/>
+                <field name="parking_cost" readonly="1"/>  <!-- Show in list but readonly -->
+                <field name="monthly_invoice_id" optional="hide"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+    <!--Form view for parking entry-->
+    <record id="parking_entry_view_form" model="ir.ui.view">
+        <field name="name">parking.entry.view.form</field>
+        <field name="model">parking.entry</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_check_in" string="Check In"
+                            type="object" class="oe_highlight"
+                            data-hotkey="v" invisible="state != 'draft'"/>
+                    <button name="action_print_ticket" string="Imprimir Ticket"
+                            type="object" class="btn-secondary"
+                            data-hotkey="p" invisible="state != 'check_in'"/>
+                    <button name="action_check_out" string="Check Out"
+                            type="object" class="oe_highlight"
+                            data-hotkey="v"
+                            invisible="state != 'check_in'"/>
+                    <button name="action_register_payment_improved" string="Register Payment"
+                            type="object" class="oe_highlight" data-hotkey="v"
+                            invisible="state != 'check_out' or is_monthly"/>
+                    <button name="action_create_invoice" string="Create Invoice"
+                            type="object" class="btn-secondary"
+                            invisible="invoice_id or state not in ('check_out', 'payment') or is_monthly"/>
+                    <button name="action_update_payment_status" string="Update Payment Status"
+                            type="object" class="btn-link"
+                            invisible="not invoice_id or invoice_payment_state != 'paid' or state == 'payment'"
+                            help="Click to update payment status if invoice is paid but parking entry is not marked as paid"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,check_in,check_out,payment"
+                           invisible="1"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoice" type="object"
+                                class="oe_stat_button" icon="fa-pencil-square-o"
+                                invisible="not invoice_id">
+                            <field name="invoice_id" invisible="1"/>
+                            <div class="o_stat_info">
+                                <field name="invoice_id" readonly="1"/>
+                                <span class="o_stat_text">Invoice</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Check Out"
+                            bg_color="bg-danger"
+                            invisible="check_out_bool ==  False"/>
+                    <widget name="web_ribbon" title="Check In"
+                            bg_color="bg-success"
+                            invisible="check_in_bool == False"/>
+                    <widget name="web_ribbon" title="Paid"
+                            bg_color="bg-success" invisible="paid_bool == False"/>
+                    <h1>
+                        <field name="name"/>
+                    </h1>
+                    <group readonly="state != 'draft'">
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="mobile" invisible="1"/>
+                            <field name="email" invisible="1"/>
+                            <field name="vehicle_id"/>
+                            <field name="vehicle_number"/>
+                            <field name="slot_type_id" string="Tipo de Vehículo" widget="slot_type_icons" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/>
+                            <field name="product_id" readonly="1"/>
+                            <field name="slot_id" 
+                                   domain="[('slot_type_id', '=', slot_type_id), ('current_parking_entry_id', '=', False), ('is_available', '=', True), ('site_id', '=', site_id)]"
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   required="site_requires_slot"
+                                   placeholder="Automatic selection based on site"/>
+                              <!-- Con Sello se muestra fuera del grupo readonly -->
+                            <!-- User ID - Editable for admins, readonly for operators -->
+                            <field name="user_id" groups="odoo_parking_management.group_parking_admin"/>
+                            <field name="user_id" readonly="1" groups="odoo_parking_management.group_site_operator"/>
+                        </group>
+                        <group>
+                            <!-- Site ID - Editable for admins, readonly for operators -->
+                            <field name="site_id" 
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   required="1"
+                                   string="Sede" groups="odoo_parking_management.group_parking_admin"/>
+                            <field name="site_id" 
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   required="1"
+                                   readonly="1"
+                                   groups="odoo_parking_management.group_site_operator"/>
+                            
+                            <!-- Location ID - Editable for admins, readonly for operators -->
+                            <field name="location_id" 
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   required="site_id"
+                                   readonly="1" string="Ubicación" groups="odoo_parking_management.group_parking_admin"
+                                   placeholder="Se selecciona automáticamente basado en la ciudad de la sede..."/>
+                            <field name="location_id" 
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   required="site_id"
+                                   readonly="1"
+                                   groups="odoo_parking_management.group_site_operator"
+                                   placeholder="Se selecciona automáticamente basado en la ciudad de la sede..."/>
+                            
+                            <!-- Created Date - Editable for admins, readonly for operators -->
+                            <field name="created_date" groups="odoo_parking_management.group_parking_admin"/>
+                            <field name="created_date" readonly="1" groups="odoo_parking_management.group_site_operator"/>
+                            <!--  -->
+                            <field name="check_in"/>
+                            <field name="check_out"/>
+                            <field name="duration" widget="float_time"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="parking_cost" invisible="1"/>  <!-- Hidden: calculated from Service Product -->
+                            <field name="invoice_payment_state" readonly="1"
+                                   invisible="not invoice_id"/>
+                            <field name="customer_type" invisible="1"/>  <!-- Hidden: deprecated field -->
+                            
+                            <!-- Monthly contract fields -->
+                            <field name="is_monthly" readonly="1"/>
+                            <field name="monthly_contract_id" readonly="1" invisible="not is_monthly"/>
+                            <field name="monthly_period" readonly="1" invisible="not is_monthly"/>
+                            <field name="monthly_invoice_id" readonly="1" invisible="not monthly_invoice_id"/>
+                            <field name="receipt_sequence" readonly="1" invisible="not receipt_sequence"/>
+                            
+                            <field name="company_id"/>
+                            <field name="check_out_bool" invisible="1"/>
+                            <field name="check_in_bool" invisible="1"/>
+                            <field name="paid_bool" invisible="1"/>
+                            <field name="invoice_id" invisible="1"/>
+                            <field name="payment_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <!-- Convenio (editable en check_in/check_out) para formulario estándar -->
+                        <group>
+                          <field name="with_stamp" string="Con Sello" invisible="state not in ('check_in','check_out')"/>
+                          <field name="reference_id"
+                                 invisible="1"
+                                 domain="[('active','=',True), ('company_id','=', company_id), '|', ('site_ids','=', False), ('site_ids','in', site_id)]"/>
+                      </group>
+                  </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!--Search view for parking entry-->
+    <record id="parking_entry_view_search" model="ir.ui.view">
+        <field name="name">parking.entry.view.search</field>
+        <field name="model">parking.entry</field>
+        <field name="arch" type="xml">
+            <search string="Parking Entries">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="vehicle_id"/>
+                <field name="site_id"/>
+                <field name="location_id"/>
+                <field name="monthly_contract_id"/>
+                <separator/>
+                <filter name="filter_today" string="Today" 
+                        domain="[('created_date', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <filter name="filter_checked_in" string="Checked In" 
+                        domain="[('state', '=', 'check_in')]"/>
+                <filter name="filter_checked_out" string="Checked Out" 
+                        domain="[('state', '=', 'check_out')]"/>
+                <separator/>
+                <filter name="filter_monthly" string="Monthly Contracts" 
+                        domain="[('is_monthly', '=', True)]"/>
+                <filter name="filter_pending_invoice" string="Pending Invoice" 
+                        domain="[('is_monthly', '=', True), ('monthly_invoice_id', '=', False)]"/>
+                <filter name="filter_current_period" string="Current Period" 
+                        domain="[('monthly_period', '=', context_today().strftime('%Y-%m'))]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_by_location" string="Location" context="{'group_by': 'location_id'}"/>
+                    <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_by_date" string="Date" context="{'group_by': 'created_date:day'}"/>
+                    <filter name="group_by_monthly" string="Monthly/Regular" context="{'group_by': 'is_monthly'}"/>
+                    <filter name="group_by_monthly_period" string="Period" context="{'group_by': 'monthly_period'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+<!--    Parking entry action public parking entry (NOW HANDLES ALL ENTRIES) -->
+    <record id="parking_entry_action_public_parking_entry"
+            model="ir.actions.act_window">
+        <field name="name">Parking Entry</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">parking.entry</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="views" eval="[(ref('odoo_parking_management.parking_entry_view_kanban'),'kanban'),
+                                      (ref('odoo_parking_management.parking_entry_view_tree'),'list'),
+                                      (ref('odoo_parking_management.parking_entry_view_form_operator'),'form'),
+                                      (ref('odoo_parking_management.parking_entry_view_form'),'form')]"/>
+        <field name="search_view_id" ref="parking_entry_view_search"/>
+        <field name="context">{'default_customer_type':'public'}</field>
+        <field name="domain">[]</field>  <!-- No domain filter: all entries are now public -->
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create Your First Parking Entry
+            </p>
+        </field>
+    </record>
+<!-- COMMENTED OUT: Private parking action completely removed
+    <record id="parking_entry_action_private_parking_entry"
+            model="ir.actions.act_window">
+        <field name="name">Private Parking Entry</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">parking.entry</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'default_customer_type':'private'}</field>
+        <field name="domain">[('customer_type', '=', ('private'))]</field>
+        <field name="active">False</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create Your First Private Parking Entry
+            </p>
+        </field>
+    </record>
+-->
+    <!--    Menu items for all private, public parking entries-->
+    <menuitem id="parking_entry_menu_parking_management_root"
+              name="Parking"
+              web_icon="odoo_parking_management,static/description/icon.png"
+              sequence="20"/>
+    <menuitem id="parking_entry_menu_configuration_root"
+              name="Configuration"
+              parent="odoo_parking_management.parking_entry_menu_parking_management_root"
+              groups="odoo_parking_management_group_parking_manager"
+              sequence="100"/>
+    <!-- COMMENTED OUT: Private parking menu completely removed
+    <menuitem id="parking_entry_menu_private_parking"
+              name="Private Parking Entry"
+              parent="odoo_parking_management.parking_entry_menu_parking_management_root"
+              action="parking_entry_action_private_parking_entry"
+              active="False"
+              sequence="999"/>
+    -->
+    
+    <!-- Main parking entry menu - now primary and only visible -->
+    <menuitem id="parking_entry_menu_public_parking"
+              name="Parking Entry"
+              parent="odoo_parking_management.parking_entry_menu_parking_management_root"
+              action="parking_entry_action_public_parking_entry"
+              sequence="1"/>  <!-- First menu item -->
+    <!--    Menu action for all,private, public parking entries-->
+    <record id="parking_entry_action_all_parking_entries" model="ir.actions.act_window">
+        <field name="name">All Parking Entry</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">parking.entry</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="views" eval="[(ref('odoo_parking_management.parking_entry_view_kanban'),'kanban'),
+                                      (ref('odoo_parking_management.parking_entry_view_tree'),'list'),
+                                      (ref('odoo_parking_management.parking_entry_view_form_operator'),'form'),
+                                      (ref('odoo_parking_management.parking_entry_view_form'),'form')]"/>
+        <field name="context">{'search_default_available':1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                View Your Parking Entries
+            </p>
+        </field>
+    </record>
+     <menuitem id="menu_reporting_root"
+              name="Reporting"
+              parent="odoo_parking_management.parking_entry_menu_parking_management_root"
+               groups="odoo_parking_management_group_parking_manager"
+              sequence="80"/>
+    <menuitem id="parking_entry_menu"
+              name="All Parking Entries"
+              parent="odoo_parking_management.menu_reporting_root"
+              action="parking_entry_action_all_parking_entries"
+              sequence="85"/>
+</odoo>

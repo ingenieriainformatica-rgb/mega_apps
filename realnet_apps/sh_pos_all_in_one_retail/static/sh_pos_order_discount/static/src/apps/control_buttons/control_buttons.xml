@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_all_in_one_retail.GlobalDiscountButton" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//SelectPartnerButton" position="after">
+            <button class="btn btn-secondary btn-lg py-5 flex-shrink-0 sh_global_discount" t-on-click="() => this.onClickGlobalDiscount()" t-if="pos.config.sh_allow_global_discount">
+                <span></span>
+                <span> Descuento global</span>
+            </button>
+            <button class="btn btn-secondary btn-lg py-5 flex-shrink-0 sh_remove_discount" t-on-click="() => this.onClickRemoveDiscount()" t-if="pos.config.sh_allow_order_line_discount || pos.config.sh_allow_global_discount">
+                <span></span>
+                <span>Eliminar descuento</span>
+            </button>
+        </xpath>
+    </t>
+</templates>

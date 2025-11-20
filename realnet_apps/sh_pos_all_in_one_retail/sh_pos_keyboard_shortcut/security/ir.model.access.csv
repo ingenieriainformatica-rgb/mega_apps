@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sh_keyboard_key,access_sh_keyboard_key,model_sh_keyboard_key,base.group_user,1,1,1,1
+access_sh_pos_keyboard_shortcut,access_sh_pos_keyboard_shortcut,model_sh_pos_keyboard_shortcut,base.group_user,1,1,1,1
+access_sh_keyboard_key_temp,access_sh_keyboard_key_temp,model_sh_keyboard_key_temp,base.group_user,1,1,1,1

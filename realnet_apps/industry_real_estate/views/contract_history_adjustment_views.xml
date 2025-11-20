@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista List para Contract History Adjustment -->
+    <record id="view_contract_history_adjustment_tree" model="ir.ui.view">
+        <field name="name">contract.history.adjustment.tree</field>
+        <field name="model">contract.history.adjustment</field>
+        <field name="arch" type="xml">
+            <list string="Historial de Ajustes IPC"
+                  decoration-muted="state=='cancelled'"
+                  decoration-warning="state=='pending'"
+                  decoration-success="state=='applied'">
+                <field name="adjustment_date"/>
+                <field name="contract_id"/>
+                <field name="ipc_id"/>
+                <field name="old_rent_amount" widget="monetary"/>
+                <field name="new_rent_amount" widget="monetary"/>
+                <field name="adjustment_amount" widget="monetary"
+                       decoration-success="adjustment_amount &gt; 0"
+                       decoration-danger="adjustment_amount &lt; 0"/>
+                <field name="ipc_percentage" widget="percentage"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="is_manual_adjustment" widget="boolean_toggle"/>
+                <field name="state"
+                       decoration-muted="state=='cancelled'"
+                       decoration-warning="state=='pending'"
+                       decoration-success="state=='applied'"
+                       widget="badge"/>
+                <field name="applied_by"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista Form para Contract History Adjustment -->
+    <record id="view_contract_history_adjustment_form" model="ir.ui.view">
+        <field name="name">contract.history.adjustment.form</field>
+        <field name="model">contract.history.adjustment</field>
+        <field name="arch" type="xml">
+            <form string="Ajuste de Canon por IPC">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,applied"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object"
+                                class="oe_stat_button" icon="fa-archive"
+                                invisible="state == 'cancelled'">
+                            <field name="active" widget="boolean_button"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Ajuste Manual"
+                            bg_color="text-bg-warning"
+                            invisible="not is_manual_adjustment"/>
+                    <widget name="web_ribbon" title="Cancelado"
+                            bg_color="text-bg-danger"
+                            invisible="state != 'cancelled'"/>
+                    <group>
+                        <group string="Información del Contrato">
+                            <field name="contract_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="adjustment_date"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="IPC Aplicado">
+                            <field name="ipc_id"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="ipc_percentage" widget="percentage"/>
+                            <field name="is_manual_adjustment"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Valores del Canon">
+                            <label for="old_rent_amount" string="Valor Anterior"/>
+                            <div class="o_row">
+                                <field name="old_rent_amount" widget="monetary"
+                                       class="oe_inline"
+                                       options="{'currency_field': 'currency_id'}"/>
+                            </div>
+                            <label for="new_rent_amount" string="Valor Nuevo"/>
+                            <div class="o_row">
+                                <field name="new_rent_amount" widget="monetary"
+                                       class="oe_inline"
+                                       options="{'currency_field': 'currency_id'}"/>
+                            </div>
+                            <field name="adjustment_amount" widget="monetary"
+                                   readonly="1"
+                                   class="oe_subtotal_footer_separator"/>
+                        </group>
+                        <group string="Control de Aplicación">
+                            <field name="applied_by" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notas" name="notes">
+                            <field name="notes"
+                                   placeholder="Observaciones sobre este ajuste..."
+                                   nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista Search para Contract History Adjustment -->
+    <record id="view_contract_history_adjustment_search" model="ir.ui.view">
+        <field name="name">contract.history.adjustment.search</field>
+        <field name="model">contract.history.adjustment</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Ajustes de Contrato">
+                <field name="contract_id"/>
+                <field name="ipc_id"/>
+                <field name="adjustment_date"/>
+                <field name="applied_by"/>
+                <separator/>
+                <filter string="Pendientes" name="pending" domain="[('state','=','pending')]"/>
+                <filter string="Aplicados" name="applied" domain="[('state','=','applied')]"/>
+                <filter string="Cancelados" name="cancelled" domain="[('state','=','cancelled')]"/>
+                <separator/>
+                <filter string="Ajustes Manuales" name="manual" domain="[('is_manual_adjustment','=',True)]"/>
+                <filter string="Ajustes Automáticos" name="automatic" domain="[('is_manual_adjustment','=',False)]"/>
+                <separator/>
+                <filter string="Este Año" name="this_year"
+                        domain="[('adjustment_date','&gt;=',context_today().strftime('%Y-01-01')),
+                                 ('adjustment_date','&lt;=',context_today().strftime('%Y-12-31'))]"/>
+                <filter string="Este Mes" name="this_month"
+                        domain="[('adjustment_date','&gt;=',context_today().strftime('%Y-%m-01'))]"/>
+                <separator/>
+                <filter string="Archivados" name="inactive" domain="[('active','=',False)]"/>
+                <!-- COMPATIBILIDAD ODOO 18/19: <group> en search views no acepta atributos -->
+                <group>
+                    <filter string="Contrato" name="group_contract" context="{'group_by':'contract_id'}"/>
+                    <filter string="IPC" name="group_ipc" context="{'group_by':'ipc_id'}"/>
+                    <filter string="Estado" name="group_state" context="{'group_by':'state'}"/>
+                    <filter string="Fecha de Ajuste" name="group_date" context="{'group_by':'adjustment_date'}"/>
+                    <filter string="Aplicado por" name="group_applied_by" context="{'group_by':'applied_by'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vista Kanban para Contract History Adjustment -->
+    <record id="view_contract_history_adjustment_kanban" model="ir.ui.view">
+        <field name="name">contract.history.adjustment.kanban</field>
+        <field name="model">contract.history.adjustment</field>
+        <field name="arch" type="xml">
+            <kanban string="Ajustes de Canon" class="o_kanban_mobile">
+                <field name="contract_id"/>
+                <field name="adjustment_date"/>
+                <field name="old_rent_amount"/>
+                <field name="new_rent_amount"/>
+                <field name="adjustment_amount"/>
+                <field name="ipc_percentage"/>
+                <field name="state"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="contract_id"/>
+                                    </strong>
+                                    <div class="text-muted">
+                                        <i class="fa fa-calendar" title="Fecha de ajuste"/> <field name="adjustment_date"/>
+                                    </div>
+                                </div>
+                                <span class="float-end badge rounded-pill"
+                                      t-attf-class="badge-#{record.state.raw_value === 'pending' ? 'warning' : record.state.raw_value === 'applied' ? 'success' : 'secondary'}">
+                                    <field name="state"/>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div>
+                                    <i class="fa fa-arrow-circle-o-up text-success" title="Incremento"/>
+                                    <field name="old_rent_amount" widget="monetary"/>
+                                    → <field name="new_rent_amount" widget="monetary"/>
+                                </div>
+                                <div>
+                                    <i class="fa fa-plus-circle" title="Incremento total"/>
+                                    <strong><field name="adjustment_amount" widget="monetary"/></strong>
+                                </div>
+                                <div t-if="record.ipc_percentage.raw_value">
+                                    <i class="fa fa-percent" title="Porcentaje IPC"/> IPC: <field name="ipc_percentage"/>%
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Vista Pivot para análisis -->
+    <record id="view_contract_history_adjustment_pivot" model="ir.ui.view">
+        <field name="name">contract.history.adjustment.pivot</field>
+        <field name="model">contract.history.adjustment</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de Ajustes">
+                <field name="adjustment_date" interval="month" type="row"/>
+                <field name="adjustment_amount" type="measure"/>
+                <field name="old_rent_amount" type="measure"/>
+                <field name="new_rent_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Vista Graph para análisis -->
+    <record id="view_contract_history_adjustment_graph" model="ir.ui.view">
+        <field name="name">contract.history.adjustment.graph</field>
+        <field name="model">contract.history.adjustment</field>
+        <field name="arch" type="xml">
+            <graph string="Gráfico de Ajustes" type="line">
+                <field name="adjustment_date" interval="month"/>
+                <field name="adjustment_amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+</odoo>

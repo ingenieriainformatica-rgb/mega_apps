@@ -1,0 +1,26 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="CustomerFacingDisplayOrderLines" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <xpath expr="//li[hasclass('orderline')]" position="attributes">
+            <t t-log="line"/>
+            <attribute name="t-attf-class">{{ (line.comboParent || line.sh_base_line_id || line.sh_is_topping) ? 'orderline-combo sh_pos_topping ms-4 fst-italic' : '' }}</attribute>
+
+        </xpath>
+        <!-- <xpath expr="//tr[hasclass('pos_orderlines_item')]" position="attributes">
+            <t t-if="orderline and orderline.is_topping">
+                <attribute name="t-att-class" >{ 'selected_orderline': orderline.id === order.get_selected_orderline().id ,'sh_topping_product': orderline.is_topping}</attribute>
+            </t>
+        </xpath> -->
+    </t>
+     <t t-name="CustomerFacingDisplayHead" t-inherit="point_of_sale.CustomerFacingDisplayHead" t-inherit-mode="extension">
+        <xpath expr="//div[@class='resources']" position="inside">
+           <link rel="stylesheet" type="text/css" href="/sh_pos_all_in_one_retail/static/sh_pos_product_toppings/static/src/scss/style.css"/>
+        </xpath>
+    </t>
+
+     <!-- <t t-name="pos_online_payment.CustomerFacingDisplayHead" t-inherit="point_of_sale.CustomerFacingDisplayHead" t-inherit-mode="extension">
+        <xpath expr="//div[@class='resources']" position="inside">
+            <link rel="stylesheet" type="text/css" href="/pos_online_payment/static/src/css/customer_facing_display.css" />
+        </xpath>
+    </t> -->
+
+</templates>

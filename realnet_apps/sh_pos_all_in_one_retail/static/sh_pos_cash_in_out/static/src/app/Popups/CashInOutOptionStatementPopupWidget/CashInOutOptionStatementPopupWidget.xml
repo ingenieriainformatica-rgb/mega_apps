@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_all_in_one_retail.CashInOutOptionStatementPopupWidget">
+        <Dialog title="props.title">
+            <div class="popup product-configurator-popup sh_cash_in_out_statement_popup">
+                <div class="modal-body main_div_sh_statement">
+                    <div class="main_sub_div_sh_statement">
+                        <div class="sh_statement_option d-flex w-100  justify-content-center">
+                            <div class="sh_session_div sh_custom_radio_btn">
+                                <input class="sh_rd_input" type="radio" id="session_statement" t-model="showStatementDate.changeStatementOption" name="statement_option" value="current_session" />
+                                <label class="sh_rd_lbl" for="session_statement">Current Session</label>
+                            </div>
+                            <div class="sh_date_div sh_custom_radio_btn ms-3">
+                                <input class="sh_rd_input" type="radio" id="date_statement" t-model="showStatementDate.changeStatementOption" name="statement_option" value="date_wise" />
+                                <label class="sh_rd_lbl" for="date_statement">Between 2 Date</label>
+                            </div>
+                        </div>
+                        <div class="sh_print_statement_option mt-3 w-100 d-flex justify-content-center">
+                            <div class="sh_pdf_div sh_custom_radio_btn">
+                                <input class="sh_print_input" type="radio" id="pdf_statement" name="print_option" value="pdf" t-model="showStatementDate.statementValue" />
+                                <label class="sh_print_lbl" for="pdf_statement">Generate PDF</label>
+                            </div>
+                            <div class="sh_receipt_div sh_custom_radio_btn ms-3">
+                                <input class="sh_print_input" type="radio" id="receipt_statement" t-model="showStatementDate.statementValue" name="print_option" value="receipt" />
+                                <label class="sh_print_lbl" for="receipt_statement">Generate Receipt</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sh_statement_date d-flex justify-content-center m-4 text-center row" t-if="showStatementDate.changeStatementOption == 'date_wise'">
+                        <div class="sh_start_date text-center col-xl-6 col-lg-6 col-md-12 col-sm-12 col-xs-12">
+                            <div class="sh_start_date_lbl">Start Date </div>
+                            <div class="sh_start_date_value">
+                                <input type="date" t-model="showStatementDate.start_date" class="start_date form-control form-control-lg w-65" />
+                            </div>
+                        </div>
+                        <div class="sh_end_date text-center col-xl-6 col-lg-6 col-md-12 col-sm-12 col-xs-12">
+                            <div class="sh_end_date_lbl">End Date </div>
+                            <div class="sh_end_date_value">
+                                <input type="date" t-model="showStatementDate.end_date" class="end_date form-control form-control-lg w-65" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <t t-set-slot="footer">
+                    <div class="d-flex justify-content-between flex-column w-100">
+                        
+                        <div class="w-100 text-center ">
+
+                            <div class="button cancel btn btn-lg btn-secondary m-1" t-on-click="cancel">
+                                Close
+                            </div>
+                            <div class="button print highlight btn btn-lg btn-primary m-1" t-on-click="print">
+                                Print
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </Dialog>
+    </t>
+</templates>

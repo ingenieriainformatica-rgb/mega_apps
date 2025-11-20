@@ -1,0 +1,25 @@
+<?xml version ="1.0" encoding="utf-8" ?>
+
+<odoo>
+    <record id="sh_pos_config_cancel_form_inherit" model="ir.ui.view">
+        <field name="name">pos.config.cancel.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='pos_interface_section']" position="after">
+                <block title="POS Order Cancel Configuration" id="config_sh_pos_cancel_order">
+                    <setting id="pos_operation_type_setting">
+                        <field name="pos_operation_type" widget="radio" />
+                    </setting>
+                    <setting ></setting>
+                    <setting id="pos_cancel_delivery_setting">
+                        <field name="pos_cancel_delivery" />
+                    </setting>
+                    <setting id="pos_cancel_invoice_setting">
+                        <field name="pos_cancel_invoice" />
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

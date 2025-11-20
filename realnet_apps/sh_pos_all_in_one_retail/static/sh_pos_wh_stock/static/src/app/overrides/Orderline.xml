@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-extend="Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('product-name')]" position="before">
+            <t t-if="env.services.pos.config.sh_display_stock and line.product_type and line.product_type == 'consu'">
+                <div class="sh_product_box_icon d-none ">
+                    <span class="product-image-icon sh_orderline_stock_icon me-2" t-on-click="() => this.env.services.pos.showStock(props.line.productId)">
+                        <i class="fa fa-building-o" aria-hidden="true"></i>
+                    </span>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

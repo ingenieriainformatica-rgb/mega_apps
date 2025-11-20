@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_all_in_one_retail.ShSOConfirmPopup">
+        <Dialog title="props.title" bodyClass="'d-flex flex-column'" size="lg">
+            <div class="popup">
+                <main class="modal-body">
+                    <t t-if='props.SaleOrderId'>
+                        Sale Order Ref :
+                        <a target="blank" class="so-name" style="color: #017e84;" t-attf-href="/mail/view?model=sale.order&amp;res_id={{props.SaleOrderId}}">
+                            <t t-esc="props.SaleOrderName" />
+                        </a>
+                    </t>
+                    <t t-else=''>
+                        <t t-esc="props.body" />
+                    </t>
+                </main>
+
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary btn-lg lh-lg o-default-button"  t-on-click="confirm">Ok</button>
+            </t>
+        </Dialog>
+    </t>
+  
+</templates>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- Heredamos la vista formulario de sale.order -->
+    <record id="view_order_form_to_invoice_posted_btn" model="ir.ui.view">
+      <field name="name">sale.order.form.to.invoice.posted.btn</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.view_order_form"/>
+      <field name="priority">20</field>
+      <field name="arch" type="xml">
+
+        <!-- Insertar el botón junto a los botones principales -->
+        <xpath expr="//header" position="inside">
+          <button name="action_open_posted_invoices"
+                  type="object"
+                  string="Completar Order"
+                  class="oe_highlight"
+                  icon="fa-refresh"
+                  confirm="Estas seguro de establecer el estado de la orden a 'Facturado por completo'?"
+                  invisible="not show_to_invoice_with_posted"
+                  help="Visible solo si la orden está 'Por facturar' y ya existe al menos una factura contabilizada."/>
+        </xpath>
+
+      </field>
+    </record>
+
+  </data>
+</odoo>

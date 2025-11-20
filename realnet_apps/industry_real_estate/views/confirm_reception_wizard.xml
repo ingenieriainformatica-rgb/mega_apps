@@ -1,0 +1,30 @@
+<odoo>
+    <record id="view_confirm_reception_wizard_form" model="ir.ui.view">
+        <field name="name">confirm.reception.wizard.form</field>
+        <field name="model">confirm.reception.wizard</field>
+        <field name="arch" type="xml">
+            <form string="¿Confirmar recepción?">
+                <group>
+                    <p>Existen ítems en la recepción de la propiedad sin validar.</p>
+                    <separator string="Para continuar debe establecer un responsable y la cantidad recibida."/>                    
+                    <field name="responsible_ids"
+                        domain="['|', '|', ('id', 'in', partner_id), ('id', 'in', co_partner_id), ('id', '=', company_partner_id)]"
+                        widget="many2many_tags"
+                        options="{'no_create': True}"/>
+                </group>
+                <footer>
+                    <button name="confirm_force_received" type="object" string="Sí, confirmar" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_confirm_reception_wizard" model="ir.actions.act_window">
+        <field name="name">Confirmar Recepción</field>
+        <field name="res_model">confirm.reception.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_confirm_reception_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

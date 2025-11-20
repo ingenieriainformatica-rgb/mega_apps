@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main menu -->
+    <menuitem id="menu_gestion_educativa_root"
+        name="Educational Management"
+        sequence="10" />
+        
+    <!-- Submenu: Students -->
+    <menuitem id="menu_gestion_alumnos"
+        name="Students"
+        parent="menu_gestion_educativa_root"
+        action="action_gestion_alumno"
+        sequence="10" />
+        
+    <!-- Submenu: Educational Centers -->
+    <menuitem id="menu_gestion_centros"
+        name="Educational Centers"
+        parent="menu_gestion_educativa_root"
+        action="action_centro_educativo"
+        sequence="20" />
+</odoo>

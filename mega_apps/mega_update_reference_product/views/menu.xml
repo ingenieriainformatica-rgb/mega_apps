@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <!-- 1) Pestaña de 1er nivel (sin acción) -->
+  <menuitem id="menu_rl_tools_tab"
+            name="Herramientas Realnet"
+            parent="stock.menu_stock_root"
+            groups="mega_update_reference_product.product_group_update_reference_user"
+            sequence="110"/>
+
+  <!-- 2) Acción del wizard -->
+  <record id="action_product_ref_fill_wizard" model="ir.actions.act_window">
+    <field name="name">Asignar referencia (archivados)</field>
+    <field name="res_model">product.ref.fill.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <!-- 3) Menú con acción dentro de la pestaña -->
+  <menuitem id="menu_product_ref_fill_wizard"
+            parent="menu_rl_tools_tab"
+            name="Asignar referencia a archivados sin código"
+            groups="mega_update_reference_product.product_group_update_reference_user"
+            action="action_product_ref_fill_wizard"
+            sequence="10"/>
+</odoo>

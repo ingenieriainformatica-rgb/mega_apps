@@ -1,0 +1,61 @@
+<odoo>
+  <record id="view_contracts_excel_wizard_form" model="ir.ui.view">
+    <field name="name">contract.excel.wizard.form</field>
+    <field name="model">contract.excel.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Exportar en Excel" edit="false" create="false">
+        <sheet>
+          <group>
+            <button name="action_refresh" type="object" string="Refrescar" class="oe_highlight"/>
+            <button name="action_export_xlsx" type="object" string="Exportar a Excel" class="oe_highlight"/>
+          </group>
+
+          <notebook>
+            <page string="Vista previa">
+            <field name="line_ids" nolabel="1" readonly="1"
+                  options="{'no_open': True}">
+              <list string="Vista previa" create="0" delete="0">
+                <field name="tipo_contrato"       string="Tipo de contrato"         readonly="1"/>
+                <field name="name"                string="Número de contrato"       readonly="1"/>
+                <field name="company_name"        string="Empresa"                  readonly="1"/>
+                <field name="state"               string="Estado"                   readonly="1"/>
+                <field name="user_name"           string="Responsable (vendedor)"   readonly="1"/>
+                <field name="arrendatario"        string="Arrendatario (nombre)"    readonly="1"/>
+                <field name="arr_doc"             string="Documento arrendatario"   readonly="1"/>
+                <field name="deudores"            string="Deudores solidarios (nombres)" readonly="1"/>
+                <field name="deudores_docs"       string="Documentos de deudores solidarios" readonly="1"/>
+                <field name="propietarios"        string="Propietarios (lista completa)" readonly="1"/>
+                <field name="propiedad"           string="Propiedad / Código"       readonly="1"/>
+                <field name="direccion"           string="Dirección del inmueble"   readonly="1"/>
+                <field name="municipio"           string="Municipio del inmueble"   readonly="1"/>
+                <field name="canon_num"           string="Canon (número)"           readonly="1"/>
+                <field name="canon_let"           string="Canon en letras"          readonly="1"/>
+                <field name="comision"            string="Comisión"                 readonly="1"/>
+                <field name="terminos_pago"       string="Términos de pago"         readonly="1"/>
+                <field name="fecha_ini"           string="Fecha inicio"             readonly="1"/>
+                <field name="vig_meses"           string="Vigencia (meses)"         readonly="1"/>
+                <field name="fecha_fin"           string="Fecha fin"                readonly="1"/>
+                <field name="fecha_creacion"      string="Fecha creación"           readonly="1"/>
+                <field name="fecha_actualizacion" string="Última actualización"     readonly="1"/>
+                <field name="titulo"              string="Título del contrato"      readonly="1"/>
+                <field name="plantilla"           string="Plantilla"                readonly="1"/>
+                <field name="ref_cliente"         string="Referencia del cliente"   readonly="1"/>
+              </list>
+            </field>
+          </page>
+
+          </notebook>
+
+          <group>
+            <field name="file_data" invisible="1"/>
+            <field name="filename" invisible="1"/>
+          </group>
+        </sheet>
+
+        <footer>
+          <button string="Cerrar" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+</odoo>

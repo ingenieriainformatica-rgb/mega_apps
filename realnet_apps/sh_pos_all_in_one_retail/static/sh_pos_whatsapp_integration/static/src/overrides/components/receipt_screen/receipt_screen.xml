@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+
+    <t t-name="ReceiptScreen" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension" owl="1">
+        <xpath expr="//button[hasclass('print')]" position="after">
+                
+                <t t-if="this.env.services.pos.config.enable_whatsapp">
+                    <button class="button print btn btn-lg btn-secondary py-3 sh_send_by_whatsapp_btn" t-on-click="onClickSendWp">
+                        <i class="fa fa-whatsapp"></i> Send By Whatsapp
+                    </button>
+                    <button class="button print btn btn-lg btn-secondary py-3 sh_send_by_whatsapp_direct_btn" t-on-click="onClickSendWpDirect">
+                        <i class="fa fa-whatsapp"></i> Send By Whatsapp Direct
+                    </button>
+                </t>
+        </xpath>
+    </t>
+
+</templates>

@@ -1,0 +1,54 @@
+<odoo>
+  <template id="report_contract_preview">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="o">
+        <t t-set="o" t-value="o.with_context(lang=(o.partner_id.lang or 'es_CO'))"/>
+        <t t-call="web.external_layout">
+          <div class="page">
+            <div class="container-fluid">
+              <!-- Encabezado -->
+              <div class="row align-items-center mb-3">
+                <div class="col">
+                  <h2 class="h3 mb-1">
+                    <t t-esc="o.contract_title or (o.x_contract_template_id and o.x_contract_template_id.name) or 'Contrato'"/>
+                  </h2>
+                  <div class="text-muted">
+                    <span class="small">Pedido: </span>
+                    <span class="small fw-bold"><t t-esc="o.name or ''"/></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Separador (evitar <hr/>) -->
+              <div class="my-3" style="border-top:1px solid #ddd;"></div>
+
+              <!-- Contenido -->
+              <div class="row">
+                <div class="col-12">
+                  <div class="border rounded p-3">
+                    <t t-if="o.rendered_clauses">
+                      <div class="contract-body"><t t-raw="o.rendered_clauses"/></div>
+                    </t>
+                    <t t-if="(not o.rendered_clauses) and o.env.context.get('preview_html')">
+                      <div class="contract-body"><t t-raw="o.env.context.get('preview_html')"/></div>
+                    </t>
+                    <t t-if="(not o.rendered_clauses) and (not o.env.context.get('preview_html'))">
+                      <div class="text-muted"><em>No hay contenido disponible para esta previsualización.</em></div>
+                    </t>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pie -->
+              <div class="row mt-4">
+                <div class="col-12 text-end">
+                  <span class="small text-muted">Generado por Odoo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </t>
+      </t>
+    </t>
+  </template>
+</odoo>

@@ -1,0 +1,48 @@
+services:
+  web: # This service defines the Odoo container.
+    image: ${ODOO_IMAGE} # Uses the official Odoo version 17.0 image.
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on: # Specifies dependencies. The 'web' service will only start after the 'db' service is active.
+      - db
+    ports:
+      - "${WEB_PORT}:${WEB_DEFAULT_PORT}"
+    volumes:
+      - mega-web-18:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./enterprise/odoo/addons:/mnt/enterprise
+      - ./realnet_apps:/mnt/realnet_apps
+      - ./mega_apps:/mnt/mega_apps
+      - ./filestore:/mnt/filestore
+      - ./log:/var/log/odoo
+    environment:
+      - PASSWORD_FILE=/run/secrets/postgresql_password # Specifies the location of the file containing the database password.
+    secrets:
+      - postgresql_password # Defines a secret that will be passed securely to the container.
+
+  db: # This service defines the PostgreSQL container.
+    image: ${POSTGRES_IMAGE} # Uses the official PostgreSQL version 15 image.
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB} # The default database name that will be created.
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgresql_password # Specifies the location of the file containing the database password.
+      - POSTGRES_USER=${POSTGRES_USER} # Defines the PostgreSQL user as 'odoo'.
+      - PGDATA=/var/lib/postgresql/data/pgdata # Specifies the location of the PostgreSQL data directory.
+    volumes:
+      - mega-db-18:/var/lib/postgresql/data/pgdata # Mounts a persistent volume for database data.
+      - ./backups:/mnt/backups
+    secrets:
+      - postgresql_password # Defines a secret that will be passed securely to the container.
+
+volumes:
+  mega-web-18:
+    name: ${WEB_VOLUMEN} # Defines a persistent volume with a specific name for Odoo data.
+  mega-db-18:
+    name: ${DB_VOLUMEN} # Defines a persistent volume with a specific name for PostgreSQL data.
+
+secrets:
+  postgresql_password:
+    file: odoo_pg_pass # Specifies the location of the secret file containing the database password.
+
+name: ${DOCKER_NAME} # The name of the configuration, useful for identifying this specific project.

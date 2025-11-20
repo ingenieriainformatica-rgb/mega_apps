@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="pos_reservation_layaway.PaymentScreenButtons" t-inherit="point_of_sale.PaymentScreenMethods" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('paymentmethods')]" position="after">
+            <div class="pos-layaway-actions mt-2">
+                <button class="btn btn-primary me-2" t-on-click="() => this.actionLayawayReservation()">
+                    <i class="fa fa-bookmark me-1"/> Apartar
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.actionLayawayAddPayment()">
+                    <i class="fa fa-credit-card me-1"/> Abonar a Apartado
+                </button>
+            </div>
+        </xpath>
+    </t>
+
+    <t t-name="pos_reservation_layaway.ControlButtons" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <!-- Add inside the Actions modal list (safe anchor used by core and softhealer modules) -->
+        <xpath expr="//t[@t-if='props.showRemainingButtons']/div/OrderlineNoteButton" position="after">
+            <button class="btn btn-secondary" t-on-click="() => this.actionLayawayAddPaymentFromProductScreen()">
+                <i class="fa fa-credit-card me-1"/> Abonar a Apartado
+            </button>
+        </xpath>
+    </t>
+
+    <t t-name="pos_reservation_layaway.ReservationReceipt">
+        <div class="pos-receipt p-2">
+            <ReceiptHeader data="props.data.headerData" />
+            <div class="text-center">--------------------------------</div>
+            <div class="pos-receipt-order-data">
+                <div><strong>Apartado:</strong> <t t-esc="props.data.name"/></div>
+                <div><strong>Cliente:</strong> <t t-esc="props.data.partner"/></div>
+                <div><strong>Fecha:</strong> <t t-esc="props.data.date"/></div>
+                <div><strong>Vence:</strong> <t t-esc="props.data.expiration_date"/></div>
+            </div>
+            <t t-if="props.data.type == 'reservation'">
+                <div class="text-center">--------------------------------</div>
+                <t t-foreach="props.data.lines" t-as="l" t-key="l_index">
+                    <div class="d-flex">
+                        <span class="me-auto">
+                            <t t-esc="l.name"/> x <t t-esc="l.qty"/>
+                        </span>
+                        <span><t t-esc="props.formatCurrency(l.subtotal)"/></span>
+                    </div>
+                </t>
+            </t>
+            <t t-if="props.data.type == 'payment'">
+                <div class="text-center">--------------------------------</div>
+                <div class="pos-receipt-order-data">
+                    <div><strong>Ticket abono:</strong> <t t-esc="props.data.ticket_number"/></div>
+                    <t t-if="props.data.amount_received and props.data.change_amount > 0">
+                        <div><strong>Monto recibido:</strong> <t t-esc="props.formatCurrency(props.data.amount_received)"/></div>
+                        <div><strong>Monto abonado:</strong> <t t-esc="props.formatCurrency(props.data.amount)"/></div>
+                        <div><strong>Cambio:</strong> <t t-esc="props.formatCurrency(props.data.change_amount)"/></div>
+                    </t>
+                    <t t-else="">
+                        <div><strong>Monto abonado:</strong> <t t-esc="props.formatCurrency(props.data.amount)"/></div>
+                    </t>
+                </div>
+            </t>
+            <div class="text-center">--------------------------------</div>
+            <div class="d-flex"><span>Total compra:</span><span class="ms-auto" t-esc="props.formatCurrency(props.data.amount_total)"/></div>
+            <div class="d-flex"><span>Abonado total:</span><span class="ms-auto" t-esc="props.formatCurrency(props.data.amount_paid)"/></div>
+            <div class="d-flex"><span>Saldo pendiente:</span><span class="ms-auto" t-esc="props.formatCurrency(props.data.amount_due)"/></div>
+            <div class="mt-2"><em>Sin reembolsos. El saldo abonado puede usarse para otros productos.</em></div>
+            <br/>
+            <div class="pos-receipt-order-data">
+                <p>Powered by Odoo</p>
+            </div>
+        </div>
+    </t>
+</templates>

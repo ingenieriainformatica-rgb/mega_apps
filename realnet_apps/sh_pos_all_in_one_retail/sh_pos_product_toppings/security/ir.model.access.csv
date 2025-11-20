@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+sh_pos_all_in_one_retail.access_sh_topping_group,access_sh_topping_group,sh_pos_all_in_one_retail.model_sh_topping_group,base.group_user,1,1,1,1
+sh_pos_all_in_one_retail.access_sh_mass_update_topings,access_sh_mass_update_topings,sh_pos_all_in_one_retail.model_sh_mass_update_topings,base.group_user,1,1,1,1

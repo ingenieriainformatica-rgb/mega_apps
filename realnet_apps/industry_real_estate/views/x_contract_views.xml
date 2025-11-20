@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_x_contract_form" model="ir.ui.view">
+        <field name="name">x.contract.form</field>
+        <field name="model">x.contract</field>
+        <field name="arch" type="xml">
+            <form string="Contrato">
+            <header>
+                <!-- <button name="action_change_state" string="Enviar a revisión" type="object"
+                        context="{'new_state':'draft'}"
+                        class="btn-secondary" modifiers="{'invisible': [('x_custom_state','!=','draft')]}"/> -->
+                <button name="action_change_state" string="Marcar como firmado" type="object"
+                        context="{'new_state':'contract_signed'}"
+                        class="btn-primary" modifiers="{'invisible': [('x_custom_state','!=','contract_signed')]}"/>
+                <!-- <button name="action_change_state" string="Activar" type="object"
+                        context="{'new_state':'pending_delivery'}"
+                        class="btn-primary" modifiers="{'invisible': [('x_custom_state','!=','pending_delivery')]}"/> -->
+
+                <field name="x_custom_state" widget="statusbar"/>
+            </header>
+
+            <sheet>
+                <!-- tu contenido -->
+                <button name="action_request_signature" string="Solicitar firma"
+                        type="object" class="oe_highlight"/>
+
+                <notebook>
+                <page string="Firmas">
+                    <field name="sign_template_id"
+                            options="{'no_create': True, 'no_create_edit': True}"
+                            placeholder="Selecciona una plantilla existente"/>
+                    <field name="sign_request_ids" readonly="1">
+                        <list>
+                            <field name="reference"/>
+                            <field name="template_id"/>
+                            <field name="state"/>
+                        </list>
+                        <form>
+                            <sheet>
+                            <group>
+                                <field name="reference" readonly="1"/>
+                                <field name="template_id" readonly="1"/>
+                                <field name="state" readonly="1"/>
+                            </group>
+                            </sheet>
+                        </form>
+                    </field>                        
+                </page>
+                </notebook>
+            </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_order_form_inherit_annex" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.annex</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="industry_real_estate.rental_form_view"/>
+        <field name="arch" type="xml">
+        <xpath expr="//header" position="inside">
+            <button name="action_open_add_annex_wizard"
+                    string="Agregar anexos"
+                    type="object"
+                    class="oe_highlight"
+                    groups="sales_team.group_sale_manager"/>
+        </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_form_inherit_payments" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.pyments</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="industry_real_estate.rental_form_view"/>
+        <field name="arch" type="xml">
+        
+        <!-- <xpath expr="//button[@name='action_draft']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath> -->
+        <field name="journal_id" position="after">
+            <field name="x_uso_destino_rel" widget="radio" options="{'horizontal': true}"/>
+            
+            <!-- Bloque completo visible solo en comercial -->
+            <!-- <div invisible="x_uso_destino_rel not in ['commercial']" class="w-100"> -->
+            <div class="w-100">
+
+            <!-- Fila 1: IPC -->
+            <div class="d-flex align-items-center gap-2 mb-1"
+                style="flex-wrap:nowrap; width:100%;">
+
+                <span class="o_form_label" style="min-width:160px;">Cambiar IPC</span>
+                <field name="cobro_adicional_ipc" nolabel="1"/>
+                <field name="monto_ipc"
+                    nolabel="1"
+                    class="o_inline"
+                    style="width:120px; min-width:120px;"
+                    placeholder="IPC"
+                    invisible="not cobro_adicional_ipc" 
+                    readonly="not cobro_adicional_ipc"/>
+                
+                
+            </div>
+            <!-- Fila 2: Comisión inmobiliaria -->
+            <div class="d-flex align-items-center gap-2"
+                style="flex-wrap:nowrap; width:100%;">
+                <span class="o_form_label" style="min-width:160px;">Cambiar comisión inmobiliaria</span>
+                <field name="comision_inmobiliaria" nolabel="1"/>
+                <field name="comision_inmobiliaria_porcentaje"
+                    nolabel="1"
+                    class="o_inline"
+                    style="width:120px; min-width:120px;"
+                    placeholder="Comisión inmobiliaria"
+                    readonly="not comision_inmobiliaria"
+                    invisible="not comision_inmobiliaria"/>
+            </div>
+            <!-- Fila 3: Administracion PH -->
+            <div class="d-flex align-items-center gap-2"
+                style="flex-wrap:nowrap; width:100%;">
+
+                <span class="o_form_label" style="min-width:160px;">Afiliación - sostenimiento</span>
+                <field name="cobro_comision_admin_ph" nolabel="1"/>
+                <field name="monto_comision_admin_ph"
+                    nolabel="1"
+                    class="o_inline"
+                    style="width:80px; min-width:80px;"
+                    placeholder="Comisión"
+                    readonly="not cobro_comision_admin_ph"
+                    invisible="not cobro_comision_admin_ph"/>
+                <span class="o_form_label" style="min-width:110px;" invisible="not cobro_comision_admin_ph">Comisión</span>
+                <field name="administracion_ph"
+                    nolabel="1"
+                    class="o_inline"
+                    style="width:120px; min-width:120px;"
+                    placeholder="Administración PH"
+                    readonly="not cobro_comision_admin_ph"
+                    invisible="not cobro_comision_admin_ph"/>
+                
+            </div>
+            <!-- Fila 4: Servicios públicos -->
+            <div class="d-flex align-items-center gap-2"
+                style="flex-wrap:nowrap; width:100%;">
+
+                <span class="o_form_label" style="min-width:160px;">Servicios públicos</span>
+                <field name="servicios_publicos" nolabel="1"/>
+            </div>
+            <!-- Fila 5: internet -->
+            <div class="d-flex align-items-center gap-2"
+                style="flex-wrap:nowrap; width:100%;">
+
+                <span class="o_form_label" style="min-width:160px;">Internet</span>
+                <field name="internet" nolabel="1"/>
+                <field name="monto_internet"
+                    nolabel="1"
+                    class="o_inline"
+                    style="width:120px; min-width:120px;"
+                    placeholder="Monto"
+                    invisible="not internet"/>
+            </div>
+            <!-- Fila 6: tv -->
+            <div class="d-flex align-items-center gap-2"
+                style="flex-wrap:nowrap; width:100%;">
+
+                <span class="o_form_label" style="min-width:160px;">Tv</span>
+                <field name="tv" nolabel="1"/>
+                <field name="monto_tv"
+                    nolabel="1"
+                    class="o_inline"
+                    style="width:120px; min-width:120px;"
+                    placeholder="Monto"
+                    invisible="not tv"/>
+            </div>
+            <!-- Fila 7: administracion sostenimiento -->
+            <div class="d-flex align-items-center gap-2"
+                style="flex-wrap:nowrap; width:100%;">
+
+                <span class="o_form_label" style="min-width:160px;">Administración ph</span>
+                <field name="administracion_sostenimiento" nolabel="1"/>
+                <field name="monto_administracion_sostenimiento"
+                    nolabel="1"
+                    class="o_inline"
+                    style="width:120px; min-width:120px;"
+                    placeholder="Monto"
+                    invisible="not administracion_sostenimiento"
+                    />
+            </div>
+
+            <!-- Fila 8: Costo transacción -->
+            <div class="d-flex align-items-center gap-2"
+                style="flex-wrap:nowrap; width:100%;">
+
+                <span class="o_form_label" style="min-width:160px;">Costo transacción</span>
+                <field name="costo_transaccion" nolabel="1"/>
+                <field name="costo_transaccion_monto"
+                    nolabel="1"
+                    class="o_inline"
+                    style="width:120px; min-width:120px;"
+                    placeholder="Monto"
+                    invisible="not costo_transaccion"
+                    />
+            </div>
+
+            <!-- Fila 9: 4x1000 -->
+            <div class="d-flex align-items-center gap-2"
+                style="flex-wrap:nowrap; width:100%;">
+
+                <span class="o_form_label" style="min-width:160px;">4x1000</span>
+                <field name="cuatropormil" nolabel="1"/>
+            </div>
+
+            </div>
+
+
+
+            <!-- </group> -->
+            <!-- <field name="porcentaje_adicional_ipc" invisible="not cobro_adicional_ipc"/> -->
+            <!-- <field name="admin_pct"/> -->
+            <!-- <field name="ecoerp_product_canon_id"/> -->
+            <!-- <field name="ecoerp_product_owner_payment_id"/> -->
+            <!-- <field name="cobro_papeleria"/> -->
+            <!-- <field name="monto_adicional_paleria" invisible="not cobro_papeleria"/> -->
+            <!-- <field name="cobro_comision_inicial"/> -->
+            <!-- <field name="porcentaje_comision_inicial" invisible="not cobro_comision_inicial"/> -->
+        </field>
+        <field name="tag_ids" position="after">
+            <!-- <field name="cobro_adicional"/> -->
+            <field name="porcentaje_cobros_adicionales"
+                    invisible="not cobro_adicional"/>
+            <field name="monto_cobros_adicionales"
+                    invisible="not cobro_adicional"/>
+        </field>
+        </field>
+    </record>
+
+    <record id="view_sale_order_hide_buttons_for_contract" model="ir.ui.view">
+        <field name="name">sale.order.hide.buttons.for.contract</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+
+        <!-- Enviar por correo -->
+        <xpath expr="//header/button[@name='action_quotation_send']" position="attributes">
+            <attribute name="invisible">[('x_custom_state', '==', 'draft')]</attribute>
+        </xpath>
+
+        <!-- Confirmar -->
+        <xpath expr="//header/button[@name='action_confirm' or @method='action_confirm' or @action='action_confirm']" position="attributes">
+            <attribute name="invisible">[('x_custom_state', '==', 'draft')]</attribute>
+        </xpath>
+        <!-- cancelar -->
+        <xpath expr="//header/button[@name='action_cancel' or @method='action_cancel' or @action='action_cancel']" position="attributes">
+            <!-- <attribute name="invisible">[('x_custom_state', '==', 'draft')]</attribute> -->
+            <attribute name="invisible">0</attribute>
+        </xpath>
+
+        <!-- Vista previa -->
+        <xpath expr="//header/button[@name='action_preview_sale_order']" position="attributes">
+            <attribute name="invisible">[('ecoerp_contract', '==', True)]</attribute>
+        </xpath>
+
+        </field>
+    </record>
+
+    <!-- <record id="view_contract_tabs_order" model="ir.ui.view">
+        <field name="name">sale.order.contract.tabs.order</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="industry_real_estate.rental_form_view"/>
+        <field name="priority">99</field>x
+        <field name="arch" type="xml">
+
+            <xpath expr="//form/sheet/notebook/page[@name='notes']" position="before">
+            <page position="move" xpath="//form/sheet/notebook/page[@name='customer_signature']"/>
+            </xpath>
+
+            <xpath expr="//form/sheet/notebook/page[@name='customer_signature']" position="before">
+            <page position="move" xpath="//form/sheet/notebook/page[@name='property_reception']"/>
+            </xpath>
+
+            <xpath expr="//form/sheet/notebook/page[@name='property_reception']" position="before">
+            <page position="move" xpath="//form/sheet/notebook/page[@name='property_delivery']"/>
+            </xpath>
+
+            <xpath expr="//form/sheet/notebook/page[@name='property_delivery']" position="before">
+            <page position="move" xpath="//form/sheet/notebook/page[@name='other_information']"/>
+            </xpath>
+
+            <xpath expr="//form/sheet/notebook/page[@name='other_information']" position="before">
+            <page position="move" xpath="//form/sheet/notebook/page[@name='order_lines']"/>
+            </xpath>
+
+        </field>
+    </record> -->
+
+</odoo>

@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de configuración ECOERP -->
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.ecoerp</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app name="industry_real_estate"
+                     data-string="ECOERP"
+                     string="ECOERP"
+                     icon="/industry_real_estate/static/description/icon.png">
+
+                    <!-- BLOQUE: Parámetros de mora y tiempos -->
+                    <block title="Parámetros de mora y tiempos">
+                        <!-- <setting help="Porcentaje de mora para cálculos automáticos.">
+                            <field name="percentage_of_arrears"/>
+                        </setting> -->                        
+                        <setting>
+                            <field name="porcentaje_mora"/>
+                        </setting>
+                        <setting help="Dias de gracias antes de aplicar mora para cálculos automáticos.">
+                            <field name="dias_gracia_mora"/>
+                        </setting>
+                        <setting>
+                            <field name="whatsapp_send_time"/>
+                        </setting>
+                        <setting>
+                            <field name="email_send_time"/>
+                        </setting>
+                    </block>
+
+                    <!-- BLOQUE: Notificaciones y escalado -->
+                    <block title="Notificaciones de escalamiento">                        
+                        <setting>
+                            <field name="notify_to_legal_department" options="{'no_open': True}"/>
+                        </setting>
+                        <setting>
+                            <field name="time_to_notify_legal_department"/>
+                        </setting>
+                        <setting>
+                            <field name="notify_to_credit_bureau" options="{'no_open': True}"/>
+                        </setting>
+                        <setting>
+                            <field name="time_to_notify_to_credit_bureau"/>
+                        </setting>
+                        <setting>
+                            <field name="notify_late_changes_to_id" options="{'no_open': True}"/>
+                        </setting>
+                    </block>
+
+                    <!-- BLOQUE: Tickets -->
+                    <!-- <block title="Tickets">
+                        <setting>
+                            <field name="ticket_per_user_type"/>
+                        </setting>
+                        <setting>
+                            <field name="ticket_per_contract"/>
+                        </setting>
+                        <setting>
+                            <field name="ticket_per_owners"/>
+                        </setting>
+                    </block> -->
+
+                    <!-- BLOQUE: Notificaciones de entrega/recepción -->
+                    <block title="Notificaciones de entrega/recepción">
+                        <setting>
+                            <field name="notify_tenant_on_reception"/>
+                        </setting>
+                        <setting>
+                            <field name="notify_tenant_on_delivery"/>
+                        </setting>
+                        <setting>
+                            <field name="notify_owners_on_reception"/>
+                        </setting>
+                        <setting>
+                            <field name="notify_owners_on_delivery"/>
+                        </setting>
+                    </block>
+
+                    <!-- BLOQUE: Tareas -->
+                    <block title="Responsabilidades por contratiempos">
+                        <setting>
+                            <field name="reception_owner_task" options="{'no_open': True}"/>
+                        </setting>
+                        <setting>
+                            <field name="delivery_owner_task" options="{'no_open': True}"/>
+                        </setting>
+                    </block>
+
+                    <!-- BLOQUE: Plantillas de firma -->
+                    <block title="Plantillas de firma">
+                        <setting>
+                            <field name="sign_template_contract_id" options="{'no_open': True}"/>
+                        </setting>
+                        <setting>
+                            <field name="sign_template_delivery_id" options="{'no_open': True}"/>
+                        </setting>
+                        <setting>
+                            <field name="sign_template_reception_id" options="{'no_open': True}"/>
+                        </setting>
+                        <setting>
+                            <field name="sign_template_clearance_delivery_id" options="{'no_open': True}"/>
+                        </setting>
+                        <setting>
+                            <field name="sign_template_clearance_reception_id" options="{'no_open': True}"/>
+                        </setting>
+                        <setting>
+                            <field name="sign_template_finish_id" options="{'no_open': True}"/>
+                        </setting>
+                    </block>
+
+                    <!-- BLOQUE: Parámetros ECOERP -->
+                    <block title="Parámetros ECOERP">
+                        <setting>
+                            <field name="ecoerp_default_admin_percent"/>
+                        </setting>
+                        <setting>
+                            <field name="tasa_usura"/>
+                        </setting>
+                        
+                        <setting>
+                            <field name="ecoerp_product_canon_id" domain="[('type','in',['service'])]"/>
+                        </setting>
+                        <setting>
+                            <field name="ecoerp_product_owner_payment_id" domain="[('type','in',['service'])]"/>
+                        </setting>
+                    </block>
+
+                    <!-- BLOQUE: Precios de Servicios Públicos -->
+                    <block title="Precios de Servicios Públicos">
+                        <setting string="Precio Energía">
+                            <field name="utility_price_energy"/>
+                        </setting>
+                        <setting string="Precio Agua">
+                            <field name="utility_price_water"/>
+                        </setting>
+                        <setting string="Precio Saneamiento">
+                            <field name="utility_price_sanitation"/>
+                        </setting>
+                        <setting string="Precio Varios">
+                            <field name="utility_price_misc"/>
+                        </setting>
+                    </block>
+
+                    <!-- BLOQUE: Cuentas Contables - Servicios Públicos -->
+                    <block title="Cuentas Contables - Servicios Públicos">
+
+                        <!-- AGUA -->
+                        <setting string="Agua">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="utility_water_account_debit_id" string="Cuenta Débito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_water_account_debit_id"
+                                           placeholder="Seleccione cuenta débito para agua..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="utility_water_account_credit_id" string="Cuenta Crédito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_water_account_credit_id"
+                                           placeholder="Seleccione cuenta crédito para agua..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <!-- ENERGÍA -->
+                        <setting string="Energía">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="utility_energy_account_debit_id" string="Cuenta Débito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_energy_account_debit_id"
+                                           placeholder="Seleccione cuenta débito para energía..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="utility_energy_account_credit_id" string="Cuenta Crédito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_energy_account_credit_id"
+                                           placeholder="Seleccione cuenta crédito para energía..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <!-- SANEAMIENTO -->
+                        <setting string="Saneamiento">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="utility_sanitation_account_debit_id" string="Cuenta Débito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_sanitation_account_debit_id"
+                                           placeholder="Seleccione cuenta débito para saneamiento..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="utility_sanitation_account_credit_id" string="Cuenta Crédito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_sanitation_account_credit_id"
+                                           placeholder="Seleccione cuenta crédito para saneamiento..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <!-- INTERNET -->
+                        <setting string="Internet">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="utility_internet_account_debit_id" string="Cuenta Débito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_internet_account_debit_id"
+                                           placeholder="Seleccione cuenta débito para internet..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="utility_internet_account_credit_id" string="Cuenta Crédito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_internet_account_credit_id"
+                                           placeholder="Seleccione cuenta crédito para internet..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <!-- TV CABLE -->
+                        <setting string="TV Cable">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="utility_tv_cable_account_debit_id" string="Cuenta Débito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_tv_cable_account_debit_id"
+                                           placeholder="Seleccione cuenta débito para TV cable..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="utility_tv_cable_account_credit_id" string="Cuenta Crédito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_tv_cable_account_credit_id"
+                                           placeholder="Seleccione cuenta crédito para TV cable..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <!-- REPARACIONES -->
+                        <setting string="Reparaciones">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="utility_repairs_account_debit_id" string="Cuenta Débito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_repairs_account_debit_id"
+                                           placeholder="Seleccione cuenta débito para reparaciones..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="utility_repairs_account_credit_id" string="Cuenta Crédito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_repairs_account_credit_id"
+                                           placeholder="Seleccione cuenta crédito para reparaciones..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <!-- VARIOS/OTROS -->
+                        <setting string="Otros Conceptos">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="utility_misc_account_debit_id" string="Cuenta Débito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_misc_account_debit_id"
+                                           placeholder="Seleccione cuenta débito para otros conceptos..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="utility_misc_account_credit_id" string="Cuenta Crédito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_misc_account_credit_id"
+                                           placeholder="Seleccione cuenta crédito para otros conceptos..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <!-- ADMINISTRACIÓN SOSTENIMIENTO -->
+                        <setting string="Administración Sostenimiento">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="utility_admin_sostenimiento_account_debit_id" string="Cuenta Débito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_admin_sostenimiento_account_debit_id"
+                                           placeholder="Seleccione cuenta débito para administración sostenimiento..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="utility_admin_sostenimiento_account_credit_id" string="Cuenta Crédito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_admin_sostenimiento_account_credit_id"
+                                           placeholder="Seleccione cuenta crédito para administración sostenimiento..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                        <!-- COSTO TRANSACCIÓN -->
+                        <setting string="Costo Transacción">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="utility_transaction_cost_account_debit_id" string="Cuenta Débito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_transaction_cost_account_debit_id"
+                                           placeholder="Seleccione cuenta débito para costo transacción..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="utility_transaction_cost_account_credit_id" string="Cuenta Crédito" class="col-lg-3 o_light_label"/>
+                                    <field name="utility_transaction_cost_account_credit_id"
+                                           placeholder="Seleccione cuenta crédito para costo transacción..."
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+
+                    </block>
+
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Acción + menú en Ajustes para ECOERP -->
+    <!--
+        COMPATIBILIDAD ODOO 18/19:
+        El valor target="inline" fue eliminado en Odoo 19.
+        Valores válidos: current (default), new, fullscreen, main
+        Usamos current que funciona en ambas versiones.
+    -->
+    <record id="action_ecoerp_settings" model="ir.actions.act_window">
+        <field name="name">ECOERP Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module': 'industry_real_estate', 'bin_size': False}</field>
+    </record>
+
+    <record id="menu_ecoerp_settings" model="ir.ui.menu">
+        <field name="name">ECOERP</field>
+        <field name="parent_id" ref="base.menu_config"/>
+        <field name="action" ref="action_ecoerp_settings"/>
+        <field name="sequence">60</field>
+    </record>
+</odoo>

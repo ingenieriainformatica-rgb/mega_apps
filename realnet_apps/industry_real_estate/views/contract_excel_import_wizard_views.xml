@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- FORM del importador -->
+  <record id="view_contracts_excel_import_wizard_form" model="ir.ui.view">
+    <field name="name">contract.excel.import.wizard.form</field>
+    <field name="model">contract.excel.import.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Importar contratos en Excel" create="false" edit="false">
+        <sheet>
+          <group>
+            <field name="file" filename="filename"/>
+            <field name="filename" readonly="1"/>
+            <field name="sheet_name"/>
+            <field name="simulate"/>
+          </group>
+
+          <group>
+            <button name="action_import" type="object" string="Importar" class="oe_highlight"/>
+          </group>
+
+          <group>
+            <field name="summary" nolabel="1" colspan="4" widget="text" readonly="1"/>
+          </group>
+        </sheet>
+        <footer>
+          <button string="Cerrar" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- Acción del importador -->
+  <record id="action_contracts_excel_import_wizard" model="ir.actions.act_window">
+    <field name="name">Importar contratos en Excel</field>
+    <field name="res_model">contract.excel.import.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_contracts_excel_import_wizard_form"/>
+    <field name="target">new</field>
+  </record>
+
+  <!-- Botón nuevo en el wizard EXISTENTE (heredamos su vista y agregamos al lado) -->
+  <record id="view_contracts_excel_add_import_button" model="ir.ui.view">
+    <field name="name">contract.excel.wizard.form.add_import_button</field>
+    <field name="model">contract.excel.wizard</field>
+    <field name="inherit_id" ref="industry_real_estate.view_contracts_excel_wizard_form"/>
+    <field name="arch" type="xml">
+      <!-- Insertar el botón después del de Exportar a Excel -->
+      <xpath expr="//button[@name='action_export_xlsx']" position="after">
+        <button type="action"
+                name="%(action_contracts_excel_import_wizard)d"
+                string="Importar desde Excel"
+                class="oe_highlight"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

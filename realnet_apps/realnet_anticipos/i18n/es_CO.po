@@ -1,0 +1,23 @@
+# Translation for realnet_anticipos
+msgid ""
+msgstr ""
+"Project-Id-Version: realnet_anticipos 18.0.1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-30 00:00+0000\n"
+"PO-Revision-Date: 2025-09-30 00:00+0000\n"
+"Last-Translator: Automatic\n"
+"Language-Team: Spanish (Colombia)\n"
+"Language: es_CO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: realnet_anticipos
+#: model:ir.model.fields,field_description:realnet_anticipos.field_res_company_anticipos_customer_account_id
+msgid "Cuenta de Anticipos de Clientes"
+msgstr "Cuenta de Anticipos de Clientes"
+
+#. module: realnet_anticipos
+msgid "Configure la Cuenta de Anticipos de Clientes en Contabilidad > Ajustes antes de registrar anticipos"
+msgstr "Configure la Cuenta de Anticipos de Clientes en Contabilidad > Ajustes antes de registrar anticipos"

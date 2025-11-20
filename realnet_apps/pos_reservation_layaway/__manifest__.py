@@ -1,0 +1,40 @@
+# -*- coding: utf-8 -*-
+{
+    'name': 'POS Reservation Layaway',
+    'summary': 'Apartar productos (reservas con abonos) para POS',
+    'version': '18.0.1.0.0',
+    'author': 'Realnet/Oskr',
+    'category': 'Point of Sale',
+    'license': 'OEEL-1',
+    'depends': [
+        'point_of_sale',
+        'account',
+        'stock',
+        'sale_management',
+        'sh_pos_all_in_one_retail',
+        'realnet_anticipos',
+    ],
+    'data': [
+        'security/pos_reservation_security.xml',
+        'security/ir.model.access.csv',
+        'data/sequence.xml',
+        'data/ir_cron.xml',
+        'views/pos_reservation_views.xml',
+        'views/res_config_settings_views.xml',
+        'wizards/consume_credit_wizard_views.xml',
+        'reports/report_pos_reservation_ticket.xml',
+    ],
+    'assets': {
+        'point_of_sale._assets_pos': [
+            'pos_reservation_layaway/static/src/js/pos_reservation.js',
+            'pos_reservation_layaway/static/src/js/reservation_receipt.js',
+            'pos_reservation_layaway/static/src/js/layaway_payment_popup.js',
+            'pos_reservation_layaway/static/src/js/layaway_invoice_receipt.js',
+            'pos_reservation_layaway/static/src/xml/pos_reservation_templates.xml',
+            'pos_reservation_layaway/static/src/xml/layaway_payment_popup.xml',
+            'pos_reservation_layaway/static/src/xml/invoice_receipt_templates.xml',
+        ],
+    },
+    'installable': True,
+    'application': False,
+}

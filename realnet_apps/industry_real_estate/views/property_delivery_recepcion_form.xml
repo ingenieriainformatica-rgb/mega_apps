@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_x_delivery_reception_line_form" model="ir.ui.view">
+        <field name="name">x.delivery.reception.line.form</field>
+        <field name="model">x.delivery.reception.line</field>
+        <field name="arch" type="xml">
+            <form string="Entrega/Recepción">
+                <sheet>
+                    <div class="oe_title" invisible="operation_type=='reception'">
+                        <h2>Entrega de Inventario de la propiedad</h2>
+                    </div>
+                    <div class="oe_title" invisible="operation_type=='delivery'">
+                        <h2>Recepción de Inventario de la propiedad</h2>
+                    </div>
+
+                    <group colspan="4" col="1">
+                        <!-- Columna izquierda: Detalles del producto -->
+                        <group>
+                            <field name="can_add_inventory" invisible="1"/>
+                            <field name="operation_type" invisible="1"/>
+                            <field name="photo_mime" invisible="1"/>
+                            <field name="photo" widget="camera_widget"
+                                   options="{'size': [0, 180]}"
+                                   readonly="editable_photo == False"/>
+                            <separator string="Información de Entrega" colspan="2" invisible="operation_type=='reception'"/>
+                            <field name="product_id" string="Producto" readonly="can_add_inventory!=True"/>                                
+                            <field name="description" readonly="can_add_inventory!=True"/>
+                            <field name="quantity" 
+                                string="Cantidad" 
+                                help="Cantidad que se entrega al arrendatario" 
+                                readonly="can_add_inventory!=True"
+                                invisible="operation_type=='reception'"/>
+                            <field name="received_quantity" 
+                                string="Cantidad recibida" 
+                                help="Cantidad que se recibe del arrendatario"
+                                invisible="operation_type=='delivery'"/>
+                            <field name="value" widget="monetary" readonly="can_add_inventory!=True"/>
+                            <field name="property_item_id" invisible="1"/>
+                            <field name="condition" widget="selection_badge"
+                                   decoration-success="condition == 'good'"
+                                   decoration-warning="condition == 'for_repair'"
+                                   decoration-danger="condition in ('damaged', 'missing')"/>
+                            <field name="date" readonly="1"/>
+                        </group>
+
+                        <!-- Columna derecha: Historial -->
+                        <group string="Movimientos">
+                            <!-- <button name="action_open_item_history"
+                                    string="Ver historial del ítem"
+                                    type="object"
+                                    icon="fa-clock-o"
+                                    class="btn-secondary"
+                                    modifiers="{'invisible': [('property_item_id', '=', False)]}"/> -->
+                            <field 
+                                name="history_ids" 
+                                view_id="ref('industry_real_estate.view_property_item_history_tree')"
+                                nolabel="1"
+                                invisible="property_item_id==False"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

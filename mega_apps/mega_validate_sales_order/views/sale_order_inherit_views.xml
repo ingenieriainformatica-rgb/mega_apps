@@ -1,0 +1,31 @@
+<odoo>
+
+    <record id="view_order_form_lock_lines_v18" model="ir.ui.view">
+        <field name="name">sale.order.form.lock.lines.v18</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']" position="attributes">
+              <attribute name="readonly">(state == 'sale' and invoice_count &gt; 0)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+              <attribute name="readonly">(state == 'sale' and invoice_count &gt; 0)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='payment_term_id']" position="attributes">
+              <attribute name="readonly">(state == 'sale' and invoice_count &gt; 0)</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_form_lock_lines_v18_studio" model="ir.ui.view">
+      <field name="name">sale.order.form.lock.lines.v18.studio</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="studio_customization.odoo_studio_sale_ord_3434a9cc-c592-421e-bec5-63c2fd7c3561"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='x_studio_descripcion']" position="attributes">
+          <attribute name="readonly">(state == 'sale' and invoice_count &gt; 0)</attribute>
+        </xpath>
+      </field>
+    </record>
+
+</odoo>

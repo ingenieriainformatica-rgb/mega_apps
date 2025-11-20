@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- Heredar del template base de point_of_sale -->
+    <t t-name="l10n_co_pos_receipt_cufe.OrderReceipt"
+       t-inherit="point_of_sale.OrderReceipt"
+       t-inherit-mode="extension">
+
+        <!-- Insertar en la sección de datos de la orden -->
+        <xpath expr="//div[hasclass('pos-receipt-order-data')]" position="inside">
+
+            <!-- Sección CUFE - Solo si está habilitado y existe CUFE -->
+            <t t-if="props.data.l10n_co_show_cufe">
+                <div class="text-center mt-3">
+                    <div class="separator">--------------------------------</div>
+                    <div class="mt-2 mb-1 fw-bold">
+                        FACTURA ELECTRÓNICA DIAN
+                    </div>
+                </div>
+
+                <!-- Código QR del CUFE -->
+                <div t-if="props.data.l10n_co_cufe_qr" class="text-center mt-2 mb-2">
+                    <img t-att-src="props.data.l10n_co_cufe_qr"
+                         class="pos-receipt-logo"
+                         alt="QR CUFE"
+                         style="width: 180px; height: 180px;"/>
+                </div>
+
+                <!-- CUFE (texto completo) -->
+                <div t-if="props.data.l10n_co_cufe" class="text-center mt-2">
+                    <div class="fw-bold">CUFE:</div>
+                    <div style="word-wrap:break-word; font-size: 10px; padding: 0 10px;">
+                        <t t-esc="props.data.l10n_co_cufe"/>
+                    </div>
+                </div>
+
+                <!-- Mensaje informativo -->
+                <div class="text-center mt-2 mb-2" style="font-size: 11px;">
+                    Factura electrónica validada por la DIAN
+                </div>
+
+                <div class="text-center">
+                    <div class="separator">--------------------------------</div>
+                </div>
+            </t>
+
+        </xpath>
+    </t>
+
+</templates>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_sale.ControlButtons" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//t[@t-if='props.showRemainingButtons']/div/OrderlineNoteButton" position="after">
+            <t t-if="!pos.config.module_pos_hr">
+                <t t-if="pos.config.sh_enable_z_report and pos.user.sh_is_allow_z_report and pos.config.sh_allow_posted_session_report">
+                    <button
+                        class="js_discount"
+                        t-att-class="buttonClass"
+                        t-on-click="() => this.printPostedSessionReport()">
+                        <i class="fa fa-tag me-1"/>  Posted Session Z - Report
+                    </button>
+                </t>
+                <t t-if="pos.config.sh_enable_z_report and pos.user.sh_is_allow_z_report">
+                    <button
+                        class="js_discount"
+                        t-att-class="buttonClass"
+                        t-on-click="() => this.onClickZreport()">
+                        <i class="fa fa-tag me-1"/>   Z - Report
+                    </button>
+                </t>
+            </t>
+            <t t-else="">
+                <t t-if="pos.get_cashier() and pos.get_cashier().name">
+                    <t t-if="pos.get_cashier().sh_is_allow_z_report and pos.config.sh_enable_z_report and pos.config.sh_allow_posted_session_report">
+                        <button
+                            class="js_discount"
+                            t-att-class="buttonClass"
+                            t-on-click="() => this.printPostedSessionReport()">
+                            <i class="fa fa-tag me-1"/>  Posted Session Z - Report
+                        </button>
+                    </t>
+                    <t t-if="pos.get_cashier().sh_is_allow_z_report and pos.config.sh_enable_z_report ">
+                        <button
+                            class="js_discount"
+                            t-att-class="buttonClass"
+                            t-on-click="() => this.onClick()">
+                            <i class="fa fa-tag me-1"/>  Z - Report
+                        </button>
+                    </t>
+                </t>
+            </t>
+        </xpath>
+    </t>
+</templates>

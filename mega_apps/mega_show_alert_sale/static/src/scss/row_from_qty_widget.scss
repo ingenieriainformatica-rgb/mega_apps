@@ -1,0 +1,30 @@
+/* Aplica solo al o2m de líneas del pedido de venta */
+.o_form_view .o_field_one2many[name="order_line"] .o_list_table tbody
+tr:has(.o_widget_qty_at_date_widget .text-danger) {
+  background-color: rgba(220, 53, 69, .08); /* rojo suave */
+  outline: 1px solid rgba(220, 53, 69, .35);
+  transition: background-color .2s ease, outline-color .2s ease;
+}
+
+/* (Opcional) tono de texto más marcado en esa fila */
+.o_form_view .o_field_one2many[name="order_line"] .o_list_table tbody
+tr:has(.o_widget_qty_at_date_widget .text-danger) td {
+  color: var(--bs-danger, #dc3545);
+}
+
+/* (Opcional) resalta inputs dentro de la fila */
+.o_form_view .o_field_one2many[name="order_line"] .o_list_table tbody
+tr:has(.o_widget_qty_at_date_widget .text-danger) .o_input {
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, .18);
+}
+
+/* (Opcional) mensaje corto bajo la primera columna */
+.o_form_view .o_field_one2many[name="order_line"] .o_list_table tbody
+tr:has(.o_widget_qty_at_date_widget .text-danger) td[name="product_id"]::after {
+  content: "⚠ Revisar disponibilidad";
+  display: block;
+  font-size: 12px;
+  margin-top: 2px;
+  color: #dc3545;
+  font-weight: 600;
+}

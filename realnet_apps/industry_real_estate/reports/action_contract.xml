@@ -1,0 +1,12 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<odoo>
+    <report
+        id="action_report_sale_order_custom"
+        model="sale.order"
+        string="Contratof"
+        report_type="qweb-pdf"
+        name="sale_order_custom_report.sale_order_template"
+        file="sale_order_custom_report.sale_order_template"
+        print_report_name="'Commande_%s' % (object.name)"
+    />
+</odoo>

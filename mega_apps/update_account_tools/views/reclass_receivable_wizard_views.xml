@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_reclass_receivable_wizard_form" model="ir.ui.view">
+    <field name="name">realnet.reclass.receivable.wizard.form</field>
+    <field name="model">realnet.reclass.receivable.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Reclasificar CxC por cuenta">
+        <group>
+          <field name="company_id"  options="{'no_open': True, 'no_create': True, 'no_quick_create': True, 'no_create_edit': True}"/>
+          <field name="account_src_id" options="{'no_create': True}"
+                 context="{'company_id': company_id, 'default_company_id': company_id}"/>
+          <field name="account_dst_id" options="{'no_create': True}"
+                 context="{'company_id': company_id, 'default_company_id': company_id}"/>
+          <field name="journal_id" options="{'no_create': True, 'no_create_edit': True}" invisible="not bulk_mode"/>
+          <field name="bulk_mode" widget="boolean_toggle"/>
+        </group>
+
+        <group string="Filtro" invisible="bulk_mode">
+            <field name="invoice_id"
+              options="{'no_create': True, 'no_quick_create': True, 'no_open': True}"/>
+        </group>
+
+        <footer>
+          <button name="action_confirm_bulk" type="object" string="Update Bulk" class="btn-primary" invisible="not bulk_mode"/>
+          <button name="action_confirm" type="object" string="Confirmar" class="btn-primary" invisible="bulk_mode"/>
+          <button string="Cerrar" class="btn-link" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_reclass_receivable_wizard" model="ir.actions.act_window">
+    <field name="name">Reclasificar CxC por cuenta</field>
+    <field name="res_model">realnet.reclass.receivable.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <menuitem id="menu_realnet_tools_root"
+            name="Herramientas Realnet"
+            parent="account.menu_finance_configuration"
+            groups="update_account_tools.group_update_accounts_user"
+            sequence="995"/>
+
+  <menuitem id="menu_reclass_receivable_wizard"
+            name="Reclasificar CxC por cuenta"
+            parent="menu_realnet_tools_root"
+            action="action_reclass_receivable_wizard"
+            sequence="10"
+            groups="update_account_tools.group_update_accounts_user"/>
+</odoo>

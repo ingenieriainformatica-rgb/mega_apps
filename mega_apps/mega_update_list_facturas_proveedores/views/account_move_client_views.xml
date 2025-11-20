@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <odoo>
+    <record id="view_move_tree_inherit_client_label_custom" model="ir.ui.view">
+        <field name="name">account.move.tree.client.label.custom</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_out_invoice_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_untaxed_in_currency_signed']" position="attributes">
+                <attribute name="string">Sub total</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='amount_tax_signed']" position="attributes">
+                <attribute name="string">Total impuesto</attribute>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
+
+
+</odoo>

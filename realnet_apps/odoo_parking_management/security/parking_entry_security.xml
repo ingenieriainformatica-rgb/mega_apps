@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Record Rules for Site-based Security -->
+    
+    <!-- Rule for Site Operators: only see records from their assigned sites -->
+    <record id="parking_entry_rule_site_operator" model="ir.rule">
+        <field name="name">Parking Entry - Restrict by Site for Operators</field>
+        <field name="model_id" ref="model_parking_entry"/>
+        <field name="domain_force">[('site_id','in', user.allowed_parking_site_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_site_operator'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    
+    <!-- Rule for Slot Details: restrict by site for operators -->
+    <record id="slot_details_rule_site_operator" model="ir.rule">
+        <field name="name">Slot Details - Restrict by Site for Operators</field>
+        <field name="model_id" ref="model_slot_details"/>
+        <field name="domain_force">[('site_id','in', user.allowed_parking_site_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_site_operator'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    
+    <!-- Rule for Location Details: allow all locations for operators (filtered by form logic) -->
+    <record id="location_details_rule_site_operator" model="ir.rule">
+        <field name="name">Location Details - Allow All for Operators</field>
+        <field name="model_id" ref="model_location_details"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('group_site_operator'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    
+    <!-- Monthly contract rules -->
+    <record id="monthly_contract_rule_site_operator" model="ir.rule">
+        <field name="name">Monthly Contract - Restrict by Site for Operators</field>
+        <field name="model_id" ref="model_parking_monthly_contract"/>
+        <field name="domain_force">[('site_id','in', user.allowed_parking_site_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_site_operator'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    
+    <!-- Monthly invoice rules -->
+    <record id="monthly_invoice_rule_site_operator" model="ir.rule">
+        <field name="name">Monthly Invoice - Restrict by Site for Operators</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="domain_force">['|', ('parking_site_id','=',False), ('parking_site_id','in', user.allowed_parking_site_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_site_operator'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    
+    <!-- Dashboard access - no restriction needed as it's filtered by form logic -->
+    
+    <!-- Note: No rule defined for group_parking_admin - they see all records (default-allow behavior) -->
+    <!-- Note: No rule defined for odoo_parking_management_group_parking_manager - they see all records -->
+</odoo>

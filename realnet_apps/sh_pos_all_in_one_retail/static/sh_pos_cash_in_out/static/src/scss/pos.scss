@@ -1,0 +1,143 @@
+body{
+	.pos{
+		.pos-content {
+			.receipt-screen {
+				.screen-content {
+					.button{
+						&.print{
+							width: 100% !important;
+							margin: 0 auto;
+						}
+					}
+					.centered-content {
+						background: #fff;
+						.pos-receipt-container{
+							overflow: auto;
+							.sh_pos_statement_receipt{
+								.sh_in_out_statement_table{
+									width: 100%;
+									thead{
+										tr{
+											th{
+												text-align: center;
+												font-weight: 700;
+												font-size: 16px;
+											}
+										}
+									}
+									tbody{
+										tr{
+											td{
+												text-align: center;
+											}
+										}
+									}
+									tfoot{
+										tr{
+											td{
+												text-align: center;
+												font-weight: 700;
+												font-size: 16px;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	.o-main-components-container{
+		.o-overlay-container{
+			.o-overlay-item{
+				.o_dialog{
+					.modal{
+						.modal-dialog {
+							.modal-content{
+								.modal-body{
+									.sh_cash_in_out_option_modal_dialog{
+										.popup{
+											.modal-body {
+												.main_div_sh_payment_table{
+													max-height: 200px;
+													overflow: auto;
+													.sh_payment_table {
+														width: 100%;
+														thead {
+															color: #fff;
+															font-size: 16px;
+															@if $sh_header_sticky =="True" {
+																position: sticky;top: 0;z-index: 1;
+															}
+															th {
+																padding: 8px 10px;
+																text-transform: uppercase;
+																font-size: 14px;
+																white-space: nowrap;
+															}
+														}
+														tbody {
+															td {
+																padding: 10px;
+																font-size: 16px;
+																font-weight: normal;
+																white-space: nowrap;
+															}
+															tr {
+																&:nth-child(odd) {
+																	background: $sh_odd_row_color !important;
+																}
+																&:nth-child(even) {
+																	background: $sh_even_row_color!important;
+																}
+																@if $sh_list_row_hover == "True" {
+																	&:hover {
+																		background: $sh_hover_background_color !important;
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+									.popup{
+										.modal-body{
+											.main_sub_div_sh_statement {
+												.sh_statement_option , .sh_print_statement_option{
+													div{
+														input{
+															display: none;
+														}
+														label{
+															position: relative;
+															padding-left: 25px;
+															&::after{
+																content: "";
+																position: absolute;
+																border: 1px solid #ddd;
+																width: 20px;
+																height: 20px;
+																border-radius: 100%;
+																left: 0;
+																top: 0;
+																bottom: 0;
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

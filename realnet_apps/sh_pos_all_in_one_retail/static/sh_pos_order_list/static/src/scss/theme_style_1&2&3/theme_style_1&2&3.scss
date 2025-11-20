@@ -1,0 +1,97 @@
+body{
+    .pos{
+        .pos-content {
+            .shorderlist-screen {
+                .top-content {
+                    .sh_header_buttons{
+                        .d-flex{
+                            .form-control {
+                                @include form_element_radius;
+                            }
+                            .btn-secondary{
+                                @include btn_border_radius;
+                                @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                    background: #fff;
+                                    &:hover{
+                                        background: lighten($sh_pos_primary_color, 45%) !important;
+                                        border-color: $sh_pos_primary_color;
+                                    }
+                                    &:active{
+                                        background: lighten($sh_pos_primary_color, 45%) !important;
+                                        border-color: $sh_pos_primary_color;
+                                    }
+                                }
+                            }
+                            .sh_top_bar_search_box{
+                                span{
+                                    color: $sh_pos_primary_color;
+                                }
+                                &:has(input:focus , input:hover){
+                                    @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                        border-color: $sh_pos_primary_color;
+                                    }
+                                }
+                            }
+                            .sh_top_bar_date_box {
+                                input{
+                                    @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                        &:hover{
+                                            border-color: $sh_pos_primary_color;
+                                        }
+                                        &:focus{
+                                            border-color: $sh_pos_primary_color;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .sh_full_content_service_management{
+                        .sh_order_list{
+                            thead{
+                                tr{
+                                    @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                        background:$sh_pos_primary_color ;
+                                    }
+                                }
+                            }
+                            tbody{
+                                tr{
+                                    td{
+                                        table{
+                                            thead{
+                                                @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                                    background:$sh_pos_primary_color ;
+                                                    th{
+                                                        background: transparent !important;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .sh_page_controls{
+                        .page-controls {
+                            .btn{
+                                @include btn_border_radius;
+                                @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                    &:hover{
+                                        background: lighten($sh_pos_primary_color, 45%) !important;
+                                        border-color: $sh_pos_primary_color;
+                                    }
+                                    &:focus{
+                                        background: lighten($sh_pos_primary_color, 45%) !important;
+                                        border-color: $sh_pos_primary_color;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

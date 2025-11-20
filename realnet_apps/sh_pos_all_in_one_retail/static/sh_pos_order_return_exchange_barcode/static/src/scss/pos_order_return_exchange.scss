@@ -1,0 +1,40 @@
+.pos  .modal-dialog .popup.sh-return-order-popup .modal-body .sh_return_order_table .sh_return_order_tbody tr:nth-child(odd){background:#f5f6f7;}
+.pos  .modal-dialog .popup.sh-return-order-popup .modal-body .sh_return_order_table .sh_return_order_tbody tr:hover{background: #e9ecef !important; color:#495057 !important;}
+// New Scss //
+.modal-header{
+    justify-content: center;
+    h4{font-size:18px;color: #000000c2 !important;}
+}
+.sh-return-order-popup{
+    .sh_radio_btn_div{
+        .sh_return_exchange_radio{
+            display: flex;justify-content: center;align-items: center;margin-bottom: 20px;gap: 20px;
+            @include media-breakpoint-down (md){
+              margin-top:20px;
+            }
+            .sh_custom_radio.sh_control_radio{
+                margin-right: 10px;font-size: 14px;font-weight: 500;
+            }
+        }
+    }
+    .sh_same_product_checkbox{
+        display: flex;justify-content: center;align-items: center;
+        .sh_custom_checkbox_exchange{
+            font-size: 14px;display: flex;align-items: center;
+            input#exchange_checkbox{
+                height: 14px;width: 14px;margin-right: 10px;
+            }
+            .sh_custom.sh_cust_checkbox{font-size:16px;}
+        }
+    }
+    .modal-body{
+        .sh_return_order_table{
+         .sh_return_order_thead{
+                white-space: pre;
+                th{padding: 0.5rem 0.7rem !important;font-size: 14px;font-weight: 500;
+                }
+            }   
+        }
+    }
+
+}

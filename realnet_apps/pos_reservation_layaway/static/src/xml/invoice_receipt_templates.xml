@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Template para Recibo de Factura Electrónica de Apartado -->
+    <t t-name="pos_reservation_layaway.LayawayInvoiceReceipt">
+        <div class="pos-receipt p-2">
+            <!-- Header de la Empresa -->
+            <div class="pos-center-align">
+                <t t-if="data.headerData and data.headerData.company">
+                    <!-- Logo de la Compañía -->
+                    <img t-attf-src="/web/image?model=res.company&amp;id={{data.headerData.company.id}}&amp;field=logo" 
+                         alt="Logo" 
+                         class="pos-receipt-logo" 
+                         style="max-width: 150px; max-height: 80px; margin-bottom: 10px;"/>
+                    <div t-if="data.headerData.company.vat">
+                        NIT: <t t-esc="data.headerData.company.vat"/>
+                    </div>
+                    <div t-if="data.headerData.company.street">
+                        <t t-esc="data.headerData.company.street"/>
+                    </div>
+                    <div t-if="data.headerData.company.city">
+                        <t t-esc="data.headerData.company.city"/>
+                    </div>
+                    <div t-if="data.headerData.company.phone">
+                        Tel: <t t-esc="data.headerData.company.phone"/>
+                    </div>
+                </t>
+            </div>
+            <div class="text-center">--------------------------------</div>
+            <div class="text-center"><strong>FACTURA DE VENTA</strong></div>
+            <div class="text-center">--------------------------------</div>
+            
+            <!-- Información de la Factura -->
+            <div class="pos-receipt-order-data">
+                <div><strong>Factura No:</strong> <t t-esc="data.invoice_data.invoice_number"/></div>
+                <div><strong>Fecha:</strong> <t t-esc="data.invoice_data.date_invoice"/></div>
+                <div><strong>Apartado:</strong> <t t-esc="data.reservation_name"/></div>
+            </div>
+            
+            <!-- Información del Cliente -->
+            <div class="text-center">--------------------------------</div>
+            <div class="pos-receipt-order-data">
+                <div><strong>Cliente:</strong> <t t-esc="data.invoice_data.partner_name"/></div>
+                <div t-if="data.invoice_data.partner_vat"><strong>Cédula/NIT:</strong> <t t-esc="data.invoice_data.partner_vat"/></div>
+                <div t-if="data.invoice_data.partner_street"><strong>Dirección:</strong> <t t-esc="data.invoice_data.partner_street"/></div>
+                <div t-if="data.invoice_data.partner_city"><strong>Ciudad:</strong> <t t-esc="data.invoice_data.partner_city"/></div>
+                <div t-if="data.invoice_data.partner_phone"><strong>Teléfono:</strong> <t t-esc="data.invoice_data.partner_phone"/></div>
+            </div>
+            
+            <!-- Líneas de Productos -->
+            <div class="text-center">--------------------------------</div>
+            <t t-foreach="data.invoice_data.invoice_lines" t-as="line" t-key="line_index">
+                <div class="d-flex">
+                    <span class="me-auto">
+                        <t t-esc="line.product_name"/> x <t t-esc="this.formatCurrency(line.quantity, false)"/>
+                    </span>
+                    <span><t t-esc="this.formatCurrency(line.price_subtotal)"/></span>
+                </div>
+                <t t-if="line.discount > 0">
+                    <div style="padding-left: 10px; font-size: 0.9em;">
+                        (Precio: <t t-esc="this.formatCurrency(line.price_unit)"/> - Desc: <t t-esc="line.discount"/>%)
+                    </div>
+                </t>
+            </t>
+            
+            <!-- Totales -->
+            <div class="text-center">--------------------------------</div>
+            <div class="d-flex"><span>Subtotal:</span><span class="ms-auto" t-esc="this.formatCurrency(data.invoice_data.amount_untaxed)"/></div>
+            <div class="d-flex"><span>Impuestos:</span><span class="ms-auto" t-esc="this.formatCurrency(data.invoice_data.amount_tax)"/></div>
+            <div class="d-flex"><span><strong>Total:</strong></span><span class="ms-auto"><strong><t t-esc="this.formatCurrency(data.invoice_data.amount_total)"/></strong></span></div>
+            
+            <!-- CUFE (Código Único de Factura Electrónica) -->
+            <t t-if="data.invoice_data.cufe">
+                <div class="text-center">--------------------------------</div>
+                <div class="text-center"><strong>FACTURA VALIDADA POR LA DIAN</strong></div>
+                <div style="font-size: 0.8em; word-break: break-all;">
+                    <strong>CUFE:</strong><br/>
+                    <t t-esc="data.invoice_data.cufe"/>
+                </div>
+                
+                <!-- QR Code -->
+                <t t-if="data.invoice_data.qr_code_url">
+                    <div class="text-center mt-2">
+                        <strong>CÓDIGO QR - VALIDACIÓN DIAN</strong><br/>
+                        <img t-att-src="data.invoice_data.qr_code_url" 
+                             alt="QR Code DIAN" 
+                             style="max-width: 180px; height: auto;"/><br/>
+                        <em style="font-size: 0.8em;">Escanee para verificar la factura</em>
+                    </div>
+                </t>
+            </t>
+            
+            <!-- Estado DIAN -->
+            <t t-if="data.invoice_data.dian_state">
+                <div class="text-center mt-2">
+                    <t t-if="data.invoice_data.dian_state === 'invoice_accepted'">
+                        <div>✓ Factura Aceptada por la DIAN</div>
+                    </t>
+                    <t t-elif="data.invoice_data.dian_state === 'invoice_pending'">
+                        <div>⏳ Factura en Proceso de Validación</div>
+                    </t>
+                </div>
+            </t>
+            
+            <!-- Footer -->
+            <div class="text-center">--------------------------------</div>
+            <div class="text-center"><strong>¡GRACIAS POR SU COMPRA!</strong></div>
+            <br/>
+            <div class="pos-receipt-order-data">
+                <p>Powered by Odoo</p>
+            </div>
+        </div>
+    </t>
+</templates>

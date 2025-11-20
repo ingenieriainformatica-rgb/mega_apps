@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit_l10n_co_pos_receipt_cufe" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.l10n.co.pos.receipt.cufe</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Insertar configuraciones CUFE después de la configuración de auto_printing -->
+            <xpath expr="//setting[@id='auto_printing']" position="after">
+
+                <!-- Configuración CUFE en Tirilla -->
+                <setting string="CUFE en Tirilla"
+                         help="Muestra el CUFE y código QR de facturas electrónicas en la tirilla">
+                    <field name="l10n_co_show_cufe_receipt"/>
+                </setting>
+
+                <!-- Configuración Facturación Automática DIAN -->
+                <setting string="Facturación Automática DIAN"
+                         help="Genera y envía la factura electrónica a DIAN automáticamente al pagar la orden">
+                    <field name="l10n_co_auto_invoice_pos"/>
+                    <div class="content-group mt16" invisible="not l10n_co_auto_invoice_pos">
+                        <div class="text-warning">
+                            <i class="fa fa-warning"/> Requiere configuración DIAN activa
+                        </div>
+                    </div>
+                </setting>
+
+            </xpath>
+        </field>
+    </record>
+</odoo>

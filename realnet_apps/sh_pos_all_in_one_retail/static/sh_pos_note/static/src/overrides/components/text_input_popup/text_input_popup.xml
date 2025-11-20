@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="TextInputPopup" t-inherit="point_of_sale.TextInputPopup" t-inherit-mode="extension">
+        <xpath expr="//textarea" position="after">
+           <div class="sh_store_checkbox o-checkbox form-check d-inline-block mt-2" t-if="!env.services.pos.config.hide_extra_note_checkbox and !this.props.is_create">
+                    <input type="checkbox" class="form-check-input" id="store_checkbox" t-model="value.store_checkbox"/>
+                    <label for="store_checkbox" class="form-check-label"> Store Extra Note</label><br/>
+                </div>
+        </xpath>
+    </t>
+</templates>

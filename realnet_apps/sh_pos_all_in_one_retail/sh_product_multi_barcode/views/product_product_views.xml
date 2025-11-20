@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="sh_product_product_barcode_view" model="ir.ui.view">
+        <field name="name">sh.product.product.barcode.view</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='sales']" position="after">
+                <page name="barcodes" string="Barcodes">
+                    <field name="barcode_line_ids" widget="one2many_list">
+                        <list string="Barcodes" editable="bottom">
+                            <field name="name" />
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

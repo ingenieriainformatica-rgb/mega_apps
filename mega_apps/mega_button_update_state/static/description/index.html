@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega - Botón Actualizar Estado de Órdenes de Venta</title>
+    <style>
+        /* Reseteo básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Fuente básica */
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            background-color: #f9fafb;
+            color: #333;
+        }
+
+        /* Contenedor general */
+        .mega-wrapper {
+            max-width: 980px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Sección Hero */
+        .mega-hero {
+            padding: 40px 30px;
+            background: linear-gradient(135deg, #1A3C6B, #7FB342);
+            color: white;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .mega-hero h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .mega-hero p {
+            font-size: 16px;
+            opacity: 0.85;
+            line-height: 1.6;
+        }
+
+        /* Insignias */
+        .mega-badges {
+            margin-top: 18px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .mega-badge {
+            background-color: #ffffff;
+            color: #1A3C6B;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+        }
+
+        /* Contenido */
+        .mega-content {
+            padding: 30px 40px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #333;
+        }
+
+        .mega-section-title {
+            font-size: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: #1A3C6B;
+        }
+
+        .mega-section-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        /* Listas */
+        ul, ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        /* Tarjetas de contenido */
+        .mega-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .mega-card {
+            background-color: #fafafa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .mega-card:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .mega-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 10px;
+        }
+
+        /* Botón de acción */
+        .mega-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 14px;
+            font-weight: 600;
+            background-color: #1A3C6B;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .mega-btn:hover {
+            background-color: #7FB342;
+        }
+
+        /* Imagen de captura de pantalla */
+        .mega-screenshot {
+            text-align: center;
+            margin-top: 40px;
+        }
+        /* Pie de página */
+        .mega-footer {
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 40px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .mega-footer a {
+            color: #1A3C6B;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="mega-wrapper">
+
+    <!-- HERO -->
+    <div class="mega-hero">
+        <h1 class="mega-hero-title">Mega - Botón Actualizar Estado de Órdenes de Venta</h1>
+        <p class="mega-hero-subtitle">
+            Limpia automáticamente tus órdenes de venta “Por facturar” que ya tienen factura asociada
+            y ponlas en el estado correcto con un solo clic.
+        </p>
+        <div class="mega-badges">
+            <span class="mega-badge">Odoo 18 / 19</span>
+            <span class="mega-badge">Ventas &amp; Contabilidad</span>
+            <span class="mega-badge">Cron Automático</span>
+        </div>
+    </div>
+
+    <!-- CONTENIDO -->
+    <div class="mega-content">
+        <h2 class="mega-section-title">¿Qué problema resuelve?</h2>
+        <p>
+            En muchos entornos productivos quedan <strong>órdenes de venta</strong> en estado
+            <em>“Por facturar”</em> aunque ya se haya creado y publicado una factura relacionada.
+            Esto genera:
+        </p>
+        <ul>
+            <li>Listados de ventas inconsistentes.</li>
+            <li>Reportes comerciales y contables poco confiables.</li>
+            <li>Dudas al revisar qué está realmente pendiente por facturar.</li>
+        </ul>
+
+        <h2 class="mega-section-title">¿Qué hace el módulo?</h2>
+        <p>
+            <strong>Mega - Botón actualizar estado</strong> analiza periódicamente tus órdenes de venta
+            y gestiona su estado de facturación:
+        </p>
+
+        <div class="mega-grid">
+            <div class="mega-card">
+                <h3 class="mega-card-title">1. Detección inteligente</h3>
+                <p>
+                    Un <strong>cron</strong> revisa automáticamente las órdenes con
+                    estado <em>“Por facturar”</em> y verifica si tienen al menos una
+                    factura asociada (publicada).
+                </p>
+            </div>
+            <div class="mega-card">
+                <h3 class="mega-card-title">2. Actualización de estado</h3>
+                <p>
+                    Cuando se detecta una coincidencia, el módulo actualiza el
+                    campo <code>invoice_status</code> a <strong>“Facturada”</strong>,
+                    evitando que siga apareciendo como pendiente.
+                </p>
+            </div>
+            <div class="mega-card">
+                <h3 class="mega-card-title">3. Botón de acción rápida</h3>
+                <p>
+                    En la propia orden de venta se muestra un
+                    <strong>botón de acción</strong> que permite actualizar el estado
+                    manualmente cuando el usuario lo requiera.
+                </p>
+                <button class="mega-btn">Actualizar estado</button>
+            </div>
+        </div>
+
+        <div class="mega-screenshot">
+            <img src="screenshot_1.png" alt="Vista de orden de venta con botón para actualizar estado de facturación" style="max-width: 90rem;" />
+            <p><em>Ejemplo de orden de venta con el botón de actualización de estado.</em></p>
+        </div>
+
+        <div class="mega-footer">
+            Desarrollado por <strong>Jorge Alberto Quiroz Sierra</strong><br/>
+            ¿Necesitas adaptar este flujo a otros modelos o procesos?
+            Visítanos en
+            <a href="https://mega.realnet.com.co/" target="_blank">https://mega.realnet.com.co/</a>
+            para soporte y personalizaciones a medida.
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<templates xml:space="preserve">
+  <t t-name="industry_real_estate.CameraWidget">
+    <div class="oe_form_field oe_form_field_camera">
+      <div class="o_field_widget o_field_widget_camera">
+        <t t-if="!isEditMode">
+          <p>Para capturar una imagen, primero debes abrir la cámara y luego hacer clic en "Capturar y guardar".</p>
+          <div class="alert alert-info" role="alert">
+            <strong>Nota:</strong> Asegúrate de que tu navegador tenga permisos para acceder a la cámara.
+          </div>
+          <div class="alert alert-warning" role="alert">
+            <strong>Advertencia:</strong> La grabación de video puede no ser compatible con todos los navegadores.
+          </div>
+
+          <div class="row o_field_widget_camera_controls">
+            <div class="col-6">
+              <video t-ref="video" style="width: 100%; max-width: 400px; border: 1px solid #ccc;" autoplay="true"/>
+            </div>
+
+            <div class="col-6">
+              <button type="button" t-on-click="openCamera" class="btn btn-success my-2" title="Abrir cámara" t-ref="btnOpenCamera">
+                <i class="fa fa-camera"/> Abrir
+              </button>
+              <button type="button" t-on-click="startRecording" class="btn btn-success my-2" title="Iniciar grabación" t-ref="btnRecordCamera">
+                <i class="fa fa-video-camera"/> Grabar
+              </button>
+              <button type="button" t-on-click="captureAndSave" class="btn btn-success my-2" title="Capturar imagen" t-ref="btnSaveImage">
+                <i class="fa fa-save"/> Capturar
+              </button>
+              <button type="button" t-on-click="stopRecording" class="btn btn-danger my-2" title="Detener" t-ref="btnCloseCamera">
+                <i class="fa fa-stop-circle"/> Detener
+              </button>
+            </div>
+            <!-- agregar vista previa si se quiere -->
+            <t t-if="props.record.data.photo">
+              <t t-if="state.photoType === 'video'">
+                <div class="alert alert-info alert-small" role="alert">
+                  <i class="fa fa-film"></i> Video cargado
+                </div>
+              </t>
+              <t t-if="state.photoType === 'image'">
+                <div class="alert alert-info alert-small" role="alert">
+                  <i class="fa fa-image"></i> Imagen cargada
+                </div>
+              </t>
+              <t t-if="state.photoType !== 'image' and state.photoType !== 'video'">
+                <div class="alert alert-info" role="alert">No se han subido archivos</div>
+              </t>
+            </t>
+          </div>
+        </t>
+        <t t-if="isEditMode and props.record.data.photo">
+          <t t-if="state.photoType === 'video'">
+            <video width="100%" height="auto" controls="true">
+              <source t-att-src="'/web/image/x.delivery.reception.line/' + props.record.resId + '/photo'" type="video/webm"/>
+              Tu navegador no soporta video HTML5.
+            </video>
+          </t>
+
+          <t t-if="state.photoType === 'image'">
+            <img t-att-src="'/web/image/x.delivery.reception.line/' + props.record.resId + '/photo'" style="max-width: 100%; margin-top: 1rem;" />
+          </t>
+          <t t-if="state.photoType !== 'image' and state.photoType !== 'video'">
+            <div>No existen ningún archivo en base de datos</div>
+          </t>
+        </t>
+        <t t-if="isEditMode and !props.record.data.photo">
+          <t t-if="state.photoType !== 'image' and state.photoType !== 'video'">
+            <div><img src="/web/static/img/placeholder.png" style="max-width: 100%; margin-top: 1rem;" /> No existen ningún archivo en base de datos</div>
+          </t>
+        </t>
+      </div>
+    </div>
+  </t>
+</templates>

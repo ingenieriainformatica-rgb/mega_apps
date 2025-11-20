@@ -1,0 +1,276 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Monthly Contract Main Form View -->
+        <record id="parking_monthly_contract_view_form" model="ir.ui.view">
+            <field name="name">parking.monthly.contract.form</field>
+            <field name="model">parking.monthly.contract</field>
+            <field name="priority">10</field>
+            <field name="arch" type="xml">
+                <form string="Personal Autorizado" create="true" edit="true" disable_autofocus="1">
+                    <header invisible="not id">
+                        <button name="action_activate" type="object" string="Activar Contrato" 
+                                class="btn-secondary" invisible="state != 'draft'"/>
+                        <button name="action_renew" type="object" string="Renovar (1 mes)"
+                                class="btn-secondary" invisible="state != 'expired'"/>
+                        <!-- Suspender deshabilitado -->
+                        <button name="action_reactivate" type="object" string="Reactivar" 
+                                class="btn-primary" invisible="state != 'suspended'"/>
+                        <button name="action_expire" type="object" string="Terminar" 
+                                class="btn-danger" invisible="state not in ('active', 'suspended')"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,active,expired"/>
+                    </header>
+                    <sheet>
+                        <!-- Title Section -->
+                        <button name="action_save" type="object" string="Guardar"
+                                class="btn-primary" invisible="state != 'draft'"/>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only" string="Nombre del Contrato"/>
+                            <h1>
+                                <field name="name" placeholder="Ej: Personal Autorizado - Juan Pérez" 
+                                       class="oe_inline"/>
+                            </h1>
+                        </div>
+                        
+                        <!-- Statistics Buttons (only show when contract exists) -->
+                        <div class="oe_button_box" name="button_box" invisible="not id">
+                            <button class="oe_stat_button" type="object" name="action_view_entries" icon="fa-car">
+                                <field string="Entradas" name="total_entries_count" widget="statinfo"/>
+                            </button>
+                            <button class="oe_stat_button" type="object" name="action_view_unpaid_invoices" icon="fa-file-text-o">
+                                <field string="Facturas sin pagar" name="unpaid_invoices_count" widget="statinfo"/>
+                            </button>
+                        </div>
+
+                        <!-- Botón Guardar visible solo mientras se está llenando (sin ID aún) -->
+
+                        
+                        
+                        <!-- Main Information Section -->
+                        <group string="Información Básica del Contrato">
+                            <group>
+                                <field name="partner_id" string="Cliente" placeholder="Seleccionar cliente..."/>
+                                <field name="site_id" string="Sitio de Parqueo" placeholder="Seleccionar sitio..."/>
+                                <field name="plan_product_id" string="Plan de Parqueo" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="price_unit" string="Precio Plan" widget="monetary"/>
+                                <field name="billing_mode" invisible="1"/>
+                                <field name="acquired_slots" string="Cupos Adquiridos"/>
+                                <field name="start_date" string="Fecha de Inicio"/>
+                                <field name="end_date" string="Fecha de Fin" readonly="1"/>
+                            </group>
+                        </group>
+                        
+                        <!-- Additional Options removed: facturación mes a mes automática -->
+
+                        <!-- Authorized Plates Management -->
+                        <group string="Placas Autorizadas" colspan="4">
+                            <field name="authorized_vehicle_ids" mode="list,form"/>
+                        </group>
+                        
+                        <!-- Hidden technical fields -->
+                        <group invisible="1">
+                            <field name="currency_id"/>
+                            <field name="analytic_account_id"/>
+                            <field name="company_id"/>
+                        </group>
+                        
+                        <!-- Statistics Section (only show after contract is created) -->
+                        <group string="Estadísticas del Contrato" invisible="not id">
+                            <group>
+                                <field name="current_period" string="Período del Contrato" readonly="1"/>
+                                <field name="current_month_entries_count" string="Entradas Este Mes" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="is_expired" string="Contrato Expirado" readonly="1" widget="boolean"/>
+                                <field name="total_entries_count" string="Total de Entradas" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="parking_monthly_contract_view_list" model="ir.ui.view">
+            <field name="name">parking.monthly.contract.list</field>
+            <field name="model">parking.monthly.contract</field>
+            <field name="arch" type="xml">
+                <list string="Personal Autorizado" decoration-success="state=='active'" 
+                      decoration-muted="state=='expired'" decoration-warning="state=='suspended'"
+                      create="true" edit="true" delete="true">
+                    <field name="name" string="Nombre del Contrato"/>
+                    <field name="partner_id" string="Cliente"/>
+                    <field name="site_id" string="Sitio de Parqueo"/>
+                    <field name="plan_product_id" string="Plan"/>
+                    <field name="acquired_slots" string="Cupos"/>
+                    <field name="price_unit" string="Precio Plan (Prepago)" widget="monetary"/>
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="start_date" string="Fecha de Inicio"/>
+                    <field name="end_date" string="Fecha de Fin"/>
+                    <field name="current_month_entries_count" string="Entradas Este Mes"/>
+                    <field name="state" string="Estado" decoration-success="state=='active'" 
+                           decoration-muted="state=='expired'" decoration-warning="state=='suspended'"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Legacy tree view for compatibility/fallback -->
+        <record id="parking_monthly_contract_view_tree" model="ir.ui.view">
+            <field name="name">parking.monthly.contract.tree</field>
+            <field name="model">parking.monthly.contract</field>
+            <field name="arch" type="xml">
+                <list string="Personal Autorizado" decoration-success="state=='active'" 
+                      decoration-muted="state=='expired'" decoration-warning="state=='suspended'">
+                    <field name="name" string="Nombre del Contrato"/>
+                    <field name="partner_id" string="Cliente"/>
+                    <field name="site_id" string="Sitio de Parqueo"/>
+                    <field name="plan_product_id" string="Plan"/>
+                    <field name="acquired_slots" string="Cupos"/>
+                    <field name="price_unit" string="Precio Plan (Prepago)"/>
+                    <field name="start_date" string="Fecha de Inicio"/>
+                    <field name="end_date" string="Fecha de Fin"/>
+                    <field name="current_month_entries_count" string="Entradas Este Mes"/>
+                    <field name="state" string="Estado"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="parking_monthly_contract_view_kanban" model="ir.ui.view">
+            <field name="name">parking.monthly.contract.kanban</field>
+            <field name="model">parking.monthly.contract</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="site_id"/>
+                    <field name="price_unit"/>
+                    <field name="currency_id"/>
+                    <field name="state"/>
+                    <field name="current_month_entries_count"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_card oe_kanban_global_click
+                                #{record.state.raw_value == 'active' ? 'oe_kanban_color_5' : ''}
+                                #{record.state.raw_value == 'expired' ? 'oe_kanban_color_2' : ''}
+                                #{record.state.raw_value == 'suspended' ? 'oe_kanban_color_3' : ''}">
+                                <div class="oe_kanban_content">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong><field name="name"/></strong>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <field name="state" widget="label_selection" 
+                                                   options="{'classes': {'active': 'success', 'expired': 'default', 'suspended': 'warning'}}"/>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <i class="fa fa-user" title="Contacto"/> <field name="partner_id"/>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <i class="fa fa-building" title="Sede"/> <field name="site_id"/>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <i class="fa fa-money" title="Monthly Price"/> <field name="price_unit" widget="monetary"/>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <i class="fa fa-car" title="Entries This Month"/> <field name="current_month_entries_count"/> entries
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="parking_monthly_contract_view_search" model="ir.ui.view">
+            <field name="name">parking.monthly.contract.search</field>
+            <field name="model">parking.monthly.contract</field>
+            <field name="arch" type="xml">
+                <search string="Buscar Personal Autorizado">
+                    <field name="name" string="Nombre" filter_domain="[('name', 'ilike', self)]"/>
+                    <field name="partner_id" string="Contacto" filter_domain="[('partner_id', 'ilike', self)]"/>
+                    <field name="site_id" string="Sede" filter_domain="[('site_id', 'ilike', self)]"/>
+                    <field name="plan_product_id" string="Plan"/>
+                    <separator/>
+                    <filter string="Activos" name="active" domain="[('state', '=', 'active')]"/>
+                    <filter string="Suspendidos" name="suspended" domain="[('state', '=', 'suspended')]"/>
+                    <filter string="Vencidos" name="expired" domain="[('state', '=', 'expired')]"/>
+                    <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
+                    <separator/>
+                    <filter string="Vencidos por fecha" name="is_expired" domain="[('is_expired', '=', True)]"/>
+                    <filter string="Finalizan este mes" name="ending_this_month" 
+                            domain="[('end_date', '&lt;=', (context_today() + relativedelta(months=1)).strftime('%Y-%m-%d')), ('end_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <separator/>
+                    <group expand="0" string="Agrupar por">
+                        <filter string="Sede" name="group_site" context="{'group_by': 'site_id'}"/>
+                        <filter string="Contacto" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                        <filter string="Plan" name="group_plan" context="{'group_by': 'plan_product_id'}"/>
+                        <filter string="Mes de inicio" name="group_start_month" context="{'group_by': 'start_date:month'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Actions -->
+        <record id="parking_monthly_contract_action" model="ir.actions.act_window">
+            <field name="name">Personal Autorizado</field>
+            <field name="res_model">parking.monthly.contract</field>
+            <field name="view_mode">list,form,kanban</field>
+            <field name="view_id" ref="parking_monthly_contract_view_list"/>
+            <field name="views" eval="[(ref('odoo_parking_management.parking_monthly_contract_view_list'),'list'),
+                                         (ref('odoo_parking_management.parking_monthly_contract_view_form'),'form'),
+                                         (ref('odoo_parking_management.parking_monthly_contract_view_kanban'),'kanban')]"/>
+            <field name="search_view_id" ref="parking_monthly_contract_view_search"/>
+            <field name="context">{
+                'search_default_active': 1,
+                'default_state': 'draft'
+            }</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">¡Crea tu primer registro de Personal Autorizado!</p>
+                <p>
+                    Personal Autorizado permite controlar el acceso de personas con plan prepago.
+                </p>
+                <ul>
+                    <li><strong>Acceso garantizado al parqueadero</strong> en su sitio preferido</li>
+                    <li><strong>Facturación mensual predecible</strong> en lugar de cobros por uso</li>
+                    <li><strong>Seguimiento de uso</strong> y facturación automatizada</li>
+                    <li><strong>Entrada/salida rápida</strong> con reconocimiento de contrato</li>
+                </ul>
+                <p>
+                    Haz clic en <strong>Crear</strong> para configurar un nuevo contrato mensual de parqueo.
+                </p>
+            </field>
+        </record>
+
+        <!-- Action specifically for creating new contracts -->
+        <record id="parking_monthly_contract_action_new" model="ir.actions.act_window">
+            <field name="name">Crear Personal Autorizado</field>
+            <field name="res_model">parking.monthly.contract</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="parking_monthly_contract_view_form"/>
+            <field name="target">current</field>
+            <field name="context">{
+                'default_state': 'draft',
+                'form_view_initial_mode': 'edit'
+            }</field>
+        </record>
+
+        <record id="parking_monthly_contract_action_active" model="ir.actions.act_window">
+            <field name="name">Contratos Activos</field>
+            <field name="res_model">parking.monthly.contract</field>
+            <field name="view_mode">list,form,kanban</field>
+            <field name="domain">[('state', '=', 'active')]</field>
+            <field name="context">{'search_default_active': 1}</field>
+        </record>
+
+    </data>
+</odoo>

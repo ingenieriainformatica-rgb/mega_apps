@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+mega_update_reference_product.access_product_ref_fill_wizard,access_product_ref_fill_wizard,mega_update_reference_product.model_product_ref_fill_wizard,base.group_user,1,1,1,1

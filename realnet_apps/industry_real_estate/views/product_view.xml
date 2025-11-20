@@ -1,0 +1,34 @@
+<odoo>
+    <record id="view_product_form_ecoerp" model="ir.ui.view">
+        <field name="name">product.template.form.ecoerp</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='options']/span[last()]" position="after">
+                <span class="d-inline-flex">
+                    <field name="ecoerp_ok"/>
+                    <label for="ecoerp_ok" string="ECOERP Entrega/Recepción"/>
+                </span>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista Quick Create personalizada para product.template -->
+    <record id="view_product_template_quick_create_ecoerp" model="ir.ui.view">
+        <field name="name">product.template.quick_create.ecoerp</field>
+        <field name="model">product.template</field>
+        <!-- <field name="view_mode">quick_create</field> -->
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="name" string="Nombre del Producto" required="1"/>
+                    <field name="ecoerp_ok" string="ECOERP Entrega/Recepción"/>
+                    <field name="item_category" string="Categoría de Item"/>
+                    <field name="list_price" string="Precio de Venta"/>
+                    <field name="categ_id" string="Categoría de Producto"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+</odoo>

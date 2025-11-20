@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit the standard payment receipt to display CE/CI number instead of native name -->
+    <template id="report_payment_receipt_document_ceci_inherit" inherit_id="account.report_payment_receipt_document">
+        <!-- Header: replace payment number with CE/CI -->
+        <xpath expr="//h3/strong/span[@t-field='o.name']" position="replace">
+            <span t-if="o.x_ceci_number" t-esc="o.x_ceci_number"/>
+            <span t-else="" t-field="o.name"/>
+        </xpath>
+
+        <!-- Payment lines in the invoice section: show CE/CI instead of move name when available -->
+        <xpath expr="//span[@t-field='payment.move_id.name']" position="replace">
+            <t t-if="payment.payment_id and payment.payment_id.x_ceci_number">
+                <span t-esc="payment.payment_id.x_ceci_number"/>
+            </t>
+            <t t-else="">
+                <t t-if="payment.move_id and payment.move_id.x_ceci_number">
+                    <span t-esc="payment.move_id.x_ceci_number"/>
+                </t>
+                <t t-else="">
+                    <span t-field="payment.move_id.name"/>
+                </t>
+            </t>
+        </xpath>
+    </template>
+</odoo>

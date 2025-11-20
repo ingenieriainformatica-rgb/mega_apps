@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_all_in_one_retail.GlobalDiscountPopupWidget">
+        <Dialog title="props.title" bodyClass="'d-flex flex-column'" size="'md'">
+            <div class="popup">
+                <main class="modal-body modal-md sh_modul_body">
+                    <div class=" sh_discount_radio d-flex justify-content-center gap-3 my-2">
+                        <label class="tax-info subentry fs-6 text-muted sh_custom_radio sh_control_radio d-flex flex-row-reverse align-items-start gap-2" for="discount_fixed_radio">Fixed
+                            <input type="radio" class="form-check-input radio-check" id="discount_fixed_radio" name="fixed_percen_discount_radio" checked="true" />
+                            <div class="sh_custom_radio_indicator"></div>
+                        </label>
+                        <label class="tax-info subentry fs-6 text-muted sh_custom_radio sh_control_radio d-flex flex-row-reverse align-items-start gap-2" for="discount_percentage_radio">Percentage
+                            <input type="radio" class="form-check-input radio-check" id="discount_percentage_radio" name="fixed_percen_discount_radio" />
+                            <div class="sh_custom_radio_indicator"></div>
+                        </label>
+                    </div>
+                    <div class="discount_amount_div d-flex justify-content-center align-items-center gap-2">
+                        <span class="tax-info subentry fs-6 text-muted  d-flex flex-row-reverse align-items-start gap-2 sh_discount_label">Value : </span>
+                        <input type="number"  class="form-control form-control-lg  sh_discount_value w-25" />
+                    </div>
+                </main>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary btn-lg lh-lg o-default-button"  t-on-click="confirm">Ok</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

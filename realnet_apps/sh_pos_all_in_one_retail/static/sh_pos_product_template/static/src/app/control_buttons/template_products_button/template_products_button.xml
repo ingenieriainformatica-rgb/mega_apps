@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_product_template.TemplateProductsButton" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//t[@t-if='props.showRemainingButtons']/div/OrderlineNoteButton" position="after">
+            <button t-if="env.services.pos.config.sh_enable_product_template" class="control-button btn btn-light rounded-0 fw-bolder" t-on-click="() => this.onClickTemplateLoad()">
+                <span></span>
+                <span> Template Products</span>
+            </button>
+        </xpath>
+    </t>
+</templates>

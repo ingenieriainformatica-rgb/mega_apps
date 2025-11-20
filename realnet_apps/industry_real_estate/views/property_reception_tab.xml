@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_rental_form_reception_tab" model="ir.ui.view">
+        <field name="name">sale.order.form.reception.tab</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="industry_real_estate.rental_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='property_reception']" position="replace">
+                <page string="Recepción inventario" name="property_reception" invisible="can_see_reception_tab">
+                    <group string="Recepción de elementos">
+                        <field name="x_custom_state" invisible="1"/>
+                        <field name="can_add_inventory" invisible="1"/>
+                        <!-- si existen elementos carga modo lectura -->
+                        <field name="x_reception_card_line_ids" 
+                            class="d-flex" 
+                            nolabel="1" 
+                            invisible="not can_add_inventory"
+                            readonly="1"
+                            context="{
+                                'from_reception': True,
+                                'can_add_inventory': can_add_inventory
+                            }">
+                            <kanban create="false" quick_create="false" editable="false">
+                                <field name="photo" />
+                                <field name="product_id" />
+                                <field name="description" />
+                                <field name="quantity" />
+                                <field name="received_quantity" />
+                                <field name="quantity_difference" />
+                                <field name="date" />
+                                <field name="condition" />
+                                <field name="validated"/>
+                                <templates>
+                                    <t t-name="card">
+                                        <div class="d-flex shadow-sm p-2 mb-2 align-items-start overflow-hidden"
+                                            role="button"
+                                            style="cursor: pointer; text-decoration:none;">
+                                            <div class="position-absolute top-0 end-0 p-0 d-flex flex-column gap-1">
+                                                <button type="object"
+                                                        name="action_open_full_form_reception"
+                                                        title="Abrir en ventana"
+                                                        icon="fa-expand"
+                                                        class="btn btn-light btn-sm shadow-sm"/>
+                                                <a type="object"
+                                                    role="button"
+                                                    name="toggle_validated"
+                                                    t-att-class="'btn btn-sm shadow-sm ' + (record.validated &amp;&amp; record.validated.raw_value ? 'btn-primary' : 'btn-light')"
+                                                    title="Marcar como validado">
+                                                    <i class="fa fa-check"/>
+                                                </a>
+                                                <button type="object"
+                                                        name="action_to_edit_reception"
+                                                        title="Agregar recpeción"
+                                                        icon="fa-edit"
+                                                        class="btn btn-light btn-sm shadow-sm"/>
+                                            </div>
+                                            <div class="flex-shrink-0 me-3">
+                                                <field 
+                                                    name="photo" 
+                                                    widget="image" 
+                                                    options="{'size': [0, 180]}"
+                                                    class="oe_avatar ml-3 mr-3"
+                                                    style="max-height: 90px; width: 100%; max-width: 90px;"/>
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-2 flex-grow-1">
+                                                <!-- Bloque Producto: fijo -->
+                                                <div class="flex-shrink-0 me-3">
+                                                    <div class="fw-bold mb-1">
+                                                        <field name="product_id" />
+                                                    </div>
+                                                    <div class="text-muted small mb-1">
+                                                        <field name="description" />
+                                                    </div>
+                                                </div>
+
+                                                <!-- Contenedor flex para los demás bloques -->
+                                                <div class="d-flex flex-wrap gap-2 flex-grow-1">
+                                                    <!-- Bloque Cantidades -->
+                                                    <div class="flex-shrink-0">
+                                                        <div class="d-flex justify-content-between small mb-1">
+                                                            <span class="rounded alert alert-success" role="alert">
+                                                                Entregado: <field name="quantity" />
+                                                            </span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between small">
+                                                            <span class="rounded alert alert-info" role="alert">
+                                                                Recibido: <field name="received_quantity" />
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Bloque Diferencias y Condición -->
+                                                    <div class="flex-shrink-0">
+                                                        <div class="d-flex justify-content-between small mb-1">
+                                                            <span role="alert" t-att-class="'rounded alert ' + 
+                                                                (record.quantity_difference &amp;&amp; typeof record.quantity_difference.raw_value !== 'undefined'
+                                                                    ? (record.quantity_difference.raw_value &lt;= 0
+                                                                        ? 'alert-danger'
+                                                                        : (record.quantity_difference.raw_value &gt; 0 &amp;&amp; record.quantity_difference.raw_value &lt; 10
+                                                                            ? 'alert-success'
+                                                                            : 'alert-warning'))
+                                                                    : 'alert-info')">
+                                                                Dif: <field name="quantity_difference" />
+                                                            </span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between small">
+                                                            <span role="alert" t-att-class="'rounded alert ' + 
+                                                                {'good': 'alert-success', 
+                                                                'for_repair': 'alert-warning', 
+                                                                'damaged': 'alert-danger',
+                                                                'missing': 'alert-danger'}[record.condition &amp;&amp; record.condition.raw_value ? record.condition.raw_value : ''] || 'alert-info'">
+                                                                <field name="condition" />
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
+                        </field>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

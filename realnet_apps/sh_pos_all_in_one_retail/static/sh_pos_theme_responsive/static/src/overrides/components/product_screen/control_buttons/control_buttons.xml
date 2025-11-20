@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- <t t-name="sh_pos_theme_responsive.ControlButtons" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('control-buttons')]" position="inside">
+            <t t-if="!ui.isSmall">
+                <SelectPartnerButton partner="partner"/>
+                <OrderlineNoteButton
+                    label="internalNoteLabel()"
+                    getter="(orderline) => orderline.getNote()"
+                    class="buttonClass"
+                    setter="(orderline, note) => orderline.setNote(note)" />
+            </t>
+        </xpath>
+    </t> -->
+</templates>

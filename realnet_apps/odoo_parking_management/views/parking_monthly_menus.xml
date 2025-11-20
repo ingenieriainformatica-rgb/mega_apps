@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Monthly Parking Menu -->
+        <menuitem id="parking_monthly_menu"
+                  name="Personal Autorizado"
+                  parent="parking_entry_menu_parking_management_root"
+                  sequence="20"
+                  groups="odoo_parking_management.group_parking_admin"/>
+
+        <!-- Monthly Contracts -->
+        <menuitem id="parking_monthly_contract_menu"
+                  name="Personal Autorizado"
+                  parent="parking_monthly_menu"
+                  action="parking_monthly_contract_action"
+                  sequence="10"
+                  groups="odoo_parking_management.group_parking_admin"/>
+
+        <!-- Monthly Dashboard -->
+        <menuitem id="parking_monthly_dashboard_menu"
+                  name="Tablero Personal Autorizado"
+                  parent="odoo_parking_management.menu_reporting_root"
+                  action="parking_monthly_dashboard_action"
+                  sequence="90"
+                  groups="odoo_parking_management.group_parking_admin"/>
+
+        <!-- Monthly Invoices List View -->
+        <record id="account_move_monthly_parking_view_list" model="ir.ui.view">
+            <field name="name">account.move.monthly.parking.list</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <list string="Monthly Parking Invoices" decoration-info="state=='draft'" 
+                      decoration-success="state=='posted'" decoration-muted="state=='cancel'">
+                    <field name="name" string="Invoice Number"/>
+                    <field name="partner_id" string="Customer"/>
+                    <field name="parking_site_id" string="Site"/>
+                    <field name="monthly_contract_id" string="Contract"/>
+                    <field name="billing_mode" string="Mode"/>
+                    <field name="parking_billing_period" string="Period"/>
+                    <field name="amount_total" string="Total" widget="monetary"/>
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="state" string="Status"/>
+                    <field name="payment_state" string="Payment Status"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Monthly Invoices Action -->
+        <!-- Invoices menu/action removed as part of prepaid-only access control -->
+
+    </data>
+</odoo>

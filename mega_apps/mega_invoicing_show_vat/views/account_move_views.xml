@@ -1,0 +1,70 @@
+<odoo>
+
+  <record id="view_vendor_bill_tree_vat_col" model="ir.ui.view">
+    <field name="name">account.move.vendor.bill.tree.vat.col</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_in_invoice_bill_tree"/>
+    <field name="arch" type="xml">
+      <!-- Insertar tras la columna de amount_tax -->
+      <xpath expr="//list/field[@name='amount_tax_signed']" position="after">
+        <field name="amount_vat_only" string="IVA" widget="monetary" optional="hide" sum="IVA"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_move_form_add_calculated_iva_btn" model="ir.ui.view">
+    <field name="name">account.move.form.add.calculated.iva.btn</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_move_form"/>
+    <field name="arch" type="xml">
+      <!-- Agregar al header (queda al final de la cinta de botones) -->
+      <xpath expr="//form[@js_class='account_move_form']/header" position="inside">
+        <button name="calculated_iva"
+                string="Guardar IVA"
+                type="object"
+                class="oe_highlight"
+                groups="account.group_account_invoice"
+                confirm="Estas seguro?"
+                invisible="1"
+                help="Recalcula los impuestos y totales de la factura en borrador."/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_vendor_bill_client_tree_vat_col" model="ir.ui.view">
+    <field name="name">account.move.vendor.bill.client.tree.vat.col</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_out_invoice_tree"/>
+    <field name="arch" type="xml">
+      <!-- Insertar tras la columna de amount_tax -->
+      <xpath expr="//list/field[@name='amount_tax_signed']" position="after">
+        <field name="amount_vat_only" string="IVA" widget="monetary" optional="hide" sum="IVA"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_vendor_bill_credit_client_tree_vat_col" model="ir.ui.view">
+    <field name="name">account.move.vendor.bill.credit.client.tree.vat.col</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_out_credit_note_tree"/>
+    <field name="arch" type="xml">
+      <!-- Insertar tras la columna de amount_tax -->
+      <xpath expr="//list/field[@name='amount_tax_signed']" position="after">
+        <field name="amount_vat_only" string="IVA" widget="monetary" optional="hide" sum="IVA"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_vendor_bill_credit_in_invoice_client_tree_vat_col" model="ir.ui.view">
+    <field name="name">account.move.vendor.in.invoice.client.tree.vat.col</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_in_invoice_refund_tree"/>
+    <field name="arch" type="xml">
+      <!-- Insertar tras la columna de amount_tax -->
+      <xpath expr="//list/field[@name='amount_tax_signed']" position="after">
+        <field name="amount_vat_only" string="IVA" widget="monetary" optional="hide" sum="IVA"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

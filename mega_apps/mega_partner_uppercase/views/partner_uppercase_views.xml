@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vista del wizard -->
+    <record id="view_partner_uppercase_wizard_form" model="ir.ui.view">
+        <field name="name">partner.uppercase.wizard.form</field>
+        <field name="model">partner.uppercase.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Actualizar nombres a MAYÚSCULA">
+              <group>
+                  <div class="alert alert-warning" role="alert" style="margin-bottom: 10px;">
+                      ⚠️ <b>Advertencia:</b> Esta acción actualizará <b>todos los contactos</b>
+                      y convertirá únicamente el campo <b>Nombre (name)</b> a <b>mayúsculas</b>.
+                      No se modificarán otros campos.
+                  </div>
+              </group>
+                <footer>
+                    <button
+                      name="action_confirm"
+                      type="object"
+                      string="Actualizar ahora"
+                      class="btn-primary"
+                      icon="fa-refresh"
+                      confirm="¿Estás seguro de ejecutar esta acción?"
+                    />
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción del wizard -->
+    <record id="action_partner_uppercase_wizard" model="ir.actions.act_window">
+        <field name="name">Actualizar nombres a MAYÚSCULA</field>
+        <field name="res_model">partner.uppercase.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- 🔹 Contenedor propio bajo Contactos -->
+    <menuitem id="menu_partner_tools_root_update"
+              name="Actualizar nombres a MAYÚSCULA"
+              parent="contacts.menu_contacts"
+              groups="mega_partner_uppercase.group_partner_uppercase_user"
+              action="action_partner_uppercase_wizard"
+              sequence="3"/>
+
+</odoo>

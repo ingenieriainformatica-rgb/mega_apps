@@ -1,0 +1,1452 @@
+$sh_pos_primary_color_night_mode: #2f333d;
+$sh_pos_secondary_color_night_mode: #242733;
+$sh_pos_third_color_night_mode: #191c24;
+
+$sh_pos_night_mode_text_color: #a3a3a3;
+$sh_pos_night_mode_second_text_color: #636576;
+$sh_pos_night_mode_highlight_text_color: #808491;
+$sh_pos_night_mode_orderline_second_text_color: #aaafbd;
+$sh_pos_night_mode_orderline: #2e364f;
+$sh_pos_night_mode_border_color: #5a5e6b;
+
+body {
+    &.sh_pos_night_mode {
+        .pos {
+            // <------------------------------------------------------------->
+            // <-------------------- bg type image start -------------------->
+            // <------------------------------------------------------------->
+            @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                @if $sh_pos_body_background_type == "bg_img" {
+                    div.pos-content {
+                        background: rgba($sh_pos_primary_color_night_mode  , $alpha :0.92) !important;
+                    }
+                }
+            }
+            // <------------------------------------------------------------->
+            // <--------------------- bg type image end --------------------->
+            // <------------------------------------------------------------->
+            .pos-topheader {
+                background: $sh_pos_third_color_night_mode !important;
+                border-color: $sh_pos_night_mode_border_color !important;
+                .pos-leftheader {
+                    .d-flex {
+                        .navbar-menu {
+                            .table-free-order-label {
+                                background: $sh_pos_secondary_color_night_mode;
+                                color: $sh_pos_night_mode_text_color;
+                            }
+                        }
+                    }
+                    .overflow-hidden {
+                        .overflow-hidden {
+                            .d-flex {
+                                div {
+                                    .btn {
+                                        background: $sh_pos_secondary_color_night_mode;
+                                        border-color: $sh_pos_night_mode_border_color;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .status-buttons  {
+                    .icon-moon {
+                        background: $sh_pos_secondary_color_night_mode;
+                        color: $sh_pos_night_mode_text_color;
+                        border-color: $sh_pos_night_mode_border_color  !important;
+                    }
+                    .oe_icon{
+                        background: $sh_pos_secondary_color_night_mode;
+                        color: $sh_pos_night_mode_text_color;
+                        border-color: $sh_pos_night_mode_border_color !important;
+                    }
+                }
+                .overflow-hidden {
+                    .btn {
+                        background: $sh_pos_secondary_color_night_mode;
+                        color: $sh_pos_night_mode_text_color;
+                        border-color: $sh_pos_night_mode_border_color;
+                    }
+                }
+                .form-control {
+                    border-color: $sh_pos_night_mode_border_color !important;
+                    &.bg-view {
+                        background: $sh_pos_secondary_color_night_mode !important;
+                        input {
+                            background: $sh_pos_secondary_color_night_mode;
+                            color: $sh_pos_night_mode_text_color;
+                        }
+                    }
+                }
+                .btn {
+                    background: $sh_pos_secondary_color_night_mode;
+                    color: $sh_pos_night_mode_text_color;
+                    border-color: $sh_pos_night_mode_border_color;
+                }
+            }
+            .pos-content {
+                background: $sh_pos_third_color_night_mode !important;
+                .shorderlist-screen {
+                    .top-content {
+                        .sh_header_buttons{
+                            border-color: $sh_pos_night_mode_border_color !important;
+                            .d-flex {
+                                // div {
+                                    .btn , select , .form-control , input{
+                                        background: $sh_pos_third_color_night_mode;
+                                        color: $sh_pos_night_mode_text_color;
+                                        border-color: $sh_pos_night_mode_border_color;
+                                        &:not(input , .form-control){
+                                            &:hover {
+                                                background: $sh_pos_primary_color_night_mode !important;
+                                                color: #fff;
+                                                border-color: $sh_pos_primary_color_night_mode ;
+                                            } 
+                                        }
+                                        &:has(input , .form-control){
+                                            &:hover {
+                                                border-color: $sh_pos_primary_color_night_mode ;
+                                            } 
+                                        }
+                                    }
+                                // }
+                            }
+                        }
+                        .sh_full_content_service_management{
+                            &.sh_order_list_full_content{
+                                .sh_order_list {
+                                    .sh_order_list_contents {
+                                        tr{
+                                            td{
+                                                border-color: $sh_pos_night_mode_text_color !important;
+                                                color: $sh_pos_night_mode_text_color !important;
+                                                table{
+                                                    tr{
+                                                        &:nth-child(even) {
+                                                            background: $sh_pos_secondary_color_night_mode !important;
+                                                        }
+                                                        &:nth-child(odd) {
+                                                            background: #1b1e26 !important;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            &:nth-child(4n+1) {
+                                                background: $sh_pos_secondary_color_night_mode !important;
+                                            }
+                                            &:nth-child(odd) {
+                                                background: #1b1e26 ;
+                                            }
+                                            @if $sh_list_row_hover == "True" {
+												&:hover {
+												  background: #313541 !important;
+												}
+											}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        .sh_page_controls{
+                            background: $sh_pos_secondary_color_night_mode;
+                            .page-controls {
+                                .page {
+                                    color: $sh_pos_night_mode_text_color;
+                                }
+                                .btn {
+                                    background: $sh_pos_third_color_night_mode;
+                                    color: $sh_pos_night_mode_text_color;
+                                    border-color: $sh_pos_night_mode_border_color;
+                                    &:hover , &:active , &:focus{
+                                        background: $sh_pos_primary_color_night_mode !important;
+                                        color: #fff;
+                                        border-color: $sh_pos_primary_color_night_mode ;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .floor-screen {
+                    background: transparent !important;
+                    .d-flex {
+                        background: transparent !important;
+                        border-color: $sh_pos_night_mode_border_color !important;
+                        .edit-buttons {
+                            .btn {
+                                background: $sh_pos_secondary_color_night_mode !important;
+                                color: $sh_pos_night_mode_text_color !important;
+                                border-color: $sh_pos_night_mode_border_color !important;
+                                &:hover {
+                                    background: $sh_pos_primary_color_night_mode !important;
+                                    color: #fff !important;
+                                    border-color: $sh_pos_primary_color_night_mode !important;
+                                }
+                            }
+                        }
+                        .floor-selector {
+                            .btn-outline-secondary{
+                                background: $sh_pos_secondary_color_night_mode;
+                                color: $sh_pos_night_mode_text_color;
+                                &.active{
+                                    background: $sh_pos_primary_color_night_mode;
+                                    color: #fff;
+                                }
+                            }
+                        }
+                    }
+                    .overflow-auto {
+                        background: transparent !important;
+                        .floor-map {
+                            .table{
+                                .info{
+                                    color: #fff;
+                                }
+                            }
+                        }
+                    }
+                }
+                .splitbill-screen {
+                    background: transparent !important;
+                    .top-content {
+                        background: transparent !important;
+                        border-color: $sh_pos_night_mode_border_color !important;
+                        .btn {
+                            &.back {
+                                background: $sh_pos_secondary_color_night_mode !important;
+                                color: $sh_pos_night_mode_text_color  !important;
+                                border-color: $sh_pos_night_mode_border_color !important;
+                                &:hover {
+                                    background: $sh_pos_primary_color_night_mode !important;
+                                    color: #fff  !important;
+                                    border-color: $sh_pos_primary_color_night_mode !important;
+                                }
+                            }
+                        }
+                    }
+                    .main {
+                        .flex-grow-1 {
+                            background: transparent !important;
+                            .d-flex {
+                                .order-container {
+                                    .orderline {
+                                        background: $sh_pos_secondary_color_night_mode !important;
+                                        color: $sh_pos_night_mode_text_color !important;
+                                        .qty {
+                                            color: $sh_pos_night_mode_text_color !important;
+                                        }
+                                    }
+                                    .border-top {
+                                        border-color: $sh_pos_night_mode_border_color !important;
+                                        color: $sh_pos_night_mode_text_color;
+                                    }
+                                }
+                            }
+                        }
+                        .controls {
+                            .order-info  {
+                                background: transparent !important;
+                            }
+                        }
+                    }
+                }
+                .switchpane{
+                    background: transparent !important; 
+                    border-color: $sh_pos_night_mode_border_color !important;
+                    .btn-secondary {
+                        background: $sh_pos_secondary_color_night_mode;
+                        border-color: $sh_pos_night_mode_border_color;
+                        color: $sh_pos_night_mode_text_color;
+                    } 
+                    .btn {
+                        &.disabled {
+                            &.btn-light{
+                                background: $sh_pos_secondary_color_night_mode !important;   
+                                color: $sh_pos_night_mode_text_color !important;
+                                
+                            }
+                        }
+                    }         
+                }
+                .product-screen {
+                    .leftpane {
+                        border-color: $sh_pos_night_mode_border_color;
+                        .d-flex {
+                            .h-unset {
+                                i , h3 {
+                                    color: $sh_pos_night_mode_text_color !important;
+                                }
+                            }
+                            .order-container {
+                                .orderline {
+                                    background: $sh_pos_night_mode_orderline !important;
+                                    color: $sh_pos_night_mode_text_color;
+                                    &.selected {
+                                        background: $sh_pos_secondary_color_night_mode !important;
+                                        border-color: $sh_pos_primary_color_night_mode !important;
+                                    }
+                                    .d-flex {
+                                        .d-flex {
+                                            .product-name {
+                                                .sh_order_line_detail {
+                                                    ul {
+                                                        li {
+                                                            .qty {
+                                                                color: $sh_pos_night_mode_text_color !important;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                .border-top{
+                                    border-color: $sh_pos_night_mode_border_color !important;
+                                    color: $sh_pos_night_mode_text_color;
+                                }
+                            }
+                            .order-summary {
+                                border-color: $sh_pos_night_mode_border_color !important;
+                                div {
+                                    color: $sh_pos_night_mode_text_color !important;
+                                    span {
+                                        color: $sh_pos_night_mode_text_color;
+                                    }
+                                }
+                            }
+                        }
+                        .pads {
+                            .subpads {
+                                .actionpad{
+                                    .validation{
+                                        .d-flex {
+                                            .pay-order-button{
+                                                background: $sh_pos_secondary_color_night_mode;
+                                                border-color: $sh_pos_night_mode_border_color;
+                                                color: $sh_pos_night_mode_text_color;
+                                                &.highlight {
+                                                    color: #fff !important;
+                                                }
+                                            }
+                                        }
+                                        .back-button {
+                                            background: $sh_pos_secondary_color_night_mode;
+                                            border-color: $sh_pos_night_mode_border_color !important;
+                                            color: $sh_pos_night_mode_text_color !important;
+                                            &:hover {
+                                                background: $sh_pos_primary_color_night_mode !important;
+                                                border-color: $sh_pos_primary_color_night_mode !important;
+                                                color: #fff !important;
+                                            }
+                                        }
+                                    }
+                                    .d-flex {
+                                        .btn {
+                                            &.set-partner  , &.mobile-more-button  {
+                                                background: $sh_pos_secondary_color_night_mode !important;
+                                                color: $sh_pos_night_mode_text_color;
+                                                border-color: $sh_pos_night_mode_border_color !important;
+                                            }
+                                        }
+                                    }
+                                }
+                                .numpad {
+                                    .numpad-button {
+                                        background: $sh_pos_secondary_color_night_mode;
+                                        border-color: $sh_pos_night_mode_border_color !important;
+                                        color: $sh_pos_night_mode_text_color ;
+                                        &:hover {
+                                            background: $sh_pos_primary_color_night_mode !important;
+                                            border-color: $sh_pos_primary_color_night_mode !important;
+                                            color: #fff !important;
+                                        }
+                                        &.active {
+                                            color: #fff !important;
+                                        }
+                                        // @for $i from 1 through 14 {
+                                        //     &:not(.o_colorlist_item_color_transparent_#{$i}){
+                                        //         background: red !important;
+                                        //     }
+                                        // }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .rightpane {
+                        .position-relative {
+                            .product-list {
+                                .category-button {
+                                    background: $sh_pos_secondary_color_night_mode !important;
+                                    color: $sh_pos_night_mode_text_color !important;
+                                    border-color: $sh_pos_night_mode_border_color !important;
+                                }
+                                .product {
+                                    background: $sh_pos_secondary_color_night_mode !important;
+                                    color: $sh_pos_night_mode_text_color !important;
+                                    border-color: $sh_pos_night_mode_border_color;
+                                }
+                            }
+                            .sh_product_list_view{
+                                table {
+                                    tbody {
+                                        tr {
+                                            &:nth-child(even) {
+                                                background: $sh_pos_secondary_color_night_mode !important;
+                                            }
+                                            &:nth-child(odd) {
+                                                background: #1b1e26 !important;
+                                            }
+                                            td {
+                                                color: $sh_pos_night_mode_text_color;
+                                                border-color: $sh_pos_night_mode_border_color;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            .flex-grow-1 {
+                                p {
+                                    color: $sh_pos_night_mode_text_color;
+                                }
+                            }
+                        }
+                    }
+                    .control-buttons {
+                        background: $sh_pos_secondary_color_night_mode;
+                        
+                        .btn {
+                            background: $sh_pos_third_color_night_mode !important;
+                            color: $sh_pos_night_mode_text_color;
+                        }
+                    }
+                }   
+                .payment-screen {
+                    background: transparent !important;
+                    .paymentlines-container {
+                        background: transparent !important;
+                        .message{
+                            color: $sh_pos_night_mode_text_color !important;
+                        }
+                    }
+                    .paymentmethods-container {
+                        .paymentmethods{
+                            background: transparent !important;
+                            .btn {
+                                background: $sh_pos_secondary_color_night_mode !important;
+                                color: $sh_pos_night_mode_text_color !important;
+                                border-color: $sh_pos_night_mode_border_color !important;
+                                &:hover {
+                                    background: $sh_pos_primary_color_night_mode !important;
+                                    color: #fff !important;
+                                    border-color: $sh_pos_night_mode_border_color !important;
+                                }
+                            }
+                        }
+                    }
+                    .payment-buttons {
+                        .d-flex {
+                            .btn {
+                                background: $sh_pos_secondary_color_night_mode !important;
+                                border-color: $sh_pos_night_mode_border_color !important;
+                                color: $sh_pos_night_mode_text_color !important;
+                                @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                    &.highlight{
+                                        background: $sh_pos_primary_color !important;
+                                        border-color: $sh_pos_primary_color !important;
+                                        color: #fff !important;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .switchpane{
+                        .btn {
+                            background: $sh_pos_secondary_color_night_mode;
+                            color: $sh_pos_night_mode_text_color;
+                            border-color: $sh_pos_night_mode_border_color;
+                            &:hover {
+                                background: $sh_pos_night_mode_text_color;
+                            }
+                            &:focus {
+                                background: $sh_pos_night_mode_text_color;
+                                background: $sh_pos_primary_color_night_mode;
+                            }
+                            &.disabled {
+                                background: $sh_pos_secondary_color_night_mode !important;
+                            }
+                        }
+                    }
+                    .overflow-y-auto{
+                        .paymentlines-container {
+                            background: transparent !important;
+                        }
+                        .paymentlines{
+                            .paymentline{
+                                background: $sh_pos_secondary_color_night_mode !important;
+                                color: $sh_pos_night_mode_text_color !important;
+                                border-color: $sh_pos_night_mode_border_color !important;
+                                &.selected {
+                                    background: $sh_pos_primary_color_night_mode !important;
+                                    color: #fff !important;
+                                }
+                            }
+                        }
+                    }
+                    .main-content {
+                        background: transparent !important;
+                        .left-content {
+                            .paymentmethods-container {
+                                .paymentmethods {
+                                    .btn {
+                                        background: $sh_pos_secondary_color_night_mode;
+                                        color: $sh_pos_night_mode_text_color;
+                                        border-color: $sh_pos_night_mode_border_color;
+                                        &:hover {
+                                            background: $sh_pos_primary_color_night_mode !important;
+                                            border-color: $sh_pos_primary_color_night_mode;
+                                            color: #fff !important;
+                                        }
+                                    }
+                                }
+                            }
+                            .payment-buttons {
+                                .d-flex {
+                                    .btn {
+                                        background: $sh_pos_secondary_color_night_mode;
+                                        border-color: $sh_pos_night_mode_border_color;
+                                        color: $sh_pos_night_mode_text_color;
+                                        &:hover {
+                                            background: $sh_pos_primary_color_night_mode !important;
+                                            border-color: $sh_pos_primary_color_night_mode !important;
+                                            color: #fff !important;
+                                        }
+                                    }
+                                }
+                            }
+                            .numpad {
+                                .btn {
+                                    background: $sh_pos_secondary_color_night_mode;
+                                    border-color: $sh_pos_night_mode_border_color;
+                                    color: $sh_pos_night_mode_text_color;
+                                    &:hover {
+                                        background: $sh_pos_primary_color_night_mode !important;
+                                        border-color: $sh_pos_primary_color_night_mode !important;
+                                        color: #fff !important;
+                                    }
+                                }
+                            }
+                            .d-flex {
+                                .btn {
+                                    &.back {
+                                        background: $sh_pos_secondary_color_night_mode;
+                                        color: $sh_pos_night_mode_text_color;
+                                        border-color: $sh_pos_night_mode_border_color !important;
+                                        &:hover {
+                                            background: $sh_pos_primary_color_night_mode !important;
+                                            border-color: $sh_pos_primary_color_night_mode !important;
+                                            color: #fff;
+                                        }
+                                    }
+                                    &.next {
+                                        color: #fff;
+                                    }
+                                }
+                            }
+                        }
+                        .center-content {
+                            .paymentlines-container {
+                                background: transparent !important;
+                            }
+                            .payment-summary {
+                                background: transparent !important;
+                                .paymentlines {
+                                    .paymentline {
+                                        background: $sh_pos_secondary_color_night_mode !important;
+                                        border-color: $sh_pos_secondary_color_night_mode !important;
+                                        color: $sh_pos_night_mode_text_color;
+                                        &.selected {
+                                            background: $sh_pos_primary_color_night_mode !important;
+                                            color: #fff;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .receipt-screen {
+                    background: transparent !important;
+                    .d-flex {
+                        .sh_buttons_group{
+                            .btn {
+                                &:focus , &:active{
+                                    background: $sh_pos_primary_color_night_mode !important;
+                                    color: $sh_pos_night_mode_text_color !important;
+                                    border-color: $sh_pos_night_mode_border_color !important;
+                                }
+                            }
+                        }
+                    }
+                    .screen-content {
+                        .default-view {
+                            .actions {
+                                border-color: $sh_pos_night_mode_border_color !important;
+                                .o_payment_successful {
+                                    .receipt-options {
+                                        .d-flex {
+                                            .d-flex {
+                                                input {
+                                                    background: $sh_pos_secondary_color_night_mode !important;
+                                                    color: $sh_pos_night_mode_text_color;
+                                                    border-color: $sh_pos_night_mode_border_color !important;
+                                                }
+                                            }
+                                            .btn {
+                                                background: $sh_pos_secondary_color_night_mode;
+                                                color: $sh_pos_night_mode_text_color;
+                                                border-color: $sh_pos_night_mode_border_color;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            .pos-receipt-container {
+                                background: transparent !important;
+                            }
+                        }
+                    }
+                }
+                .ticket-screen {
+                    background: transparent !important;
+                    .screen-full-width {
+                        .leftpane {
+                            background: transparent !important;
+                            .rounded-3 {
+                                background: $sh_pos_secondary_color_night_mode !important;
+                                color: $sh_pos_night_mode_text_color !important;
+                            }
+                            .d-flex {
+                                background: transparent !important;
+                                .order-container {
+                                    .orderline {
+                                        background: $sh_pos_night_mode_orderline !important;
+                                        color: $sh_pos_night_mode_text_color;
+                                        .qty {
+                                            color: $sh_pos_night_mode_text_color !important;
+                                        }
+                                        &.selected {
+                                            background: $sh_pos_secondary_color_night_mode !important;
+                                            border-color: $sh_pos_primary_color_night_mode !important;
+                                        }
+                                    }
+                                }
+                                .order-summary {
+                                    border-color: $sh_pos_night_mode_border_color !important;
+                                    div {
+                                        color: $sh_pos_night_mode_text_color !important;
+                                        span {
+                                            color: $sh_pos_night_mode_text_color !important;
+                                        }
+                                    }
+                                }
+                            }
+                            .pads {
+                                .pads {
+                                    border-color: $sh_pos_night_mode_border_color !important;
+                                    .btn {
+                                        &.back-button {
+                                            background: $sh_pos_secondary_color_night_mode;
+                                            color: $sh_pos_night_mode_text_color;
+                                            border-color: $sh_pos_night_mode_border_color;
+                                            &:hover {
+                                                background: $sh_pos_primary_color_night_mode;
+                                                border-color: $sh_pos_primary_color_night_mode;
+                                            }
+                                        }
+                                    }
+                                }
+                                .subpads {
+                                    .numpad {
+                                        .btn {
+                                            background: $sh_pos_secondary_color_night_mode;
+                                            color: $sh_pos_night_mode_text_color;
+                                            border-color: $sh_pos_night_mode_border_color;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        .rightpane {
+                            background: transparent !important;
+                            .controls {
+                                background: transparent !important;
+                                .buttons {
+                                    .discard {
+                                        background: $sh_pos_secondary_color_night_mode;
+                                        color: $sh_pos_night_mode_text_color;
+                                        border-color: $sh_pos_night_mode_border_color;
+                                        &:hover {
+                                            background: $sh_pos_primary_color_night_mode !important;
+                                            border-color: $sh_pos_primary_color_night_mode !important;
+                                            color: $sh_pos_night_mode_text_color;
+                                        }
+                                    }
+                                }
+                                .pos-search-bar {
+                                    .search {
+                                        .input-group {
+                                            border-color: $sh_pos_night_mode_border_color !important;
+                                            input {
+                                                border-color: $sh_pos_night_mode_border_color !important;
+                                                background: $sh_pos_secondary_color_night_mode !important;
+                                                color: $sh_pos_night_mode_text_color;
+                                            }
+                                            .fields {
+                                                ul {
+                                                    background: $sh_pos_secondary_color_night_mode !important;
+                                                    li {
+                                                        span {
+                                                            color: $sh_pos_night_mode_text_color !important;
+                                                        }
+                                                        &:nth-child(even) {
+                                                            background: $sh_pos_secondary_color_night_mode !important;
+                                                        }
+                                    
+                                                        &:nth-child(odd) {
+                                                            background: #1b1e26 !important;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            ul {
+                                                background: $sh_pos_secondary_color_night_mode !important;
+                                                border-color: $sh_pos_night_mode_border_color !important;
+                                                li {
+                                                    color: $sh_pos_night_mode_text_color !important;
+                                                }
+                                            }
+                                            .btn {
+                                                background: $sh_pos_secondary_color_night_mode;
+                                                color: $sh_pos_night_mode_text_color;
+                                                border-color: $sh_pos_night_mode_border_color;
+                                                &:hover {
+                                                    background: $sh_pos_primary_color_night_mode !important;
+                                                    border-color: $sh_pos_primary_color_night_mode !important;
+                                                    color: $sh_pos_night_mode_text_color;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                .item {
+                                    .page {
+                                        color: $sh_pos_night_mode_text_color;
+                                    }
+                                    .page-controls {
+                                        .btn {
+                                            background: $sh_pos_secondary_color_night_mode;
+                                            color: $sh_pos_night_mode_text_color;
+                                            border-color: $sh_pos_night_mode_border_color;
+                                            &:hover {
+                                                background: $sh_pos_primary_color_night_mode !important;
+                                                border-color: $sh_pos_primary_color_night_mode !important;
+                                                color: $sh_pos_night_mode_text_color;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            .orders {
+                                .h-100 {
+                                    .fa {
+                                        color: $sh_pos_night_mode_text_color;
+                                        + .mt-2 {
+                                            color: $sh_pos_night_mode_text_color;
+                                        }
+                                    }
+                                }
+                                .order-row {
+                                    div {
+                                        color: $sh_pos_night_mode_text_color;
+                                    }
+                                    &:nth-child(even) {
+                                        background: $sh_pos_secondary_color_night_mode !important;
+                                    }
+
+                                    &:nth-child(odd) {
+                                        background: #1b1e26 !important;
+                                    }
+                                }
+                            }
+                        }
+                        .control-buttons {
+                            background: $sh_pos_secondary_color_night_mode;
+                            padding: 10px;
+                            .btn {
+                                background: $sh_pos_third_color_night_mode !important;
+                                color: $sh_pos_night_mode_text_color;
+                            }
+                        }
+                    }
+                }
+                .owl-carousel {
+                    .owl-stage-outer {
+                        background: $sh_pos_secondary_color_night_mode;
+                        .owl-stage {
+                            .owl-item {
+                                .btn {
+                                    background: $sh_pos_third_color_night_mode !important;
+                                    color: $sh_pos_night_mode_text_color;
+                                    &:hover {
+                                        background: $sh_pos_primary_color_night_mode !important;
+                                        color: #fff !important;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .o-main-components-container{
+            .o-overlay-container{
+                .o-overlay-item{
+                    .o_dialog{
+                        .modal{
+                            .modal-dialog {
+                                .modal-content {
+                                    background: $sh_pos_secondary_color_night_mode !important;
+                                    .modal-header{
+                                        border-color: $sh_pos_night_mode_border_color;
+                                        h4 {
+                                            color: $sh_pos_night_mode_text_color;
+                                        }
+                                        .input-group{
+                                            .form-control {
+                                                background: $sh_pos_third_color_night_mode !important;
+                                                border-color: $sh_pos_night_mode_border_color !important;
+                                                input {
+                                                    background: $sh_pos_third_color_night_mode !important;
+                                                    color: $sh_pos_night_mode_text_color;
+                                                }
+                                            }
+                                        }
+                                        .btn-close{
+                                            filter: invert(1);
+                                        }
+                                    }
+                                    .modal-body {
+                                        border-color: $sh_pos_night_mode_border_color !important;
+                                        margin: 10px 0;
+                                        .payment-methods-overview{
+                                            div , span {
+                                                color: $sh_pos_night_mode_text_color;
+                                            }
+                                        }
+                                        div {
+                                            .my-1 {
+                                                .w-50 {
+                                                    .form-control {
+                                                        background: $sh_pos_secondary_color_night_mode !important;
+                                                        border-color: $sh_pos_night_mode_border_color !important;
+                                                        input {
+                                                            color: $sh_pos_night_mode_text_color !important;
+                                                            background: $sh_pos_secondary_color_night_mode !important;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .input-amount {
+                                            .d-flex{
+                                                .form-control {
+                                                    background: $sh_pos_secondary_color_night_mode !important;
+                                                    border-color: $sh_pos_night_mode_border_color !important;
+                                                    input {
+                                                        background: $sh_pos_secondary_color_night_mode !important;
+                                                        color: $sh_pos_night_mode_text_color;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .mb-3 {
+                                            .d-flex {
+                                                .cash-input {
+                                                    .input-group{
+                                                        .form-control {
+                                                            border-color: $sh_pos_night_mode_border_color ;
+                                                            background: $sh_pos_secondary_color_night_mode !important;
+                                                            input {
+                                                                background: $sh_pos_secondary_color_night_mode;
+                                                                color: $sh_pos_night_mode_text_color !important;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .discount_amount_div{
+                                            span , input {
+                                                border-color: $sh_pos_night_mode_border_color;
+                                                color: $sh_pos_night_mode_text_color !important;
+                                            }
+                                        }
+                                        .sh_cash_in_out_option_modal_dialog{
+                                            .popup {
+                                                .modal-body{
+                                                    .main_div_sh_payment_table{
+                                                        .sh_payment_table{
+                                                            tbody {
+                                                                tr {
+                                                                    &:nth-child(even) {
+                                                                        background: $sh_pos_secondary_color_night_mode !important;
+                                                                    }
+                                                                    &:nth-child(odd) {
+                                                                        background: #1b1e26 !important;
+                                                                    }
+                                                                    td {
+                                                                        color: $sh_pos_night_mode_text_color !important;
+                                                                    }
+                                                                    @if $sh_list_row_hover == "True" {
+                                                                        &:hover {
+                                                                          background: #313541 !important;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    .main_div_sh_payment_footer{
+                                                        .row{
+                                                            div {
+                                                                div{
+                                                                    span {
+                                                                        color: $sh_pos_night_mode_text_color !important;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .popup{
+                                            .modal-body{
+                                                .sh_box{
+                                                    span{
+                                                        color: $sh_pos_night_mode_text_color !important;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        label {
+                                            color: $sh_pos_night_mode_text_color !important;
+                                        }
+                                        #sh_table_id{
+                                            table {
+                                                tbody {
+                                                    tr {
+                                                        &:nth-child(even) {
+                                                            background: $sh_pos_secondary_color_night_mode !important;
+                                                        }
+                                                        &:nth-child(odd) {
+                                                            background: #1b1e26 !important;
+                                                        }
+                                                        td {
+                                                            color: $sh_pos_night_mode_text_color !important;
+                                                        }
+                                                        @if $sh_list_row_hover == "True" {
+                                                            &:hover {
+                                                              background: #313541 !important;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                tfoot {
+                                                    tr {
+                                                        background: #3f424b !important;
+                                                        th {
+                                                            color: $sh_pos_night_mode_text_color !important;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .opening-cash-section {
+                                            .cash-input-sub-section {
+                                                .d-flex{
+                                                    .input-group{
+                                                        .form-control {
+                                                            background: $sh_pos_primary_color_night_mode !important;
+                                                            border-color: $sh_pos_night_mode_border_color !important;
+                                                            input {
+                                                                background: $sh_pos_primary_color_night_mode !important;
+                                                                color: $sh_pos_night_mode_text_color !important;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .section-inventory , .financials-order {
+                                            border-color: $sh_pos_night_mode_border_color !important;
+                                            div , h3 {
+                                                color: $sh_pos_night_mode_text_color;
+                                            }
+                                        }
+                                        .o_kanban_view , .o_list_view{
+                                            .o_control_panel{
+                                                background: transparent !important;
+                                                border-color: $sh_pos_night_mode_border_color !important;
+                                                .o_control_panel_main{
+                                                    .o_control_panel_actions{
+                                                        .o_cp_searchview{
+                                                            .o_searchview{
+                                                                border-color: $sh_pos_night_mode_border_color !important;
+                                                                input {
+                                                                    color: $sh_pos_night_mode_text_color !important;
+                                                                }
+                                                                ul {
+                                                                    background: $sh_pos_secondary_color_night_mode !important;
+                                                                    border-color: $sh_pos_night_mode_border_color;
+                                                                    li {
+                                                                        background: $sh_pos_secondary_color_night_mode !important;
+                                                                        color: $sh_pos_night_mode_text_color !important;
+                                                                        a , span , div {
+                                                                            color: $sh_pos_night_mode_text_color !important;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                .o_searchview_input_container {
+                                                                    .o_searchview_facet{
+                                                                        background: $sh_pos_primary_color_night_mode !important;
+                                                                        color: $sh_pos_night_mode_text_color !important;
+                                                                    }
+                                                                }
+                                                            }
+                                                            .o_searchview_dropdown_toggler{
+                                                                border-color: $sh_pos_night_mode_border_color $sh_pos_night_mode_border_color $sh_pos_night_mode_border_color transparent !important;
+                                                                &:hover {
+                                                                    background: $sh_pos_primary_color_night_mode !important;
+                                                                    color: $sh_pos_night_mode_text_color !important;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            .o_content {
+                                                .o_kanban_renderer{
+                                                    background: transparent !important;
+                                                    border-color: $sh_pos_night_mode_border_color !important;
+                                                    .o_kanban_record , .o_kanban_group {
+                                                        .o_kanban_header{
+                                                            color: $sh_pos_night_mode_text_color !important;
+                                                        }
+                                                        background: transparent !important;
+                                                        color: $sh_pos_night_mode_text_color;
+                                                        border-color: $sh_pos_night_mode_border_color !important;
+                                                    }
+                                                }
+                                            }
+                                            table {
+                                                tbody {
+                                                    tr {
+                                                        th {
+                                                            background: transparent !important;
+                                                            color: $sh_pos_night_mode_text_color !important;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .btn {
+                                            @include media-breakpoint-down(lg) {
+                                                background: $sh_pos_secondary_color_night_mode;
+                                                border-color: $sh_pos_night_mode_border_color;
+                                                color: $sh_pos_night_mode_text_color;
+                                            }
+                                        }
+                                        .section-product-info-title {
+                                            .d-flex {
+                                                div {
+                                                    color: $sh_pos_night_mode_text_color !important;
+                                                }
+                                            }
+                                        }
+                                        .mx-auto {
+                                            color: $sh_pos_night_mode_text_color;
+                                        }
+                                        .section-self-order-availability {
+                                            border-color: $sh_pos_night_mode_border_color !important;
+                                            div {
+                                                color: $sh_pos_night_mode_text_color !important;
+                                            }
+                                        }
+                                        .text-prewrap {
+                                            color: $sh_pos_night_mode_text_color;
+                                        }
+                                        .sh_popup_button{
+                                            .btn {
+                                                @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                                    border-color: $sh_pos_night_mode_border_color !important;
+                                                }
+                                                @if $sh_pos_theme_style == "style_4" {
+                                                    outline-color: $sh_pos_night_mode_border_color;
+                                                    border: 0 !important;
+                                                }
+                                            }
+                                        }
+                                        table {
+                                            border-color:  $sh_pos_night_mode_border_color !important;
+                                            thead{
+                                                border-color:  $sh_pos_night_mode_border_color !important;
+                                                tr{
+                                                    border-color:  $sh_pos_night_mode_border_color !important;
+                                                    th{
+                                                        color: #fff !important;
+                                                        border-color:  $sh_pos_night_mode_border_color !important;
+                                                        @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                                            background: $sh_pos_primary_color !important;
+                                                        }
+                                                        span {
+                                                            color: #fff !important;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            tbody {
+                                                border-color:  $sh_pos_night_mode_border_color !important;
+                                                tr , div.partner-info{
+                                                    border-color:  $sh_pos_night_mode_border_color !important;
+                                                    div {
+                                                        color: $sh_pos_night_mode_text_color !important;
+                                                    }
+                                                    td {
+                                                        color: $sh_pos_night_mode_text_color;
+                                                        border-color:  $sh_pos_night_mode_border_color !important;
+                                                        .o_tag{
+                                                            background: $sh_pos_primary_color_night_mode !important;
+                                                        }
+                                                        .btn {
+                                                            &.dropdown-toggle {
+                                                                background: $sh_pos_third_color_night_mode;
+                                                                border-color: $sh_pos_night_mode_border_color !important;
+                                                                &:hover {
+                                                                    background: $sh_pos_primary_color_night_mode;
+                                                                    border-color: $sh_pos_primary_color_night_mode !important;
+                                                                    color: #fff;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    &:nth-child(even) {
+                                                        background: $sh_pos_secondary_color_night_mode !important;
+                                                    }
+                                                    &:nth-child(odd) {
+                                                        background: #1b1e26 !important;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .o_form_view{
+                                            .o_form_view_container{
+                                                .o_content{
+                                                    .o_form_renderer{
+                                                        .o_form_sheet_bg{
+                                                            .o_form_statusbar{
+                                                                .o_field_widget{
+                                                                    .o_statusbar_status{
+                                                                        .btn {
+                                                                            background: $sh_pos_third_color_night_mode;
+                                                                            color: $sh_pos_night_mode_text_color;
+                                                                            &::before {
+                                                                                background: $sh_pos_primary_color_night_mode;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            .o_form_sheet{
+                                                                background: transparent !important;
+                                                                div , span , input , label , select{
+                                                                    color: $sh_pos_night_mode_text_color;
+                                                                    border-color: $sh_pos_night_mode_border_color !important;
+                                                                    .o_notebook_headers{
+                                                                        .nav {
+                                                                            background: transparent !important;
+                                                                            border-color: $sh_pos_night_mode_border_color;
+                                                                            li {
+                                                                                a {
+                                                                                    background: $sh_pos_secondary_color_night_mode;
+                                                                                    border-color: $sh_pos_night_mode_border_color !important;
+                                                                                    color: $sh_pos_night_mode_text_color !important;
+                                                                                    &.active{
+                                                                                        background: $sh_pos_primary_color_night_mode !important;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    .o_notebook_content {
+                                                                        .tab-pane {
+                                                                            .o_field_widget{
+                                                                                .o_x2m_control_panel{
+                                                                                    .o_cp_buttons{
+                                                                                        .btn {
+                                                                                            background: $sh_pos_secondary_color_night_mode !important;
+                                                                                            border-color: $sh_pos_night_mode_border_color !important;
+                                                                                            color: $sh_pos_night_mode_text_color;
+                                                                                            &:hover {
+                                                                                                background: $sh_pos_primary_color_night_mode !important;
+                                                                                                border-color: $sh_pos_primary_color_night_mode !important;
+                                                                                                color: #fff;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            .o-autocomplete--dropdown-menu {
+                                                                                background: $sh_pos_secondary_color_night_mode;
+                                                                                border-color: $sh_pos_night_mode_border_color;
+                                                                                .o-autocomplete--dropdown-item {
+                                                                                    color: $sh_pos_night_mode_text_color;
+                                                                                    &:hover {
+                                                                                        background: $sh_pos_primary_color_night_mode;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            textarea {
+                                                                                border-color: $sh_pos_night_mode_border_color !important;
+                                                                                &:hover , &:focus {
+                                                                                    border-color: $sh_pos_night_mode_border_color !important;
+                                                                                }
+                                                                            }
+                                                                            .o_group{
+                                                                                div {
+                                                                                    label {
+                                                                                        color: $sh_pos_night_mode_text_color !important;
+                                                                                    }
+                                                                                    .o_horizontal_separator{
+                                                                                        box-shadow: 0 1px 0 $sh_pos_night_mode_border_color !important;
+                                                                                        
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    &:hover , &:focus {
+                                                                        border-color: $sh_pos_night_mode_border_color !important;
+                                                                    }
+                                                                }
+                                                                ul {
+                                                                    background: $sh_pos_secondary_color_night_mode !important;
+                                                                    border-color: $sh_pos_night_mode_border_color;
+                                                                    li {
+                                                                        background: $sh_pos_secondary_color_night_mode !important;
+                                                                        color: $sh_pos_night_mode_text_color !important;
+                                                                        a , span , div {
+                                                                            color: $sh_pos_night_mode_text_color !important;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .sh_popup_button{
+                                            .btn {
+                                                background: $sh_pos_secondary_color_night_mode;
+                                                color: $sh_pos_night_mode_text_color;
+                                                border-color: $sh_pos_night_mode_border_color !important;
+                                                &:hover {
+                                                    background: $sh_pos_primary_color_night_mode;
+                                                    border-color: $sh_pos_primary_color_night_mode !important;
+                                                }
+                                            }
+                                        }
+                                        textarea {
+                                            border-color: $sh_pos_night_mode_border_color !important;
+                                            color: $sh_pos_night_mode_text_color;
+                                        }
+                                        .overflow-hidden {
+                                            .btn {
+                                                background: $sh_pos_secondary_color_night_mode;
+                                                color: $sh_pos_night_mode_text_color !important;
+                                                border-color: $sh_pos_night_mode_border_color !important;
+                                                &.btn-secondary{
+                                                    border-color: $sh_pos_night_mode_border_color !important;
+                                                }
+                                                &:hover {
+                                                    background: $sh_pos_primary_color_night_mode !important;
+                                                    color: #fff !important;
+                                                    border-color: $sh_pos_primary_color_night_mode !important;
+                                                }
+                                            }
+                                        }
+                                        .input-symbol {
+                                            .popup-input {
+                                                color: $sh_pos_night_mode_text_color;
+                                                border-color: $sh_pos_night_mode_border_color;
+                                                .text-muted{
+                                                    color: $sh_pos_night_mode_text_color !important;
+                                                }
+                                            }
+                                        }
+                                        .numpad{
+                                            background: transparent !important;
+                                            .btn {
+                                                background: $sh_pos_secondary_color_night_mode;
+                                                color: $sh_pos_night_mode_text_color;
+                                                border-color: $sh_pos_night_mode_border_color;
+                                                &:hover {
+                                                    background: $sh_pos_primary_color_night_mode;
+                                                    border-color: $sh_pos_primary_color_night_mode;
+                                                    color: #fff;
+                                                }
+                                            }
+                                        }
+                                        .d-flex {
+                                            .btn-secondary {
+                                                background: $sh_pos_secondary_color_night_mode;
+                                                color: $sh_pos_night_mode_text_color;
+                                                border-color: $sh_pos_night_mode_border_color !important;
+                                                &:hover {
+                                                    color: #fff;
+                                                    background: $sh_pos_primary_color_night_mode;
+                                                    border-color: $sh_pos_primary_color_night_mode;
+                                                }
+                                            }
+                                            h3 {
+                                                color: $sh_pos_night_mode_text_color !important;
+                                            }
+                                            .product-list {
+                                                article {
+                                                    background: $sh_pos_primary_color_night_mode !important;
+                                                    border-color: $sh_pos_night_mode_border_color !important;
+                                                    .product-content {
+                                                        .overflow-hidden {
+                                                            color: $sh_pos_night_mode_text_color !important;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .attribute{
+                                            .d-flex {
+                                                div {
+                                                    .form-check-label {
+                                                        background: $sh_pos_secondary_color_night_mode !important;
+                                                        color: $sh_pos_night_mode_text_color !important;
+                                                        border-color: $sh_pos_night_mode_border_color !important;
+                                                        span {
+                                                            color: $sh_pos_night_mode_text_color !important;
+                                                        }
+                                                        &.active{
+                                                            span {   
+                                                                color: #fff !important;
+                                                            }
+                                                        }
+                                                        &:hover {
+                                                            background: $sh_pos_primary_color_night_mode !important;
+                                                            color: #fff !important;
+                                                            border-color: $sh_pos_primary_color_night_mode !important;
+                                                            span {
+                                                                color: #fff !important;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .selection-item {
+                                            background: $sh_pos_secondary_color_night_mode !important;
+                                            color: $sh_pos_night_mode_text_color !important;
+                                            border-color: $sh_pos_night_mode_border_color !important;
+                                            &:hover{
+                                                background: $sh_pos_primary_color_night_mode !important;
+                                                color: #fff !important;
+                                            }
+                                            &.active{
+                                                background: $sh_pos_primary_color_night_mode !important;
+                                                color: #fff !important;
+                                            }
+                                        }
+                                    }
+                                    .modal-footer {
+                                        border-color: $sh_pos_night_mode_border_color;
+                                            .btn {
+                                                &.btn-secondary {
+                                                    background: $sh_pos_secondary_color_night_mode;
+                                                    border-color: $sh_pos_night_mode_border_color !important;
+                                                    color: $sh_pos_night_mode_text_color;
+                                                    &:hover{
+                                                        background: $sh_pos_primary_color_night_mode !important;
+                                                        border-color: $sh_pos_primary_color_night_mode !important;
+                                                        color: #fff !important;
+                                                    }
+                                                }
+                                            }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .o_popover{
+                        border-color: $sh_pos_night_mode_border_color;
+                        background: $sh_pos_secondary_color_night_mode !important;
+                        .o_dropdown_container {
+                            border-color: $sh_pos_night_mode_border_color !important;
+                        }
+                        select {
+                            background: $sh_pos_secondary_color_night_mode !important;
+                            border-color: $sh_pos_night_mode_border_color !important;
+                            option {
+                                background: $sh_pos_secondary_color_night_mode !important;
+                                border-color: $sh_pos_night_mode_border_color !important;
+                                color: $sh_pos_night_mode_text_color !important;
+                            }
+                        }
+                        .pos-burger-menu-items{
+                            background: $sh_pos_secondary_color_night_mode !important;
+                        }
+                        span ,div , h5 {
+                            color: $sh_pos_night_mode_text_color !important;
+                            border-color: $sh_pos_night_mode_border_color !important;
+                            &[title="Customer Display"]{
+                                background: $sh_pos_secondary_color_night_mode !important;
+                            }
+                            .o_add_custom_group_menu , .o_menu_item {
+                                color: $sh_pos_night_mode_text_color !important;
+                                &.focus {
+                                    background: $sh_pos_secondary_color_night_mode !important;
+                                }
+                            }
+                            .o_accordion_values{
+                                border-color: $sh_pos_night_mode_border_color !important;
+                                input {
+                                    border-color: $sh_pos_night_mode_border_color !important;
+                                    color: $sh_pos_night_mode_text_color !important;
+                                }
+                            }
+                            &.o-dropdown-item {
+                                background: $sh_pos_secondary_color_night_mode;
+                                color: $sh_pos_night_mode_text_color;
+                                border-radius: 0;
+                                &:hover {
+                                    background: $sh_pos_primary_color_night_mode;
+                                    color: #fff;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

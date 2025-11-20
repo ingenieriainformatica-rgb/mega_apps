@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_remove_cart_item.RemoveAllItemButton" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//SelectPartnerButton" position="after">
+            <button t-if="env.services.pos.config.sh_remove_all_item and( !props.showRemainingButtons || (ui.isSmall and props.showRemainingButtons))" t-attf-class="{{ui.isSmall ? 'sh_is_mobile d-block btn btn-secondary btn-lg py-5 flex-shrink-0 mb-2' : 'sh_is_desktop btn btn-light btn-lg lh-lg'}}" class="control-button" t-att-disabled="!pos.get_order()?.get_orderlines().length" t-on-click="() => this.onClickRemoveItem()">
+                <span></span>
+                <span>Eliminar todos los items</span>
+            </button>
+        </xpath>
+    </t>
+</templates>

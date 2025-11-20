@@ -1,0 +1,60 @@
+<odoo>
+  <record id="view_payment_clien_register_wizard_form" model="ir.ui.view">
+    <field name="name">payment.clien.register.wizard</field>
+    <field name="model">payment.clien.register.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Crear cliente pago" class="o_form_narrow">
+        <group >
+          <group  class="o_inner_group">
+            <field name="payment_type" widget="radio" options="{'horizontal': True}" readonly="1"/>
+            <field name="date" readonly="1" string="Fecha:"/>
+          </group>
+          <group  class="o_inner_group">
+            <group  class="o_inner_group">
+              <field name="principal_amount" readonly="1" string="Cantidad prestada"/>
+            </group>
+          </group>
+        </group>
+        <notebook>
+          <!-- ====== Pestaña 1: Pago ====== -->
+          <page string="Parámetros del pago">
+            <group >
+              <group  class="o_inner_group">
+                <field
+                  name="journal_id"
+                  string="Diario"
+                  domain="[('type', 'in', ['bank', 'cash', 'credit'])]"
+                  options="{'no_create': True, 'no_create_edit': True, 'no_open': True}"
+                  required="1"/>
+                <field
+                  name="payment_method_line_id"
+                  domain="[('id','in', available_payment_method_line_ids)]"
+                  options="{'no_create': True, 'no_create_edit': True, 'no_open': True}"
+                  required="1"/>
+              </group>
+              <group  class="o_inner_group">
+                <field
+                  name="partner_id"
+                  placeholder="Bancolombia / Entidad financiera"
+                  options="{'no_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field
+                  name="memo"
+                  placeholder="Referencia visible en extracto bancario"/>
+              </group>
+            </group>
+          </page>
+        </notebook>
+        <footer>
+          <!-- Usa tu método real: action_confirm o action_continue -->
+          <button string="Crear pago"
+                  name="action_confirm_accoun_loan"
+                  type="object"
+                  confirm="Estas seguro? no se puede devolver el pago"
+                  class="btn-primary"/>
+          <button string="Cancelar" special="cancel" class="btn-secondary"/>
+        </footer>
+
+      </form>
+    </field>
+  </record>
+</odoo>

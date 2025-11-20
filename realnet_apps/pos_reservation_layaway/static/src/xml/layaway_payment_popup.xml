@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="pos_reservation_layaway.LayawayPaymentPopup">
+        <Dialog title="'Abonar a Apartado'">
+            <div class="o_form_container p-2">
+                <!-- Búsqueda de Cliente -->
+                <div class="mb-3">
+                    <label class="form-label">Buscar Cliente</label>
+                    <div class="position-relative">
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                t-model="state.partnerSearch"
+                                t-on-input="searchPartners"
+                                placeholder="Nombre, Cédula o Teléfono..."
+                                t-att-disabled="state.selectedPartner"/>
+                            <button 
+                                t-if="state.selectedPartner" 
+                                class="btn btn-outline-secondary" 
+                                t-on-click="clearPartnerSearch"
+                                type="button">
+                                ✕
+                            </button>
+                        </div>
+                        <!-- Lista de clientes -->
+                        <div t-if="state.showPartnerList" class="position-absolute w-100 bg-white border rounded shadow-sm mt-1" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+                            <div t-foreach="state.partners" t-as="partner" t-key="partner.id" 
+                                 class="p-2 border-bottom cursor-pointer hover-bg-light"
+                                 t-on-click="() => this.selectPartner(partner)"
+                                 style="cursor: pointer;">
+                                <div><strong><t t-esc="partner.name"/></strong></div>
+                                <div class="text-muted small">
+                                    <t t-if="partner.vat">Cédula: <t t-esc="partner.vat"/></t>
+                                    <t t-if="partner.phone"> | Tel: <t t-esc="partner.phone"/></t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selección de Apartado -->
+                <div t-if="state.selectedPartner" class="mb-3">
+                    <label class="form-label">Seleccionar Apartado</label>
+                    <select class="form-select" t-on-change="onReservationChange" t-att-disabled="state.loading">
+                        <option value="">-- Seleccione un apartado --</option>
+                        <option t-foreach="state.reservations" t-as="reservation" t-key="reservation.id" 
+                                t-att-value="reservation.id">
+                            <t t-esc="reservation.name"/> - 
+                            Estado: <t t-esc="reservation.state"/> - 
+                            Saldo: <t t-esc="reservation.amount_due"/> - 
+                            Vence: <t t-esc="reservation.expiration_date"/>
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Información del Apartado Seleccionado -->
+                <div t-if="state.resv" class="mb-3">
+                    <div t-if="state.resv.state === 'paid'" class="alert py-2 mb-2" style="background-color: #d4edda; border-color: #c3e6cb;">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fa fa-check-circle fa-lg me-2" style="color: #155724;"></i>
+                                <div>
+                                    <strong style="color: #155724;">Apartado Pagado Completamente</strong>
+                                    <div class="small" style="color: #155724;">Este apartado está listo para facturar</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm" t-on-click="createInvoice" t-att-disabled="state.loading" style="background-color: #28a745; border-color: #28a745; color: white; font-weight: 600; padding: 8px 16px;">
+                                <i class="fa fa-file-invoice me-1"></i> Crear Factura
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info py-2">
+                        <div><strong>Apartado:</strong> <t t-esc="state.resv.name"/></div>
+                        <div><strong>Cliente:</strong> <t t-esc="state.resv.partner_id and state.resv.partner_id[1]"/></div>
+                        <div><strong>Estado:</strong> 
+                            <span t-if="state.resv.state === 'draft'" class="badge bg-secondary">Borrador</span>
+                            <span t-if="state.resv.state === 'reserved'" class="badge bg-warning">Reservado</span>
+                            <span t-if="state.resv.state === 'paid'" class="badge bg-success">Pagado</span>
+                            <span t-if="state.resv.state === 'invoiced'" class="badge bg-primary">Facturado</span>
+                        </div>
+                        <div><strong>Fecha de Vencimiento:</strong> <t t-esc="state.resv.expiration_date"/></div>
+                        <div><strong>Total:</strong> <t t-esc="state.resv.amount_total"/></div>
+                        <div><strong>Pagado:</strong> <t t-esc="state.resv.amount_paid"/></div>
+                        <div><strong>Saldo Pendiente:</strong> <t t-esc="state.resv.amount_due"/></div>
+                    </div>
+                </div>
+
+                <!-- Monto a Abonar -->
+                <div class="mb-3" t-if="state.resv and state.resv.state !== 'paid'">
+                    <label class="form-label">Monto a Abonar</label>
+                    <input 
+                        type="number" 
+                        min="0" 
+                        step="0.01" 
+                        class="form-control" 
+                        t-model.number="state.amount"
+                        t-on-input="onAmountChange"
+                        t-att-disabled="!state.resv"/>
+                </div>
+                
+                <!-- Mostrar Cambio -->
+                <div t-if="state.showChange and state.changeAmount > 0" class="mb-3">
+                    <div class="alert alert-warning py-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fa fa-exclamation-triangle me-2"></i>
+                            <div>
+                                <strong>Cambio a Devolver: $<t t-esc="state.changeAmount.toFixed(2)"/></strong>
+                                <div class="small">El monto ingresado excede el saldo pendiente</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Método de Pago -->
+<div class="mb-3" t-if="state.resv and state.resv.state !== 'paid'">
+                    <label class="form-label">Método de Pago</label>
+                    <select class="form-select" t-model.number="state.selectedPaymentMethod" t-att-disabled="!state.resv or state.loading">
+                        <option value="">-- Seleccione un método de pago --</option>
+                        <option t-foreach="state.paymentMethods" t-as="method" t-key="method.id" 
+                                t-att-value="method.journal_id">
+                            <t t-esc="method.name"/>
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Mensajes de Error -->
+                <div t-if="state.error" class="alert alert-danger py-2">
+                    <t t-esc="state.error"/>
+                </div>
+
+                <!-- Indicador de Carga -->
+                <div t-if="state.loading" class="text-center py-2">
+                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    Cargando...
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button t-if="state.resv and state.resv.state !== 'paid'" 
+                        class="btn btn-primary" 
+                        t-att-disabled="state.loading or !state.resv or !state.amount or !state.selectedPaymentMethod" 
+                        t-on-click="confirm">
+                    Abonar
+                </button>
+                <button class="btn btn-secondary" t-on-click="cancel">Cancelar</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

@@ -1,0 +1,26 @@
+<odoo>
+  <data>
+    <record id="view_sale_advpay_hide_field" model="ir.ui.view">
+      <field name="name">sale.advance.payment.inv.hide.field</field>
+      <field name="model">sale.advance.payment.inv</field>
+      <field name="inherit_id" ref="sale.view_sale_advance_payment_inv"/>
+      <field name="priority" eval="99"/>
+      <field name="arch" type="xml">
+
+        <!-- 1) El radio original queda para TODOS EXCEPTO el grupo -->
+        <xpath expr="//field[@name='advance_payment_method']" position="attributes">
+          <attribute name="groups">!sale_and_purchasing_override.group_update_accounts_user</attribute>
+        </xpath>
+
+        <!-- 2) Para el GRUPO: ocultamos el campo (valor por defecto = 'delivered') y mostramos aviso -->
+        <xpath expr="//group[.//field[@name='advance_payment_method']]" position="inside">
+          <field name="advance_payment_method" groups="sale_and_purchasing_override.group_update_accounts_user" invisible="1"/>
+          <div groups="sale_and_purchasing_override.group_update_accounts_user" class="text-muted">
+            Este asistente generará automáticamente una <b>Factura normal</b>.
+          </div>
+        </xpath>
+
+      </field>
+    </record>
+  </data>
+</odoo>

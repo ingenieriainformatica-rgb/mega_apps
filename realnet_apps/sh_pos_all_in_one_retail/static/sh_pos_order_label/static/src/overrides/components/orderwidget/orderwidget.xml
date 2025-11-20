@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_all_in_one_retail.OrderSummary" t-inherit="point_of_sale.OrderSummary" t-inherit-mode="extension">
+        <xpath expr="//Orderline" position="attributes">
+            <attribute name="t-if">!line.add_section</attribute>
+        </xpath>
+        <xpath expr="//Orderline" position="after">
+            <t t-if="line.add_section">
+                <li t-att-data-label_id="line.get_orderline_label()" class="orderline label_item">
+                    <h6 class="line_label">
+                        <t t-if='line and line.get_orderline_label()'>
+                            <span>
+                                <t t-esc="line.get_orderline_label()" />
+                            </span>
+                        </t>
+                        <t t-else=''></t>
+                    </h6>
+                    <span t-on-click='() => this.remove_label(line)' class="remove_label">
+                        <i class="fa fa-fw fa-trash-o" />
+                    </span>
+                </li>
+            </t>
+        </xpath>
+    </t>
+</templates>

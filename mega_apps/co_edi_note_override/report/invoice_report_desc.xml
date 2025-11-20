@@ -1,0 +1,23 @@
+<odoo>
+  <template id="report_invoice_document_add_general_desc" inherit_id="account.report_invoice_document">
+
+    <!-- 1) Insertar una nueva COLUMNA al inicio del bloque de fechas -->
+    <!-- <xpath expr="//div[@id='informations']//div[@name='invoice_date']" position="before">
+      <t t-if="o.x_studio_descripcin_1">
+        <div class="col" name="general_description_col">
+          <strong>Descripción general</strong>
+          <div class="o-general-desc" t-esc="(o.x_studio_descripcin_1 or '')[:12]"/>
+        </div>
+      </t>
+    </xpath> -->
+
+    <!-- 2) Un poco de CSS para que no corte en varias líneas (opcional) -->
+    <xpath expr="//t[@t-call='web.external_layout']" position="inside">
+      <t>
+        <style>
+          .o-general-desc { white-space: nowrap; }
+        </style>
+      </t>
+    </xpath>
+  </template>
+</odoo>

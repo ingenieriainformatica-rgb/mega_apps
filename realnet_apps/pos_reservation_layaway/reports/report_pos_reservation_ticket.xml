@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="action_report_pos_reservation_payment_ticket" model="ir.actions.report">
+            <field name="name">Ticket Abono Apartado</field>
+            <field name="model">pos.reservation.payment</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">pos_reservation_layaway.report_pos_reservation_payment_ticket</field>
+            <field name="print_report_name">('Ticket Abono - %s' % (object.ticket_number))</field>
+        </record>
+
+        <template id="report_pos_reservation_payment_ticket">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Comprobante de Abono</h2>
+                    <p>
+                        <strong>Ticket:</strong> <span t-esc="o.ticket_number"/>
+                        <span class="mx-2">|</span>
+                        <strong>Fecha:</strong> <span t-esc="o.date"/>
+                    </p>
+                    <p>
+                        <strong>Cliente:</strong> <span t-esc="o.reservation_id.partner_id.display_name"/>
+                        <br/>
+                        <strong>Reserva:</strong> <span t-esc="o.reservation_id.name"/>
+                        <br/>
+                        <strong>Vencimiento:</strong> <span t-esc="o.reservation_id.expiration_date"/>
+                    </p>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th class="text-end">Cant.</th>
+                                <th class="text-end">Precio</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="o.reservation_id.line_ids" t-as="l">
+                                <td><span t-esc="l.name"/></td>
+                                <td class="text-end"><span t-esc="l.qty"/></td>
+                                <td class="text-end"><span t-esc="l.price_unit_fixed"/></td>
+                                <td class="text-end"><span t-esc="l.price_subtotal"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>
+                        <strong>Total Compra:</strong> <span t-esc="o.reservation_id.amount_total"/>
+                        <span class="mx-2">|</span>
+                        <strong>Abono Total:</strong> <span t-esc="o.reservation_id.amount_paid"/>
+                        <span class="mx-2">|</span>
+                        <strong>Saldo Pendiente:</strong> <span t-esc="o.reservation_id.amount_due"/>
+                    </p>
+                    <p class="mt16">
+                        <em>Sin reembolsos. El saldo abonado puede usarse para otros productos.</em>
+                    </p>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

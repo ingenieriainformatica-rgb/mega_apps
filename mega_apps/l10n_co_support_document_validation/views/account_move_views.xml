@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Vista de Formulario: Agregar Tab de Validación de Documentos Soporte -->
+        <record id="view_move_form_support_doc_validation" model="ir.ui.view">
+            <field name="name">account.move.form.support.doc.validation</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+
+                <!-- Agregar notebook page solo visible para documentos soporte -->
+                <xpath expr="//notebook" position="inside">
+                    <page string="Validación Doc. Soporte"
+                          invisible="not l10n_co_edi_is_support_document">
+
+                        <!-- Alerta visual si documento anterior no enviado -->
+                        <div class="alert alert-warning mb-3" role="alert" invisible="not show_support_doc_warning">
+                            <strong><i class="fa fa-exclamation-triangle"/> El documento soporte anterior no ha sido enviado exitosamente a la DIAN.</strong>
+                            <span invisible="not previous_support_doc_id">
+                                Puede <button class="oe_link" type="object" name="action_view_previous_support_document" style="padding: 0; vertical-align: baseline;">ver el documento anterior</button> para verificar su estado.
+                            </span>
+                            <field name="show_support_doc_warning" invisible="1"/>
+                        </div>
+
+                        <!-- Información del documento anterior -->
+                        <group>
+                            <group string="Documento Anterior en la Secuencia">
+                                <field name="previous_support_doc_id"
+                                       readonly="1"
+                                       options="{'no_open': False, 'no_create': True}"/>
+                                <field name="previous_support_doc_dian_state"
+                                       readonly="1"
+                                       widget="badge"
+                                       decoration-success="previous_support_doc_dian_state == 'invoice_accepted'"
+                                       decoration-danger="previous_support_doc_dian_state in ['invoice_sending_failed', 'invoice_rejected']"
+                                       decoration-warning="previous_support_doc_dian_state == 'invoice_pending'"/>
+                            </group>
+
+                            <group string="Bypass Manual de Validación"
+                                   groups="l10n_co_support_document_validation.group_support_doc_manager,base.group_system">
+                                <field name="support_doc_validation_override"/>
+                                <div class="text-muted">
+                                    <i class="fa fa-info-circle"/> Marcar solo si está autorizado para omitir la validación de secuencia.
+                                    Esto permitirá confirmar el documento sin validar el envío del anterior a DIAN.
+                                </div>
+                            </group>
+                        </group>
+
+                        <!-- Información adicional -->
+                        <group>
+                            <group string="Información de Validación">
+                                <label for="id" string="Descripción"/>
+                                <div>
+                                    <p class="text-muted">
+                                        <strong>¿Qué valida este módulo?</strong><br/>
+                                        Este módulo verifica que el documento soporte anterior en la secuencia
+                                        haya sido enviado correctamente a la DIAN antes de permitir confirmar
+                                        este documento.<br/><br/>
+
+                                        <strong>Estados DIAN válidos:</strong><br/>
+                                        • <span class="badge badge-success">Aceptado (invoice_accepted)</span><br/>
+                                        <!-- • <span class="badge badge-secondary">Rechazado (invoice_rejected)</span><br/><br/> -->
+
+                                        <strong>Estados que bloquean:</strong><br/>
+                                        • <span class="badge badge-warning">Pendiente (invoice_pending)</span><br/>
+                                        • <span class="badge badge-danger">Fallo de envío (invoice_sending_failed)</span><br/>
+                                        • <span class="badge badge-danger">Rechazado (invoice_rejected)</span><br/>
+                                        • <span class="badge badge-secondary">No enviado</span>
+                                    </p>
+                                </div>
+                            </group>
+                        </group>
+
+                    </page>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

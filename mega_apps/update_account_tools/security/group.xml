@@ -1,0 +1,15 @@
+<odoo>
+    <!-- Nueva categoría para tu módulo -->
+    <record id="module_update_accounts_user" model="ir.module.category">
+        <field name="name">Update accounts bad</field>
+        <field name="description">Permissions to manage the bad accounts.</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <!-- Grupo de usuarios para ver el menú de transferencias -->
+    <record id="group_update_accounts_user" model="res.groups">
+        <field name="name">Users - Update accounts bad</field>
+        <field name="category_id" ref="module_update_accounts_user"/>
+        <field name="comment">Users who can access the transfers between cash registers menu.</field>
+    </record>
+</odoo>

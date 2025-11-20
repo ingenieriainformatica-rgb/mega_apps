@@ -1,0 +1,56 @@
+<odoo>
+    <record id="sale_order_form_owner_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.owner.scope</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="industry_real_estate.rental_form_view"/>
+        <field name="priority">200</field>
+        <field name="arch" type="xml">
+            <!-- 1) Arrendatario (visible solo si scope=rental) -->
+            
+            <xpath expr="//field[@name='partner_id']" position="attributes">                
+                <attribute name="invisible">ecoerp_scope=='owner'</attribute>
+                <!-- si quieres, mantén también customer_rank -->
+                
+                <!-- <attribute name="domain">['|', ('is_tenant','=',True), ('category_id.name','ilike','Arrendatario')]</attribute> -->
+                <attribute name="context">{'default_is_tenant': 1, 'default_customer_rank': 1}</attribute>
+            </xpath>
+
+            <!-- 2) Propietario (misma field partner_id, pero otra “vista” y contexto) -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="owner_candidate_ids" invisible="1"/>
+                <!-- <field name="partner_id" string="Titular"
+                    invisible="ecoerp_scope!='owner'"
+                    domain="['&amp;', '|',
+                                ('is_property_owner','=',True),
+                                ('category_id.name','ilike','Propietario'),
+                                ('id','in', owner_candidate_ids)
+                            ]"
+                    context='{"default_is_property_owner": 1, "default_supplier_rank": 1}'/> -->
+                <field name="partner_id" string="Titular"
+                    invisible="ecoerp_scope!='owner'"
+                    context='{"default_is_property_owner": 1, "default_supplier_rank": 1}'/>
+            </xpath>
+
+            <!-- Pestañas específicas de propietario -->
+            <!-- <xpath expr="//sheet//notebook" position="inside">
+                <page string="Resp. económicas" modifiers="{'invisible': [('ecoerp_scope','!=','owner')]}">
+                <group>
+                    <field name="amount_owner_base" readonly="1"/>
+                </group>
+                <field name="owner_responsibility_ids" nolabel="1">
+                    <list editable="bottom">
+                        <field name="sequence" invisible="1"/>
+                        <field name="owner_id"/>
+                        <field name="percent"/>
+                        <field name="subject_to_vat"/>
+                        <field name="is_copropietario"/>
+                        <field name="is_main_payee"/>
+                        <field name="amount_estimated" readonly="1"/>
+                    </list>
+                </field>
+                </page>
+            </xpath> -->
+
+        </field>
+    </record>
+</odoo>

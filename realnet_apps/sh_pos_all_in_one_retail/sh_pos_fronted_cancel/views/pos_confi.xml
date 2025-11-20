@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record model="ir.ui.view" id="sh_pos_fronted_cancel_config_form_view_inherit">
+        <field name="name">res.config.view.form.inherit.sh_pos_fronted_cancel</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form" />
+        <field name="arch" type="xml">
+            <field name="is_posbox" position="after" >
+                <field name="allow_sh_pos_cancel" />
+            </field>
+        </field>
+    </record>
+</odoo>

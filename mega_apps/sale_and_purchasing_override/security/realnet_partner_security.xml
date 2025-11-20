@@ -1,0 +1,22 @@
+<odoo>
+  <!-- (Opcional pero recomendado) Para que Odoo no reescriba en updates -->
+  <data noupdate="1">
+
+    <!-- Categoría propia para tu módulo -->
+    <record id="module_update_accounts_user" model="ir.module.category">
+      <field name="name">You cannot create or edit (Filters)</field>
+      <field name="description">You cannot create or edit the Sales.</field>
+      <field name="sequence">30</field>
+    </record>
+
+    <!-- Grupo que usaremos para BLOQUEAR la creación desde M2O -->
+    <record id="group_update_accounts_user" model="res.groups">
+      <field name="name">You cannot create or edit (Users)</field>
+      <field name="category_id" ref="module_update_accounts_user"/>
+      <field name="comment">
+        Users who cannot create/edit contacts from many2one fields in PO/SO partner.
+      </field>
+    </record>
+
+  </data>
+</odoo>

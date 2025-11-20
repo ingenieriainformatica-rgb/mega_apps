@@ -1,0 +1,35 @@
+// NEW SCSS 23/01/2025
+.pos {
+    .pos-content {
+        .product-screen {
+            .leftpane {
+                .order-container {
+                    li.sh_pos_topping {display: none !important;}
+                    .orderline {
+                        .topping-item {
+                            width: 87%;margin-left: auto;
+                            .orderline {
+                                padding:6px 10px !important;margin: 0 !important;margin-left: 10px !important;
+                                .product-name{margin: 0 !important;}
+                                .fa-trash{
+                                    &::before{right:43px;}
+                                }
+                                .product-price{width: 20% !important;}
+                            }
+                            .orderline.selected{background:unset !important;border: 0 ;}
+                            .sh_topping_line.selected{
+                                color: unset !important;
+                                .product-name,.info-list{
+                                    span,.price-per-unit{color: unset !important;}
+                                }
+                            }
+                        }
+                        &:nth-child(2){
+                            div.d-flex{align-items: center !important;}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

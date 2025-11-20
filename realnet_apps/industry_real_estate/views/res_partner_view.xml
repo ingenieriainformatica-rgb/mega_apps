@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- 1) Hacer 'name' readonly cuando NO es empresa -->
+  <record id="res_partner_form_name_readonly_person" model="ir.ui.view">
+    <field name="name">res.partner.form.name.readonly.person</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="priority">20</field>
+    <field name="arch" type="xml">
+      <!-- En v18 el campo suele estar directo en el sheet/title; este xpath es estable -->
+      <xpath expr="//field[@name='name']" readonly="not is_company"></xpath>
+    </field>
+  </record>
+
+  <!-- 2) Insertar los 4 campos (solo para personas) dentro del sheet -->
+  <record id="res_partner_form_name_parts" model="ir.ui.view">
+    <field name="name">res.partner.form.name.parts</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="priority">21</field>
+    <field name="arch" type="xml">
+      <!-- Los añadimos dentro del <sheet>, así evitamos depender de la ubicación exacta del <field name="name"> -->
+      <xpath expr="//field[@name='parent_id']" position="before">
+        <group string="Nombres y apellidos" invisible="is_company" col="4">
+          <field name="x_firstname"  colspan="4"/>
+          <field name="x_middlename" colspan="4"/>
+          <field name="x_lastname"   colspan="4"/>
+          <field name="x_lastname2"  colspan="4"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_mercury.OrderReceipt" t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('after-footer')]" position="after">
+            <t t-if="props.data.generalNote">
+                <br />
+                <div style="text-align: left;">
+                    <b class="fw-bolder">General Note</b>
+                    <t t-foreach="props.data.generalNote.split('\n')" t-as="subNote" t-key="subNote_index">
+                        <br/>• <t t-esc="subNote"/>
+                    </t>
+                </div>
+            </t>
+        </xpath>
+    </t>
+
+</templates>

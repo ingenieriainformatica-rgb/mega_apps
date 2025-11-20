@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+mega_partner_uppercase.access_partner_uppercase_wizard,access_partner_uppercase_wizard,mega_partner_uppercase.model_partner_uppercase_wizard,base.group_user,1,1,1,1

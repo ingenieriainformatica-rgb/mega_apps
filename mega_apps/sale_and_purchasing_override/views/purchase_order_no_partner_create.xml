@@ -1,0 +1,26 @@
+<odoo>
+  <data>
+    <record id="view_order_purchase_order_form_no_partner_create" model="ir.ui.view">
+      <field name="name">purchase.order.form.no.partner.create</field>
+      <field name="model">purchase.order</field>
+      <field name="inherit_id" ref="purchase.purchase_order_form"/>
+      <field name="arch" type="xml">
+
+        <!-- 1) La versión original queda para TODOS EXCEPTO el grupo -->
+        <xpath expr="//form//field[@name='partner_id']" position="attributes">
+          <attribute name="groups">!sale_and_purchasing_override.group_update_accounts_user</attribute>
+        </xpath>
+
+        <!-- 2) Duplicamos el campo para el GRUPO y le ponemos las options que bloquean crear -->
+        <xpath expr="//form//field[@name='partner_id']" position="after">
+          <field name="partner_id"
+                 widget="res_partner_many2one"
+                 groups="sale_and_purchasing_override.group_update_accounts_user"
+                 context="{'res_partner_search_mode': 'supplier', 'show_vat': True}"
+                 options='{"no_create": true, "no_create_edit": true, "no_quick_create": true, "no_open": true}'/>
+        </xpath>
+
+      </field>
+    </record>
+  </data>
+</odoo>

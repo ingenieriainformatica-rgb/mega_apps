@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_weight.OrderWidget" t-inherit="point_of_sale.OrderWidget" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('order-summary')]" position="inside">
+            <t t-set="order" t-value="this.env.services.pos.get_order()" ></t>
+            <t t-if='this.env.services.pos.config.enable_weight'>
+                <div class="sh_cart_weight_main">
+                    <span class="sh_cart_total_weight_lbl">Total Weight :</span>
+                    <t t-set="total_weight" t-value="order.get_total_weight()" />
+                    <span class="sh_cart_total_weight_val"><t t-esc='total_weight' /></span>
+                </div>
+            </t>
+            <t t-if='this.env.services.pos.config.enable_volume'>
+                <div class="sh_cart_vol_main">
+                    <span class="sh_cart_total_volume_lbl">Total Volume :</span>
+                    <t t-set="total_volume" t-value="order.get_total_volume()" />
+                    <span class="sh_cart_total_volume_val"><t t-esc='total_volume' /></span>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

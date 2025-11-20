@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <!--
+    COMPATIBILIDAD ODOO 18/19:
+    - category_id → application_id (en res.groups)
+    - groups_id → group_ids (en res.users)
+    Ambos se asignan via Python en hooks.py para compatibilidad
+  -->
+
+  <!-- 1) Crear el grupo -->
+  <record id="group_real_estate_user" model="res.groups">
+    <field name="name">Real Estate / User</field>
+    <!-- category_id/application_id se asigna en post_init_hook -->
+  </record>
+
+  <!-- 2) Grupo de gestor de propiedades -->
+  <record id="group_property_manager" model="res.groups">
+    <field name="name">Gestor de Propiedades</field>
+    <!-- category_id/application_id se asigna en post_init_hook -->
+  </record>
+
+  <!-- Nota: La asignación de grupos al usuario admin se hace en post_init_hook -->
+</odoo>

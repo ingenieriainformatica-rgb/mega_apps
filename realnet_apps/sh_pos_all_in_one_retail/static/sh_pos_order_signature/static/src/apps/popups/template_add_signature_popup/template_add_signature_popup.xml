@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_enable_order_signature.TemplateAddSignaturePopupWidget">
+        <Dialog title="props.title" bodyClass="'d-flex flex-column'" size="lg">
+            <div class="popup">
+                <main class="modal-body sh_signature_main_body">
+                    <div class="main_div_signature">
+                        <div class="signature_detail_div">
+                            <div id="signature"></div>
+                            <NameAndSignature t-props="nameAndSignatureProps"/>
+                            <div class="signature_name_date d-flex justify-content-center align-items-center">
+                                <div class="name_div d-flex align-items-center" t-if="pos.config.sh_enable_order_signature and pos.config.sh_enable_name">
+                                    <t t-if="env.services.pos.config.sh_enable_name"> 
+                                        <span class=""> Name : </span> 
+                                        <input type="text" placeholder="Enter Name" id="sh_name" t-model="state.sh_name"  class="form-control form-control-md w-75 ms-auto"/>
+                                    </t>
+                                </div>
+                                <div class="date_div d-flex align-items-center ms-3" t-if="pos.config.sh_enable_order_signature and pos.config.sh_enable_date">
+                                    <t t-if="env.services.pos.config.sh_enable_date"> 
+                                        <span class=""> Date : </span>
+                                        <input type="date" id="sh_date" t-model="state.sh_date" class="form-control form-control-md w-75 ms-auto" /> 
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary btn-lg lh-lg o-default-button clear"  t-on-click="confirm">Save</button>
+                <button class="btn btn-primary btn-lg lh-lg o-default-button clear"  t-on-click="cancel">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

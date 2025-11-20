@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_all_in_one_retail.ProductQtyPopup">
+        <Dialog title="props.title" bodyClass="'d-flex flex-column'" size="lg">
+            <div class="popup">
+                <main class="modal-body">
+                    <div id="sh_table_id">
+                        <table class="table table-borderless wh_qty mb-0" t-if="this.env.services.pos.config.sh_display_by == 'warehouse'">
+                            <thead>
+                                <tr>
+                                    <th class="head_td name_th">Warehouse</th>
+                                    <th class="head_td qty_th">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-if="getStock">
+                                    <tr t-foreach="getStock" t-as="stock" t-key="stock">
+                                        <t t-if="stock != 'total'">
+                                            <td class="data_td">
+                                                <t t-esc="stock"></t>
+                                            </td>
+                                            <td class="data_td">
+                                                <t t-esc="getStock[stock][stock]"></t>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th class="footer_td">Total</th>
+                                    <th class="footer_td"><t t-esc="getStock['total']" /></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <table class="table table-borded wh_qty mb-0" t-else="">
+                            <thead>
+                                <tr>
+                                    <th class="head_td name_th">Locations</th>
+                                    <th class="head_td qty_th">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-if="getStock">
+                                    <t t-set="toatal_qty" t-value="0.0"/>
+                                    <tr t-foreach="getStock" t-as="stock" t-key="stock.id">
+                                        <td class="data_td">
+                                            <t t-esc="stock.location_id.display_name"></t>
+                                        </td>
+                                        <td class="data_td">
+                                            <t t-if="stock.updated_qty">
+                                                <t t-esc="stock.updated_qty"></t>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="stock.quantity"></t>
+
+                                            </t>
+                                            <t t-set="toatal_qty" t-value="stock.quantity + toatal_qty"/>
+
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th class="footer_td">Total</th>
+                                    <th class="footer_td"> <t t-esc="toatal_qty" /></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </main>
+
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary btn-lg lh-lg o-default-button"  t-on-click="close">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Grupo de Seguridad: Administrador de Validación de Documentos Soporte -->
+        <record id="group_support_doc_manager" model="res.groups">
+            <field name="name">Documento Soporte / Administrador de Validación</field>
+            <field name="category_id" ref="base.module_category_accounting"/>
+            <field name="implied_ids" eval="[(4, ref('account.group_account_manager'))]"/>
+            <field name="comment">
+                Permite a los usuarios:
+                - Ver el campo support_doc_validation_override
+                - Activar/desactivar bypass de validación de secuencia
+                - Confirmar documentos soporte sin validar el anterior (con bypass)
+
+                Este permiso debe otorgarse solo a usuarios autorizados para
+                casos excepcionales donde sea necesario omitir la validación.
+            </field>
+        </record>
+
+    </data>
+</odoo>

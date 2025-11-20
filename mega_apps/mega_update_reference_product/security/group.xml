@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Nueva categoría para tu módulo -->
+    <record id="product_group_update_reference" model="ir.module.category">
+      <field name="name">Mega Update Reference Code</field>
+      <field name="description">Permissions</field>
+      <field name="sequence">35</field>
+    </record>
+
+    <!-- Usuario: puede usar la caja -->
+    <record id="product_group_update_reference_user" model="res.groups">
+      <field name="name">Mega Update / Users</field>
+      <field name="category_id" ref="product_group_update_reference"/>
+    </record>
+
+</odoo>

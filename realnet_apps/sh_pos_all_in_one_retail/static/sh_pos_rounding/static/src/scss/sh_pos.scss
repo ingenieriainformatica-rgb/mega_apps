@@ -1,0 +1,28 @@
+.pos{
+	.pos-content{
+		.product-screen{
+			.leftpane{
+				.order-summary{
+					.sh_pos_rounding_text{
+						color:#495057 !important;
+						text-align: end;
+					}
+				}
+			}
+		}
+		.payment-screen{
+			.main-content{
+				.center-content{
+					.paymentlines-container{
+						.sh_rounding_div{
+							display:flex; justify-content: flex-start; align-items: center;
+							.rounding_label{
+								margin-right: 5px;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,246 @@
+<odoo>
+        <!-- Diseno del tiquete de parqueadero (recibo termico) -->
+        <template id="parking_ticket">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <div class="page">
+                        <style>
+                            /* Ajustes basicos para recibo termico estrecho */
+                            .pm-ticket {
+                                font-family: "Segoe UI", "DejaVu Sans", Arial, sans-serif;
+                                font-size: 11px;
+                                line-height: 1.25;
+                                width: 100%;
+                            }
+                            body, main, .page { margin: 0 !important; padding: 0 !important; }
+                            .pm-center { text-align: center; }
+                            .pm-bold { font-weight: 700; }
+                            .pm-line { border-top: 1px dashed #000; margin: 4px 0; }
+                            .pm-block { margin: 3px 0; }
+                            .pm-small { font-size: 10px; }
+                            .pm-info-row { display: flex; justify-content: space-between; }
+                            .pm-label { font-weight: 700; }
+                            .pm-hr { height: 1px; border: none; border-top: 1px dashed #000; margin: 6px 0; }
+                            .pm-underscored { display:block; border-bottom: 1px solid #000; height: 14px; }
+                            .pm-section-title { text-align:center; }
+                            .pm-stars { text-align:center; }
+                            .pm-logo-block { margin: 0 0 2px 0; padding: 0; }
+                            .pm-barcode { margin: 2px 0; }
+                            .pm-logo { display:block; margin: 0 auto; width: 150px; max-width: 100%; height: auto; }
+                        </style>
+
+                        <t t-set="trans_tbl" t-value="{225:'a',193:'A',233:'e',201:'E',237:'i',205:'I',243:'o',211:'O',250:'u',218:'U',241:'n',209:'N'}"/>
+                        <t t-set="norm" t-value="lambda s: (s or '').translate(trans_tbl)"/>
+
+                        <div class="pm-ticket" t-translation="off">
+                            <!-- Logo -->
+                            <div class="pm-logo-block pm-center">
+                                <img alt="Happy Parking" class="pm-logo"
+                                    t-att-src="(web_base_url and (web_base_url.rstrip('/') + '/odoo_parking_management/static/src/svg/happy_parking_logo_full.svg') or '/odoo_parking_management/static/src/svg/happy_parking_logo_full.svg')"/>
+                            </div>
+                            <!-- Encabezado: Consecutivo, Fecha/Hora, Placa -->
+                            <div class="pm-block">
+                                <div>Consecutivo: <span t-esc="norm(doc.name)"/></div>
+                                <div>
+                                    Fecha / Hora:
+                                    <span t-esc="doc.check_in and (format_datetime and format_datetime(doc.check_in) or doc.check_in)"/>
+                                </div>
+                                <div>Placa: <span t-esc="norm(doc.vehicle_number)"/></div>
+                            </div>
+
+                            <!-- Codigo de barras de la placa (Code128) -->
+                            <div class="pm-barcode pm-center">
+                                <img t-if="doc.vehicle_number"
+                                    t-att-src="( (web_base_url and (web_base_url.rstrip('/') + '/report/barcode?barcode_type=Code128&amp;value=%s&amp;width=600&amp;height=120&amp;humanreadable=0') or ('/report/barcode?barcode_type=Code128&amp;value=%s&amp;width=600&amp;height=120&amp;humanreadable=0')) % (quote_plus(doc.vehicle_number),) )"
+                                    style="max-width:100%; height:auto;"/>
+                            </div>
+
+                            <!-- Porteria / ubicacion -->
+                            <div class="pm-block">
+                                <span class="pm-label">PORTERIA:</span>
+                                <span t-esc="norm(doc.site_id.name or doc.location_id.name or '')"/>
+                            </div>
+
+                            <!-- Seccion TARIFA CARROS -->
+                            <div class="pm-stars">**************************************</div>
+                            <div class="pm-section-title pm-bold pm-block">TARIFA CARROS</div>
+                            <div class="pm-block">
+                                <div class="pm-bold">CON SELLO DEL LOCAL VISITADO</div>
+                                <div>Del minuto 1 al 20 tendra costo</div>
+                                <div>de Tres Mil Cien Pesos ($3.100)</div>
+                                <div>Del minuto 21 hora o fraccion de hora</div>
+                                <div>tendra costo de Seis Mil Doscientos</div>
+                                <div>Pesos ($6.200)</div>
+                            </div>
+                            <div class="pm-block">
+                                <div class="pm-bold">SIN SELLO</div>
+                                <div>A partir del minuto uno (1) tendra</div>
+                                <div>costo de Seis Mil Doscientos</div>
+                                <div>Pesos ($6.200)</div>
+                                <div>Hora o fraccion de hora</div>
+                            </div>
+                            <div class="pm-stars">**************************************</div>
+
+                            <!-- Seccion TARIFA MOTOS -->
+                            <div class="pm-section-title pm-bold pm-block">TARIFA MOTOS</div>
+                            <div class="pm-block">
+                                <div class="pm-bold">CON SELLO DEL LOCAL VISITADO</div>
+                                <div>Del minuto 1 al 30 no tendra costo</div>
+                                <div>Del minuto 31 hora o fraccion de hora</div>
+                                <div>tendra costo de Tres Mil Cien Pesos</div>
+                                <div>($3.100)</div>
+                            </div>
+                            <div class="pm-block">
+                                <div class="pm-bold">SIN SELLO</div>
+                                <div>A partir del minuto uno (1) tendra</div>
+                                <div>costo de Tres Mil Cien Pesos</div>
+                                <div>($3.100) Hora o fraccion de hora</div>
+                            </div>
+
+                            <hr class="pm-hr"/>
+
+                            <!-- Informacion para facturacion electronica -->
+                            <div class="pm-block">
+                                <div class="pm-bold">PARA SOLICITAR FACTURA ELECTRONICA</div>
+                                <div>POR FAVOR DILIGENCIAR LA SIGUIENTE</div>
+                                <div>INFORMACION:</div>
+                            </div>
+                            <div class="pm-block">
+                                <div>RAZON SOCIAL/NOMBRE: <span class="pm-underscored"/></div>
+                                <div>NIT/C.C: <span class="pm-underscored"/></div>
+                                <div>CELULAR: <span class="pm-underscored"/></div>
+                                <div>CORREO ELECTRONICO: <span class="pm-underscored"/></div>
+                                <div>DIRECCION: <span class="pm-underscored"/></div>
+                            </div>
+
+                            <!-- Horario -->
+                            <div class="pm-block pm-bold">HORARIO DE PARQUEADERO</div>
+                            <div class="pm-block">
+                                <div>DE LUNES A VIERNES DE 6:30 A.M - 6:00 P.M</div>
+                                <div>SABADOS DE 8:00 A.M - 3:00 P.M</div>
+                                <div>DOMINGOS Y FESTIVOS NO HAY SERVICIO</div>
+                            </div>
+                            <div class="pm-center pm-block">GRACIAS POR VISITARNOS</div>
+                            <div class="pm-center pm-small">Linea Feliz 313 360 50 93</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <!-- Report action (BASE) kept unbound to avoid duplicate options in Print -->
+        <record id="report_parking_ticket" model="ir.actions.report">
+            <field name="name">Parking Ticket Report</field>
+            <field name="model">parking.entry</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">odoo_parking_management.parking_ticket</field>
+            <field name="report_file">odoo_parking_management.parking_ticket</field>
+            <field name="paperformat_id" ref="odoo_parking_management.paper_format_parking_ticket"/>
+            <!-- Ensure this report is NOT bound to the Print menu -->
+            <field name="binding_type">report</field>
+            <field name="binding_model_id" eval="False"/>
+            <!-- Hide from generic Print menu to avoid duplicates -->
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_no_one')])]"/>
+        </record>
+
+        <!-- Template for Personal Autorizado (short format) -->
+        <template id="parking_ticket_authorized">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <div class="page">
+                        <style>
+                            .pm-ticket {
+                                font-family: "Segoe UI", "DejaVu Sans", Arial, sans-serif;
+                                font-size: 11px;
+                                line-height: 1.25;
+                                width: 100%;
+                            }
+                            body, main, .page { margin: 0 !important; padding: 0 !important; }
+                            .pm-center { text-align: center; }
+                            .pm-bold { font-weight: 700; }
+                            .pm-line { border-top: 1px dashed #000; margin: 4px 0; }
+                            .pm-block { margin: 3px 0; }
+                            .pm-small { font-size: 10px; }
+                            .pm-logo-block { margin: 0 0 2px 0; padding: 0; }
+                            .pm-logo { display:block; margin: 0 auto; width: 150px; max-width: 100%; height: auto; }
+                            .pm-hr { height: 1px; border: none; border-top: 1px dashed #000; margin: 6px 0; }
+                        </style>
+
+                        <t t-set="trans_tbl" t-value="{225:'a',193:'A',233:'e',201:'E',237:'i',205:'I',243:'o',211:'O',250:'u',218:'U',241:'n',209:'N'}"/>
+                        <t t-set="norm" t-value="lambda s: (s or '').translate(trans_tbl)"/>
+
+                        <div class="pm-ticket" t-translation="off">
+                            <!-- Logo -->
+                            <div class="pm-logo-block pm-center">
+                                <img alt="Happy Parking" class="pm-logo"
+                                    t-att-src="(web_base_url and (web_base_url.rstrip('/') + '/odoo_parking_management/static/src/svg/happy_parking_logo_full.svg') or '/odoo_parking_management/static/src/svg/happy_parking_logo_full.svg')"/>
+                            </div>
+
+                            <!-- Encabezado basico -->
+                                    <div class="pm-block">
+                                        <div>Consecutivo: <span t-esc="norm(doc.name)"/></div>
+                                        <div>Fecha / Hora:<span t-esc="doc.check_in and (format_datetime and format_datetime(doc.check_in) or doc.check_in)"/></div>
+                                        <div>Placa: <span t-esc="norm(doc.vehicle_number)"/></div>
+                                    </div>
+
+                            <!-- Codigo de barras de la placa -->
+                            <div class="pm-center pm-block">
+                                <img t-if="doc.vehicle_number"
+                                    t-att-src="( (web_base_url and (web_base_url.rstrip('/') + '/report/barcode?barcode_type=Code128&amp;value=%s&amp;width=600&amp;height=120&amp;humanreadable=0') or ('/report/barcode?barcode_type=Code128&amp;value=%s&amp;width=600&amp;height=120&amp;humanreadable=0')) % (quote_plus(doc.vehicle_number),) )"
+                                    style="max-width:100%; height:auto;"/>
+                            </div>
+
+                            <!-- Identificacion del autorizado y marca -->
+                            <div class="pm-block">
+                                <div>
+                                    <span t-esc="norm(doc.partner_id.name or '')"/>,
+                                    AUTORIZADO CREDICENTRO
+                                </div>
+                            </div>
+
+                            <hr class="pm-hr"/>
+
+                            <!-- Mensaje legal/responsabilidad -->
+                            <div class="pm-block">
+                                <div>Si al momento de ingresar, el vehiculo presenta danos o averias,</div>
+                                <div>el usuario informara sobre ellos, en desarrollo del principio</div>
+                                <div>de buena fe contractual. Favor estacionar en reversa, y solo</div>
+                                <div>en los sitios demarcados.</div>
+                            </div>
+
+                            <div class="pm-block">
+                                <div class="pm-bold">EQUIPOS Y SOFTWARE</div>
+                                <div>POWERED BY ODOO</div>
+                                <div class="pm-small">Linea Feliz 313 3605093</div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <!-- Report action for Personal Autorizado (kept unbound) -->
+        <record id="report_parking_ticket_authorized" model="ir.actions.report">
+            <field name="name">Parking Ticket - Personal Autorizado</field>
+            <field name="model">parking.entry</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">odoo_parking_management.parking_ticket_authorized</field>
+            <field name="report_file">odoo_parking_management.parking_ticket_authorized</field>
+            <field name="paperformat_id" ref="odoo_parking_management.paper_format_parking_ticket_authorized"/>
+            <!-- Ensure this report is NOT bound to the Print menu -->
+            <field name="binding_type">report</field>
+            <field name="binding_model_id" eval="False"/>
+            <!-- Hide from generic Print menu to avoid duplicates -->
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_no_one')])]"/>
+        </record>
+
+        <!-- Single action exposed in UI that decides which ticket to print -->
+        <record id="action_print_parking_ticket_auto" model="ir.actions.server">
+            <field name="name">Imprimir Ticket</field>
+            <field name="model_id" ref="model_parking_entry"/>
+            <field name="state">code</field>
+            <field name="code">action = records.action_print_ticket()</field>
+            <field name="binding_model_id" ref="model_parking_entry"/>
+            <field name="binding_type">action</field>
+        </record>
+    </odoo>

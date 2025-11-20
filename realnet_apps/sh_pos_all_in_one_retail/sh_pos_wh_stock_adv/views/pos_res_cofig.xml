@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="view_sh_pos_wh_stock_adv_config_form">
+        <field name="name">res.config.settings.view.form.inherit.sh_pos_wh_stock_adv</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority">50</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='pos_sh_display_by']/.." position="after" >
+                <div id="category_reference">
+                    <div class="o_setting_left_pane">
+                        <field name="pos_sh_update_real_time_qty" />
+                    </div>
+                    <div class="o_setting_right_pane" style="white-space: nowrap;">
+                        <label for="pos_sh_update_real_time_qty" />
+                        <div class="text-muted">
+                            Update Quantity From Other POS Session
+                        </div>
+                    </div>
+                </div>
+                <div id="category_reference">
+                    <div class="o_setting_left_pane">
+                        <field name="pos_sh_update_quantity_cart_change" />
+                    </div>
+                    <div class="o_setting_right_pane" style="white-space: nowrap;">
+                        <label for="pos_sh_update_quantity_cart_change" />
+                        <div class="text-muted">
+                            Note : This option will give empact on speed performance.
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

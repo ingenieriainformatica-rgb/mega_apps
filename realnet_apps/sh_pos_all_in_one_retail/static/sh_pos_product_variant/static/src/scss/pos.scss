@@ -1,0 +1,78 @@
+//odoo 18 add scss//
+.pos {
+    .modal-dialog {
+        .modal-content {
+            .modal-body {
+                .sh_alternative_products {
+                    .sh_alternative_products_title {
+                        background: $o-community-color;
+                        text-align: center;
+                        padding: 8px 0px;
+                        border-radius: 3px;
+                        margin-bottom: 12px;
+                        span {
+                            margin-bottom: 15px;
+                            color: #fff;
+                        }
+                    }
+                }
+                .product-list {
+                    max-height: 240px !important;
+                    overflow: auto !important;
+                    .product {
+                        background: #fff !important;
+                        $o-colors_type: #ffabab, #f8cea7, #fde697, #c9dff9, #ddb2d2, #fae0d5, #95e4df, #a5b2fa, #ffadd4,
+                            #c3f0c9, #e75b5b63, #9872e6 !default;
+                        @for $bg-color from 1 to length($o-colors) {
+                            &.o_colorlist_item_color_transparent_#{$bg-color} {
+                                .product-information-tag {
+                                    $sh_border_color : nth($o-colors_type, $bg-color);
+                                    border-color: transparent  $sh_border_color transparent transparent !important;
+                                }
+                            }
+                        }
+                        @if $sh_display_product_image_name == "product_name" {
+                            height: 130px;
+                            justify-content: center;
+                            align-items: center !important;
+                        }
+                    }
+                }
+                &:has(.sh_alternative_products .sh_alternative_products_title) {
+                    max-height: unset !important;
+                    overflow: auto !important;
+                }
+                .sh_alternative_products {
+                    margin-top: 10px;
+                }
+                .section-product-info-title {
+                    .d-flex {
+                        justify-content: space-between !important;
+                        h4 {
+                            span:first-child {
+                                font-weight: 600;
+                            }
+                        }
+                    }
+                }
+            }
+            .modal-footer {
+                @include media-breakpoint-down(lg) {
+                    justify-content: center !important;
+                }
+            }
+        }
+    }
+    *::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    *::-webkit-scrollbar-thumb {
+        background: #393939;
+        min-height: 30px;
+    }
+    *::-webkit-scrollbar-track {
+        background: #e9ecef;
+        border-left: solid 1px #c8c8c8;
+    }
+}

@@ -1,0 +1,76 @@
+<templates id="template" xml:space="preserve">
+    
+    <t t-name="Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <xpath expr="//ul[hasclass('info-list')]" position="after">
+            <t t-if="line.sh_is_has_topping">
+                <div class='topping-item' t-if='line.sh_topping_line_ids'> 
+                    <t t-foreach="line.sh_topping_line_ids" t-as="topping" t-key="topping.id">
+                        <li class="orderline position-relative d-flex align-items-center p-2 lh-sm cursor-pointer sh_topping_line" t-attf-class="{{ topping.comboParent ? 'orderline-combo ms-4 fst-italic' : '' }}" t-att-class="props.class">
+                            <div t-if="line.sh_is_has_topping" class="fa fa-trash"
+                                t-att-data-line="line.id"
+                                t-on-click.stop="() => this._clickRemoveLine(line.id)"></div>
+                            <div class="product-order"></div>
+                            <div t-if="topping.imageSrc" class="o_line_container d-flex align-items-center justify-content-center">
+                                <img t-attf-style="border-radius: 1rem;" t-att-src="topping.imageSrc"/>
+                            </div>
+                            <div class="d-flex flex-column w-100 gap-1">
+                                <div class="d-flex justify-content-between w-100">
+                                    <div class="product-name d-inline-block flex-grow-1 fw-bolder pe-1 text-truncate">
+                                        <span class="text-wrap" t-esc="topping.productName"/>
+                                        <t t-slot="product-name"/>
+                                    </div>
+                                    <div t-if="!props.basic_receipt" class="product-price price fw-bolder">
+                                        <t t-if="topping.price === 'free'">Free</t>
+                                        <t t-else="" t-esc="topping.price"/>
+                                    </div>
+                                    <div t-if="props.showTaxGroupLabels" t-esc="topping.taxGroupLabels" class="text-end" style="width: 2rem"/>
+                                </div>
+                                <ul class="info-list d-flex flex-column sh_info_list w-100">
+                                    <li class="price-per-unit">
+                                        <span class="qty px-1 border rounded text-bg-view fw-bolder me-1" t-esc="topping.qty"/>
+                                        <t t-if="!props.basic_receipt">
+                                            x
+                                            <t t-if="topping.price !== 0">
+                                                <s t-esc="topping.oldUnitPrice" t-if="topping.oldUnitPrice" />
+                                                <t t-esc="topping.unitPrice" />
+                                            </t>
+                                            /
+                                        </t>
+                                        <t t-if="topping.unit" t-esc="topping.unit" />
+                                    </li>
+                                    <li t-if="topping.price !== 0 and topping.discount and topping.discount !== '0' and !props.basic_receipt">
+                                        <t t-esc="topping.price_without_discount"/> With a <em><t t-esc="topping.discount" />% </em> discount
+                                    </li>
+                                    <li t-if="topping.customerNote" class="customer-note w-100 p-2 mt-2 rounded text-break text-bg-warning bg-opacity-25">
+                                        <i class="fa fa-sticky-note me-1" role="img" aria-label="Customer Note" title="Customer Note"/>
+                                        <t t-esc="topping.customerNote" />
+                                    </li>
+                                    <div class="internal-note-container d-flex gap-2">
+                                        <t t-foreach="topping.internalNote?.split?.('\n') or []" t-as="note" t-key="note_index">
+                                            <li t-if="note.trim() !== ''" t-esc="note" class="internal-note badge mt-2 p-2 rounded-pill bg-info text-info bg-opacity-25" style="font-size: 0.85rem;" />
+                                        </t>
+                                    </div>
+                                    <li t-foreach="topping.packLotLines or []" t-as="lot" t-key="lot_index" t-esc="lot" />
+                                    <t t-slot="default" />
+                                </ul>
+                            </div>
+                        </li>
+                    </t>
+                </div>
+            </t>
+        </xpath>
+        <xpath expr="//li[hasclass('orderline')]" position="attributes">
+            <t t-log="line"/>
+            <attribute name="t-attf-class">{{ (line.comboParent || line.sh_base_line_id || line.sh_is_topping) ? 'orderline-combo sh_pos_topping ms-4 fst-italic' : '' }}</attribute>
+
+        </xpath>
+    </t>
+
+    <t t-name="ShOrderChangeReceipt" t-inherit="point_of_sale.OrderChangeReceipt" t-inherit-mode="extension" >
+        <xpath expr="//div[hasclass('d-flex medium')]/.." position="attributes">
+            <t t-esc="console.log('line ===>', line)"></t>
+            <attribute name="t-attf-class">{{ (line.isCombo || line.sh_base_line_id || line.sh_is_topping) ? 'orderline-combo sh_pos_topping ms-4 fst-italic' : '' }}</attribute>
+        </xpath>
+    </t>
+
+</templates>

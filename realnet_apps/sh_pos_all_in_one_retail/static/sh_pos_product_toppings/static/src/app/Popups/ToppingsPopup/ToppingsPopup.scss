@@ -1,0 +1,28 @@
+.sh_cash_in_out_statement_popup {
+    .modal-body {
+        &.main_div_sh_statement {
+            max-height: 300px !important;
+            min-height: 300px;
+            overflow: auto;
+
+            .main_sub_div_sh_statement {
+
+                .sh_toppings_products,
+                .sh_global_toppins {
+                    .product {
+                        border: 1px solid transparent;
+                        cursor: pointer;
+
+                        &:focus {
+                            border-color: $o-brand-primary !important;
+                        }
+
+                        &:hover {
+                            border-color: $o-brand-primary !important;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,1027 @@
+# Translation of Odoo Module: odoo_parking_management
+# Language: Spanish (Colombia)
+# Copyright (C) 2025
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: odoo_parking_management 18.0.1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-01 00:00+0000\n"
+"PO-Revision-Date: 2025-10-01 00:00+0000\n"
+"Last-Translator: Auto Generated\n"
+"Language-Team: Spanish (Colombia)\n"
+"Language: es_CO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: odoo_parking_management
+#: model:ir.module.category,name:odoo_parking_management.module_odoo_parking_management
+msgid "Parking Management"
+msgstr "Gestión de Parqueaderos"
+
+#. module: odoo_parking_management
+#: model:ir.module.category,description:odoo_parking_management.module_odoo_parking_management
+msgid "Category for Parking Management"
+msgstr "Categoría para la gestión de parqueaderos"
+
+#. module: odoo_parking_management
+#: model:res.groups,name:odoo_parking_management.odoo_parking_management_group_parking_user
+msgid "User"
+msgstr "Usuario"
+
+#. module: odoo_parking_management
+#: model:res.groups,name:odoo_parking_management.odoo_parking_management_group_parking_manager
+msgid "Manager"
+msgstr "Administrador"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.parking_entry_action_public_parking_entry
+msgid "Public Parking Entry"
+msgstr "Entrada de Parqueo Público"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.parking_entry_action_private_parking_entry
+msgid "Private Parking Entry"
+msgstr "Entrada de Parqueo Privado"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.parking_entry_action_all_parking_entries
+msgid "All Parking Entry"
+msgstr "Todas las Entradas de Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.parking_entry_action_public_parking_entry
+msgid "Create Your First Public Parking Entry"
+msgstr "Cree su primera entrada de parqueo público"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.parking_entry_action_private_parking_entry
+msgid "Create Your First Private Parking Entry"
+msgstr "Cree su primera entrada de parqueo privado"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.parking_entry_action_all_parking_entries
+msgid "View Your Parking Entries"
+msgstr "Ver sus entradas de parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.slot_type_action_slot_type_details
+msgid "Slot Types"
+msgstr "Tipos de Cupo"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.slot_type_action_slot_type_details
+msgid "Create Your First Slot Type"
+msgstr "Cree su primer tipo de cupo"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.vehicle_details_action_vehicle_details
+msgid "Vehicle"
+msgstr "Vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.vehicle_details_action_vehicle_details
+msgid "Create Your First Vehicle Entry"
+msgstr "Cree su primera entrada de vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.slot_details_action_slot_details
+msgid "Slots"
+msgstr "Cupos"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.slot_details_action_slot_details
+msgid "Create Your First Slot"
+msgstr "Cree su primer cupo"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.slot_details_action_all_slots
+msgid "All Slots"
+msgstr "Todos los Cupos"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.slot_details_action_all_slots
+msgid "Display all the slots"
+msgstr "Mostrar todos los cupos"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.parking_entry_action_allocated_slots
+msgid "Allocated Slots"
+msgstr "Cupos Asignados"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.parking_entry_action_allocated_slots
+msgid "First Allocated Parking Entry"
+msgstr "Primera entrada de parqueo asignada"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.parking_entry_action_non_allocated_slots
+msgid "Non Allocated Slots"
+msgstr "Cupos No Asignados"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.parking_entry_action_non_allocated_slots
+msgid "First Non Allocated Parking Entry"
+msgstr "Primera entrada de parqueo no asignada"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.location_details_action
+msgid "Location"
+msgstr "Ubicación"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.location_details_action
+msgid "Create Your First Location"
+msgstr "Cree su primera ubicación"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.member_slot_reservation_action
+msgid "Member Slot Reservations"
+msgstr "Reservas de Cupo para Miembro"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.member_slot_reservation_action
+msgid "Create Your First Member Slot Reservation"
+msgstr "Cree su primera reserva de cupo para miembro"
+
+#. module: odoo_parking_management
+#: model:ir.actions.report,name:odoo_parking_management.report_parking_ticket
+msgid "Parking Ticket Report"
+msgstr "Reporte de Tiquete de Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.model,name:odoo_parking_management.model_parking_entry
+msgid "Public Park Entry"
+msgstr "Entrada de Parqueo Público"
+
+#. module: odoo_parking_management
+#: model:ir.model,name:odoo_parking_management.model_slot_type
+msgid "Slot Type"
+msgstr "Tipo de Cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model,name:odoo_parking_management.model_location_details
+msgid "Location Details"
+msgstr "Detalles de Ubicación"
+
+#. module: odoo_parking_management
+#: model:ir.model,name:odoo_parking_management.model_slot_details
+msgid "Details about slot"
+msgstr "Detalles del cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model,name:odoo_parking_management.model_member_slot_reservation
+msgid "Member Slot Reservation"
+msgstr "Reserva de Cupo para Miembro"
+
+#. module: odoo_parking_management
+#: model:ir.model,name:odoo_parking_management.model_vehicle_details
+msgid "Vehicle Details"
+msgstr "Detalles del Vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model,name:odoo_parking_management.model_register_payment_wizard
+msgid "Register Parking Payment"
+msgstr "Registrar Pago de Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.rule,name:odoo_parking_management.parking_entry_rule_parking_user
+msgid "View Own Docs"
+msgstr "Ver Documentos Propios"
+
+#. module: odoo_parking_management
+#: model:ir.rule,name:odoo_parking_management.parking_entry_rule_manager
+msgid "View All Docs"
+msgstr "Ver Todos los Documentos"
+
+#. module: odoo_parking_management
+#: model:ir.sequence,name:odoo_parking_management.seq_pubic_parking_entry
+msgid "Public Parking Entry"
+msgstr "Entrada de Parqueo Público"
+
+#. module: odoo_parking_management
+#: model:ir.sequence,name:odoo_parking_management.seq_private_parking_entry
+msgid "Private Parking Entry"
+msgstr "Entrada de Parqueo Privado"
+
+#. module: odoo_parking_management
+#: model:report.paperformat,name:odoo_parking_management.paper_format_parking_ticket
+msgid "Gate Pass"
+msgstr "Pase de Puerta"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.parking_entry_menu_parking_management_root
+msgid "Parking"
+msgstr "Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.parking_entry_menu_configuration_root
+msgid "Configuration"
+msgstr "Configuración"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.parking_entry_menu_private_parking
+msgid "Private Parking Entry"
+msgstr "Entrada de Parqueo Privado"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.parking_entry_menu_public_parking
+msgid "Public Parking Entry"
+msgstr "Entrada de Parqueo Público"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.menu_reporting_root
+msgid "Reporting"
+msgstr "Informes"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.parking_entry_menu
+msgid "All Parking Entries"
+msgstr "Todas las Entradas de Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.slot_type_menu
+msgid "Slot Types"
+msgstr "Tipos de Cupo"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.vehicle_details_menu
+msgid "Vehicle"
+msgstr "Vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.slot_details_menu
+msgid "Slots"
+msgstr "Cupos"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.menu_slots_root
+msgid "Slots"
+msgstr "Cupos"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.slot_details_menu_all_slots
+msgid "All Slots"
+msgstr "Todos los Cupos"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.slot_details_menu_allocated_slots
+msgid "Allocated Slots"
+msgstr "Cupos Asignados"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.slot_details_menu_not_allocated_slots
+msgid "Not Allocated Slots"
+msgstr "Cupos No Asignados"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.location_details_menu
+msgid "Locations"
+msgstr "Ubicaciones"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.member_slot_reservation_menu
+msgid "Member Slot Reservations"
+msgstr "Reservas de Cupo para Miembro"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_form
+msgid "Check In"
+msgstr "Entrada"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_form
+msgid "Check Out"
+msgstr "Salida"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_form
+msgid "Paid"
+msgstr "Pagado"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_form
+msgid "Register Payment"
+msgstr "Registrar Pago"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.register_payment_wizard_view_form
+msgid "Pay"
+msgstr "Pagar"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.register_payment_wizard_view_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__name
+msgid "Reference"
+msgstr "Referencia"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__partner_id
+msgid "Contact"
+msgstr "Contacto"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__mobile
+msgid "Mobile"
+msgstr "Móvil"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__email
+msgid "Email"
+msgstr "Correo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__check_in
+msgid "Check In"
+msgstr "Entrada"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__vehicle_id
+msgid "Vehicle"
+msgstr "Vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__vehicle_number
+msgid "Vehicle Number"
+msgstr "Número de Vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__slot_type_id
+msgid "Slot Type"
+msgstr "Tipo de Cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__slot_id
+msgid "Slot"
+msgstr "Cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__user_id
+msgid "Created By"
+msgstr "Creado Por"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__created_date
+msgid "Created Datetime"
+msgstr "Fecha y Hora de Creación"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__check_out
+msgid "Check Out"
+msgstr "Salida"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__duration
+msgid "Duration"
+msgstr "Duración"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__customer_type
+msgid "Type"
+msgstr "Tipo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields.selection,name:odoo_parking_management.selection__parking_entry__customer_type__private
+msgid "Private"
+msgstr "Privado"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields.selection,name:odoo_parking_management.selection__parking_entry__customer_type__public
+msgid "Public"
+msgstr "Público"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__location_id
+msgid "Location"
+msgstr "Ubicación"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields.selection,name:odoo_parking_management.selection__parking_entry__state__draft
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields.selection,name:odoo_parking_management.selection__parking_entry__state__check_in
+msgid "Check In"
+msgstr "Entrada"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields.selection,name:odoo_parking_management.selection__parking_entry__state__check_out
+msgid " Check Out"
+msgstr " Salida"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields.selection,name:odoo_parking_management.selection__parking_entry__state__payment
+msgid "Payment"
+msgstr "Pago"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__currency_id
+msgid "Currency"
+msgstr "Moneda"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__parking_cost
+msgid "Parking Cost"
+msgstr "Costo de Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__check_in_bool
+msgid "Check In Bool"
+msgstr "Booleano de Entrada"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__check_out_bool
+msgid "Check Out Bool"
+msgstr "Booleano de Salida"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__paid_bool
+msgid "Paid Bool"
+msgstr "Booleano de Pago"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__name
+msgid "Field for the sequence of parking entries"
+msgstr "Campo para la secuencia de entradas de parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__partner_id
+msgid "Field for customer"
+msgstr "Campo para el cliente"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__mobile
+msgid "Mobile number of customer"
+msgstr "Número móvil del cliente"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__email
+msgid "E-mail of customer"
+msgstr "Correo electrónico del cliente"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__check_in
+msgid "Check In time of the vehicle for parking"
+msgstr "Hora de entrada del vehículo para parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__vehicle_id
+msgid "Vehicle of Customer"
+msgstr "Vehículo del Cliente"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__vehicle_number
+msgid "Vehicle number of customer"
+msgstr "Número de vehículo del cliente"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__slot_type_id
+msgid "Slot type fr the vehicle"
+msgstr "Tipo de cupo para el vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__slot_id
+msgid "Slot assigned for vehicle of Customer"
+msgstr "Cupo asignado para el vehículo del Cliente"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__user_id
+msgid "Field for user that entries are created"
+msgstr "Campo para el usuario que crea las entradas"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__created_date
+msgid "Date which entry was created"
+msgstr "Fecha en la que se creó la entrada"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__check_out
+msgid "Check Out time of vehicle"
+msgstr "Hora de salida del vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__duration
+msgid "Time spent by the vehicles"
+msgstr "Tiempo que pasó el vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__customer_type
+msgid "Type of the customer"
+msgstr "Tipo de cliente"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__company_id
+msgid "Name of the company"
+msgstr "Nombre de la compañía"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__location_id
+msgid "Name of the location"
+msgstr "Nombre de la ubicación"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__state
+msgid "Status of the vehicle"
+msgstr "Estado del vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__parking_cost
+msgid "Cost for the parking."
+msgstr "Costo del parqueo."
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__check_in_bool
+msgid "Check if checked in."
+msgstr "Indica si se hizo la entrada."
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__check_out_bool
+msgid "Check if checked out."
+msgstr "Indica si se hizo la salida."
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__paid_bool
+msgid "Check if paid."
+msgstr "Indica si está pagado."
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_slot_type__vehicle_type
+msgid "Name"
+msgstr "Nombre"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_slot_type__code
+msgid "Code"
+msgstr "Código"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_slot_type__allowed_park_duration
+msgid "Allowed Parking Time"
+msgstr "Tiempo Permitido de Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_slot_type__vehicle_type
+msgid "Name of vehicle"
+msgstr "Nombre del vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_slot_type__code
+msgid "Unique identifier for vehicle"
+msgstr "Identificador único del vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_slot_type__allowed_park_duration
+msgid "Time allowed for the vehicle"
+msgstr "Tiempo permitido para el vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_location_details__name
+msgid "Locations"
+msgstr "Ubicaciones"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_location_details__name
+msgid "Name of the location"
+msgstr "Nombre de la ubicación"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_slot_details__code
+msgid "Code"
+msgstr "Código"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_slot_details__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_slot_details__slot_type_id
+msgid "Slot Type"
+msgstr "Tipo de Cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_slot_details__code
+msgid "Unique identifier for slot"
+msgstr "Identificador único del cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_slot_details__name
+msgid "Name of the slot"
+msgstr "Nombre del cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_slot_details__slot_type_id
+msgid "Type of the slot"
+msgstr "Tipo del cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_member_slot_reservation__slot_id
+msgid "Slot"
+msgstr "Cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_member_slot_reservation__partner_id
+msgid "Member"
+msgstr "Miembro"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_member_slot_reservation__start_date
+msgid "Start Date"
+msgstr "Fecha de Inicio"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_member_slot_reservation__end_date
+msgid "End Date"
+msgstr "Fecha de Fin"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_member_slot_reservation__slot_id
+msgid "Field for the ID of the slot"
+msgstr "Campo para el ID del cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_member_slot_reservation__partner_id
+msgid "Field for Reserved Member"
+msgstr "Campo para el Miembro Reservado"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_member_slot_reservation__start_date
+msgid "Field for adding the start date"
+msgstr "Campo para agregar la fecha de inicio"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_member_slot_reservation__end_date
+msgid "Field for adding end date"
+msgstr "Campo para agregar la fecha de fin"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_vehicle_details__vehicle_name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_vehicle_details__vehicle_id
+msgid "Vehicle"
+msgstr "Vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_vehicle_details__partner_id
+msgid "Owner"
+msgstr "Propietario"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_vehicle_details__number_plate
+msgid "Number Plate"
+msgstr "Placa"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_vehicle_details__ownership_type
+msgid "Ownership Type"
+msgstr "Tipo de Propiedad"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields.selection,name:odoo_parking_management.selection__vehicle_details__ownership_type__outsider
+msgid "Outsider"
+msgstr "Externo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields.selection,name:odoo_parking_management.selection__vehicle_details__ownership_type__member
+msgid "Member"
+msgstr "Miembro"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_vehicle_details__vehicle_name
+msgid "Field for the sequence of parking entries"
+msgstr "Campo para la secuencia de entradas de parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_vehicle_details__vehicle_id
+msgid "Name of vehicle"
+msgstr "Nombre del vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_vehicle_details__partner_id
+msgid " Name of Partner"
+msgstr " Nombre del Socio"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_vehicle_details__number_plate
+msgid "Number for the vehicle"
+msgstr "Número del vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_vehicle_details__ownership_type
+msgid "Type of the owner of vehicle"
+msgstr "Tipo de propietario del vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_register_payment_wizard__partner_id
+msgid "Partner"
+msgstr "Contacto"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_register_payment_wizard__parking_duration
+msgid "Duration"
+msgstr "Duración"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_register_payment_wizard__amount
+msgid "Amount"
+msgstr "Monto"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_register_payment_wizard__ref
+msgid "Reference"
+msgstr "Referencia"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_register_payment_wizard__date
+msgid "Date"
+msgstr "Fecha"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_register_payment_wizard__partner_id
+msgid "Name of partner to register the payment"
+msgstr "Nombre del contacto para registrar el pago"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_register_payment_wizard__parking_duration
+msgid "Duration of the parking vehicle"
+msgstr "Duración del parqueo del vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_register_payment_wizard__amount
+msgid "Amount of the parking vehicle"
+msgstr "Monto del parqueo del vehículo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_register_payment_wizard__ref
+msgid "Reference to the parking ticket"
+msgstr "Referencia al tiquete de parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_register_payment_wizard__date
+msgid "Date when payment was made"
+msgstr "Fecha en que se realizó el pago"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_kanban
+msgid "Slot:"
+msgstr "Cupo:"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_kanban
+msgid "Vehicle:"
+msgstr "Vehículo:"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_kanban
+msgid "Check In:"
+msgstr "Entrada:"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_kanban
+msgid "Check Out:"
+msgstr "Salida:"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_ticket
+msgid "Parking Ticket"
+msgstr "Tiquete de Parqueo"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_ticket
+msgid "REFERENCE"
+msgstr "REFERENCIA"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_ticket
+msgid "Vehicle Number"
+msgstr "Número de Vehículo"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_ticket
+msgid "Location"
+msgstr "Ubicación"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_ticket
+msgid "Check In"
+msgstr "Entrada"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_ticket
+msgid "Check Out"
+msgstr "Salida"
+
+#. module: odoo_parking_management
+#: model:ir.model,name:odoo_parking_management.model_parking_site
+msgid "Parking Site"
+msgstr "Sede de Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_site__name
+msgid "Site Name"
+msgstr "Nombre de la Sede"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_site__code
+msgid "Site Code"
+msgstr "Código de la Sede"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_site__address
+msgid "Address"
+msgstr "Dirección"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_site__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_res_users__allowed_site_ids
+msgid "Allowed Sites"
+msgstr "Sedes Permitidas"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_res_users__default_site_id
+msgid "Default Site"
+msgstr "Sede Predeterminada"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__site_id
+msgid "Site"
+msgstr "Sede"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_slot_details__site_id
+msgid "Site"
+msgstr "Sede"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_location_details__site_id
+msgid "Site"
+msgstr "Sede"
+
+#. module: odoo_parking_management
+#: model:res.groups,name:odoo_parking_management.group_site_operator
+msgid "Site Operator"
+msgstr "Operador de Sede"
+
+#. module: odoo_parking_management
+#: model:res.groups,name:odoo_parking_management.group_parking_admin
+msgid "Parking Admin"
+msgstr "Administrador de Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,name:odoo_parking_management.parking_site_action
+msgid "Parking Sites"
+msgstr "Sedes de Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.ui.menu,name:odoo_parking_management.parking_site_menu
+msgid "Sites"
+msgstr "Sedes"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.res_users_view_form_inherit
+msgid "Parking Sites"
+msgstr "Sedes de Parqueo"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_site_view_search
+msgid "Group By Site"
+msgstr "Agrupar por Sede"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.slot_details_view_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.slot_details_view_search
+msgid "Slot Type"
+msgstr "Tipo de Cupo"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_search
+msgid "My Sites"
+msgstr "Mis Sedes"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_site_view_form
+msgid "Site Information"
+msgstr "Información de la Sede"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_site_view_form
+msgid "Analytics Account"
+msgstr "Cuenta Analítica"
+
+#. module: odoo_parking_management
+#: model:ir.actions.act_window,help:odoo_parking_management.parking_site_action
+msgid "Create your first parking site"
+msgstr "Cree su primera sede de parqueo"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_site_view_search
+msgid "Active Sites"
+msgstr "Sedes Activas"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_site_view_search
+msgid "Inactive Sites"
+msgstr "Sedes Inactivas"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__site_id
+msgid "Parking Site"
+msgstr "Sede de Parqueo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_parking_entry__site_id
+msgid "Parking site where this entry belongs"
+msgstr "Sede de parqueo a la que pertenece esta entrada"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_slot_details__site_id
+msgid "Parking site where this slot belongs"
+msgstr "Sede de parqueo a la que pertenece este cupo"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,help:odoo_parking_management.field_location_details__site_id
+msgid "Parking site where this location belongs"
+msgstr "Sede de parqueo a la que pertenece esta ubicación"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_form
+msgid "Automatic selection based on site"
+msgstr "Selección automática basada en la sede"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_form
+msgid "Se selecciona automáticamente basado en la sede..."
+msgstr "Se selecciona automáticamente basado en la sede..."
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__service_product_id
+msgid "Service Product"
+msgstr "Producto de Servicio"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__is_monthly
+msgid "Is Monthly"
+msgstr "Es Mensualidad"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__monthly_contract_id
+msgid "Monthly Contract"
+msgstr "Contrato Mensual"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__monthly_period
+msgid "Monthly Period"
+msgstr "Periodo Mensual"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__monthly_invoice_id
+msgid "Monthly Invoice"
+msgstr "Factura Mensual"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__receipt_sequence
+msgid "Receipt Sequence"
+msgstr "Secuencia de Recibo"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_form
+msgid "Create Invoice"
+msgstr "Crear Factura"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__plaza
+msgid "Plaza"
+msgstr "Plaza"
+
+#. module: odoo_parking_management
+#: model:ir.model.fields,field_description:odoo_parking_management.field_parking_entry__service_product_id
+msgid "Service Product"
+msgstr "Producto de Servicio"
+
+#. module: odoo_parking_management
+#: model_terms:ir.ui.view,arch_db:odoo_parking_management.parking_entry_view_form
+msgid "REGISTRAR SALIDA"
+msgstr "REGISTRAR SALIDA"

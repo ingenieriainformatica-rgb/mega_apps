@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--Form view of Register Payment Wizard-->
+    <record id="register_payment_wizard_view_form" model="ir.ui.view">
+        <field name="name">register.payment.wizard.view.form</field>
+        <field name="model">register.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form class="odpm-guard-form">
+                <group>
+                    <group>
+                        <field name="partner_id" readonly="1" options="{'no_open': True}" label="partner_id"/>
+                        <field name="parking_duration" readonly="1" label="parking_duration"/>
+                        <field name="amount" readonly="1" label="amount"/>
+                        <field name="received_amount" required="1"/>
+                        <field name="change_amount" readonly="1" label="change_amount"/>
+                    </group>
+                    <group>
+                        <field name="ref" readonly="1" label="ref"/>
+                        <field name="date" readonly="1" label="date"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="parking_payment" type="object" string="Pay" class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,42 @@
+<odoo>
+  <record id="account_loan_line_list_inherit_pay" model="ir.ui.view">
+    <field name="name">account.loan.line.list.inherit.pay</field>
+    <field name="model">account.loan.line</field>
+    <!-- Usa el xmlid REAL de tu vista -->
+    <field name="inherit_id" ref="account_loans.account_loan_line_list_view"/>
+    <field name="arch" type="xml">
+      <!-- En v18 es <list>, no <tree> -->
+      <xpath expr="//list" position="inside">
+        <!-- Botón por línea -->
+        <button name="action_open_register_payment"
+                type="object"
+                string=""
+                class="btn-success"
+                help="Pagar cuota"
+                icon="fa-money"
+                invisible="loan_state in ('draft') or paid_fee or not loan_paid_client"
+                />
+      </xpath>
+    </field>
+  </record>
+
+  <record id="account_loan_form_inherit_views_button_pay_next" model="ir.ui.view">
+    <field name="name">account.loan.form.inherit.button.pay.next</field>
+    <field name="model">account.loan</field>
+    <field name="inherit_id" ref="account_loans.account_loan_form_view"/>
+    <field name="arch" type="xml">
+      <!-- Insertamos en el header del form -->
+      <xpath expr="//form/header" position="inside">
+        <button
+          name="action_open_register_payment_from_loan"
+          type="object"
+          string="Cliente pago"
+          class="btn btn-primary"
+          icon="fa-money"
+          invisible="state != 'running' or paid_client"
+        />
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

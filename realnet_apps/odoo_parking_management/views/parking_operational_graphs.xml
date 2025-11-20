@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Graph: Entradas por hora -->
+        <record id="parking_entry_graph_by_hour" model="ir.ui.view">
+            <field name="name">parking.entry.graph.by.day</field>
+            <field name="model">parking.entry</field>
+            <field name="arch" type="xml">
+                <graph string="Entradas por Día" type="bar">
+                    <field name="created_date" interval="day"/>
+                    <field name="id" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- Graph: Salidas por hora -->
+        <record id="parking_entry_graph_checkout_by_hour" model="ir.ui.view">
+            <field name="name">parking.entry.graph.checkout.by.day</field>
+            <field name="model">parking.entry</field>
+            <field name="arch" type="xml">
+                <graph string="Salidas por Día" type="bar">
+                    <field name="check_out" interval="day"/>
+                    <field name="id" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- Graph: Duración por tipo de vehículo (Slot Type) -->
+        <record id="parking_entry_graph_duration_by_vehicle" model="ir.ui.view">
+            <field name="name">parking.entry.graph.duration.by.vehicle</field>
+            <field name="model">parking.entry</field>
+            <field name="arch" type="xml">
+                <graph string="Duración por Tipo de Vehículo" type="bar">
+                    <field name="slot_type_id"/>
+                    <field name="duration" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- Graph: Pagos por Diario (aprox. Digital vs Efectivo) -->
+        <record id="account_payment_graph_by_journal" model="ir.ui.view">
+            <field name="name">account.payment.graph.by.journal</field>
+            <field name="model">account.payment</field>
+            <field name="arch" type="xml">
+                <graph string="Pagos por Diario" type="pie">
+                    <field name="journal_id"/>
+                    <field name="amount" type="measure"/>
+                </graph>
+            </field>
+        </record>
+    </data>
+</odoo>

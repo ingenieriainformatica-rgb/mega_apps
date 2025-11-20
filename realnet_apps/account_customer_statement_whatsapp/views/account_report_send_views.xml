@@ -1,0 +1,33 @@
+<odoo>
+  <!-- Heredar la vista del wizard de envío del Estado del cliente -->
+  <record id="view_account_report_send_inherit_whatsapp" model="ir.ui.view">
+    <field name="name">account.report.send.inherit.whatsapp</field>
+    <field name="model">account.report.send</field>
+    <field name="inherit_id" ref="account_reports.account_report_send_form"/>
+    <field name="arch" type="xml">
+      <!-- Inserta los nuevos campos en el área de opciones del asistente -->
+      <!-- Botonera de canal (EMAIL / WHATSAPP) -->
+      <xpath expr="//div[@name='options']" position="before">
+        <div class="mb-3" name="channel_toggle">
+          <button name="action_switch_to_email" type="object" string="EMAIL" class="btn btn-primary mr-2" invisible="delivery_channel != 'email'"/>
+          <button name="action_switch_to_email" type="object" string="EMAIL" class="btn btn-secondary mr-2" invisible="delivery_channel == 'email'"/>
+          <button name="action_switch_to_whatsapp" type="object" string="WHATSAPP" class="btn btn-primary" invisible="delivery_channel != 'whatsapp'"/>
+          <button name="action_switch_to_whatsapp" type="object" string="WHATSAPP" class="btn btn-secondary" invisible="delivery_channel == 'whatsapp'"/>
+        </div>
+      </xpath>
+      <!-- Sección visual para WhatsApp: número detectado y vista previa -->
+      <xpath expr="//footer" position="before">
+        <div name="whatsapp_section" invisible="delivery_channel != 'whatsapp'">
+          <group>
+            <field name="whatsapp_phone" readonly="1"/>
+            <field name="whatsapp_template_id" required="delivery_channel == 'whatsapp'" options="{'no_create': True}"/>
+          </group>
+          <field name="whatsapp_preview" class="o_field_html"/>
+          <group>
+            <field name="whatsapp_attachments_widget" widget="mail_attachments" string="Adjuntar un archivo" nolabel="1" colspan="2"/>
+          </group>
+        </div>
+      </xpath>
+    </field>
+  </record>
+</odoo>

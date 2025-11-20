@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Categoría para agrupar el/los grupos del módulo -->
+  <record id="category_validate_dian" model="ir.module.category">
+      <field name="name">Mega Validate Alert DIAN</field>
+      <field name="description">Permissions for validate resolution DIAN</field>
+      <field name="sequence">35</field>
+  </record>
+
+  <!-- Grupo del módulo (ajusta el nombre a gusto) -->
+  <record id="group_validate_dian_user" model="res.groups">
+      <field name="name">Mega Validate Alert DIAN / Users</field>
+      <field name="category_id" ref="category_validate_dian"/>
+  </record>
+</odoo>

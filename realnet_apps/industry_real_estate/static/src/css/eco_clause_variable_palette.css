@@ -1,0 +1,8 @@
+.oe-clause-palette { background:#e6f6fa; border:1px solid #bde7f2; border-radius:6px; padding:.75rem; font-size: .7em;}
+.oe-clause-title { margin-bottom:.5rem; }
+.oe-clause-chips { display:flex; flex-wrap:wrap; gap:.5rem; }
+.oe-clause-var { padding:.25rem .5rem; border-radius:.5rem; background:transparent; border:1px solid #bde7f2; cursor:pointer; user-select:none; }
+.oe-clause-var:hover { background:#f8fdff; }
+.o-paragraph {
+    text-align: justify;
+}

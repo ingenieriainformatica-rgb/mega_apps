@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_all_in_one_retail.LabelPopup">
+        <Dialog title="props.title">
+            <div class="label_popup">
+                <div class="modal-body p-0">
+                    <textarea rows='3' class="form-control" name='label_value' t-model="state.value" id='label_value' placeholder='Add Label' value='' autofocus="autofocus"></textarea>
+                </div>
+                <t t-set-slot="footer">
+                    <button class="btn btn-primary btn-lg lh-lg o-default-button" t-on-click="confirm">Apply</button>
+                    <button class="btn btn-secondary btn-lg lh-lg o-default-button" t-on-click="close">Discard</button>
+                </t>
+            </div>
+        </Dialog>
+
+    </t>
+</templates>

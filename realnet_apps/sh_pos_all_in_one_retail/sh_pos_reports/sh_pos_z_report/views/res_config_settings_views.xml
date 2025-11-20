@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="sh_pos_z_report_res_config_settings" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sh_pos_z_report</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <block id="pos_interface_section" position="after">
+                <block title="POS Z Report">
+                    <setting>
+                        <field name="pos_sh_enable_z_report"/>
+                    </setting>
+                    <setting invisible="not pos_sh_enable_z_report">
+                        <field name="pos_sh_allow_z_report_type" required="pos_sh_enable_z_report"/>
+                    </setting>
+                    <setting invisible="not pos_sh_enable_z_report">
+                        <field name="pos_sh_allow_posted_session_report"/>
+                    </setting>
+                    <setting invisible="not pos_sh_enable_z_report">
+                        <field name="pos_sh_display_category_wise_detail"/>
+                    </setting>
+                    <setting invisible="not pos_sh_enable_z_report">
+                        <field name="pos_sh_display_product_wise_detail"/>
+                    </setting>
+                    <setting invisible="not pos_sh_enable_z_report">
+                        <field name="pos_sh_display_customer_wise_detail"/>
+                    </setting>
+                    <setting invisible="not pos_sh_enable_z_report">
+                        <field name="pos_sh_display_payment_detail"/>
+                    </setting>
+                </block>
+            </block>
+        </field>
+    </record>
+</odoo>

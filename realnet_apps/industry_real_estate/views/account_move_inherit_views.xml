@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Herencia de vista de facturas para:
+        1. Mostrar el campo partner_id en la vista de lista de Journal Items
+        2. Agregar campo técnico partner_id_manual_override para conservar cambios manuales
+    -->
+    <record id="view_move_form_show_partner_in_journal_items" model="ir.ui.view">
+        <field name="name">account.move.form.show.partner.journal.items</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!--
+                Modificar el atributo column_invisible del campo partner_id
+                en el tab de Journal Items para hacerlo siempre visible
+            -->
+            <xpath expr="//page[@id='aml_tab']//field[@name='partner_id']" position="attributes">
+                <!-- Remover la condición que oculta la columna en facturas -->
+                <attribute name="column_invisible">0</attribute>
+            </xpath>
+
+            <!--
+                Agregar campo técnico invisible para controlar el override manual del partner
+                Este campo se coloca después del partner_id en la lista
+            -->
+            <xpath expr="//page[@id='aml_tab']//field[@name='partner_id']" position="after">
+                <field name="partner_id_manual_override" column_invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

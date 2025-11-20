@@ -1,0 +1,162 @@
+@if $sh_pos_theme_style == "style_4" {
+    body {
+        .o-main-components-container {
+            .o-overlay-container {
+                .o-overlay-item {
+                    .o_dialog {
+                        .modal {
+                            .modal-dialog {
+                                .modal-content {
+                                    .modal-body {
+                                        .product-list {
+                                            &::-webkit-scrollbar-thumb {
+                                                @include theme_4_bg_color;
+                                            }
+                                            article {
+                                                .product-information-tag {
+                                                    @include theme_4_bg_color;
+                                                }
+                                                $o-colors_type: #ffabab, #f8cea7, #fde697, #c9dff9, #ddb2d2, #fae0d5,
+                                                    #95e4df, #a5b2fa, #ffadd4, #c3f0c9, #e75b5b63, #9872e6 !default;
+                                                @for $bg-color from 1 to length($o-colors) {
+                                                    &.o_colorlist_item_color_transparent_#{$bg-color} {
+                                                        .product-information-tag {
+                                                            background: nth($o-colors_type, $bg-color) !important;
+                                                        }
+                                                    }
+                                                }
+                                                &:active {
+                                                    border-color: $sh_pos_primary_color;
+                                                    background: #fff !important;
+                                                }
+                                            }
+                                        }
+                                        .sh_alternative_products {
+                                            .sh_alternative_products_title {
+                                                @include theme_4_bg_color;
+                                            }
+                                            .product-list {
+                                                &::-webkit-scrollbar-thumb {
+                                                    @include theme_4_bg_color;
+                                                }
+                                                article {
+                                                    .product-information-tag {
+                                                        @include theme_4_bg_color;
+                                                    }
+                                                    $o-colors_type: #ffabab, #f8cea7, #fde697, #c9dff9, #ddb2d2, #fae0d5,
+                                                        #95e4df, #a5b2fa, #ffadd4, #c3f0c9, #e75b5b63, #9872e6 !default;
+                                                    @for $bg-color from 1 to length($o-colors) {
+                                                        &.o_colorlist_item_color_transparent_#{$bg-color} {
+                                                            .product-information-tag {
+                                                                background: nth($o-colors_type, $bg-color) !important;
+                                                            }
+                                                        }
+                                                    }
+                                                    &:active {
+                                                        border-color: $sh_pos_primary_color;
+                                                        background: #fff !important;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@if $sh_pos_button_style == "style_4" {
+    body {
+        .o-main-components-container {
+            .o-overlay-container {
+                .o-overlay-item {
+                    .o_dialog {
+                        .modal {
+                            .modal-dialog {
+                                .modal-content {
+                                    .modal-body {
+                                        .sh_alternative_products {
+                                            .sh_alternative_products_title {
+                                                border-radius: 20px;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@if $sh_pos_product_style == "style_4" {
+    body {
+        .o-main-components-container {
+            .o-overlay-container {
+                .o-overlay-item {
+                    .o_dialog {
+                        .modal {
+                            .modal-dialog {
+                                .modal-content {
+                                    .modal-body {
+                                        .product-list {
+                                            article {
+                                                border-radius: 15px !important;
+                                                img {
+                                                    border-radius: 15px;
+                                                }
+                                                .product-information-tag {
+                                                    width: 30px;
+                                                    height: 30px;
+                                                    border-radius: 15px;
+                                                    border-width: unset;
+                                                    border-style: unset;
+                                                    display: flex;
+                                                    justify-content: center;
+                                                    align-items: center;
+                                                    .product-information-tag-logo {
+                                                        position: unset;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .sh_alternative_products {
+                                            .product-list {
+                                                article {
+                                                    border-radius: 15px !important;
+                                                    img {
+                                                        border-radius: 15px;
+                                                    }
+                                                    .product-information-tag {
+                                                        width: 30px;
+                                                        height: 30px;
+                                                        border-radius: 15px;
+                                                        border-width: unset;
+                                                        border-style: unset;
+                                                        display: flex;
+                                                        justify-content: center;
+                                                        align-items: center;
+                                                        .product-information-tag-logo {
+                                                            position: unset;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,61 @@
+<odoo>
+  <template id="report_invoice_document_compact" inherit_id="account.report_invoice_document">
+
+    <!-- Deja tus estilos tal cual -->
+    <xpath expr="//t[@t-call='web.external_layout']" position="inside">
+      <t>
+        <style>
+          .page, span {
+            font-size:0.9rem !important;
+            line-height:1.0 !important;
+          }
+
+          .page .row, .page .col-6, .page .col-12 {
+            margin:0 !important;
+            padding:0 !important;
+          }
+
+          .page table td, .page table th {
+            padding:2px 4px !important;
+            vertical-align:top;
+          }
+
+          .page table tr {
+            page-break-inside: avoid;
+          }
+
+          .page table, .page table * {
+            word-wrap:break-word;
+            overflow-wrap:anywhere;
+          }
+
+          #informations {
+            margin-top:-16px !important;
+          }
+
+          img[src*="qr"], img[src*="QR"] {
+            height:8rem !important;
+            width:auto !important;
+            line-height: 1px;
+          }
+
+          .article h2 {
+            margin-top:-16px !important;
+            font-size: 1.3rem !important;
+            font-weight: 600 !important;
+          }
+
+          table td[name*='name'],
+          table td span[name='name'],
+          td[class*='o_invoice_line_name'] {
+            max-width: 500px !important;      /* ajusta ancho visible */
+            vertical-align: top !important;
+          }
+
+        </style>
+      </t>
+    </xpath>
+
+  </template>
+
+</odoo>

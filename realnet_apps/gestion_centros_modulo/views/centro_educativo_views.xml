@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Educational Center form view -->
+    <record id="view_centro_educativo_form" model="ir.ui.view">
+        <field name="name">gestion.centro.form</field>
+        <field name="model">gestion.centro</field>
+        <field name="arch" type="xml">
+            <form string="Educational Center">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_alumnos" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="alumno_count" widget="statinfo" string="Students"/>
+                        </button>
+                    </div>
+                    <group>
+                        <field name="name" string="Name"/>
+                        <field name="lugar" string="Location"/>
+                        <field name="email" string="Email"/>
+                        <field name="ampa_telefono" string="Parents' Association Phone"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Educational Center list view -->
+    <record id="view_centro_educativo_list" model="ir.ui.view">
+        <field name="name">gestion.centro.list</field>
+        <field name="model">gestion.centro</field>
+        <field name="arch" type="xml">
+            <list string="Educational Centers">
+                <field name="name" string="Name"/>
+                <field name="lugar" string="Location"/>
+                <field name="email" string="Email"/>
+                <field name="ampa_telefono" string="Parents' Association Phone"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Educational Center action -->
+    <record id="action_centro_educativo" model="ir.actions.act_window">
+        <field name="name">Educational Centers</field>
+        <field name="res_model">gestion.centro</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu items -->
+    <menuitem id="menu_gestion_centro_root" name="Educational Management"/>
+    <menuitem id="menu_gestion_centros" name="Educational Centers" parent="menu_gestion_centro_root" action="action_centro_educativo"/>
+</odoo>

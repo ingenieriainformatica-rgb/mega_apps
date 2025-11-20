@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+mega_loan_payment.access_loan_register_payment_wizard,access_loan_register_payment_wizard,mega_loan_payment.model_loan_register_payment_wizard,base.group_user,1,1,1,1
+
+mega_loan_payment.access_payment_clien_register_wizard,access_payment_clien_register_wizard,mega_loan_payment.model_payment_clien_register_wizard,base.group_user,1,1,1,1

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_all_in_one_retail.ZReportOptionPopup">
+        <Dialog title.translate="Print Z-Report" bodyClass="'d-flex flex-column'" size="lg">
+            <div class="popup sh_z_report_modal_dialog_popup">
+                <main class="modal-body">
+                    <div class="sh_print_statement_option d-flex gap-5">
+                        <div class="sh_pdf_div sh_custom_radio_btn">
+                            <input class="sh_print_input form-check-input o_radio_input me-2" type="radio" id="pdf_statement" t-model="state.selected_type" name="print_option" value="pdf" checked="true" />
+                            <label class="sh_print_lbl" for="pdf_statement">Generate PDF</label>
+                        </div>
+                        <div class="sh_receipt_div sh_custom_radio_btn">
+                            <input class="sh_print_input form-check-input o_radio_input me-2" type="radio" id="receipt_statement" t-model="state.selected_type" name="print_option" value="receipt" />
+                            <label class="sh_print_lbl" for="receipt_statement">Generate Receipt</label>
+                        </div>
+                    </div>
+                </main>
+
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary btn-lg lh-lg o-default-button"  t-on-click="print">Print</button>
+                <button class="btn btn-primary btn-lg lh-lg o-default-button"  t-on-click="close">Close</button>
+            </t>
+        </Dialog>
+    </t>
+    
+</templates>
+    

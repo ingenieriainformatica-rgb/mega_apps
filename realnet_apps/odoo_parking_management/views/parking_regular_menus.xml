@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Menú del Tablero de Clientes Ordinarios bajo "Reporting/Informes" -->
+        <menuitem id="parking_regular_dashboard_menu"
+                  name="Tablero Clientes Ordinarios"
+                  parent="odoo_parking_management.menu_reporting_root"
+                  action="parking_regular_dashboard_action"
+                  sequence="88"/>
+    </data>
+</odoo>
+

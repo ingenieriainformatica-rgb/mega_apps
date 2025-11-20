@@ -1,0 +1,6 @@
+.pos-content .product-screen .leftpane .order-container .orderline div.d-flex .fa-trash::before{position: absolute;right: 10px;bottom: 12px;}
+@media (max-width:576px) {        
+    .product-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Vista de Configuración: Agregar configuración de Documentos Soporte -->
+        <record id="res_config_settings_view_form_support_doc" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.support.doc</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+
+                <!-- Agregar después de la configuración de l10n_co_edi si existe, o al final de account -->
+                <xpath expr="//t[@id='l10n_co_edi_settings_content']" position="after">
+                    <!-- Configuración de Validación de Documentos Soporte -->
+                    <setting id="support_doc_validation_setting"
+                             help="Valida que los documentos soporte se envíen a DIAN en orden secuencial. Previene confirmar un documento si el anterior no ha sido enviado correctamente.">
+                        <field name="support_doc_sequence_validation"/>
+                        <div class="content-group mt16" invisible="not support_doc_sequence_validation">
+                            <div class="row">
+                                <label for="support_doc_validation_mode" class="col-lg-3 o_light_label" string="Modo de Validación"/>
+                                <field name="support_doc_validation_mode"
+                                       class="col-lg-9"
+                                       widget="radio"
+                                       options="{'horizontal': true}"/>
+                            </div>
+                            <div class="text-muted mt8">
+                                <strong>Bloquear:</strong> No permite confirmar la factura si el documento anterior no está enviado.<br/>
+                                <strong>Advertir:</strong> Permite confirmar pero registra advertencia en el log del sistema.
+                            </div>
+                        </div>
+                    </setting>
+
+                    <!-- Información adicional -->
+                    <div class="alert alert-info mt16" role="alert">
+                        <i class="fa fa-info-circle"/> <strong>Validación de Documentos Soporte:</strong>
+                        Verifica que los documentos soporte se envíen a DIAN en orden secuencial,
+                        evitando que se confirmen documentos sin haber enviado el anterior.
+                        <br/><br/>
+                        <strong>Requisitos:</strong> Módulo <code>l10n_co_dian</code> instalado y configurado,
+                        journals de compra con resolución DIAN configurada.
+                        <br/><br/>
+                        <strong>Bypass manual:</strong> Los usuarios con el rol
+                        "Documento Soporte / Administrador de Validación" pueden omitir
+                        la validación en casos excepcionales.
+                    </div>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

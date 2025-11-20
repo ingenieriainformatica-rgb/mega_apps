@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista List para IPC History -->
+    <record id="view_ipc_history_tree" model="ir.ui.view">
+        <field name="name">ipc.history.tree</field>
+        <field name="model">ipc.history</field>
+        <field name="arch" type="xml">
+            <list string="Historial de IPC"
+                  decoration-muted="state=='draft'"
+                  decoration-info="state=='confirmed'"
+                  decoration-success="state=='applied'">
+                <field name="name"/>
+                <field name="year"/>
+                <field name="ipc_value" widget="float"/>
+                <field name="source"/>
+                <field name="state"
+                       decoration-muted="state=='draft'"
+                       decoration-info="state=='confirmed'"
+                       decoration-success="state=='applied'"
+                       widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista Form para IPC History -->
+    <record id="view_ipc_history_form" model="ir.ui.view">
+        <field name="name">ipc.history.form</field>
+        <field name="model">ipc.history</field>
+        <field name="arch" type="xml">
+            <form string="IPC - Índice de Precios al Consumidor">
+                <header>
+                    <!--<button name="action_confirm" string="Confirmar" type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"
+                            data-hotkey="q"/>-->
+                    <button name="action_set_to_draft" string="Volver a Borrador" type="object"
+                            invisible="state not in ('confirmed',)"
+                            data-hotkey="d"/>
+                    <button name="action_mark_as_applied" string="Marcar como Aplicado" type="object"
+                            class="btn-success"
+                            invisible="state != 'confirmed'"
+                            groups="base.group_erp_manager"
+                            confirm="¿Está seguro de marcar este IPC como aplicado? Esta acción limita las ediciones futuras."/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,applied"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Período">
+                            <field name="year" placeholder="Ej: 2024" readonly="state in ('confirmed', 'applied')"/>
+                            <field name="create_date" string="Fecha de Creación" readonly="1"/>
+                        </group>
+                        <group string="Valores">
+                            <field name="ipc_value" widget="float" readonly="state in ('confirmed', 'applied')"/>
+                            <field name="write_date" string="Última Actualización" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Información Adicional">
+                            <field name="source" placeholder="DANE, Banco de la República, etc."/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes" placeholder="Observaciones sobre este período del IPC..." nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista Search para IPC History -->
+    <record id="view_ipc_history_search" model="ir.ui.view">
+        <field name="name">ipc.history.search</field>
+        <field name="model">ipc.history</field>
+        <field name="arch" type="xml">
+            <search string="Buscar IPC">
+                <field name="name"/>
+                <field name="year"/>
+                <field name="source"/>
+                <separator/>
+                <filter string="Borrador" name="draft" domain="[('state','=','draft')]"/>
+                <filter string="Confirmado" name="confirmed" domain="[('state','=','confirmed')]"/>
+                <filter string="Aplicado" name="applied" domain="[('state','=','applied')]"/>
+                <separator/>
+                <filter string="Año Actual" name="current_year"
+                        domain="[('year','=',context_today().year)]"/>
+                <filter string="Archivados" name="inactive" domain="[('active','=',False)]"/>
+                <!-- COMPATIBILIDAD ODOO 18/19: <group> en search views no acepta atributos -->
+                <group>
+                    <filter string="Año" name="group_year" context="{'group_by':'year'}"/>
+                    <filter string="Estado" name="group_state" context="{'group_by':'state'}"/>
+                    <filter string="Fuente" name="group_source" context="{'group_by':'source'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vista Kanban para IPC History -->
+    <record id="view_ipc_history_kanban" model="ir.ui.view">
+        <field name="name">ipc.history.kanban</field>
+        <field name="model">ipc.history</field>
+        <field name="arch" type="xml">
+            <kanban string="Historial IPC" class="o_kanban_mobile">
+                <field name="name"/>
+                <field name="year"/>
+                <field name="ipc_value"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <span class="float-end badge rounded-pill"
+                                      t-attf-class="badge-#{record.state.raw_value === 'draft' ? 'secondary' : record.state.raw_value === 'confirmed' ? 'info' : 'success'}">
+                                    <field name="state"/>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div>
+                                    <i class="fa fa-line-chart" title="Valor IPC"/> IPC: <field name="ipc_value"/>
+                                </div>
+                                <div t-if="record.source.raw_value">
+                                    <i class="fa fa-bank" title="Fuente"/> <field name="source"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>

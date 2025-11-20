@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_rental_form_delivery_tab" model="ir.ui.view">
+        <field name="name">sale.order.form.delivery.tab</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="industry_real_estate.rental_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='property_delivery']" position="replace">
+                <page string="Entrega inventario" name="property_delivery" invisible="can_see_delivery_tab">
+                    <group string="Entrega de elementos">  
+                        <field name="x_custom_state" invisible="1"/>
+                        <field name="can_add_inventory" invisible="1"/>
+
+                        <!-- si no existen elementos carga el botón de registro-->
+                        <field name="x_delivery_card_line_ids"
+                            class="d-flex"
+                            nolabel="1"
+                            readonly="not can_add_inventory"
+                            invisible="not can_add_inventory"
+                            context="{
+                                'default_ecoerp_ok': True, 
+                                'quick_create_view': 'industry_real_estate.view_product_template_quick_create_ecoerp',
+                                'can_add_inventory': can_add_inventory,
+                                'default_property_item_id': property_item_id,
+                                'from_delivery': True
+                            }">
+                            <kanban create="true"
+                                js_class="o_kanban_reload"
+                                view_type="kanban"
+                                quick_create="true"
+                                quick_create_view="industry_real_estate.view_product_template_quick_create_ecoerp"
+                                editable="bottom">
+                                <field name="photo" />
+                                <field name="product_id" />
+                                <field name="description" />
+                                <field name="quantity" />
+                                <field name="received_quantity" />
+                                <field name="date" />
+                                <field name="property_item_id"/>
+                                <field name="condition" />
+                                <field name="value" />
+                                <templates id="template" xml:space="preserve">
+                                    <t t-name="card">
+                                        <div class="d-flex shadow-sm p-2 mb-2 align-items-start" style="min-height: 100px;">
+                                            <div style="position: absolute; top: 0.5rem; right: 0.5rem; z-index: 2;">
+                                                <button type="object"
+                                                        name="action_open_full_form_delivery"
+                                                        title="Abrir en ventana"
+                                                        icon="fa-expand"
+                                                        class="btn btn-light btn-sm shadow-sm"/>
+                                            </div>
+                                            <div class="flex-shrink-0 me-3">
+                                                <field 
+                                                    name="photo"
+                                                    widget="image"
+                                                    options="{'size': [0, 180]}"
+                                                    t-attf-src="data:image/png;base64,#{record.photo.value}"
+                                                    class="oe_avatar ml-3 mr-3"
+                                                    style="max-height: 90px; width: 100%; max-width: 90px;"/>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold mb-1">
+                                                    <field name="product_id" />
+                                                </div>
+                                                <div class="text-muted small mb-1">
+                                                    <field name="description" />
+                                                </div>
+                                                <div>
+                                                    <field name="value" widget="monetary"/>
+                                                </div>
+                                                <div class="text-muted small">
+                                                    <span class="fw-bold small mb-1">
+                                                        Cantidad: <field name="quantity" />
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <field name="date" />
+                                                </div>
+                                                <div>
+                                                    <span role="alert" t-att-class="'badge rounded alert ' + 
+                                                        {'good': 'alert-success', 
+                                                         'for_repair': 'alert-warning', 
+                                                         'damaged': 'alert-danger',
+                                                         'missing': 'alert-danger'}[record.condition.raw_value] || 'bg-info'">
+                                                        <field name="condition" />
+                                                    </span>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
+                        </field>
+
+                        <!-- si existen elementos carga modo lectura
+                        <field name="x_delivery_card_line_ids"
+                            class="d-flex"
+                            nolabel="1"
+                            readonly="[('can_add_inventory', '==', False)]"
+                            invisible="[('can_add_inventory', '==', False)]"
+                            context="{
+                                'default_ecoerp_ok': True, 
+                                'can_add_inventory': not can_add_inventory,
+                                'default_property_item_id': property_item_id,
+                                'from_delivery': True
+                            }">
+                            <kanban create="false" js_class="o_kanban_reload" view_type="kanban" on_click="false">
+                                <field name="photo" />
+                                <field name="product_id" />
+                                <field name="description" />
+                                <field name="quantity" />
+                                <field name="date" />
+                                <field name="property_item_id"/>
+                                <field name="condition" />
+                                <field name="value" />
+                                <templates id="template_delivery_readonly" xml:space="preserve">
+                                    <t t-name="card">
+                                        <div class="d-flex shadow-sm p-2 mb-2 align-items-start" style="min-height: 100px;">
+                                            <div style="position: absolute; top: 0.5rem; right: 0.5rem; z-index: 2;">
+                                                <button type="object"
+                                                        name="action_open_full_form_delivery"
+                                                        title="Abrir en ventana"
+                                                        icon="fa-expand"
+                                                        class="btn btn-light btn-sm shadow-sm"/>
+                                            </div>
+                                            <div class="flex-shrink-0 me-3">
+                                                <field 
+                                                    name="photo"
+                                                    widget="image"
+                                                    options="{'size': [0, 180]}"
+                                                    t-attf-src="data:image/png;base64,#{record.photo.value}"
+                                                    class="oe_avatar ml-3 mr-3"
+                                                    style="max-height: 90px; width: 100%; max-width: 90px;"/>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold mb-1">
+                                                    <field name="product_id" />
+                                                </div>
+                                                <div class="text-muted small mb-1">
+                                                    <field name="description" />
+                                                </div>
+                                                <div class="text-muted small">
+                                                    <span class="fw-bold small mb-1">
+                                                        Cantidad: <field name="quantity" />
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <field name="value" widget="monetary"/>
+                                                </div>
+                                                <div>
+                                                    <field name="date" />
+                                                </div>
+                                                <div>
+                                                    <span role="alert" t-att-class="'badge rounded alert ' + 
+                                                        {'good': 'alert-success', 
+                                                         'for_repair': 'alert-warning', 
+                                                         'damaged': 'alert-danger',
+                                                         'missing': 'alert-danger'}[record.condition.raw_value] || 'bg-info'">
+                                                        <field name="condition" />
+                                                    </span>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
+                        </field> -->
+                    </group> 
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

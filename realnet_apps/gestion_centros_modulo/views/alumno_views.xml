@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Student form view -->
+    <record id="view_alumno_form" model="ir.ui.view">
+        <field name="name">gestion.alumno.form</field>
+        <field name="model">gestion.alumno</field>
+        <field name="arch" type="xml">
+            <form string="Student">
+                <sheet>
+                    <group>
+                        <group string="Student Information">
+                            <field name="name"/>
+                            <field name="codigo" string="Identification Code"/>
+                            <field name="fecha_nacimiento" string="Date of Birth"/>
+                            <field name="telefono" string="Phone"/>
+                            <field name="telefono_2" string="Alternate Phone"/>
+                            <field name="email"/>
+                        </group>
+                        <group string="Educational Details">
+                            <field name="centro_id" string="Educational Center"/>
+                            <field name="actividad" string="Associated Activity"/>
+                            <field name="ampa" string="Parents' Association (AMPA)"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Family Information">
+                        <group>
+                            <field name="nombre_padre" string="Father's Name"/>
+                            <field name="nombre_madre" string="Mother's Name"/>
+                        </group>
+                        <group>
+                            <field name="telefono_familia" string="Family Phone"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Student list view -->
+    <record id="view_alumno_list" model="ir.ui.view">
+        <field name="name">gestion.alumno.list</field>
+        <field name="model">gestion.alumno</field>
+        <field name="arch" type="xml">
+            <list string="Students">
+                <field name="name"/>
+                <field name="codigo" string="ID Code"/>
+                <field name="centro_id" string="Center"/>
+                <field name="actividad" string="Activity"/>
+                <field name="telefono" string="Phone"/>
+                <field name="ampa" string="AMPA"/>
+                <field name="nombre_padre" string="Father" optional="hide"/>
+                <field name="nombre_madre" string="Mother" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Student search view -->
+    <record id="view_alumno_search" model="ir.ui.view">
+        <field name="name">gestion.alumno.search</field>
+        <field name="model">gestion.alumno</field>
+        <field name="arch" type="xml">
+            <search string="Search Students">
+                <field name="name" string="Name"/>
+                <field name="codigo" string="ID Code"/>
+                <field name="centro_id" string="Center"/>
+                <field name="actividad" string="Activity"/>
+                
+                <filter string="AMPA" name="filter_ampa" domain="[('ampa', '=', True)]"/>
+                <filter string="Not in AMPA" name="filter_no_ampa" domain="[('ampa', '=', False)]"/>
+                
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Center" name="group_centro" context="{'group_by': 'centro_id'}"/>
+                    <filter string="Activity" name="group_actividad" context="{'group_by': 'actividad'}"/>
+                    <filter string="AMPA" name="group_ampa" context="{'group_by': 'ampa'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Main action for all students -->
+    <record id="action_gestion_alumno" model="ir.actions.act_window">
+        <field name="name">All Students</field>
+        <field name="res_model">gestion.alumno</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_alumno_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first student!
+            </p>
+            <p>
+                Here you can manage all students across all educational centers.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for AMPA students -->
+    <record id="action_alumnos_ampa" model="ir.actions.act_window">
+        <field name="name">AMPA Students</field>
+        <field name="res_model">gestion.alumno</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('ampa', '=', True)]</field>
+        <field name="context">{'default_ampa': True}</field>
+        <field name="search_view_id" ref="view_alumno_search"/>
+    </record>
+</odoo>

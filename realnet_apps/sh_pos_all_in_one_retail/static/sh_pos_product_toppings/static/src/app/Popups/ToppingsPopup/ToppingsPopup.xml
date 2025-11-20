@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_product_toppings.ToppingsPopup">
+        <Dialog title="props.title" bodyClass="'d-flex flex-column'" size="lg">
+            <div class="popup">
+                <main class="modal-body">
+                    <div class="main_sub_div_sh_statement">
+                        <div class="sh_toppings_products product-list d-grid gap-1 p-1"
+                            t-if="toppingProducts and toppingProducts.length > 0">
+                            <ProductCard
+                                t-foreach="toppingProducts" t-as="product" t-key="product.id"
+                                productId="product.id"
+                                product="product"
+                                class="pos.productViewMode"
+                                name="product.display_name"
+                                color="product.pos_categ_ids?.at(-1)?.color"
+                                price="this.getProductPrice(product)"
+                                imageUrl="pos.config.show_product_images and product.getImageUrl()"
+                                onClick.bind="() => this.addProductToOrder(product)"
+                                productInfo="true"
+                                onProductInfoClick.bind="() => this.onProductInfoClick(product)" />
+                        </div>
+
+                        <div class="sh_global_toppins product-list d-grid gap-1 p-1"
+                            t-if="globalToppings and globalToppings.length > 0">
+                            <ProductCard
+                                t-foreach="globalToppings" t-as="product" t-key="product.id"
+                                productId="product.id"
+                                product="product"
+                                class="pos.productViewMode"
+                                name="product.display_name"
+                                color="product.pos_categ_ids?.at(-1)?.color"
+                                price="this.getProductPrice(product)"
+                                imageUrl="pos.config.show_product_images and product.getImageUrl()"
+                                onClick.bind="() => this.addProductToOrder(product)"
+                                productInfo="true"
+                                onProductInfoClick.bind="() => this.onProductInfoClick(product)" />
+                        </div>
+                    </div>
+                </main>
+
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary btn-lg lh-lg o-default-button" t-on-click="close">
+                    Ok</button>
+            </t>
+        </Dialog>
+    </t>
+    
+</templates>

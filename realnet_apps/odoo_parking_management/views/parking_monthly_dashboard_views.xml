@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Vistas del Tablero de Mensualidades -->
+        <record id="parking_monthly_dashboard_view_form" model="ir.ui.view">
+            <field name="name">parking.monthly.dashboard.form</field>
+            <field name="model">parking.monthly.dashboard</field>
+            <field name="arch" type="xml">
+                <form string="Tablero Personal Autorizado">
+                    <sheet>
+                        <div class="oe_button_box" name="button_box"/>
+                        
+                        <group>
+                            <group>
+                                <field name="all_sites" string="Todas las sedes"/>
+                                <field name="site_ids" string="Sedes" widget="many2many_tags" invisible="all_sites"/>
+                                <field name="site_id" invisible="1"/>
+                                <field name="period_month" string="Periodo"/>
+                                <field name="currency_id" invisible="1"/>
+                            </group>
+                        </group>
+                        
+                        <div class="row mt-3">
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fa fa-check-circle fa-2x" title="Mensualidades Activos"/>
+                                            </div>
+                                            <div>
+                                                <h3 class="card-title mb-0">
+                                                    <field name="active_contracts_count" readonly="1"/>
+                                                </h3>
+                                                <p class="card-text">Mensualidades Activos</p>
+                                                <button type="object" name="action_view_active_contracts" 
+                                                        class="btn btn-sm btn-outline-light">Ver</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fa fa-pause-circle fa-2x" title="Mensualidades Suspendidos"/>
+                                            </div>
+                                            <div>
+                                                <h3 class="card-title mb-0">
+                                                    <field name="suspended_contracts_count" readonly="1"/>
+                                                </h3>
+                                                <p class="card-text">Suspendidos</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fa fa-times-circle fa-2x" title="Mensualidades Vencidos"/>
+                                            </div>
+                                            <div>
+                                                <h3 class="card-title mb-0">
+                                                    <field name="expired_contracts_count" readonly="1"/>
+                                                </h3>
+                                                <p class="card-text">Vencidos</p>
+                                                <button type="object" name="action_view_expired_contracts" 
+                                                        class="btn btn-sm btn-outline-light">Ver</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fa fa-money fa-2x" title="Ingresos"/>
+                                            </div>
+                                            <div>
+                                                <h3 class="card-title mb-0">
+                                                    <field name="recurring_revenue" widget="monetary" readonly="1"/>
+                                                </h3>
+                                                <p class="card-text">Ingresos Recurrentes</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Estado de Facturación</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Monto Facturado:</span>
+                                            <strong>
+                                                <field name="invoiced_amount" widget="monetary" readonly="1"/>
+                                            </strong>
+                                        </div>
+                                        <button type="object" name="action_view_monthly_invoices" 
+                                                class="btn btn-sm btn-primary">Ver Facturas</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Estado de Entradas</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Agregadas:</span>
+                                            <span class="badge bg-success">
+                                                <field name="entries_aggregated_count" readonly="1"/>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Pendientes:</span>
+                                            <span class="badge bg-warning">
+                                                <field name="entries_pending_count" readonly="1"/>
+                                            </span>
+                                        </div>
+                                        <button type="object" name="action_view_pending_entries" 
+                                                class="btn btn-sm btn-warning">Ver Pendientes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Billing Mode Breakdown -->
+                        <div class="row mt-3">
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fa fa-calendar-check-o fa-2x" title="Mensualidades Mes Vencido"/>
+                                            </div>
+                                            <div>
+                                                <h3 class="card-title mb-0">
+                                                    <field name="active_postpaid_contracts_count" readonly="1"/>
+                                                </h3>
+                                                <p class="card-text">Mensualidades Mes Vencido</p>
+                                                <button type="object" name="action_view_postpaid_contracts" 
+                                                        class="btn btn-sm btn-outline-light">Ver</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-secondary text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fa fa-credit-card fa-2x" title="Mensualidades Mes Anticipado"/>
+                                            </div>
+                                            <div>
+                                                <h3 class="card-title mb-0">
+                                                    <field name="active_prepaid_contracts_count" readonly="1"/>
+                                                </h3>
+                                                <p class="card-text">Mensualidades Mes Anticipado</p>
+                                                <button type="object" name="action_view_prepaid_contracts" 
+                                                        class="btn btn-sm btn-outline-light">Ver</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-dark text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fa fa-line-chart fa-2x" title="Ingresos Mes Vencido"/>
+                                            </div>
+                                            <div>
+                                                <h3 class="card-title mb-0">
+                                                    <field name="postpaid_invoiced_amount" widget="monetary" readonly="1"/>
+                                                </h3>
+                                                <p class="card-text">Facturado Mes Vencido</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card bg-dark text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fa fa-area-chart fa-2x" title="Ingresos Mes Anticipado"/>
+                                            </div>
+                                            <div>
+                                                <h3 class="card-title mb-0">
+                                                    <field name="prepaid_invoiced_amount" widget="monetary" readonly="1"/>
+                                                </h3>
+                                                <p class="card-text">Facturado Mes Anticipado</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Acción del Tablero -->
+        <record id="parking_monthly_dashboard_action" model="ir.actions.act_window">
+            <field name="name">Tablero Personal Autorizado</field>
+            <field name="res_model">parking.monthly.dashboard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="parking_monthly_dashboard_view_form"/>
+            <field name="target">current</field>
+            <field name="context">{'form_view_initial_mode': 'edit'}</field>
+        </record>
+
+    </data>
+</odoo>

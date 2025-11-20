@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="OrderListScreen" t-inherit="sh_pos_order_list.OrderListScreen" t-inherit-mode="extension" owl="1">
+        <xpath expr="//td[hasclass('sh-actions')]" position="inside">
+            <t t-if="pos.config.allow_sh_pos_cancel">
+                <t t-if='pos.company.pos_operation_type == "cancel_draft"'>
+                    <t t-esc="console.log('ordd=er ', order)"/>
+                    <t t-if="(order.state != 'draft')">
+                        <span title="Cancel-Draft"><i class="fa fa-file-o sh_cancel_draft" aria-hidden="true" 
+                            t-on-click="(ev)=>this.click_draft(ev, order)"></i></span>
+                    </t>
+                </t>
+                <t t-if='pos.company.pos_operation_type == "cancel_delete"'>
+                    <span title="Cancel - Delete"><i class="fa fa-trash sh_cancel_delete"  aria-hidden="true"
+                         t-on-click="(ev)=>this.click_delete(ev, order)"></i></span>
+                </t>
+                <t t-if='pos.company.pos_operation_type == "cancel"' >
+                    <span title="Cancel" t-if="(order.state != 'cancel')" ><i class="fa fa-times-circle sh_cancel_delete" aria-hidden="true" 
+                    t-on-click="(ev)=>this.click_cancel(ev, order)"></i></span>
+                </t>
+            </t>
+        </xpath>
+    </t>
+</templates>

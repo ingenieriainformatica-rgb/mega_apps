@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+  <template id="realnet_invoice_hide_taxes" inherit_id="account.report_invoice_document" priority="250">
+    <!-- ejemplo: ocultar columna “Taxes” y totales de impuestos -->
+    <xpath expr="//t[@t-call='web.external_layout']" position="inside">
+      <style>
+        /* Oculta la columna "Taxes" usando sus atributos name */
+        [name='th_taxes'],
+        [name='td_taxes'] {
+          display: none !important;
+        }
+      </style>
+    </xpath>
+  </template>
+</odoo>

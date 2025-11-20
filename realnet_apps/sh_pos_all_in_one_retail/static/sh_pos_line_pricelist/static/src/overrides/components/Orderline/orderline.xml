@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <xpath expr="//span[@t-esc='line.productName']" position="before">
+            <t t-if="env.services.pos.get_order().get_screen_data() and env.services.pos.get_order().get_screen_data().name == 'ProductScreen' and !env.services.pos.get_order().finalized and line.pricelist_icon and env.services.pos.config.use_pricelist">
+                <span class="span_prizcelist_icon" >
+                    <img t-on-click="() => env.services.pos.get_order().on_click_pricelist_icon(line)" t-att-src="line.pricelist_icon" style="width: 20px; height: 20px; margin-right: 5px;" class="discount_icon" />
+                </span>
+            </t>
+        </xpath>
+    </t>
+</templates>

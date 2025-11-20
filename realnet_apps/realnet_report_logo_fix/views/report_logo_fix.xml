@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Fix para el logo en reportes - Compatible con producción y desarrollo 
+         Usa image_data_uri() que es la función helper de Odoo para convertir binarios a base64
+    -->
+    
+    <!-- Layout Bubble - Fix logo -->
+    <template id="realnet_external_layout_bubble_logo" inherit_id="web.external_layout_bubble" priority="999">
+        <xpath expr="//img[@t-if='company.logo']" position="replace">
+            <img t-if="company.logo" 
+                 class="o_company_logo mb-2"
+                 t-att-src="image_data_uri(company.logo)"
+                 alt="Logo"
+                 style="max-height: 80px; max-width: 250px; object-fit: contain;"/>
+        </xpath>
+    </template>
+
+    <!-- Layout Standard - Fix logo -->
+    <template id="realnet_external_layout_standard_logo" inherit_id="web.external_layout_standard" priority="999">
+        <xpath expr="//img[@t-if='company.logo']" position="replace">
+            <img t-if="company.logo"
+                 class="o_company_logo"
+                 t-att-src="image_data_uri(company.logo)"
+                 alt="Logo"
+                 style="max-height: 80px; max-width: 250px; object-fit: contain;"/>
+        </xpath>
+    </template>
+
+    <!-- Layout Boxed - Fix logo -->
+    <template id="realnet_external_layout_boxed_logo" inherit_id="web.external_layout_boxed" priority="999">
+        <xpath expr="//img[@t-if='company.logo']" position="replace">
+            <img t-if="company.logo"
+                 class="o_company_logo"
+                 t-att-src="image_data_uri(company.logo)"
+                 alt="Logo"
+                 style="max-height: 80px; max-width: 250px; object-fit: contain;"/>
+        </xpath>
+    </template>
+</odoo>

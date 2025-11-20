@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <record id="fleet_repair_label_id" model="ir.actions.report">
+        <field name="name">Car Repair Label</field>
+        <field name="model">fleet.repair</field>
+        <field name="report_type">qweb-pdf</field>
+
+        <!-- Nombre del template QWeb -->
+        <field name="report_name">car_repair_industry.machi_rep_label_temp_id</field>
+        <!-- Opcional en QWeb; puedes repetir el mismo -->
+        <field name="report_file">car_repair_industry.machi_rep_label_temp_id</field>
+
+        <!-- Enlazar al modelo para que aparezca en Imprimir -->
+        <field name="binding_model_id" ref="car_repair_industry.model_fleet_repair"/>
+        <field name="binding_type">report</field>
+
+        <!-- OJO: groups_id (no group_ids) y el ID correcto de Fleet -->
+        <field name="groups_id" eval="[
+          (4, ref('car_repair_industry.group_fleet_repair_service_manager'))
+        ]"/>
+
+    </record>
+
+</odoo>

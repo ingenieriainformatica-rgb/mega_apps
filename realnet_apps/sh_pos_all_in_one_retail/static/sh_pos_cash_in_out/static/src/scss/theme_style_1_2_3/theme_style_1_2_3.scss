@@ -1,0 +1,109 @@
+body {
+    .pos {
+        .pos-content {
+            .receipt-screen {
+                .screen-content {
+                    .centered-content {
+                        &::-webkit-slider-thumb {
+                            @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                background: $sh_pos_primary_color !important;
+                            }
+                        }
+						.pos-receipt-container{
+                            &::-webkit-slider-thumb {
+                                @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or  $sh_pos_theme_style == "style_3"  {
+                                    background: $sh_pos_primary_color !important;
+                                }
+                            }
+                        }
+                    }
+                }
+                .top-content {
+                    .btn-secondary {
+                        @include btn_border_radius;
+                        @if $sh_pos_theme_style == "style_1" or $sh_pos_theme_style == "style_2" or $sh_pos_theme_style == "style_3" {
+                            border-color: $sh_pos_primary_color !important;color: $sh_pos_primary_color !important;background-color: #fff;
+                            &:hover {
+                                background: $sh_pos_primary_color !important;color: #fff !important;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .o-main-components-container{
+		.o-overlay-container{
+			.o-overlay-item{
+				.o_dialog{
+					.modal{
+						.modal-dialog {
+							.modal-content{
+								.modal-body{
+									.sh_cash_in_out_option_modal_dialog{
+										.popup{
+											.modal-body {
+												.main_div_sh_payment_table{
+                                                    &::-webkit-scrollbar-thumb{
+                                                        background: $sh_pos_primary_color !important;
+                                                    }
+													.sh_payment_table {
+														width: 100%;
+														thead {
+                                                            background: $sh_pos_primary_color !important;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .popup{
+										.modal-body{
+											.main_sub_div_sh_statement {
+												.sh_statement_option , .sh_print_statement_option{
+													div{
+														input{
+															&:checked{
+																+ 
+																label{
+																	&::after{
+																		border: 5px solid $sh_pos_primary_color;
+																	}
+																}
+															}
+														}
+														label{
+															&:hover{
+																&::after{
+																	border-color: $sh_pos_primary_color;
+																}
+															}
+														}
+													}
+												}
+											}
+                                            .sh_statement_date{
+                                                .sh_start_date , .sh_end_date{
+                                                    div{
+                                                        input{
+                                                            &:focus{
+                                                                border-color: $sh_pos_primary_color;
+                                                            }
+                                                            &:hover{
+                                                                border-color: $sh_pos_primary_color;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+										}
+									}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

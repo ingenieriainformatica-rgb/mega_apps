@@ -1,0 +1,24 @@
+<odoo>
+  <record id="industry_real_estate.rental_form_view_vigencia" model="ir.ui.view">
+    <field name="name">industry_real_estate.rental_form.view.vigencia</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="industry_real_estate.rental_form_view"/>
+
+    <field name="arch" type="xml">
+      <!-- 1) Insertar Vigencia justo antes del Vencimiento que YA existe -->
+      <xpath expr="//field[@name='validity_date']" position="before">
+        <field name="vigencia_meses"/>
+      </xpath>
+
+      <xpath expr="//field[@name='validity_date']" position="before">
+        <field name="next_invoice_date"/>
+      </xpath>
+
+      <!-- 2) Asegurar que ese Vencimiento sea solo lectura -->
+      <xpath expr="//field[@name='validity_date']" position="attributes">
+        <attribute name="readonly">1</attribute>
+      </xpath>
+      
+    </field>
+  </record>
+</odoo>

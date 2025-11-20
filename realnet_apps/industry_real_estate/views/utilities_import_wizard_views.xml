@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- FORM del importador de Servicios Públicos -->
+  <record id="view_utilities_excel_import_wizard_form" model="ir.ui.view">
+    <field name="name">utilities.excel.import.wizard.form</field>
+    <field name="model">utilities.excel.import.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Importar Servicios Públicos" create="false" edit="false">
+        <sheet>
+          <group>
+            <field name="file" filename="filename"/>
+            <field name="filename" readonly="1"/>
+            <field name="sheet_name"/>
+            <field name="simulate"/>
+          </group>
+
+          <group>
+            <button name="action_import" type="object" string="Importar" class="oe_highlight"/>
+          </group>
+
+          <group>
+            <field name="summary_html" nolabel="1" colspan="4" widget="html" readonly="1"/>
+          </group>
+        </sheet>
+        <footer>
+          <button string="Cerrar" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- Acción del wizard -->
+  <record id="action_utilities_excel_import_wizard" model="ir.actions.act_window">
+    <field name="name">Importar Servicios Públicos</field>
+    <field name="res_model">utilities.excel.import.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="view_utilities_excel_import_wizard_form"/>
+    <field name="target">new</field>
+  </record>
+
+</odoo>

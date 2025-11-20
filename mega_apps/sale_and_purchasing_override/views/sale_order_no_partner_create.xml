@@ -1,0 +1,29 @@
+<odoo>
+  <data>
+    <record id="view_sale_partner_no_create_by_group" model="ir.ui.view">
+      <field name="name">sale.order.partner.no.create.by.group</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.view_order_form"/>
+      <field name="priority" eval="500"/> 
+      <field name="arch" type="xml">
+
+        <!-- 1) Oculta el original a los del grupo -->
+        <xpath expr="//form//field[@name='partner_id']" position="attributes">
+          <attribute name="groups">!sale_and_purchasing_override.group_update_accounts_user</attribute>
+        </xpath>
+
+        <!-- 2) Inserta la versión bloqueada solo para el grupo -->
+        <xpath expr="//form//field[@name='partner_id']" position="before">
+          <field name="partner_id"
+                 groups="sale_and_purchasing_override.group_update_accounts_user"
+                 widget="res_partner_many2one"
+                 context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}"
+                 options='{"no_create": true, "no_create_edit": true, "no_quick_create": true, "no_open": true}'
+                 placeholder="Type to find a customer..."
+                 readonly="state in ['cancel', 'sale']"/>
+        </xpath>
+
+      </field>
+    </record>
+  </data>
+</odoo>

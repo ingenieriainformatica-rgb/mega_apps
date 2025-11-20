@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Parking Site Views -->
+    
+    <!-- Tree View -->
+    <record id="parking_site_tree_view" model="ir.ui.view">
+        <field name="name">parking.site.tree</field>
+        <field name="model">parking.site</field>
+        <field name="arch" type="xml">
+            <list string="Parking Sites">
+                <field name="name"/>
+                <field name="city"/>
+                <field name="company_id"/>
+                <field name="slot_required"/>
+                <field name="parking_entry_count"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Form View -->
+    <record id="parking_site_form_view" model="ir.ui.view">
+        <field name="name">parking.site.form</field>
+        <field name="model">parking.site</field>
+        <field name="arch" type="xml">
+            <form string="Parking Site">
+                <header>
+                    <button name="action_view_parking_entries" 
+                            type="object" 
+                            string="View Parking Entries" 
+                            class="oe_highlight"
+                            invisible="parking_entry_count == 0"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_parking_entries" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-car">
+                            <field name="parking_entry_count" widget="statinfo" string="Entries"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" 
+                            invisible="active == True"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Site Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="city"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group>
+                            <field name="slot_required"/>
+                            <field name="analytic_account_id"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="parking_site_search_view" model="ir.ui.view">
+        <field name="name">parking.site.search</field>
+        <field name="model">parking.site</field>
+        <field name="arch" type="xml">
+            <search string="Parking Sites">
+                <field name="name"/>
+                <field name="city"/>
+                <field name="company_id"/>
+                <separator/>
+                <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="filter_inactive" string="Archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_city" string="City" context="{'group_by': 'city'}"/>
+                    <filter name="group_by_company" string="Company" context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Action -->
+    <record id="parking_site_action" model="ir.actions.act_window">
+        <field name="name">Parking Sites</field>
+        <field name="res_model">parking.site</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="parking_site_search_view"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new parking site
+            </p>
+            <p>
+                Parking sites represent physical locations where vehicles can be parked.
+                Each site is associated with a city and company for better organization and security.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Menu Items -->
+    <menuitem id="parking_site_menu" 
+              name="Parking Sites" 
+              parent="parking_entry_menu_configuration_root" 
+              action="parking_site_action" 
+              sequence="30"
+              groups="group_parking_admin"/>
+              
+</odoo>

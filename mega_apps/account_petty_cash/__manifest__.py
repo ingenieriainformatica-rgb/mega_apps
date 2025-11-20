@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+{
+  "name": "Account Petty Cash (Caja Menor)",
+  "version": "1.0",
+  "summary": "Control de caja menor: encabezado de fondo y trazabilidad inicial",
+  "author": "Jorge Alberto Quiroz Sierra",
+  "website": "https://mega.realnet.com.co/",
+  "sequence": -102,
+  "category": "MegaTecnicentro/PettyCashaAccount",
+  "depends": [
+      "base",
+      "account",
+      "mail",
+  ],
+  "data": [
+      "security/group.xml",
+      "security/ir.model.access.csv",
+      "data/mail_template.xml",
+      "data/cashbox_sequence.xml",
+      "data/security.xml",
+      "views/petty_cash_views.xml",
+      "views/petty_cash_1a1_views.xml",
+      "views/petty_cash_line_views.xml",
+      "views/petty_cash_config_views.xml",
+      "views/menu.xml",
+  ],
+  "application": True,
+  "installable": True,
+  "license": "LGPL-3",
+}

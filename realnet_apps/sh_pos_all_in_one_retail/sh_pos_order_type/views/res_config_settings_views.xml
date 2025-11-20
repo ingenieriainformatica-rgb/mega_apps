@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="sh_order_type_res_config_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+
+            <block id="pos_interface_section" position="after">
+                <block title="Order Types">
+                    <setting>
+                        <field name="enable_order_type" />
+                    </setting>
+                    <setting invisible="not enable_order_type" required="1">
+                        <field name="order_type_mode" widget="radio" required="enable_order_type"/>
+                    </setting>
+                    <setting invisible="order_type_mode != 'multi'" >
+                        <field name="order_types_ids" widget="many2many_tags" invisible="order_type_mode != 'multi'"/>
+                    </setting>
+                    <setting invisible="not enable_order_type" >
+                        <field name="order_type_id" required="order_type_mode != 'multi' and enable_order_type"/>
+                    </setting>
+                </block>
+            </block>
+        </field>
+    </record>
+</odoo>

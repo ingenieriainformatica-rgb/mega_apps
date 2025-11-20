@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="sh_pos_all_in_one_retail.ControlButtons" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension" >
+        <xpath expr="//t[@t-if='props.showRemainingButtons']/div/OrderlineNoteButton" position="after">
+            <t t-if='this.pos.config.enable_order_type '>
+                <button class="js_order_type" t-att-class="buttonClass" t-on-click="() => this.onClickOrderTypeBtn()">
+                    <i class="fa fa-file-text-o me-1"/> Order type
+                </button>
+            </t>
+        </xpath>
+    </t>
+
+</templates>

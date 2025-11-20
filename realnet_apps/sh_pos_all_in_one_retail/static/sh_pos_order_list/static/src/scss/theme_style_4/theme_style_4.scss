@@ -1,0 +1,223 @@
+@if $sh_pos_theme_style == "style_4" {
+    @if $sh_pos_body_background_type == "bg_img" {
+        body{
+            .pos{
+                .pos-content {
+                    .shorderlist-screen {
+                        .top-content {
+                            .sh_header_buttons{
+                                border-bottom: 0 !important;
+                                .d-flex{
+                                    .btn , .form-control , .form-select{
+                                        @include bg_type_image_style_4;
+                                        outline-color: transparent !important;
+                                        input{
+                                            background: transparent !important;
+                                            &::placeholder{
+                                                color: #fff;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            .sh_full_content_service_management{
+                                .sh_order_list{
+                                    .sh_order_list_contents{
+                                        tr{
+                                            td {
+                                                color: #fff !important;
+                                                border: 0;
+                                                box-shadow: none;
+                                                table{
+                                                    tr{
+                                                        &:nth-child(odd) {
+                                                            background: rgba($sh_odd_row_color, $alpha: 0.19) !important;
+                                                            backdrop-filter: blur(7.5px);
+                                                        }
+                                                        &:nth-child(even) {
+                                                            background: rgba($sh_even_row_color, $alpha: 0.19) !important;
+                                                            backdrop-filter: blur(7.5px);
+                                                        }
+                                                        @if $sh_list_row_hover == "True" {
+                                                            &:hover {
+                                                                background: rgba(
+                                                                    $sh_hover_background_color,
+                                                                    $alpha: 0.15
+                                                                ) !important;
+                                                            }
+                                                        }
+                                                        td {
+                                                            color: #fff !important;
+                                                            border: 0;
+                                                            box-shadow: none;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            @for $yj from 1 through 10000{
+                                                &[data-id="#{$yj}"]{
+                                                    @if ($yj % 2 == 0){
+                                                        background: rgba($sh_odd_row_color, $alpha: 0.19) !important;
+                                                        backdrop-filter: blur(7.5px);
+                                                    }
+                                                    @else {
+                                                        background: rgba($sh_even_row_color, $alpha: 0.19) !important;
+                                                        backdrop-filter: blur(7.5px);
+                                                    }
+                                                }
+                                            }
+                                            @if $sh_list_row_hover == "True" {
+                                                &:hover {
+                                                    background: rgba(
+                                                        $sh_hover_background_color,
+                                                        $alpha: 0.15
+                                                    ) !important;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            .sh_page_controls{
+                                background: transparent ;
+                                .page-controls {
+                                    .page{
+                                        span{
+                                            color: #fff;
+                                        }
+                                    }
+                                    .btn{
+                                        border: 0;
+                                        @include bg_type_image_style_4;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }        
+    }
+    body{
+        .pos{
+            .pos-content {
+                .shorderlist-screen {
+                    .top-content {
+                        .sh_header_buttons{
+                            .d-flex{
+                                .btn-secondary{
+                                    background: #fff;
+                                    border: 0;
+                                    outline: 1px solid $sh_pos_primary_color;
+                                    &:hover{
+                                        @include theme_4_bg_color;
+                                        color: #fff;
+                                        outline-color: transparent;
+                                    }
+                                    option{
+                                        color: $sh_pos_primary_color;
+                                    }
+                                }
+                                .sh_top_bar_search_box{
+                                    &:has(input:focus , input:hover){
+                                            border-color: $sh_pos_primary_color;
+                                    }
+                                }
+                                .sh_top_bar_date_box {
+                                    input{
+                                        &:hover{
+                                            border-color: $sh_pos_primary_color;
+                                        }
+                                        &:focus{
+                                            border-color: $sh_pos_primary_color;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        .sh_full_content_service_management{
+                            .sh_order_list{
+                                thead{
+                                    tr{
+                                        @include theme_4_bg_color;
+                                    }
+                                }
+                                tbody{
+                                    tr{
+                                        td{
+                                            table{
+                                                thead{
+                                                    @include theme_4_bg_color;
+                                                    th{
+                                                        background: transparent !important;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        .sh_page_controls{
+                            .page-controls {
+                                .btn{
+                                    &:hover{
+                                        @include theme_4_bg_color;
+                                        color: #fff;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@if $sh_pos_button_style == "style_4" {
+    body{
+        .pos{
+            .pos-content {
+                .shorderlist-screen {
+                    .top-content {
+                        .sh_header_buttons{
+                            .d-flex{
+                                .btn-secondary {
+                                    border-radius: 50px;
+                                }
+                            }
+                        }
+                        .sh_page_controls{
+                            .page-controls {
+                                .btn{
+                                    border-radius: 50px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+@if $sh_form_element_style == "style_4" {
+    body{
+        .pos{
+            .pos-content {
+                .shorderlist-screen {
+                    .top-content {
+                        .sh_header_buttons{
+                            .d-flex{
+                                .form-control {
+                                    border-radius: 50px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

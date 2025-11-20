@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_property_item_history_tree" model="ir.ui.view">
+        <field name="name">property.item.history.tree</field>
+        <field name="model">property.item.history</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="property_id" string="Propiedad"/>
+                <field name="company_id" string="Empresa"/>
+                <field name="date" string="Fecha"/>
+                <field name="quantity" string="Cantidad"/>
+                <field name="operation_type" string="Tipo de Movimiento"/>
+                <field name="user_id" string="Registrado por"/>
+                <field name="notes" string="Descripción"/>
+            </list>
+        </field>
+    </record>
+</odoo>

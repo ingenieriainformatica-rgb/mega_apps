@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-extend="ProductConfiguratorPopup" t-inherit="point_of_sale.ProductConfiguratorPopup" t-inherit-mode="extension">
+        <xpath expr='//Dialog' position="inside">
+            <div class="sh_alternative_products" t-if="pos.config.sh_pos_display_alternative_products">                    
+                <t t-if="getAlternativeProduct and getAlternativeProduct.length">
+                    <div class="sh_alternative_products_title">
+                        <span class="modal-title h4">
+                            Alternative Products
+                        </span>
+                    </div>
+                    <div class="sh_product_variant_2 product-list d-grid gap-1">
+                        <ProductCard
+                            t-foreach="getAlternativeProduct" t-as="product" t-key="product.id"
+                            productId="product.id"
+                            product="product"
+                            class="pos.productViewMode"
+                            name="product.display_name"
+                            color="product.pos_categ_ids?.at(-1)?.color"
+                            imageUrl="pos.config.show_product_images and product.getImageUrl()"
+                            onClick.bind="() => this.addProductToOrder(product)"
+                            productInfo="true"
+                            onProductInfoClick.bind="() => this.onProductInfoClick(product)" />
+                    </div>
+                </t>
+            </div>
+        </xpath>
+        <xpath expr="//div[@t-ref='input-area']" position="attributes">
+            <attribute name="t-if">(!pos.config.sh_pos_enable_product_variants )or (getVarientProduct and getVarientProduct.length == 0)</attribute>
+        </xpath>
+        <xpath expr="//div[@t-ref='input-area']" position="after">
+            <div class="sh_product_variant_2 product-list d-grid gap-1" t-if="pos.config.sh_pos_enable_product_variants and getVarientProduct and getVarientProduct.length > 0">
+                <ProductCard
+                    t-foreach="getVarientProduct" t-as="product" t-key="product.id"
+                    productId="product.id"
+                    product="product"
+                    class="pos.productViewMode"
+                    name="product.display_name"
+                    color="product.pos_categ_ids?.at(-1)?.color"
+                    imageUrl="pos.config.show_product_images and product.getImageUrl()"
+                    onClick.bind="() => this.addProductToOrder(product)"
+                    productInfo="true"
+                    onProductInfoClick.bind="() => this.onProductInfoClick(product)"/>
+            </div>
+        </xpath>
+        
+    </t>
+</templates>

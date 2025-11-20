@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_pos_reservation_user,pos.reservation user,model_pos_reservation,pos_reservation_layaway.group_pos_reservation_user,1,1,1,1
+access_pos_reservation_manager,pos.reservation manager,model_pos_reservation,pos_reservation_layaway.group_pos_reservation_manager,1,1,1,1
+access_pos_reservation_line_user,pos.reservation.line user,model_pos_reservation_line,pos_reservation_layaway.group_pos_reservation_user,1,1,1,1
+access_pos_reservation_line_manager,pos.reservation.line manager,model_pos_reservation_line,pos_reservation_layaway.group_pos_reservation_manager,1,1,1,1
+access_pos_reservation_payment_user,pos.reservation.payment user,model_pos_reservation_payment,pos_reservation_layaway.group_pos_reservation_user,1,1,1,1
+access_pos_reservation_payment_manager,pos.reservation.payment manager,model_pos_reservation_payment,pos_reservation_layaway.group_pos_reservation_manager,1,1,1,1
+access_stock_reservation_hold_user,stock.reservation.hold user,model_stock_reservation_hold,base.group_user,1,1,1,1
+access_stock_reservation_hold_manager,stock.reservation.hold manager,model_stock_reservation_hold,pos_reservation_layaway.group_pos_reservation_manager,1,1,1,1
+access_consume_credit_wizard,consume.credit.wizard,model_pos_reservation_consume_credit_wizard,base.group_user,1,1,1,1
+

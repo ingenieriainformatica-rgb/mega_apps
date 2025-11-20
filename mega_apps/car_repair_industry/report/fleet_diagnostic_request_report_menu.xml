@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <record id="fleet_diagnostic_request_report_id" model="ir.actions.report">
+        <field name="name">Car Diagnostic Request</field>
+        <field name="model">fleet.diagnose</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">car_repair_industry.machi_diagn_req_temp_id</field>
+        <field name="report_file">car_repair_industry.machi_diagn_req_temp_id</field>
+        <field name="binding_model_id" ref="model_fleet_diagnose"/>
+        <field name="binding_type">report</field>
+        <!-- <field name="group_ids"
+               eval="[(4, ref('car_repair_industry.group_fleet_repair_service_manager')), (4, ref('fleet.fleet_group_manager'))]"/> -->
+    </record>
+
+</odoo>

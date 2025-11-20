@@ -1,0 +1,211 @@
+##############################
+# SISTEMA OPERATIVO
+##############################
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux / otros
+*.swp
+*.swo
+*~
+*.tmp
+*.temp
+
+##############################
+# PYTHON / ODOO
+##############################
+# Cachés de Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+venv/
+env/
+.venv/
+.odoo-venv/
+.python-env/
+.env.bak
+.env.backup
+
+# Paquetes / builds Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.wheelhouse/
+
+# Cachés de herramientas Python
+.mypy_cache/
+.pytest_cache/
+.tox/
+.cache/
+coverage.xml
+htmlcov/
+.coverage
+*.cover
+.nox/
+
+##############################
+# ODOO: RUNTIME / DATOS
+##############################
+# Logs y PIDs
+*.log
+*.pid
+*.pid.lock
+/log
+
+# Filestore y datos de Odoo (NO versionar)
+filestore/
+filestore_*/
+.sessions/
+sessions/
+.oe/
+.odoo/
+
+# Datos temporales
+tmp/
+temp/
+tmp_*/
+cache/
+.odoo_cache/
+
+# Traducciones compiladas
+*.mo
+
+##############################
+# CONFIGURACIONES LOCALES
+##############################
+# Configs de Odoo locales (mantén solo un ejemplo si quieres)
+odoo.conf
+*.local.conf
+*.dev.conf
+*.test.conf
+*.prod.conf
+
+# Variables de entorno
+!.env.example      # sí versiona el ejemplo
+
+# Claves / certificados (MEJOR NO SUBIR)
+*.pem
+*.key
+*.crt
+*.pfx
+
+##############################
+# BASES DE DATOS / BACKUPS
+##############################
+# Dumps de PostgreSQL u otros backups
+*.sql
+*.sql.gz
+*.dump
+*.backup
+*.bak
+*.old
+
+/backups
+
+# Backups comprimidos
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*.rar
+
+##############################
+# FRONTEND / NODE / JS
+##############################
+# Dependencias
+node_modules/
+bower_components/
+jspm_packages/
+
+# Logs de node
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Locks (si prefieres no versionarlos)
+# coméntalos si quieres que SÍ suban
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Builds / assets generados
+static/lib/
+static/dist/
+static/build/
+static/bundle/
+staticfiles/
+*.map
+
+##############################
+# DOCKER / CONTENEDORES
+##############################
+.docker/
+docker-data/
+docker_logs/
+*.pid
+
+# Volúmenes montados o datos persistentes
+data/
+data_*/
+volumes/
+
+##############################
+# EDITORES / IDE
+##############################
+# VSCode
+.vscode/
+.history/
+
+# JetBrains (PyCharm, IntelliJ, etc.)
+.idea/
+*.iml
+out/
+
+# Visual Studio
+.vs/
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Otros proyectos / herramientas
+.spyproject/
+.ropeproject/
+
+##############################
+# DOCUMENTOS / OFICINA
+##############################
+# Archivos temporales de Office
+~$*.doc*
+~$*.dot*
+~$*.xls*
+~$*.ppt*
+
+##############################
+# OTROS VARIOS
+##############################
+# Archivos de merge / parches
+*.orig
+*.rej
+
+# Archivos de sistema varios
+*.log.[0-9]*
+*.swp
+*.swo
+
+developer.code-workspace

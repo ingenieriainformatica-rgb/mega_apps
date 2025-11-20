@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Menú del Tablero Operativo bajo "Reporting/Informes" -->
+        <menuitem id="parking_operational_dashboard_menu"
+                  name="Tablero Operativo"
+                  parent="odoo_parking_management.menu_reporting_root"
+                  action="parking_operational_dashboard_action"
+                  sequence="70"/>
+    </data>
+</odoo>
+

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="custom_internal_layout_header" inherit_id="web.internal_layout">
+        <xpath expr="//div[hasclass('header')]" position="replace">
+            <div class="header">
+                <div class="mb-4">
+                    <p class="m-0"><strong><span t-field="company.name"/></strong></p>
+                    <p class="m-0">NIT <span t-field="company.vat"/></p>
+                    <p class="m-0"><span t-field="company.partner_id.street"/></p>
+                    <p class="m-0"><span t-field="company.partner_id.city"/></p>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

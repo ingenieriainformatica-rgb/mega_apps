@@ -1,0 +1,82 @@
+# Archivos de Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Archivos de log
+*.log
+
+# Configuración local de Odoo
+odoo.conf
+*.db
+*.bak
+
+# Archivos temporales
+*.swp
+*.swo
+*.~*
+*~
+
+# Bases de datos sqlite (si aplican)
+*.sqlite
+*.sqlite3
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+ehthumbs.db
+# Icon?
+
+# Node.js y web assets si usas Webpack o npm en addons
+node_modules/
+*.map
+
+# Directorios de builds o virtualenvs
+/build/
+dist/
+*.egg-info/
+.eggs/
+.env
+.venv/
+env/
+venv/
+
+# Archivos y directorios de pruebas temporales
+/.tox/
+.coverage
+htmlcov/
+*.cover
+.cache/
+
+# Carpeta de dependencias de Odoo (si está presente)
+odoo/addons/.mr.developer.cfg
+odoo/.installed.cfg
+
+# Snapshots de Odoo para export/import
+*.zip
+*.tar.gz
+*.dump
+
+# Carpeta de addons externos descargados (opcional)
+external_addons/
+
+# Archivos de personalización local
+*.crt
+*.key
+*.pem
+*.csr
+
+# VSCode / IDEs
+.vscode/
+.idea/
+
+# Archivos temporales de Odoo en tiempo de ejecución
+*.pid
+*.sock
+
+# Carpeta de almacenamiento de archivos de sesión HTTP
+sessions/
+
+# Carpeta de datos adjuntos
+filestore/

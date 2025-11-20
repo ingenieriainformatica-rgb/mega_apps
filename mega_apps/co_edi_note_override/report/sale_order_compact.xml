@@ -1,0 +1,17 @@
+<odoo>
+  <template id="report_saleorder_document_custom" inherit_id="sale.report_saleorder_document" priority="60">
+
+    <!-- Estilos globales, igual que en la factura -->
+    <xpath expr="//t[@t-call='web.external_layout']" position="inside">
+      <t>
+        <style>
+          .page { font-size:0.9rem !important; line-height:1.0 !important; }
+          .page h2, .page h3, .page h4 { margin:0 0 2px 0 !important; }
+          .page table td, .page table th { padding:2px 4px !important; vertical-align:top; }
+          .page table tr { page-break-inside: avoid; }
+        </style>
+      </t>
+    </xpath>
+
+  </template>
+</odoo>

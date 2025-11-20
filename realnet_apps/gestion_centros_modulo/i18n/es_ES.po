@@ -1,0 +1,97 @@
+# Translation file for gestion_centros_modulo
+msgid ""
+msgstr ""
+"Project-Id-Version: gestion_centros_modulo\n"
+"POT-Creation-Date: 2025-07-29 00:00+0000\n"
+"PO-Revision-Date: 2025-07-29 00:00+0000\n"
+"Last-Translator: Andros Cabello <info@androscabello.com>\n"
+"Language-Team: Spanish\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: gestion_centros_modulo
+msgid "Educational Management"
+msgstr "Gestión Educativa"
+
+#. module: gestion_centros_modulo
+msgid "Students"
+msgstr "Alumnos"
+
+#. module: gestion_centros_modulo
+msgid "Educational Centers"
+msgstr "Centros Educativos"
+
+#. module: gestion_centros_modulo
+msgid "All Students"
+msgstr "Todos los Alumnos"
+
+#. module: gestion_centros_modulo
+msgid "Name"
+msgstr "Nombre"
+
+#. module: gestion_centros_modulo
+msgid "Identification Code"
+msgstr "Código de Identificación"
+
+#. module: gestion_centros_modulo
+msgid "Date of Birth"
+msgstr "Fecha de Nacimiento"
+
+#. module: gestion_centros_modulo
+msgid "Phone"
+msgstr "Teléfono"
+
+#. module: gestion_centros_modulo
+msgid "Alternate Phone"
+msgstr "Teléfono alternativo"
+
+#. module: gestion_centros_modulo
+msgid "Email"
+msgstr "Email"
+
+#. module: gestion_centros_modulo
+msgid "Associated Activity"
+msgstr "Actividad Asociada"
+
+#. module: gestion_centros_modulo
+msgid "Parents' Association (AMPA)"
+msgstr "AMPA"
+
+#. module: gestion_centros_modulo
+msgid "Educational Center"
+msgstr "Centro Educativo"
+
+#. module: gestion_centros_modulo
+msgid "Father's Name"
+msgstr "Nombre del Padre"
+
+#. module: gestion_centros_modulo
+msgid "Mother's Name"
+msgstr "Nombre de la Madre"
+
+#. module: gestion_centros_modulo
+msgid "Family Phone"
+msgstr "Teléfono Familiar"
+
+#. module: gestion_centros_modulo
+msgid "STUDENT INFORMATION"
+msgstr "DATOS DEL ALUMNO"
+
+#. module: gestion_centros_modulo
+msgid "EDUCATIONAL INFORMATION"
+msgstr "DATOS EDUCATIVOS"
+
+#. module: gestion_centros_modulo
+msgid "FAMILY INFORMATION"
+msgstr "DATOS FAMILIARES"
+
+#. module: gestion_centros_modulo
+msgid "Location"
+msgstr "Lugar"
+
+#. module: gestion_centros_modulo
+msgid "Parents' Association Phone"
+msgstr "Teléfono AMPA"

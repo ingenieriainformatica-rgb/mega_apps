@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_all_in_one_retail.CashInOutStatementButton" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//t[@t-if='props.showRemainingButtons']/div/OrderlineNoteButton" position="after">
+            <button t-if="pos.config.sh_enable_cash_in_out_statement" class="control-button btn btn-secondary btn-lg py-5 flex-shrink-0" t-on-click="() => this.cash_in_out_statement()">
+                <span></span>
+                <i class="fa fa-print" aria-hidden="true"></i>
+                Cash In / Out Statement
+
+            </button>
+            <button t-if="pos.config.sh_enable_payment" class="control-button btn btn-secondary btn-lg py-5 flex-shrink-0" t-on-click="() => this.sh_payments()">
+                <span></span>
+
+                <i class="fa fa-money" aria-hidden="true"></i>
+                    Payments
+            </button>
+        </xpath>
+    </t>
+</templates>

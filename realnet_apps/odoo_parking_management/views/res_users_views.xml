@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extension of res.users form view to show parking site fields -->
+    
+    <record id="res_users_parking_sites_form_view" model="ir.ui.view">
+        <field name="name">res.users.parking.sites.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Parking Sites" groups="base.group_system,odoo_parking_management.group_parking_admin">
+                    <group>
+                        <group string="Site Access">
+                            <field name="allowed_parking_site_ids" widget="many2many_tags"/>
+                            <field name="default_parking_site_id" 
+                                   domain="[('id', 'in', allowed_parking_site_ids)]"/>
+                        </group>
+                    </group>
+                    <group string="Information">
+                        <p>
+                            <strong>Allowed Parking Sites:</strong> Sites this user can access and manage.<br/>
+                            <strong>Default Parking Site:</strong> Site used by default when creating new parking entries.
+                        </p>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    
+</odoo>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sh_pos_order_line_pos_note" model="ir.ui.view">
+        <field name="name">pos.order.line.pos.note</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='qty']" position="before">
+                <field name="note" />
+            </xpath>
+            <xpath expr="//list//field[@name='price_unit']" position="after">
+                <field name="sh_uom_id" />
+            </xpath>
+            <xpath expr="//field[@name='general_note']" position="after">
+                <field name="order_note" />
+            </xpath>
+        </field>
+    </record>
+</odoo>

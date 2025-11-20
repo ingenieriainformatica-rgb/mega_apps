@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="sh_pos_weight.Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <xpath expr='//ul[hasclass("info-list")]' position='after'>
+            <div class="d-flex align-items-center">
+                <t t-if='line and line.weight_in_cart'>
+                    <div class="sh_orderline_weight_main">
+                        <span class="sh_orderline_weight_lbl">Weight </span>
+                        <span class="sh_orderline_weight_val"><t t-esc='line.product_weight'></t></span>
+                    </div>
+                </t>
+                <t t-if='env.services.pos.config.enable_weight and env.services.pos.config.product_weight_receipt'>
+                    <t t-if='line and line.weight_in_receipt'>
+                        <div class="sh_orderline_weight_main">
+                            <span class="sh_orderline_weight_lbl">Weight </span>
+                            <span class="sh_orderline_weight_val"><t t-esc='line.product_weight'></t></span>
+                        </div>
+                    </t>           
+                </t>
+            <!-- </div>
+            <div class="d-flex align-items-center"> -->
+                <t t-if='env.services.pos.config.enable_volume'>
+                    <t t-if='props.line and props.line.volume_in_cart'>
+                        <div class="sh_orderline_volume_main">
+                            <span class="sh_orderline_volume_lbl">Volume </span>
+                            <span class="sh_orderline_volume_val"><t t-esc='props.line.product_volume'></t></span>
+                        </div>
+                    </t>
+                </t>
+                <t t-if='env.services.pos.config.enable_volume and env.services.pos.config.product_volume_receipt'>
+                    <t t-if='props.line and props.line.volume_in_receipt'>
+                        <div class="sh_orderline_volume_main">
+                            <span class="sh_orderline_volume_lbl">Volume </span>
+                            <span class="sh_orderline_volume_val"><t t-esc='props.line.product_volume'></t></span>
+                        </div>
+                    </t>
+                </t>
+            </div>
+
+        </xpath>
+    </t>
+</templates>

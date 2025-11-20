@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <menuitem id="menu_account_realnet_tools_firts_level"
+      name="Control de efectivo"
+      parent="account.menu_finance_entries"
+      groups="account_petty_cash.group_pc_user"
+      sequence="1000"
+  />
+
+  <menuitem id="menu_petty_cash_box"
+    name="MegaTecnicentro"
+    parent="account_petty_cash.menu_account_realnet_tools_firts_level"
+    sequence="10"
+    groups="account_petty_cash.group_pc_user"
+    action="action_petty_cash_box"/>
+
+  <menuitem id="menu_petty_cash_box_1a1"
+    name="1a1"
+    parent="account_petty_cash.menu_account_realnet_tools_firts_level"
+    sequence="20"
+    groups="account_petty_cash.group_pc_user"
+    action="action_petty_cash_box_1a1"/>
+
+</odoo>

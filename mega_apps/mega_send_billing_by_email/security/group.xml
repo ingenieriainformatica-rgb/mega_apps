@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="0">
+
+    <!-- Categoría propia para las alertas -->
+    <record id="module_category_realnet_alerts" model="ir.module.category">
+      <field name="name">Mega - Alertas - Facturas </field>
+      <field name="description">Grupos y permisos de alertas de facturación</field>
+      <field name="sequence">60</field>
+    </record>
+
+    <!-- Grupo de destinatarios -->
+    <record id="group_billing_alert_recipients" model="res.groups">
+      <field name="name">Alertas de facturación (reciben email)</field>
+      <field name="category_id" ref="mega_send_billing_by_email.module_category_realnet_alerts"/>
+    </record>
+
+  </data>
+</odoo>
