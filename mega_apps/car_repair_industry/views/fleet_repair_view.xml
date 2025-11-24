@@ -72,7 +72,7 @@
                         </div>
                         <group>
                             <group>
-                                <field name="name" readonly="state != 'draft'"/>
+                                <field name="name" readonly="state != 'draft'" string="Concepto"/>
                                 <field name="user_id" readonly="state != 'draft'"/>
                                 <field name="confirm_sale_order" invisible="True"/>
                             </group>
@@ -147,7 +147,7 @@
             <field name="priority">4</field>
             <field name="arch" type="xml">
                 <list string="Car Repair">
-                    <field name="name" string="Subject"/>
+                    <field name="name" string="Concepto"/>
                     <field name="client_id"/>
                     <field name="phone"/>
                     <field name="receipt_date"/>

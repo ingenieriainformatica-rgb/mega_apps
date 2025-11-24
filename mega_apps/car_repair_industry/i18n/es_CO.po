@@ -669,7 +669,7 @@ msgstr "Año de fabricación del automóvil"
 #: model_terms:ir.ui.view,arch_db:car_repair_industry.view_fleet_repair_tree
 #, python-format
 msgid "Car Repair"
-msgstr "Reparación de autos"
+msgstr "Taller de autos"
 
 #. module: car_repair_industry
 #: model:mail.template,name:car_repair_industry.car_repair_service_done

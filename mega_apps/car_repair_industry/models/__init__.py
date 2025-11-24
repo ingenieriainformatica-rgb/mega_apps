@@ -8,4 +8,4 @@ from . import custom_sale
 from . import fleet_repair_checklist
 from . import calendar_event
 from . import appointment_slots
-
+from . import fleet_vehicle_model

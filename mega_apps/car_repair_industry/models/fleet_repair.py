@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
-
+import logging
 from odoo import fields, models, api, _
 from odoo import tools
 from odoo.exceptions import UserError, ValidationError
+
+
+_logger = logging.getLogger(__name__)
 
 
 class FleetRepair(models.Model):
@@ -258,6 +261,7 @@ class FleetRepair(models.Model):
             addr['client_phone'] = self.client_id.phone
             addr['client_mobile'] = self.client_id.phone
             addr['client_email'] = self.client_id.email
+            self.contact_name = self.client_id.name
         return {'value': addr}
 
     def action_create_fleet_diagnosis(self):

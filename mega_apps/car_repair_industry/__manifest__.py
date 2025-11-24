@@ -163,6 +163,7 @@ automotive workshop management software
         'views/fleet_repair_sequence.xml',
         'views/fleet_diagnose_view.xml',
         'views/fleet_workorder_sequence.xml',
+        'views/fleet_vehicle_model_views_inherit.xml',
         'views/fleet_workorder_view.xml',
         'views/custom_sale_view.xml',
         'views/calendar_event_view.xml',

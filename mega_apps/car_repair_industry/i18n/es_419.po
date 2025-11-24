@@ -161,7 +161,7 @@ msgstr ""
 "<p>Estimado <t t-out=\"object.client_id.name\"></t>\n"
 ",</p>\n"
 "<p>\n"
-"Hemos cerrado su solicitud de reparación de automóviles ahora.\n"
+"Hemos cerrado su solicitud de reparación de autos ahora.\n"
 "</p><br>\n"
 "<a t-attf-href=\"/feedback/form/{{ object.id }}\" role=\"button\" class=\"btn btn-"
 "primary btn-md\">Envíe su opinión</a>\n"
@@ -640,7 +640,7 @@ msgstr "Información del automovil"
 #. module: car_repair_industry
 #: model:ir.model.fields,field_description:car_repair_industry.field_fleet_repair__fleet_repair_line
 msgid "Car Lines"
-msgstr "Líneas de automóviles"
+msgstr "Líneas de autos"
 
 #. module: car_repair_industry
 #: model:ir.model.fields,field_description:car_repair_industry.field_fleet_repair_line__list_of_damage
@@ -669,44 +669,44 @@ msgstr "Año de fabricación del automóvil"
 #: model_terms:ir.ui.view,arch_db:car_repair_industry.view_fleet_repair_tree
 #, python-format
 msgid "Car Repair"
-msgstr "Reparación de autos"
+msgstr "Taller de autos"
 
 #. module: car_repair_industry
 #: model:mail.template,name:car_repair_industry.car_repair_service_done
 msgid "Car Repair - Send by Email"
-msgstr "Reparación de automóviles - Enviar por correo electrónico"
+msgstr "Taller de autos - Enviar por correo electrónico"
 
 #. module: car_repair_industry
 #: model:ir.actions.report,name:car_repair_industry.fleet_repair_checklist_id
 msgid "Car Repair Checklist"
-msgstr "Lista de verificación de reparación de automóviles"
+msgstr "Lista de verificación de reparación de autos"
 
 #. module: car_repair_industry
 #: model:ir.actions.client,name:car_repair_industry.fleet_repair_dashboard
 msgid "Car Repair Dashboard"
-msgstr "Panel de reparación de automóviles"
+msgstr "Panel de reparación de autos"
 
 #. module: car_repair_industry
 #. odoo-javascript
 #: code:addons/car_repair_industry/static/src/xml/fleet_repair_dashboard.xml:0
 #, python-format
 msgid "Car Repair Details"
-msgstr "Detalles de reparación de automóviles"
+msgstr "Detalles de reparación de autos"
 
 #. module: car_repair_industry
 #: model:ir.actions.report,name:car_repair_industry.fleet_repair_label_id
 msgid "Car Repair Label"
-msgstr "Etiqueta de reparación de automóviles"
+msgstr "Etiqueta de reparación de autos"
 
 #. module: car_repair_industry
 #: model:ir.actions.report,name:car_repair_industry.fleet_repair_receipt_id
 msgid "Car Repair Receipt"
-msgstr "Recibo de reparación de automóviles"
+msgstr "Recibo de reparación de autos"
 
 #. module: car_repair_industry
 #: model:ir.actions.server,name:car_repair_industry.ir_actions_car_repair_dashboard
 msgid "Car Repair: Dashboard"
-msgstr "Reparación de automóviles: tablero de instrumentos"
+msgstr "Reparación de autos: tablero de instrumentos"
 
 #. module: car_repair_industry
 #. odoo-python
@@ -1925,7 +1925,7 @@ msgstr "Cita agendada"
 #. module: car_repair_industry
 #: model_terms:ir.ui.view,arch_db:car_repair_industry.view_fleet_diagnose_filter
 msgid "Search Car Diagnoses"
-msgstr "Buscar diagnósticos de automóviles"
+msgstr "Buscar diagnósticos de autos"
 
 #. module: car_repair_industry
 #: model_terms:ir.ui.view,arch_db:car_repair_industry.view_repair_order_filter
