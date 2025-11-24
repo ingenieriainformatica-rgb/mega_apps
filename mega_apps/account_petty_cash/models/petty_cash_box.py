@@ -96,6 +96,8 @@ class PettyCashBox(models.Model):
         # Selección por XMLID (simple y explícita)
         if source in ("control_efectivo_1a1", "1a1"):
             xmlid = "account_petty_cash.seq_petty_cash_box_1a1"
+        if source in ("control_efectivo_megasur", "megasur"):
+            xmlid = "account_petty_cash.seq_petty_cash_box_megasur"
         else:
             # default: Mega
             xmlid = "account_petty_cash.seq_petty_cash_box"

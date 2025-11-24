@@ -1,4 +1,7 @@
-from odoo import fields, models
+import logging
+from odoo import fields, models  #type: ignore
+
+_logger = logging.getLogger(__name__)
 
 
 class PettyCashBalance(models.Model):
@@ -10,6 +13,7 @@ class PettyCashBalance(models.Model):
     TYPE_SELECTION = [
         ('control_efectivo', 'Control de efectivo'),
         ('control_efectivo_1a1', 'Control de efectivo 1a1'),
+        ('control_efectivo_megasur', 'Control de efectivo MEGASUR'),
     ]
 
     name = fields.Selection(

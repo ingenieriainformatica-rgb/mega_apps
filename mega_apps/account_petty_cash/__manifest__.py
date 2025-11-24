@@ -20,6 +20,7 @@
       "data/security.xml",
       "views/petty_cash_views.xml",
       "views/petty_cash_1a1_views.xml",
+      "views/petty_cash_box_megasur_views.xml",
       "views/petty_cash_line_views.xml",
       "views/petty_cash_config_views.xml",
       "views/menu.xml",

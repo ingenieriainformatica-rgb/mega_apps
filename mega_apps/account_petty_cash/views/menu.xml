@@ -22,4 +22,11 @@
     groups="account_petty_cash.group_pc_user"
     action="action_petty_cash_box_1a1"/>
 
+  <menuitem id="menu_petty_cash_box_megasur"
+    name="MEGASUR"
+    parent="account_petty_cash.menu_account_realnet_tools_firts_level"
+    sequence="30"
+    groups="account_petty_cash.group_pc_user"
+    action="action_petty_cash_box_megasur"/>
+
 </odoo>
