@@ -162,7 +162,9 @@
         </record>
 
 
-        <menuitem name="Billing"
+        <!-- Esto es para mostrar el menu de Facturación -->
+
+        <!-- <menuitem name="Billing"
                   id="menu_quotation"
                   parent="menu_main_car_repair"
                   sequence="4"/>
@@ -185,7 +187,7 @@
                   parent="menu_quotation"
                   action="action_invoice_tree1"
                   groups="group_fleet_repair_directeur_commercial,group_fleet_repair_service_manager"
-                  sequence="2"/>
+                  sequence="2"/> -->
 
     </data>
 </odoo>        
