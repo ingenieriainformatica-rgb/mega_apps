@@ -183,7 +183,7 @@
         </record>
 
         <!--Menuitems-->
-        <menuitem id="menu_main_car_repair" name="Car Repair" sequence="50"/>
+        <menuitem id="menu_main_car_repair" name="Car Repair" sequence="50" web_icon="car_repair_industry,static/description/icon.png"/>
         <menuitem name="Car Repair" parent="menu_main_car_repair" id="menu_sub_car_repair" sequence="3"/>
 
         <menuitem name="Car Repair" parent="menu_sub_car_repair" id="menu_fleet_repair_submenu" sequence="3"
