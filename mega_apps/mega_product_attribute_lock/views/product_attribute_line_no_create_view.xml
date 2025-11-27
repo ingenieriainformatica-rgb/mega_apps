@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        Vista heredada para bloquear la creación de atributos
+        desde la pestaña "Atributos y variantes" del producto.
+    -->
+    <record id="view_product_template_attribute_line_no_create"
+            model="ir.ui.view">
+        <field name="name">product.template.attribute.line.no.create</field>
+        <field name="model">product.template</field>
+        <!-- Vista principal de formulario de producto -->
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+
+            <!--
+                Localizamos el campo attribute_id dentro de las líneas de atributos.
+                Odoo 18: está dentro del one2many attribute_line_ids.
+            -->
+            <xpath expr="//field[@name='attribute_line_ids']//field[@name='attribute_id']"
+                   position="attributes">
+                <!--
+                    no_create      -> no muestra "Crear"
+                    no_create_edit -> no muestra "Crear y editar..."
+                    no_open        -> si True, no deja abrir el formulario del atributo.
+                    Pon no_open=True si quieres que solo puedan seleccionar, sin abrir.
+                -->
+                <attribute name="options">
+                    {'no_create': True, 'no_create_edit': True, 'no_open': True}
+                </attribute>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
