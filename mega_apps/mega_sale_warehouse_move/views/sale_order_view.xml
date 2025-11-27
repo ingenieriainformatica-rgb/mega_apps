@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_order_form_mega_warehouse_hide" model="ir.ui.view">
+        <field name="name">sale.order.form.mega.warehouse.hide</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_stock.view_order_form_inherit_sale_stock"/>
+        <field name="arch" type="xml">
+
+            <!-- Ocultar SOLO el warehouse_id que es visible (sin atributo invisible) -->
+            <xpath expr="//group[@name='sale_shipping']//field[@name='warehouse_id' and not(@invisible)]"
+                   position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_order_form_mega_warehouse_move" model="ir.ui.view">
+        <field name="name">sale.order.form.mega.warehouse.move</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Insertar warehouse_id después de payment_term_id -->
+            <xpath expr="//group[@name='sale_header']//group[@name='order_details']//field[@name='payment_term_id']"
+                   position="after">
+                   <!-- Título -->
+                    <separator string="Entrega:"/>
+                    <field name="warehouse_id"
+                        options="{'no_create': True, 'no_open': True}"
+                        force_save="1"
+                        readonly="state == 'sale'"/>
+            </xpath>
+        </field>
+    </record>
+    
+
+</odoo>
