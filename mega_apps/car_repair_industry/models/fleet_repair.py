@@ -385,7 +385,15 @@ class ServiceType(models.Model):
     _name = 'service.type'
     _description = "Service Type"
 
-    name = fields.Char(string='Name')
+    name = fields.Char(string='Name', required=True)
+
+    _sql_constraints = [
+        (
+            'service_type_name_uniq',          # nombre interno del constraint
+            'unique(name)',                   # regla SQL: el campo name debe ser único
+            'Ya existe un tipo de servicio con este nombre.'  # mensaje de error
+        ),
+    ]
 
 
 class FleetRepairLine(models.Model):

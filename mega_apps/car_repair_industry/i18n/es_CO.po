@@ -1527,7 +1527,7 @@ msgstr "Nombre"
 #: model:ir.model.fields,field_description:car_repair_industry.field_fleet_repair_line__service_type
 #: model:ir.model.fields,field_description:car_repair_industry.field_fleet_workorder__service_type
 msgid "Nature of Service"
-msgstr "Naturaleza del servicio"
+msgstr "Tipo de servicio"
 
 #. module: car_repair_industry
 #: model:ir.model.fields,field_description:car_repair_industry.field_fleet_repair__activity_calendar_event_id
