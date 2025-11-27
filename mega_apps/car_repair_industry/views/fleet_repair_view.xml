@@ -151,6 +151,14 @@
                     <field name="client_id"/>
                     <field name="phone"/>
                     <field name="receipt_date"/>
+                    <field name="state"
+                        optional="show"
+                        widget="badge"
+                        decoration-info="state in ('draft', 'diagnosis')"              
+                        decoration-warning="state in ('quote', 'saleorder', 'workorder')"  
+                        decoration-success="state in ('work_completed', 'invoiced', 'done')" 
+                        decoration-danger="state == 'cancel'"/> 
+                    <field name="priority" optional="show" widget="badge" decoration-info="priority == '1'" decoration-danger="priority == '2'" />
                     <field name="user_id"/>
                 </list>
             </field>
@@ -167,7 +175,42 @@
                     <field name="client_id" operator="child_of"/>
                     <field name="user_id"/>
                     <field name="fleet_id"/>
+                    <filter name="state_open"
+                            string="Pendientes"
+                            domain="[('state', 'in', ('draft','diagnosis','diagnosis_complete','quote','saleorder','workorder'))]"/>
+                    <filter name="state_done"
+                            string="Completadas"
+                            domain="[('state', 'in', ('work_completed','invoiced','done'))]"/>
+                    <filter name="state_cancel"
+                            string="Canceladas"
+                            domain="[('state', '=', 'cancel')]"/>
+
                     <separator/>
+
+                    <filter name="priority_low"
+                            string="Prioridad baja"
+                            domain="[('priority', '=', '0')]"/>
+                    <filter name="priority_normal"
+                            string="Prioridad  media"
+                            domain="[('priority', '=', '1')]"/>
+                    <filter name="priority_high"
+                            string="Prioridad  alta"
+                            domain="[('priority', '=', '2')]"/>
+
+                    <group expand="0" string="Agrupar por">
+                        <filter name="group_by_client"
+                                string="Cliente"
+                                context="{'group_by': 'client_id'}"/>
+                        <filter name="group_by_state"
+                                string="Estado"
+                                context="{'group_by': 'state'}"/>
+                        <filter name="group_by_user"
+                                string="Asignado a"
+                                context="{'group_by': 'user_id'}"/>
+                        <filter name="group_by_receipt_date"
+                                string="Fecha de recibo"
+                                context="{'group_by': 'receipt_date'}"/>
+                    </group>
                 </search>
             </field>
         </record>

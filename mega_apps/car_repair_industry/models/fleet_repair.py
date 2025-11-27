@@ -272,7 +272,7 @@ class FleetRepair(models.Model):
         mod_obj = self.env['ir.model.data']
         act_obj = self.env['ir.actions.act_window']
         if not repair_obj.fleet_repair_line:
-            raise UserError('You cannot create Car Diagnosis without Cars.')
+            raise UserError(_('You cannot create Car Diagnosis without Cars.'))
 
         diagnose_vals = {
             'service_rec_no': repair_obj.sequence,

@@ -1666,6 +1666,12 @@ msgid "Pending"
 msgstr "Pendiente"
 
 #. module: car_repair_industry
+#. odoo-python
+#: code:addons/car_repair_industry/models/fleet_repair.py:0
+msgid "You cannot create Car Diagnosis without Cars."
+msgstr "No puede crear un diagnóstico de vehículo sin un vehículo asociado."
+
+#. module: car_repair_industry
 #: model_terms:ir.ui.view,arch_db:car_repair_industry.service_repair_form
 msgid "Personal Details"
 msgstr "Detalles personales"
