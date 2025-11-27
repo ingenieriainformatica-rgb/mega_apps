@@ -168,6 +168,7 @@ automotive workshop management software
         'views/custom_sale_view.xml',
         'views/calendar_event_view.xml',
         'views/appointment_slots_views.xml',
+        'views/fleet_vehicle_model_view.xml',
         'views/dashboard.xml',
         'views/templates.xml',
         'report/fleet_repair_label_view.xml',

@@ -1,0 +1,29 @@
+<odoo>
+    <record id="view_fleet_vehicle_model_form_megafleet" model="ir.ui.view">
+        <field name="name">fleet.vehicle.model.form.megafleet</field>
+        <field name="model">fleet.vehicle.model</field>
+        <!-- Usa aquí el ID real de la vista original -->
+        <field name="inherit_id" ref="fleet.fleet_vehicle_model_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 1) Grupo MODELO (asientos, puertas, año, gancho) -->
+            <!-- Tomamos el group padre del campo 'seats' -->
+            <xpath expr="//page[@name='information']//field[@name='seats']/.."
+                   position="attributes">
+                <attribute name="invisible">
+                    vehicle_type not in ('car', 'truck', 'bus', 'van', 'machinery')
+                </attribute>
+            </xpath>
+
+            <!-- 2) Grupo MOTOR (Engine) -->
+            <!-- Usamos el name='group_engine' que ya tienes en la vista -->
+            <xpath expr="//page[@name='information']//group[@name='group_engine']"
+                   position="attributes">
+                <attribute name="invisible">
+                    vehicle_type not in ('car', 'truck', 'bus', 'van', 'machinery')
+                </attribute>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
