@@ -11,7 +11,7 @@
                     <header>
                         <button name="action_create_quotation" string="Create Quotation" type="object"
                                 class="oe_highlight" style="float:left;" invisible="state != 'in_progress'"
-                                groups="car_repair_industry.group_fleet_repair_service_manager"/>
+                                groups="car_repair_industry.group_fleet_repair_service_manager" confirm="Estas seguro?"/>
                         <button name="%(action_fleet_diagnose_assign_to_technician)d" string="Assign to Technician"
                                 invisible="state != 'draft'" type="action" class="oe_highlight" style="float:left;"
                                 groups="car_repair_industry.group_fleet_repair_head_technician,car_repair_industry.group_fleet_repair_directeur_commercial,car_repair_industry.group_fleet_repair_service_manager"/>
@@ -74,7 +74,7 @@
                         </div>
                         <group>
                             <group>
-                                <field name="name" readonly="True"/>
+                                <field name="name" readonly="True" string="Concepto"/>
                                 <field name="user_id" readonly="True"/>
                             </group>
                             <group>
@@ -135,9 +135,15 @@
             <field name="priority">4</field>
             <field name="arch" type="xml">
                 <list string="Car Diagnosis" create="false" edit="false">
-                    <field name="name" string="Subject"/>
+                    <field name="service_rec_no"/>
+                    <field name="name" string="Concepto"/>
                     <field name="client_id"/>
                     <field name="receipt_date"/>
+                    <field name="state"
+                        widget="badge"
+                        decoration-info="state == 'draft'"
+                        decoration-warning="state == 'in_progress'"
+                        decoration-success="state == 'done'"/>
                     <field name="user_id"/>
                 </list>
             </field>

@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <form string="Assign To Technician">
                     <group>
-                        <field name="user_id" style="width: 50%"/>
+                        <field name="user_id" style="width: 50%" options="{'no_create': True, 'no_open': True}"/>
                     </group>
                     <footer>
                         <button name="do_assign_technician" string="Assign" type="object" class="oe_highlight"/>

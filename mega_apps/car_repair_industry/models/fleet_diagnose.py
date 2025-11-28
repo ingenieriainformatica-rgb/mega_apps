@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
-
+import logging
 from odoo import fields, models, api, _
 from odoo.exceptions import UserError, ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class FleetDiagnose(models.Model):
@@ -221,13 +223,19 @@ class FleetDiagnose(models.Model):
         for fleet_line in self.fleet_repair_line:
             if fleet_line.spare_part_ids:
                 counter += 1
+        if counter == 0:
+            raise UserError(_(
+                "No es posible crear una cotización porque ninguna línea de diagnóstico tiene productos asociados."
+            ))
         quote_vals = {
             'partner_id': self.client_id.id or False,
             'state': 'draft',
             'client_order_ref': self.name,
             'diagnose_id': self.id,
             'fleet_repair_id': self.fleet_repair_id.id,
+            'x_studio_descripcion': self.name,
         }
+
         order_id = self.env['sale.order'].create(quote_vals)
         if self.fleet_repair_id:
             id = self.fleet_repair_id.id

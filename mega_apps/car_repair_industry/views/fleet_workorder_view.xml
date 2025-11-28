@@ -133,6 +133,13 @@
                     <field name="name" string="Work Order"/>
                     <field name="phone"/>
                     <field name="user_id"/>
+                    <field name="state"
+                        widget="badge"
+                        decoration-muted="state == 'draft'"
+                        decoration-danger="state == 'cancel'"
+                        decoration-warning="state == 'pause'"
+                        decoration-info="state == 'startworking'"
+                        decoration-success="state == 'done'"/>
                 </list>
             </field>
         </record>

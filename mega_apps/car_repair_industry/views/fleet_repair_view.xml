@@ -147,6 +147,7 @@
             <field name="priority">4</field>
             <field name="arch" type="xml">
                 <list string="Car Repair">
+                    <field name="sequence"/>
                     <field name="name" string="Concepto"/>
                     <field name="client_id"/>
                     <field name="phone"/>
@@ -328,7 +329,7 @@
                                         <field name="est_ser_hour" readonly="workorder_id != False"/>
                                     </group>
                                 </group>
-                                <separator string="Spare Parts / Add Service"/>
+                                <separator string="PIEZAS DE RECAMBIO / SERVICIO ADICIONAL"/>
                                 <field name="spare_part_ids" readonly="workorder_id != False">
                                     <list string="Spare Parts" editable="bottom">
                                         <field name="product_id" domain="[('type', 'in', ['service','consu'])]"/>
@@ -360,6 +361,11 @@
                     <field name="car_year"/>
                     <field name="guarantee" widget="radio"/>
                     <field name="service_type"/>
+                    <field name="state"
+                        widget="badge"
+                        decoration-info="state == 'draft'"
+                        decoration-warning="state == 'diagnosis'"
+                        decoration-success="state == 'done'"/>
                 </list>
             </field>
         </record>
