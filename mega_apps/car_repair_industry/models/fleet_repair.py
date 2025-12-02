@@ -442,8 +442,7 @@ class FleetRepairLine(models.Model):
     warehouse_id = fields.Many2one(
         'stock.warehouse',
         string='Almacén',
-        help='Almacén desde el cual se reservarán los repuestos de esta orden.',
-        required=True
+        help='Almacén desde el cual se reservarán los repuestos de esta orden.'
     )
 
     _rec_name = 'fleet_id'

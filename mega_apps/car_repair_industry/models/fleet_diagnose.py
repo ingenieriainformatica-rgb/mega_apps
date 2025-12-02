@@ -227,6 +227,10 @@ class FleetDiagnose(models.Model):
             raise UserError(_(
                 "No es posible crear una cotización porque ninguna línea de diagnóstico tiene productos asociados."
             ))
+        if not self.fleet_repair_line.warehouse_id.id:
+            raise UserError(_(
+                "Debes seleccionar el almacén."
+            ))
         quote_vals = {
             'partner_id': self.client_id.id or False,
             'state': 'draft',
