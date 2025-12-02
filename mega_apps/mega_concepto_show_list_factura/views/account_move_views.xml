@@ -1,0 +1,15 @@
+<odoo>
+    <!-- Agregar Vendedor en el árbol (lista) de facturas -->
+    <record id="view_move_tree_add_invoice_user" model="ir.ui.view">
+        <field name="name">account.move.tree.add.invoice.user</field>
+        <field name="model">account.move</field>
+        <!-- En Odoo 17/18 la lista de facturas es esta vista -->
+        <field name="inherit_id" ref="account.view_out_invoice_tree"/>
+        <field name="arch" type="xml">
+            <!-- Lo insertamos después del cliente -->
+            <xpath expr="//list/field[@name='invoice_date_due']" position="after">
+                <field name="x_studio_concepto" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

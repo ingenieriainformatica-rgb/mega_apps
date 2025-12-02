@@ -32,6 +32,19 @@
             </xpath>
         </field>
     </record>
+
+
+    <record id="view_order_form_mega_warehouse_required" model="ir.ui.view">
+        <field name="name">sale.order.form.mega.warehouse.required</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Marcamos el campo Almacén como requerido en el formulario -->
+            <xpath expr="//field[@name='warehouse_id']" position="attributes">
+                <attribute name="required">1</attribute>
+            </xpath>
+        </field>
+    </record>
     
 
 </odoo>
