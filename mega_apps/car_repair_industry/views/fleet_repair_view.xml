@@ -328,6 +328,9 @@
                                     <group invisible="guarantee_type == 'free'">
                                         <field name="est_ser_hour" readonly="workorder_id != False"/>
                                     </group>
+                                    <group invisible="guarantee_type == 'free'">
+                                        <field name="warehouse_id" options="{'no_create': True, 'no_open': True}" readonly="workorder_id != False"/>
+                                    </group>
                                 </group>
                                 <separator string="PIEZAS DE RECAMBIO / SERVICIO ADICIONAL"/>
                                 <field name="spare_part_ids" readonly="workorder_id != False">
@@ -335,7 +338,7 @@
                                         <field name="product_id" domain="[('type', 'in', ['service','consu'])]"/>
                                         <field name="default_code"/>
                                         <field name="quantity"/>
-                                        <field name="price_unit"/>
+                                        <!-- <field name="price_unit"/> -->
                                     </list>
                                 </field>
                                 <separator string="Diagnostic Results"/>

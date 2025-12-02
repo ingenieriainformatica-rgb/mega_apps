@@ -439,6 +439,12 @@ class FleetRepairLine(models.Model):
         index=True)
     car_year = fields.Char(string="car Manufacturing Year")
     list_of_damage = fields.Char(string="Car Manufacturing Year")
+    warehouse_id = fields.Many2one(
+        'stock.warehouse',
+        string='Almacén',
+        help='Almacén desde el cual se reservarán los repuestos de esta orden.',
+        required=True
+    )
 
     _rec_name = 'fleet_id'
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
 import logging
-from odoo import fields, models, api, _
-from odoo.exceptions import UserError, ValidationError
+from odoo import fields, models, api, _  #type: ignore
+from odoo.exceptions import UserError, ValidationError  #type: ignore
 
 _logger = logging.getLogger(__name__)
 
@@ -234,6 +234,7 @@ class FleetDiagnose(models.Model):
             'diagnose_id': self.id,
             'fleet_repair_id': self.fleet_repair_id.id,
             'x_studio_descripcion': self.name,
+            'warehouse_id': self.fleet_repair_line.warehouse_id.id
         }
 
         order_id = self.env['sale.order'].create(quote_vals)
@@ -254,7 +255,7 @@ class FleetDiagnose(models.Model):
                         'name': part_line.product_id.name,
                         'product_uom_qty': part_line.quantity,
                         'product_uom': part_line.product_id.uom_id.id,
-                        'price_unit': part_line.price_unit,
+                        # 'price_unit': part_line.price_unit,
                         'order_id': order_id.id,
                         'car_model': fleet_line.model_id.name,
                         'license_plate': fleet_line.license_plate,
@@ -267,7 +268,7 @@ class FleetDiagnose(models.Model):
                         'name': part_line.product_id.name,
                         'product_uom_qty': part_line.quantity,
                         'product_uom': part_line.product_id.uom_id.id,
-                        'price_unit': part_line.price_unit,
+                        # 'price_unit': part_line.price_unit,
                         'order_id': order_id.id,
                         'car_model': fleet_line.model_id.name,
                         'license_plate': fleet_line.license_plate,
