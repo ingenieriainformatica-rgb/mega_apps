@@ -76,3 +76,10 @@ class SaleOrder(models.Model):
             self.warehouse_id = False
 
         return res
+    
+    @api.onchange('user_id')
+    def _onchange_user_id_reset_warehouse(self):
+        """Cada vez que cambie el vendedor, vaciamos warehouse_id."""
+        for order in self:
+            if order.state in ('draft', 'sent', 'cancel'):
+                order.warehouse_id = False
