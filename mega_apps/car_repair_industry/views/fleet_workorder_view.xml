@@ -99,7 +99,7 @@
                                 <separator string="fleet Info"/>
                                 <field name="fleet_repair_line" readonly="True"/>
                             </page>
-                            <page string="Timesheet">
+                            <page string="Timesheet" invisible="1">
                                 <field name="timesheet_ids" widget="one2many_list">
                                     <list string="Timesheet" editable="bottom">
                                         <field name="workorder_id" column_invisible="1"/>

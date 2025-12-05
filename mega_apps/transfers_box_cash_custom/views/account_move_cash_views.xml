@@ -1,0 +1,226 @@
+<odoo>
+
+    <record id="view_move_search_hide_partner_transfers" model="ir.ui.view">
+        <field name="name">account.move.search.hide.partner.transfers</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='groupy_by_journal']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+            <!-- Oculta “Contacto” solo para la acción de transferencias -->
+            <xpath expr="//search//filter[@name='partner']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <xpath expr="//search//filter[@name='salesperson']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <xpath expr="//search//filter[@name='status']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <xpath expr="//search//filter[@name='preferred_payment_method_line']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <xpath expr="//filter[@name='edi_state']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- Ocultar "Fecha de factura" -->
+            <xpath expr="//filter[@name='invoicedate']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- Ocultar "Fecha de vencimiento" -->
+            <xpath expr="//filter[@name='duedate']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- “Mis facturas” -->
+            <xpath expr="//filter[@name='myinvoices']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- “No protegido” (solo aparece con grupos, igual lo ocultamos) -->
+            <xpath expr="//filter[@name='not_secured']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- “Sin enviar” -->
+            <xpath expr="//filter[@name='not_sent']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- “Facturas” y “Notas de crédito” -->
+            <xpath expr="//filter[@name='out_invoice']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+            <xpath expr="//filter[@name='out_refund']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- “Por revisar” -->
+            <xpath expr="//filter[@name='to_check']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- “Por pagar”, “En proceso de pago”, “Vencidas” -->
+            <xpath expr="//filter[@name='open']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+            <xpath expr="//filter[@name='in_payment']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+            <xpath expr="//filter[@name='late']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- Fechas: ocultar “Fecha de factura” y “Fecha de vencimiento”.
+                Dejamos visible SOLO “Fecha contable” (name="date"). -->
+            <xpath expr="//filter[@name='invoice_date'] | //filter[@name='invoice_date' or @name='invoicedate']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+            <xpath expr="//filter[@name='due_date'] | //filter[@name='duedate']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- (Opcional) ocultar separadores extra si te molestan en ese contexto -->
+            <xpath expr="//search/separator" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <xpath expr="//search" position="inside">
+                <filter name="cash_journals_only"
+                        string="Solo diarios de caja"
+                        domain="[('journal_id.is_cash_transfer','=', True)]"
+                        invisible="1"/>
+            </xpath>
+            
+        </field>
+    </record>
+    <!-- ocultar de la lista -->
+    <record id="view_move_list_inherit_remove_info" model="ir.ui.view">
+        <field name="name">account.move.list.remove.info</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='status_in_payment']" position="attributes">
+                <attribute name="column_invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- Insertar columna Concepto (ref) -->
+            <xpath expr="//list/field[@name='name']" position="after">
+                <field name="x_studio_concepto" string="Concepto" column_invisible="context.get('page_origin') != 'transfers_box'"/>
+            </xpath>
+
+            <!-- Insertar columna de estado como badge (después del nombre/numero) -->
+            <xpath expr="//list/field[@name='amount_total_in_currency_signed']" position="after">
+                <field name="state" widget="badge"
+                        decoration-warning="state == 'draft'"
+                        decoration-success="state == 'posted'"
+                        decoration-danger="state == 'cancel'"/>
+            </xpath>
+
+            <xpath expr="//field[@name='invoice_date_due']" position="attributes">
+                <attribute name="column_invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='amount_untaxed_in_currency_signed']" position="attributes">
+                <attribute name="column_invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='date']" position="replace">
+                <field name="date"
+                    string="Fecha contable"
+                    column_invisible="context.get('page_origin') != 'transfers_box'"/>
+            </xpath>
+
+        </field>
+    </record>
+    <!-- Ocultar la pestaña "Otra información" -->
+    <record id="view_move_form_inherit_remove_info" model="ir.ui.view">
+        <field name="name">account.move.form.remove.info</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <!-- <xpath expr="//field[@name='line_ids']//field[@name='name']" position="attributes">
+                <attribute name="string">Concepto</attribute>
+            </xpath> -->
+
+            <!-- label -->
+            <xpath expr="//label[@for='ref']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- field ref con nolabel -->
+            <xpath expr="//field[@name='ref' and @nolabel]" position="attributes">
+                <attribute name="invisible">(context.get('page_origin') == 'transfers_box') or (move_type not in ('in_invoice','in_receipt','in_refund'))</attribute>
+            </xpath>
+
+            <!-- field ref con etiqueta -->
+            <xpath expr="//field[@name='ref' and not(@nolabel)]" position="attributes">
+                <attribute name="invisible">(context.get('page_origin') == 'transfers_box') or (move_type in ('in_invoice','in_receipt','in_refund','out_invoice','out_refund'))</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='journal_id']" position="attributes">
+                <attribute name="domain">[('id','in', suitable_journal_ids)]</attribute>
+            </xpath>
+
+            <xpath expr="//page[@id='other_tab_entry']" position="attributes">
+                <attribute name="invisible">context.get('page_origin') == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- Configuramos invisibilidad según contexto -->
+            <!-- <xpath expr="//field[@name='line_ids']//field[@name='partner_id']" position="attributes">
+                <attribute name="attrs">{'invisible': [('context.get("page_origin"), '=', 'transfers_box')]}</attribute>
+                <attribute name="column_invisible">context.get("page_origin") == 'transfers_box'</attribute>
+            </xpath> -->
+
+            <xpath expr="//field[@name='line_ids']//field[@name='analytic_distribution']" position="attributes">
+                <attribute name="attrs">{'invisible': [('context.get("page_origin"), '=', 'transfers_box')]}</attribute>
+                <attribute name="column_invisible">context.get("page_origin") == 'transfers_box'</attribute>
+            </xpath>
+
+            <!-- Activar filtro SOLO si vienes por tu acción con page_origin='transfers_box' -->
+            <!-- <xpath expr="//field[@name='line_ids']//field[@name='account_id']" position="attributes">
+                <attribute name="domain">(context.get('page_origin') == 'transfers_box') and [('company_ids','in',[company_id]),('deprecated','=',False),'|','&amp;',('account_type','=','liability_payable'),('reconcile','=',True),('account_type','in',['asset_cash','asset_bank'])] or []</attribute>
+                <attribute name="options">{'no_create': True}</attribute>
+            </xpath>             -->
+            
+        </field>
+    </record>
+    <!-- Acción personalizada para transferencias entre cajas -->
+    <record id="action_cash_transfers" model="ir.actions.act_window">
+        <field name="name">Transferencias entre cajas</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('journal_id.is_cash_transfer', '=', True)]</field>
+        <field name="context">
+            {
+                'page_origin': 'transfers_box',
+                'search_default_group_by_cash_journal': 1,
+                'group_by': 'journal_id'
+            }
+        </field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                Transferencias entre cajas
+            </p>
+            <p>
+                Crea tu primera transferencia entre cajas!!!
+            </p>
+        </field>
+    </record>
+    <!-- Menú personalizado -->
+    <menuitem id="menu_cash_transfers"
+              name="Transferencias entre cajas"
+              parent="account.menu_finance_entries"
+              sequence="1000"
+              action="action_cash_transfers"
+              groups="transfers_box_cash_custom.group_cash_transfers_user"/>
+</odoo>

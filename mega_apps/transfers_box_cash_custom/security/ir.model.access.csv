@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_transfers_box_cash_custom_user,access_transfers_box_cash_custom_user,account.model_account_move,transfers_box_cash_custom.group_cash_transfers_user,1,1,1,1

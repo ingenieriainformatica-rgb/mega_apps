@@ -1,0 +1,15 @@
+<odoo>
+    <!-- Nueva categoría para tu módulo -->
+    <record id="module_category_cash_transfers" model="ir.module.category">
+        <field name="name">Transferencias de Caja</field>
+        <field name="description">Permisos para gestionar transferencias internas entre cajas y bancos.</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- Grupo de usuarios para ver el menú de transferencias -->
+    <record id="group_cash_transfers_user" model="res.groups">
+        <field name="name">Usuario - Transferencias entre cajas</field>
+        <field name="category_id" ref="module_category_cash_transfers"/>
+        <field name="comment">Usuarios que pueden acceder al menú de transferencias entre cajas.</field>
+    </record>
+</odoo>

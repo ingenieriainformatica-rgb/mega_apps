@@ -104,7 +104,7 @@
                                 <field name="fleet_repair_line"/>
                                 <!-- <field name="fleet_repair_line" context="{'diagnose_id': active_id, 'active_model': 'fleet.diagnose'}" /> -->
                             </page>
-                            <page string="Timesheet">
+                            <page string="Timesheet" invisible="1">
                                 <field name="timesheet_ids" widget="one2many_list">
                                     <list string="Timesheet" editable="bottom">
                                         <field name="diagnose_id" column_invisible="1"/>

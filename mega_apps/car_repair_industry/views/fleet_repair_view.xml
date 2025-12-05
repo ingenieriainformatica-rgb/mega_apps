@@ -116,7 +116,7 @@
                                     <field name="rating" widget="priority"/>
                                 </group>
                             </page>
-                            <page string="Timesheet">
+                            <page string="Timesheet" invisible="1">
                                 <field name="timesheet_ids" widget="one2many_list">
                                     <list string="Timesheet" editable="bottom">
                                         <field name="repair_id" column_invisible="1"/>
