@@ -31,15 +31,15 @@
                 <attribute name="invisible">1</attribute>
             </xpath> -->
             <xpath expr="//block[@id='hr_payroll_settings']" position="after">
-                <h2>Parameters</h2>
+                <h2>Parámetros</h2>
                 <div class="row mt16 o_settings_container">
                     <div class="col-12 col-lg-6 o_setting_box">
                         <div class="o_setting_left_pane"/>
                         <div class="o_setting_right_pane">
-                            <span class="o_form_label">Legal parameters</span>
+                            <span class="o_form_label">Parámetros legales</span>
                             <div class="content-group">
                                 <div class="row mt16">
-                                    <label for="smmlv_value" class="col-lg-3 o_light_label"/>
+                                    <label for="smmlv_value" class="col-lg-3 o_light_label" string="Salario mínimo legal mensual vigente"/>
                                     <field name="smmlv_value"/>
                                 </div>
                                 <div class="row mt16">
@@ -47,34 +47,34 @@
                                     <field name="uvt_value"/>
                                 </div>
                                 <div class="row mt16">
-                                    <label for="stm_value" class="col-lg-3 o_light_label"/>
+                                    <label for="stm_value" class="col-lg-3 o_light_label" string="Subsidio mensual de transporte"/>
                                     <field name="stm_value"/>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <h2>Percentages</h2>
+                <h2>Porcentajes</h2>
                 <div class="row mt16 o_settings_container">
                     <div class="col-12 col-lg-6 o_setting_box">
                         <div class="o_setting_left_pane"/>
                         <div class="o_setting_right_pane">
-                            <span class="o_form_label">Overtime percentages</span>
+                            <span class="o_form_label">Porcentajes de horas extra</span>
                             <div class="content-group">
                                 <div class="row mt16">
-                                    <label for="daily_overtime" class="col-lg-3 o_light_label"/>
+                                    <label for="daily_overtime" class="col-lg-3 o_light_label" string="Diario"/>
                                     <field name="daily_overtime"/>
                                 </div>
                                 <div class="row mt16">
-                                    <label for="overtime_night_hours" class="col-lg-3 o_light_label"/>
+                                    <label for="overtime_night_hours" class="col-lg-3 o_light_label" string="Horas nocturnas"/>
                                     <field name="overtime_night_hours"/>
                                 </div>
                                 <div class="row mt16">
-                                    <label for="sunday_holiday_daily_overtime" class="col-lg-3 o_light_label"/>
+                                    <label for="sunday_holiday_daily_overtime" class="col-lg-3 o_light_label" string="Domingos y festivos todos los días"/>
                                     <field name="sunday_holiday_daily_overtime"/>
                                 </div>
                                 <div class="row mt16">
-                                    <label for="sunday_night_overtime_holidays" class="col-lg-3 o_light_label"/>
+                                    <label for="sunday_night_overtime_holidays" class="col-lg-3 o_light_label" string="Domingo por la noche y días festivos"/>
                                     <field name="sunday_night_overtime_holidays"/>
                                 </div>
                             </div>
@@ -84,18 +84,18 @@
                     <div class="col-12 col-lg-6 o_setting_box">
                         <div class="o_setting_left_pane"/>
                         <div class="o_setting_right_pane">
-                            <span class="o_form_label">Surcharge percentages</span>
+                            <span class="o_form_label">Porcentajes de recargos</span>
                             <div class="content-group">
                                 <div class="row mt16">
-                                    <label for="hours_night_surcharge" class="col-lg-3 o_light_label"/>
+                                    <label for="hours_night_surcharge" class="col-lg-3 o_light_label" string="Horas nocturnas"/>
                                     <field name="hours_night_surcharge"/>
                                 </div>
                                 <div class="row mt16">
-                                    <label for="daily_surcharge_hours_sundays_holidays" class="col-lg-3 o_light_label"/>
+                                    <label for="daily_surcharge_hours_sundays_holidays" class="col-lg-3 o_light_label" string="Horario diario los domingos y festivos"/>
                                     <field name="daily_surcharge_hours_sundays_holidays"/>
                                 </div>
                                 <div class="row mt16">
-                                    <label for="sunday_holidays_night_surcharge_hours" class="col-lg-3 o_light_label"/>
+                                    <label for="sunday_holidays_night_surcharge_hours" class="col-lg-3 o_light_label" string="Domingos y festivos por la noche"/>
                                     <field name="sunday_holidays_night_surcharge_hours"/>
                                 </div>
                             </div>
