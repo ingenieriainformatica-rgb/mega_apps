@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
 import logging
-from odoo import fields, models, api, _
-from odoo import tools
-from odoo.exceptions import UserError, ValidationError
-
+from odoo import fields, models, api, _  # type: ignore
+from odoo import tools  # type: ignore
+from odoo.exceptions import UserError, ValidationError  # type: ignore
+from markupsafe import Markup
 
 _logger = logging.getLogger(__name__)
 
@@ -373,6 +373,64 @@ class FleetRepair(models.Model):
         if self.env.user.has_group('base.group_user'):
             return self.env["ir.actions.actions"]._for_xml_id("car_repair_industry.fleet_repair_dashboard")
         return self.env["ir.actions.actions"]._for_xml_id("car_repair_industry.fleet_repair_dashboard")
+    
+    def write(self, vals):
+        images_changed = "images_ids" in vals and not self.env.is_superuser()
+
+        # 1) Antes de escribir, guardamos las imágenes actuales por registro
+        old_attachments_map = {}
+        if images_changed:
+            for rec in self:
+                old_attachments_map[rec.id] = set(rec.images_ids.ids)
+
+            commands = vals["images_ids"]
+            if not isinstance(commands, (list, tuple)):
+                commands = [commands]
+
+            remove_command_detected = False
+
+            for cmd in commands:
+                # cmd es una tupla/lista tipo (op, id, vals)
+                if not isinstance(cmd, (list, tuple)) or not cmd:
+                    continue
+                op = cmd[0]
+
+                # 3 = unlink relación, 5 = limpiar todas, 6 = reemplazar lista
+                if op in (3, 5, 6):
+                    remove_command_detected = True
+                    break
+
+            if remove_command_detected and not self.env.user.has_group(
+                "car_repair_industry.group_taller_delete_images"
+            ):
+                raise UserError(
+                    _(
+                        "No tiene permisos para eliminar imágenes de diagnósticos de taller."
+                    )
+                )
+
+        # 2) Ejecutamos el write real
+        res = super().write(vals)
+
+        # 3) Después del write, detectamos qué imágenes fueron eliminadas
+        if images_changed:
+            Attachment = self.env["ir.attachment"]
+            user_name = self.env.user.display_name
+
+            for rec in self:
+                old_ids = old_attachments_map.get(rec.id, set())
+                new_ids = set(rec.images_ids.ids)
+                removed_ids = old_ids - new_ids
+
+                if removed_ids:
+                    removed_attachments = Attachment.browse(list(removed_ids))
+                    names = ", ".join(removed_attachments.mapped("name"))
+                    # Mensaje en el chatter
+                    body = Markup("El usuario <b>%s</b> eliminó las imágenes: %s") % (user_name, names)
+                    rec.message_post(body=body)
+
+        return res
+
 
 
 class ir_attachment(models.Model):
@@ -443,6 +501,12 @@ class FleetRepairLine(models.Model):
         'stock.warehouse',
         string='Almacén',
         help='Almacén desde el cual se reservarán los repuestos de esta orden.'
+    )
+    engine_number = fields.Char(
+        string="Número de motor",
+        related="fleet_id.engine_number",
+        store=True,
+        readonly=False,
     )
 
     _rec_name = 'fleet_id'

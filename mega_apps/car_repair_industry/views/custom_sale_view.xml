@@ -35,11 +35,18 @@
                     </button>
                 </xpath>
 
-                <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/list/field[@name='product_id']"
+                <!-- <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/list/field[@name='product_id']"
                        position="before">
                     <field name="car_model" column_invisible="parent.fleet_repair_id == False"/>
                     <field name="license_plate" column_invisible="parent.fleet_repair_id == False"/>
+                </xpath> -->
+
+                <xpath expr="//field[@name='partner_id']" position="after">
+                        <separator string="Vehiculo" colspan="4" invisible="fleet_repair_id == False"/>
+                        <field name="vehicle_model_id" options="{'no_create': True, 'no_open': True}" invisible="fleet_repair_id == False" readonly="1"/>
+                        <field name="vehicle_plate" invisible="fleet_repair_id == False" readonly="1"/>
                 </xpath>
+
 
             </field>
         </record>

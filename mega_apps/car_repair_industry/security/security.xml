@@ -1,0 +1,15 @@
+<odoo>
+   
+    <record id="group_taller_delete_images_category" model="ir.module.category">
+      <field name="name">Delete images Taller</field>
+      <field name="description">Workshop: Removing Diagnostic Images</field>
+      <field name="sequence">35</field>
+    </record>
+
+    <!-- Usuario: puede usar la caja -->
+    <record id="group_taller_delete_images" model="res.groups">
+      <field name="name">Workshop: Removing Diagnostic Images / Users</field>
+      <field name="category_id" ref="group_taller_delete_images_category"/>
+    </record>
+
+</odoo>

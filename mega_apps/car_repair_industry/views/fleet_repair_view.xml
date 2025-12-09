@@ -288,12 +288,13 @@
                         <group class="col-xs-12">
                             <group class="col-xs-6">
                                 <field name="fleet_id" options="{'no_create': True, 'no_open': True}"/>
-                                <field name="license_plate"/>
-                                <field name="vin_sn"/>
+                                <field name="license_plate" readonly="1"/>
+                                <field name="vin_sn" readonly="1"/>
+                                <field name="engine_number" readonly="1"/>
                             </group>
                             <group class="col-xs-6">
-                                <field name="model_id" options="{'no_create': True, 'no_open': True}"/>
-                                <field name="fuel_type"/>
+                                <field name="model_id" options="{'no_create': True, 'no_open': True}" readonly="1"/>
+                                <field name="fuel_type" readonly="1"/>
                                 <field name="car_year"/>
                                 <field name="diagnose_id" invisible="True"/>
                                 <field name="workorder_id" invisible="True"/>

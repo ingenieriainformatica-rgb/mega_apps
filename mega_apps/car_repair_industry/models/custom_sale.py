@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api, _
-from odoo.tools import float_is_zero, float_compare, DEFAULT_SERVER_DATETIME_FORMAT
+from odoo import fields, models, api, _  #type:ignore
+from odoo.tools import float_is_zero, float_compare, DEFAULT_SERVER_DATETIME_FORMAT  #type:ignore
 
 
 class SaleOrder(models.Model):
@@ -14,6 +14,15 @@ class SaleOrder(models.Model):
     is_workorder_created = fields.Boolean(string="Workorder Created")
     count_fleet_repair = fields.Integer(string='Repair Orders', compute='_compute_repair_id')
     workorder_count = fields.Integer(string='Work Orders', compute='_compute_workorder_id')
+    vehicle_plate = fields.Char(
+        string="Placa del vehículo",
+        help="Placa del vehículo asociada a esta orden de venta."
+    )
+    vehicle_model_id = fields.Many2one(
+        "fleet.vehicle.model",
+        string="Modelo del vehículo",
+        help="Modelo del vehículo asociado a esta orden de venta."
+    )
 
     @api.depends('fleet_repair_id')
     def _compute_repair_id(self):
