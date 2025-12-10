@@ -15,13 +15,13 @@ class FleetRepair(models.Model):
     _description = "Car Repair"
     _order = 'id desc'
 
-    name = fields.Char(string='Subject', required=True)
+    name = fields.Char(string='Concepto', required=True)
     sequence = fields.Char(string='Sequence', readonly=True, copy=False)
     client_id = fields.Many2one('res.partner', string='Client', required=True, tracking=True)
     client_phone = fields.Char(string='Phone')
     client_mobile = fields.Char(string='Mobile')
     client_email = fields.Char(string='Email')
-    receipt_date = fields.Date(string='Date of Receipt')
+    receipt_date = fields.Date(string='Date of Receipt', default=lambda self: fields.Date.context_today(self),)
     contact_name = fields.Char(string='Contact Name')
     phone = fields.Char(string='Contact Number')
     fleet_id = fields.Many2one('fleet.vehicle', 'Car')
