@@ -10,7 +10,7 @@
         "hr_payroll",
     ],
     "data": [
-        "data/payroll_rules.xml",
+        "rules/payroll_rules.xml",
     ],
     "application": True,
     "installable": True,
