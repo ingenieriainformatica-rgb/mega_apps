@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="mega_view_move_form_concept_readonly_posted" model="ir.ui.view">
+        <field name="name">Mega: read-only Concepto cuando está posteado</field>
+        <field name="model">account.move</field>
+        <!-- Heredamos la vista de Studio -->
+        <field name="inherit_id" ref="studio_customization.odoo_studio_account__d2366bcb-bf6f-450f-a35e-d0c145b61f2f"/>
+        <field name="priority" eval="200"/>
+
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='x_studio_concepto']" position="replace">
+                <field name="x_studio_concepto" readonly="state == 'posted'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
