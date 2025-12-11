@@ -31,7 +31,7 @@
                 <attribute name="invisible">1</attribute>
             </xpath> -->
             <xpath expr="//block[@id='hr_payroll_settings']" position="after">
-                <h2>Parámetros</h2>
+                <!-- <h2>Parámetros</h2>
                 <div class="row mt16 o_settings_container">
                     <div class="col-12 col-lg-6 o_setting_box">
                         <div class="o_setting_left_pane"/>
@@ -53,7 +53,69 @@
                             </div>
                         </div>
                     </div>
+                </div> -->
+
+                <h2>Parámetros</h2>
+
+                <div class="row mt16 o_settings_container">
+
+                    <!-- ========================= -->
+                    <!--        PARÁMETROS LEGALES -->
+                    <!-- ========================= -->
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">Parámetros legales</span>
+
+                            <div class="content-group">
+
+                                <div class="row mt16">
+                                    <label for="smmlv_value" class="col-lg-5 o_light_label" string="Salario mínimo legal mensual vigente"/>
+                                    <field name="smmlv_value"/>
+                                </div>
+
+                                <div class="row mt16">
+                                    <label for="uvt_value" class="col-lg-5 o_light_label" string="UVT"/>
+                                    <field name="uvt_value"/>
+                                </div>
+
+                                <div class="row mt16">
+                                    <label for="stm_value" class="col-lg-5 o_light_label" string="Subsidio mensual de transporte" />
+                                    <field name="stm_value"/>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =============================== -->
+                    <!--   PARÁMETROS DE SALUD Y PENSIÓN -->
+                    <!-- =============================== -->
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+
+                            <span class="o_form_label">Parámetros de aportes (empleado)</span>
+
+                            <div class="content-group">
+
+                                <div class="row mt16">
+                                    <label for="salud_employee_rate" class="col-lg-5 o_light_label" string="% Salud trabajador"/>
+                                    <field name="salud_employee_rate"/>
+                                </div>
+
+                                <div class="row mt16">
+                                    <label for="pension_employee_rate" class="col-lg-5 o_light_label" string="% Pensión trabajador"/>
+                                    <field name="pension_employee_rate"/>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
                 </div>
+
                 <h2>Porcentajes</h2>
                 <div class="row mt16 o_settings_container">
                     <div class="col-12 col-lg-6 o_setting_box">

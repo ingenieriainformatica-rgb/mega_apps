@@ -11,6 +11,19 @@ class ResCompany(models.Model):
     uvt_value = fields.Monetary("UVT", currency_field='currency_id', readonly=False)
     stm_value = fields.Monetary("Monthly transportation allowance", currency_field='currency_id', readonly=False)
 
+    # Employee contribution rates
+    salud_employee_rate = fields.Float(
+        string="Salud trabajador (%)",
+        default=4.0,
+        help="Porcentaje de aporte a salud que descuenta al trabajador."
+    )
+    pension_employee_rate = fields.Float(
+        string="Pensión trabajador (%)",
+        default=4.0,
+        help="Porcentaje de aporte a pensión que descuenta al trabajador."
+    )
+
+
     # times
     daily_overtime = fields.Float("% Daily overtime", readonly=False, default=25.0)
     overtime_night_hours = fields.Float("% Overtime night hours", readonly=False, default=75.0)

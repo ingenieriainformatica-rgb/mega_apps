@@ -10,7 +10,9 @@
         "hr_payroll",
     ],
     "data": [
+        "views/mega_hr_payslip_line_hide.xml",
         "rules/payroll_rules.xml",
+        "type/mega_payslip_input_types.xml",
     ],
     "application": True,
     "installable": True,

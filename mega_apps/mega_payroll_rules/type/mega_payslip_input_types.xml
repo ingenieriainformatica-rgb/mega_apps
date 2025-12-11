@@ -1,0 +1,37 @@
+<odoo>
+    <data>
+
+        <!-- Comisiones -->
+        <record id="mega_input_comisiones" model="hr.payslip.input.type">
+            <field name="name">Comisiones</field>
+            <field name="country_id" ref="base.co"/>
+            <field name="code">COMI</field>
+            <field name="struct_ids" eval="[(4, ref('mega15_structure'))]"/>
+        </record>
+
+        <!-- Bonificación -->
+        <record id="mega_input_bonificacion" model="hr.payslip.input.type">
+            <field name="name">Bonificación</field>
+            <field name="country_id" ref="base.co"/>
+            <field name="code">BONO</field>
+            <field name="struct_ids" eval="[(4, ref('mega15_structure'))]"/>
+        </record>
+
+        <!-- Descuento manual -->
+        <record id="mega_input_descuento_manual" model="hr.payslip.input.type">
+            <field name="name">Descuento manual</field>
+            <field name="country_id" ref="base.co"/>
+            <field name="code">DESCTO</field>
+            <field name="struct_ids" eval="[(4, ref('mega15_structure'))]"/>
+        </record>
+
+        <!-- Otros Devengados -->
+        <record id="mega_input_otros_devengados" model="hr.payslip.input.type">
+            <field name="name">Otros Devengados</field>
+            <field name="country_id" ref="base.co"/>
+            <field name="code">OTDEV</field>
+            <field name="struct_ids" eval="[(4, ref('mega15_structure'))]"/>
+        </record>
+
+    </data>
+</odoo>

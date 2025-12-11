@@ -20,34 +20,55 @@
         </record>
 
         <!-- ============================= -->
-        <!-- 3) SALARIO PROPORCIONAL      -->
+        <!-- 3) Descuento por días no trabajado    -->
         <!-- ============================= -->
-        <record id="mega_rule_sal_pro" model="hr.salary.rule">
-            <field name="name">Salario proporcional MEGA</field>
-            <field name="code">SAL_PRO</field>
-            <field name="sequence">20</field>
-            <field name="category_id" ref="hr_payroll.BASIC"/>
+        <!-- ============================= -->
+        <record id="mega_rule_descuento_falta" model="hr.salary.rule">
+            <field name="name">Descuento por días no trabajados</field>
+            <field name="code">DESC_FALTA</field>
+            <field name="sequence">25</field>
+            <field name="category_id" ref="hr_payroll.DED"/>
             <field name="struct_id" ref="mega15_structure"/>
 
-            <field name="condition_select">none</field>
-            <field name="amount_select">code</field>
-            <field name="amount_python_compute"><![CDATA[
-monthly_wage = contract.wage or 0.0
-period_days = (payslip.date_to - payslip.date_from).days + 1
-
+            <!-- Solo aplica si existe LEAVE90 (Sin pagar) -->
+            <field name="condition_select">python</field>
+            <field name="condition_python"><![CDATA[
 unpaid_days = 0.0
 for wd in worked_days.values():
-    if wd.code == 'SIN_PAGAR':
+    if wd.code == 'LEAVE90':
+        unpaid_days += wd.number_of_days
+result = unpaid_days > 0
+            ]]></field>
+
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute"><![CDATA[
+# Salario quincenal del contrato
+wage = contract.wage or 0.0
+
+# Días sin pagar (código LEAVE90)
+unpaid_days = 0.0
+for wd in worked_days.values():
+    if wd.code == 'LEAVE90':
         unpaid_days += wd.number_of_days
 
-paid_days = period_days - unpaid_days
-daily = monthly_wage / 30.0
-result = daily * paid_days
+# Valor diario (quincena = 15 días)
+daily_wage = wage / 15.0 if wage else 0.0
+
+# Mostrar los días en la columna "Cantidad"
+result_qty = unpaid_days
+
+# Valor por día (negativo)
+result = -daily_wage
+
+# Tasa 100% (para que no afecte)
+result_rate = 100.0
             ]]></field>
         </record>
 
+
         <!-- ============================= -->
         <!-- 4) AUXILIO DE TRANSPORTE     -->
+        <!-- ============================= -->
         <!-- ============================= -->
         <record id="mega_rule_aux_trans" model="hr.salary.rule">
             <field name="name">Auxilio de transporte</field>
@@ -56,28 +77,68 @@ result = daily * paid_days
             <field name="category_id" ref="hr_payroll.ALW"/>
             <field name="struct_id" ref="mega15_structure"/>
 
+            <!-- Condición: sueldo <= 2 SMMLV -->
             <field name="condition_select">python</field>
             <field name="condition_python"><![CDATA[
 smmlv = payslip.company_id.smmlv_value or 0.0
 wage = contract.wage or 0.0
-result = wage <= 2.0 * smmlv
+result = (wage * 2) <= 2.0 * smmlv
             ]]></field>
 
             <field name="amount_select">code</field>
             <field name="amount_python_compute"><![CDATA[
-stm = payslip.company_id.stm_value or 0.0
+# Auxilio mensual configurado en la compañía
+stm_month = payslip.company_id.stm_value or 0.0
+
+# Quincena (mitad del mes)
+aux_quincena = stm_month / 2.0
+
+# Días del periodo de nómina
 period_days = (payslip.date_to - payslip.date_from).days + 1
 
+# Días sin pagar (código LEAVE90 = "Sin pagar")
 unpaid_days = 0.0
 for wd in worked_days.values():
-    if wd.code == 'SIN_PAGAR':
+    if wd.code in ('LEAVE90',):  # agrega otros códigos si quieres excluir más
         unpaid_days += wd.number_of_days
 
 paid_days = period_days - unpaid_days
-daily = stm / 30.0
-result = daily * paid_days
+
+if period_days > 0:
+    # Proporcional al tiempo realmente trabajado
+    result = aux_quincena * (paid_days / period_days)
+else:
+    result = 0.0
             ]]></field>
         </record>
+
+
+        <!-- ============================= -->
+        <!-- COMISIONES / OTROS DEVENGADOS -->
+        <!-- ============================= -->
+        <!-- <record id="mega_rule_comisiones" model="hr.salary.rule">
+            <field name="name">Comisiones / Otros devengados</field>
+            <field name="code">COMISIONES</field>
+            <field name="sequence">35</field> -->
+            <!-- Devengado -->
+            <!-- <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="struct_id" ref="mega15_structure"/> -->
+
+            <!-- Solo aplica si hay algún input del tipo elegido -->
+            <!-- <field name="condition_select">python</field>
+            <field name="condition_python"><![CDATA[
+result = inputs.get('OTDEV')
+            ]]></field>
+
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute"><![CDATA[
+amount = inputs.get('OTDEV', 0.0)
+# Monto que se suma al neto
+result = amount
+            ]]></field>
+        </record> -->
+
+
 
         <!-- ============================= -->
         <!-- 5) SALUD 4%                   -->
@@ -96,8 +157,10 @@ result = daily * paid_days
 # Base cotizable: categoría BASIC (incluye SAL_PRO)
 base = categories.get('BASIC', 0.0)
 
+rate = (payslip.company_id.salud_employee_rate or 0.0) / 100.0
+
 # Retención del 4%
-result = base * 0.04
+result = -(base * rate)
             ]]></field>
         </record>
 
@@ -118,34 +181,11 @@ result = base * 0.04
 # Base cotizable: categoría BASIC (incluye SAL_PRO)
 base = categories.get('BASIC', 0.0)
 
+rate = (payslip.company_id.pension_employee_rate or 0.0) / 100.0
+
 # Retención 4% pensión
-result = base * 0.04
-            ]]></field>
-        </record>
-
-
-        <!-- ============================= -->
-        <!-- 7) NETO                       -->
-        <!-- ============================= -->
-        <record id="mega_rule_net" model="hr.salary.rule">
-            <field name="name">Salario neto MEGA</field>
-            <field name="code">NET_MEGA</field>
-            <field name="sequence">100</field>
-            <field name="category_id" ref="hr_payroll.NET"/>
-            <field name="struct_id" ref="mega15_structure"/>
-
-            <field name="condition_select">none</field>
-            <field name="amount_select">code</field>
-            <field name="amount_python_compute"><![CDATA[
-# BASIC: salario proporcional (SAL_PRO)
-base = categories.get('BASIC', 0.0)
-# ALW: auxilios (ej. AUX_TRANS)
-alw   = categories.get('ALW', 0.0)
-# DED: deducciones (SALUD4, PENSION4, etc. suelen ser negativas)
-ded   = categories.get('DED', 0.0)
-
-# Neto = básicos + auxilios + deducciones
-result = basic + alw + ded
+result = -(base * rate)
+# result_name = "Putasss"
             ]]></field>
         </record>
 

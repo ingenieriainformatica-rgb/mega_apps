@@ -17,6 +17,18 @@ class ResConfigSettings(models.TransientModel):
     stm_value = fields.Monetary(related="company_id.stm_value",
                                 string="Monthly transportation allowance", readonly=False,
                                 currency_field='currency_id')
+    
+    # 👇 porcentajes de salud y pensión trabajador
+    salud_employee_rate = fields.Float(
+        related="company_id.salud_employee_rate",
+        string="Salud trabajador (%)",
+        readonly=False
+    )
+    pension_employee_rate = fields.Float(
+        related="company_id.pension_employee_rate",
+        string="Pensión trabajador (%)",
+        readonly=False
+    )
 
     # times
     daily_overtime = fields.Float(
