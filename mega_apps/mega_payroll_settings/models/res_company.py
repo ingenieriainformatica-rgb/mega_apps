@@ -23,6 +23,18 @@ class ResCompany(models.Model):
         help="Porcentaje de aporte a pensión que descuenta al trabajador."
     )
 
+    # Employer contribution rates (🔥 nuevos campos)
+    salud_employer_rate = fields.Float(
+        string="Salud empleador (%)",
+        default=8.5,
+        help="Porcentaje de aporte a salud que asume el empleador."
+    )
+    pension_employer_rate = fields.Float(
+        string="Pensión empleador (%)",
+        default=12.0,
+        help="Porcentaje de aporte a pensión que asume el empleador."
+    )
+
 
     # times
     daily_overtime = fields.Float("% Daily overtime", readonly=False, default=25.0)

@@ -95,18 +95,34 @@
                         <div class="o_setting_left_pane"/>
                         <div class="o_setting_right_pane">
 
-                            <span class="o_form_label">Parámetros de aportes (empleado)</span>
+                            <span class="o_form_label">Parámetros de aportes <span class="text-success">(Empleado)</span></span>
 
                             <div class="content-group">
 
                                 <div class="row mt16">
-                                    <label for="salud_employee_rate" class="col-lg-5 o_light_label" string="% Salud trabajador"/>
+                                    <label for="salud_employee_rate" class="col-lg-5 o_light_label" string="% Salud"/>
                                     <field name="salud_employee_rate"/>
                                 </div>
 
                                 <div class="row mt16">
-                                    <label for="pension_employee_rate" class="col-lg-5 o_light_label" string="% Pensión trabajador"/>
+                                    <label for="pension_employee_rate" class="col-lg-5 o_light_label" string="% Pensión"/>
                                     <field name="pension_employee_rate"/>
+                                </div>
+
+                            </div>
+
+                            <span class="o_form_label">Parámetros de aportes <span class="text-success">(Empleador)</span></span>
+
+                            <div class="content-group">
+
+                                <div class="row mt16">
+                                    <label for="salud_employer_rate" class="col-lg-5 o_light_label" string="% Salud"/>
+                                    <field name="salud_employer_rate"/>
+                                </div>
+
+                                <div class="row mt16">
+                                    <label for="pension_employer_rate" class="col-lg-5 o_light_label" string="% Pensión"/>
+                                    <field name="pension_employer_rate"/>
                                 </div>
 
                             </div>

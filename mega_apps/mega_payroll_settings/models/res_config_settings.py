@@ -30,6 +30,18 @@ class ResConfigSettings(models.TransientModel):
         readonly=False
     )
 
+    # Employer contribution rates (🔥 nuevos campos)
+    salud_employer_rate = fields.Float(
+        string="Salud empleador (%)",
+        related="company_id.salud_employer_rate",
+        readonly=False
+    )
+    pension_employer_rate = fields.Float(
+        string="Pensión empleador (%)",
+        related="company_id.pension_employer_rate",
+        readonly=False
+    )
+
     # times
     daily_overtime = fields.Float(
         related="company_id.daily_overtime",

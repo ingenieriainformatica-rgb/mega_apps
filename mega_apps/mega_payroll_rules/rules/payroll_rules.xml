@@ -116,27 +116,27 @@ else:
         <!-- ============================= -->
         <!-- COMISIONES / OTROS DEVENGADOS -->
         <!-- ============================= -->
-        <!-- <record id="mega_rule_comisiones" model="hr.salary.rule">
+        <record id="mega_rule_comisiones" model="hr.salary.rule">
             <field name="name">Comisiones / Otros devengados</field>
             <field name="code">COMISIONES</field>
-            <field name="sequence">35</field> -->
+            <field name="sequence">35</field>
             <!-- Devengado -->
-            <!-- <field name="category_id" ref="hr_payroll.ALW"/>
-            <field name="struct_id" ref="mega15_structure"/> -->
+            <field name="category_id" ref="hr_payroll.ALW"/>
+            <field name="struct_id" ref="mega15_structure"/>
 
             <!-- Solo aplica si hay algún input del tipo elegido -->
-            <!-- <field name="condition_select">python</field>
+            <field name="condition_select">python</field>
             <field name="condition_python"><![CDATA[
 result = inputs.get('OTDEV')
             ]]></field>
 
             <field name="amount_select">code</field>
             <field name="amount_python_compute"><![CDATA[
-amount = inputs.get('OTDEV', 0.0)
-# Monto que se suma al neto
+input_otdev = inputs.get('OTDEV')
+amount = input_otdev.amount if input_otdev else 0.0
 result = amount
             ]]></field>
-        </record> -->
+        </record>
 
 
 
@@ -144,7 +144,7 @@ result = amount
         <!-- 5) SALUD 4%                   -->
         <!-- ============================= -->
         <record id="mega_rule_salud4" model="hr.salary.rule">
-            <field name="name">Salud (Trabajador 4%)</field>
+            <field name="name">Salud (Trabajador)</field>
             <field name="code">SALUD4</field>
             <field name="sequence">40</field>
             <field name="category_id" ref="hr_payroll.DED"/>
@@ -161,6 +161,7 @@ rate = (payslip.company_id.salud_employee_rate or 0.0) / 100.0
 
 # Retención del 4%
 result = -(base * rate)
+result_name = f"Salud (Trabajador {rate * 100}%)"
             ]]></field>
         </record>
 
@@ -169,7 +170,7 @@ result = -(base * rate)
         <!-- 6) PENSIÓN 4%                 -->
         <!-- ============================= -->
         <record id="mega_rule_pension4" model="hr.salary.rule">
-            <field name="name">Pensión (Trabajador 4%)</field>
+            <field name="name">Pensión (Trabajador)</field>
             <field name="code">PENSION4</field>
             <field name="sequence">50</field>
             <field name="category_id" ref="hr_payroll.DED"/>
@@ -185,8 +186,84 @@ rate = (payslip.company_id.pension_employee_rate or 0.0) / 100.0
 
 # Retención 4% pensión
 result = -(base * rate)
-# result_name = "Putasss"
+result_name = f"Pensión (Trabajador {rate * 100}%)"
             ]]></field>
+        </record>
+
+
+        <!-- ===================== -->
+        <!-- CATEGORÍAS ADICIONALES -->
+        <!-- ===================== -->
+
+        <record id="mega_cat_aportes_empleador" model="hr.salary.rule.category">
+            <field name="name">Aportes empleador</field>
+            <field name="code">EMP_APORTES</field>
+        </record>
+
+
+        <!-- ===================== -->
+        <!-- REGLA: SALUD EMPLEADOR -->
+        <!-- ===================== -->
+
+        <record id="mega_rule_salud_empleador" model="hr.salary.rule">
+            <field name="name">Salud (Empleador)</field>
+            <field name="code">SALUD_EMP</field>
+            <field name="sequence">45</field>
+
+            <field name="category_id" ref="mega_cat_aportes_empleador"/>
+            <field name="struct_id" ref="mega15_structure"/>
+            <field name="appears_on_payslip">True</field>
+
+            <field name="condition_select">python</field>
+            <field name="condition_python"><![CDATA[
+# aplica solo si hay salario básico / imponible
+result = contract.wage is not None and contract.wage > 0.0
+    ]]></field>
+
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute"><![CDATA[
+# Base de cotización: salario del contrato
+base = contract.wage or 0.0
+
+rate = (payslip.company_id.salud_employer_rate or 0.0) / 100.0
+
+# Ejemplo: 8.5% salud empleador
+result = base * rate
+result_name = f"Salud (Empleador {rate * 100}%)"
+    ]]></field>
+        </record>
+
+
+        <!-- ===================== -->
+        <!-- REGLA: PENSIÓN EMPLEADOR -->
+        <!-- ===================== -->
+
+        <record id="mega_rule_pension_empleador" model="hr.salary.rule">
+            <field name="name">Pensión (Empleador)</field>
+            <field name="code">PENSION_EMP</field>
+            <field name="sequence">55</field>
+
+            <field name="category_id" ref="mega_cat_aportes_empleador"/>
+            <field name="struct_id" ref="mega15_structure"/>
+            <field name="appears_on_payslip">True</field>
+
+            <field name="condition_select">python</field>
+            <field name="condition_python"><![CDATA[
+# aplica solo si hay salario básico / imponible
+result = contract.wage is not None and contract.wage > 0.0
+    ]]></field>
+
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute"><![CDATA[
+# Base de cotización: salario del contrato
+base = contract.wage or 0.0
+
+rate = (payslip.company_id.pension_employer_rate or 0.0) / 100.0
+
+# Ejemplo: 8.5% salud empleador
+result = base * rate
+result_name = f"Pensión (Empleador {rate * 100}%)"
+    ]]></field>
         </record>
 
 
