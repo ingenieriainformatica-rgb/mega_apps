@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <template id="report_saleorder_document_prefactura" inherit_id="sale.report_saleorder_document">
+
+    <!-- 1) Título Prefactura -->
+    <xpath expr="//t[@t-set='layout_document_title']" position="replace">
+      <t t-set="layout_document_title">
+        <span>Prefactura # </span>
+        <span t-field="doc.name">SO0000</span>
+      </t>
+    </xpath>
+
+    <!-- 2) Firma Aprobado al final (antes del último oe_structure de la página) -->
+    <!-- <xpath expr="(//div[@class='page']//div[@class='oe_structure'])[last()]" position="before">
+      <div class="mt-5" style="page-break-inside: avoid;">
+        <div class="text-center" style="margin-top: 40px;">
+          <div class="mt-1"><strong>Firma Aprobado</strong></div>
+        </div>
+      </div>
+    </xpath> -->
+
+    <xpath expr="(//div[@class='page']//div[@class='oe_structure'])[last()]" position="before">
+        <div class="mt-5" style="page-break-inside: avoid;">
+            <div class="row">
+                <div class="col-12 text-end">
+                    <div class="d-inline-block px-5 py-4 text-center">
+                    <strong>Firma Aprobado</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </xpath>
+
+
+  </template>
+
+</odoo>

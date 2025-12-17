@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Heredamos SOLO la vista de búsqueda -->
+    <record id="view_account_invoice_report_search_inherit_concepto" model="ir.ui.view">
+        <field name="name">account.invoice.report.search.inherit.concepto</field>
+        <field name="model">account.invoice.report</field>
+        <field name="inherit_id" ref="account.view_account_invoice_report_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="x_studio_concepto" string="Concepto"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="view_account_invoice_report_list_inherit_concepto" model="ir.ui.view">
+        <field name="name">account.invoice.report.list.inherit.concepto</field>
+        <field name="model">account.invoice.report</field>
+        <field name="inherit_id" ref="account.account_invoice_report_view_tree"/>
+        <field name="arch" type="xml">
+        <xpath expr="//list//field[@name='partner_id']" position="after">
+            <field name="x_studio_concepto" string="Concepto" optional="show"/>
+        </xpath>
+        </field>
+    </record>
+
+
+</odoo>
