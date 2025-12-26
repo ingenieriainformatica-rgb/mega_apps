@@ -303,3 +303,99 @@ class ReclassReceivableWizard(models.TransientModel):
                 'type': 'rainbow_man',
             }
         }
+    
+
+    def action_confirm_bulk_journal(self):
+        # _logger.info("\n[BULK_JOURNAL] Bulk journal reclassification initiated.\n")
+        self.ensure_one()
+        rec = self
+
+        # 1) Validaciones
+        if not rec.account_dst_id:
+            raise UserError("Selecciona la cuenta destino.")
+        if not rec.account_src_id:
+            raise UserError("Selecciona la cuenta origen.")
+        if rec.account_src_id.id == rec.account_dst_id.id:
+            raise UserError("La cuenta origen y destino no pueden ser la misma.")
+        if not rec.journal_id:
+            raise UserError("Debes seleccionar un diario para ejecutar el proceso.")
+
+        journal_code = (rec.journal_id.code or "").strip()
+        if not journal_code:
+            raise UserError("El diario seleccionado no tiene 'Código' (journal.code).")
+
+        Move = self.env["account.move"]
+        domain = [
+            ("company_id", "=", rec.company_id.id),
+            ("name", "=ilike", f"{journal_code}%"),
+            # ("state", "=", "posted"),  # si quieres
+        ]
+
+        moves = Move.search(domain, order="date desc, id desc")
+        if not moves:
+            raise UserError(f"No encontré documentos con prefijo {journal_code}%.")
+
+        # _logger.info("\n [BULK_JOURNAL] Movimientos encontrados: %s \n", len(moves))
+
+        # Categorías que bloquean TODO el move si aparece al menos 1 producto ahí
+        blocked_tokens = {"SERVICIOS", "ACEITE"}
+
+        for idx, move in enumerate(moves, start=1):
+            lines = move.invoice_line_ids.filtered(lambda l: l.product_id)
+            if not lines:
+                # _logger.info("\n\n (sin productos en invoice_line_ids) \nFACTU/2025/09/0140\n")
+                continue
+
+            # 1) Detectar si el move tiene algún producto bloqueado
+            blocked_lines = []
+            for line in lines:
+                categ = line.product_id.product_tmpl_id.categ_id
+                categoria = (categ.complete_name or "").upper() if categ else ""
+                # Si la ruta de categoría contiene SERVICIOS o ACEITE
+                if any(tok in categoria for tok in blocked_tokens):
+                    blocked_lines.append((line, categoria))
+
+            # 2) Si hay bloqueados, saltar TODO el move
+            if blocked_lines:
+                _logger.info(
+                        "\n [CATEGORIA][%s/%s] MOVE id=%s | name=%s | type=%s | state=%s | date=%s \n",
+                        idx, len(moves), move.id, move.name, move.move_type, move.state, move.date
+                    )
+                continue  # 👈 acá es donde NO sigue con esa factura
+
+            has_src = self.env['account.move.line'].search_count([
+                ('move_id', '=', move.id),
+                ('account_id', '=', rec.account_src_id.id),
+            ]) > 0
+
+            if not has_src:
+                # _logger.info(
+                #     "[BULK_JOURNAL] SKIP %s: no tiene cuenta origen %s - %s",
+                #     move.name, rec.account_src_id.code, rec.account_src_id.name
+                # )
+                continue
+
+            try:
+                with self.env.cr.savepoint():  # aísla errores por factura
+                    # Llamada a tu método SQL (tolera acc_src=None)
+                    # Si quieres que el 'note' del backup incluya el batch, añade una variante del método con parámetro note_extra
+                    self._reclass_update_invoice_sql(move, rec.account_src_id, rec.account_dst_id, rec.company_id)
+                    _logger.info(
+                        "\n [BULK_JOURNAL][%s/%s] MOVE id=%s | name=%s | type=%s | state=%s | date=%s \n",
+                        idx, len(moves), move.id, move.name, move.move_type, move.state, move.date
+                    )
+                    # ok_count += 1
+            except Exception as e:
+                # No interrumpe el resto
+                _logger.exception("[BULK] Falló %s: %s", move.name, e)
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": "Bulk Journal",
+                "message": f"Proceso terminado. Revisa el log para ver cuáles moves fueron bloqueados por categoría.",
+                "type": "success",
+                "sticky": False,
+            }
+        }

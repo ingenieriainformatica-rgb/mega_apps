@@ -21,9 +21,22 @@
         </group>
 
         <footer>
-          <button name="action_confirm_bulk" type="object" string="Update Bulk" class="btn-primary" invisible="not bulk_mode"/>
-          <button name="action_confirm" type="object" string="Confirmar" class="btn-primary" invisible="bulk_mode"/>
+          <button name="action_confirm" type="object" string="Confirmar"
+                  class="btn-primary"
+                  invisible="bulk_mode"/>
+
+          <!-- Bulk SIN diario -->
+          <button name="action_confirm_bulk" type="object" string="Update Bulk"
+                  class="btn-primary"
+                  invisible="not bulk_mode or journal_id"/>
+
+          <!-- Bulk CON diario -->
+          <button name="action_confirm_bulk_journal" type="object" string="Update Bulk Journal"
+                  class="btn-primary"
+                  invisible="not bulk_mode or not journal_id"/>
+
           <button string="Cerrar" class="btn-link" special="cancel"/>
+
         </footer>
       </form>
     </field>
