@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="realnet_sale_dashboard.SaleDashboard">
+    <div class="o_main_content p-3">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="mb-0">Tablero Ventas (Realnet)</h2>
+
+        <form class="d-flex gap-2" t-on-submit="onApplyFilters">
+          <div>
+            <small class="text-muted">Desde</small>
+            <input type="date" class="form-control"
+                   t-model="state.date_from"/>
+          </div>
+          <div>
+            <small class="text-muted">Hasta</small>
+            <input type="date" class="form-control"
+                   t-model="state.date_to"/>
+          </div>
+          <button class="btn btn-primary mt-4" type="submit">
+            Aplicar
+          </button>
+        </form>
+      </div>
+
+      <t t-if="state.loading">
+        <div class="alert alert-info">Cargando datos…</div>
+      </t>
+
+      <t t-else="">
+        <!-- KPIs -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-3">
+            <div class="card p-3">
+              <div class="text-muted">Ventas hoy</div>
+              <div class="fs-3 fw-bold">
+                <t t-esc="state.kpis.today_total.toLocaleString()"/>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-3">
+            <div class="card p-3">
+              <div class="text-muted">Ventas mes</div>
+              <div class="fs-3 fw-bold">
+                <t t-esc="state.kpis.month_total.toLocaleString()"/>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-3">
+            <div class="card p-3">
+              <div class="text-muted">Pedidos</div>
+              <div class="fs-3 fw-bold">
+                <t t-esc="state.kpis.orders_count"/>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-3">
+            <div class="card p-3">
+              <div class="text-muted">Ticket promedio</div>
+              <div class="fs-3 fw-bold">
+                <t t-esc="state.kpis.avg_ticket.toLocaleString()"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla Top clientes -->
+        <div class="card p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">Top clientes</h4>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th class="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-foreach="state.top_customers" t-as="row" t-key="row.partner">
+                  <tr>
+                    <td><t t-esc="row.partner"/></td>
+                    <td class="text-end"><t t-esc="row.amount.toLocaleString()"/></td>
+                  </tr>
+                </t>
+              </tbody>
+            </table>
+          </div>
+          <small class="text-muted mt-2 d-block">
+            *Si quieres, aquí mismo agregamos “Top vendedores”, “Ventas por bodega”, “Cotizaciones vs Ventas”, etc.
+          </small>
+        </div>
+      </t>
+    </div>
+  </t>
+</templates>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="mega_dashboard.SaleDashboard">
+    <Layout display="display" className="'o_dashboard h-100 overflow-y-auto'">
+
+      <DashboardHero />
+
+      <DateFilterBar onClickFilter.bind="onClickFilter"/>
+
+      <!-- Layout principal -->
+      <div class="container-fluid mb-5 mt-5" t-if="statistics.isReady">
+        <!-- ✅ AQUÍ (debajo del filtro) -->
+        <Informe data="statistics.sales.sales_by_warehouse" grand="statistics.sales.grand"/>
+      </div>
+
+    </Layout>
+  </t>
+</templates>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+  <t t-name="mega_dashboard.Hero">
+    <section class="container-fluid px-3 px-lg-4 pt-3 pt-lg-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4 p-lg-5">
+          <!-- Contenido centrado -->
+          <div class="d-flex flex-column align-items-center justify-content-center text-center gap-2">
+            
+            <div class="d-flex align-items-center justify-content-center gap-2">
+              <h2 class="m-0" style="color: darkcyan;">Dashboard Gerencial</h2>
+              <span class="badge text-bg-primary">Ventas</span>
+            </div>
+
+            <p class="text-muted mb-0" style="max-width: 720px;">
+              Bienvenido. Consulta indicadores y reportes por sede, filtrando por rango de fechas.
+            </p>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </t>
+</templates>

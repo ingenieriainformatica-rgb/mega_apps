@@ -1,0 +1,40 @@
+<templates xml:space="preserve">
+  <t t-name="mega_dashboard.DateFilterBar">
+    <section class="container-fluid px-3 px-lg-4 pb-2">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body py-3">
+          <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+
+            <!-- Left: label -->
+            <div class="d-flex align-items-center gap-2">
+              <i class="fa fa-calendar text-muted"/>
+              <span class="fw-semibold">Rango de fechas</span>
+              <span class="text-muted small">Filtra KPIs y ventas por sede</span>
+            </div>
+
+            <!-- Right: inputs -->
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <label class="text-muted small m-0">Desde</label>
+                <input type="date" class="form-control form-control-sm"
+                       t-att-value="state.date_from"/>
+              </div>
+
+              <div class="d-flex align-items-center gap-2">
+                <label class="text-muted small m-0">Hasta</label>
+                <input type="date" class="form-control form-control-sm"
+                       t-att-value="state.date_to"/>
+              </div>
+
+              <button class="btn btn-primary btn-sm"  t-on-click="onClickFilter">
+                <i class="fa fa-filter me-1"/> Aplicar
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </t>
+</templates>

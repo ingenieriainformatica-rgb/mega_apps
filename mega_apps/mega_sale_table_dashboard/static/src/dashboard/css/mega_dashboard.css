@@ -1,0 +1,40 @@
+.mega_kpi_card2{
+  border-radius: 14px;
+  background: #fff;
+}
+
+.mega_kpi_topbar{
+  height: 6px;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  background: linear-gradient(90deg, rgba(13,110,253,.55), rgba(255,193,7,.55));
+}
+
+.mega_kpi_title2{
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  color: rgba(33,37,41,.70);
+  text-transform: uppercase;
+}
+
+.mega_kpi_value2{
+  font-size: 22px;
+  font-weight: 800;
+  color: rgba(33,37,41,.92);
+  line-height: 1.1;
+}
+
+.mega_kpi_sub2{
+  font-size: 12px;
+  color: rgba(33,37,41,.60);
+}
+
+.mega_kpi_badge{
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(33,37,41,.06);
+  color: rgba(33,37,41,.65);
+  white-space: nowrap;
+}

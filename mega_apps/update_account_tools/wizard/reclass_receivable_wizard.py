@@ -338,7 +338,7 @@ class ReclassReceivableWizard(models.TransientModel):
         # _logger.info("\n [BULK_JOURNAL] Movimientos encontrados: %s \n", len(moves))
 
         # Categorías que bloquean TODO el move si aparece al menos 1 producto ahí
-        blocked_tokens = {"SERVICIOS", "ACEITE"}
+        blocked_tokens = {}
 
         for idx, move in enumerate(moves, start=1):
             lines = move.invoice_line_ids.filtered(lambda l: l.product_id)
