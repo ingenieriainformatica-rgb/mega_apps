@@ -1,6 +1,7 @@
 /** @odoo-module */
 
-import { Component, useState } from "@odoo/owl";
+import { Component, useState, useRef } from "@odoo/owl";
+
 
 function formatYMD(d) {
   const y = d.getFullYear();
@@ -19,12 +20,13 @@ function last30Days() {
 export class DateFilterBar extends Component {
   static template = "mega_dashboard.DateFilterBar";
   static props = {
-    onClickFilter: {
-        type: Object
-    }
+    onClickFilter: { type: Function },   // ✅ callback
   };
 
   setup() {
+    this.date_from = useRef('input_date_from');
+    this.date_to = useRef('input_date_to');
+    
     const def = last30Days();
     this.state = useState({
       date_from: def.date_from,
@@ -40,29 +42,10 @@ export class DateFilterBar extends Component {
     this.state.date_to = ev.target.value;
   }
 
-  async onApply() {
-    // validación básica
-    if (this.state.date_from && this.state.date_to && this.state.date_from > this.state.date_to) {
-      // si ya tienes notification service, aquí lo usas
-      alert("La fecha 'Desde' no puede ser mayor que 'Hasta'.");
-      return;
-    }
-    await this.props.onApplyRange({
-      date_from: this.state.date_from,
-      date_to: this.state.date_to,
-    });
-  }
-
-  async onReset() {
-    const def = last30Days();
-    this.state.date_from = def.date_from;
-    this.state.date_to = def.date_to;
-    await this.props.onApplyRange(def);
-  }
-
   onClickFilter(ev){
-      console.log("Filter clicked",this.state.date_from ,this.state.date_to);
-      this.props.onClickFilter();
+      const date_from = this.date_from.el.value
+      const date_to = this.date_to.el.value
+      this.props.onClickFilter({date_from: date_from, date_to: date_to});
   }
 
 }

@@ -9,7 +9,7 @@
   <!-- Menú dentro de Ventas -->
   <menuitem id="menu_sale_dashboard_realnet"
             name="Informes"
-            parent="sale.sale_order_menu"
+            parent="accountant.menu_accounting"
             action="action_sale_dashboard_realnet"
             sequence="999"/>
 </odoo>
