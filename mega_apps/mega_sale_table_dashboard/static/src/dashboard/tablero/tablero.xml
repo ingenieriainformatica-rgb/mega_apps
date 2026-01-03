@@ -5,13 +5,39 @@
 
       <DashboardHero />
 
-      <DateFilterBar onClickFilter.bind="onClickFilter"/>
+      <DateFilterBar
+        warehouses="state.warehouses"
+        loadingWarehouses="state.loadingWarehouses"
+        onClickFilter.bind="onClickFilter"
+      />
+
 
       <!-- Layout principal -->
       <div class="container-fluid mb-5 mt-5" t-if="statistics.isReady">
-        <!-- ✅ AQUÍ (debajo del filtro) -->
-        <Informe data="statistics.sales.sales_by_warehouse" grand="statistics.sales.grand"/>
+        <div class="row g-3">
+
+          <!-- Columna 1 -->
+          <div class="col-12 col-lg-4">
+            <Informe data="statistics.sales.sales_by_warehouse" grand="statistics.sales.grand" option="statistics.isReadyWarehouse"/>
+          </div>
+
+          <!-- Columna 2 (placeholder) -->
+          <div class="col-12 col-lg-4">
+            <!-- Aquí metes tu segundo componente -->
+            <!-- <Grafica data="statistics.sales..." /> -->
+            <div class="card p-3">Columna 2</div>
+          </div>
+
+          <!-- Columna 3 (placeholder) -->
+          <div class="col-12 col-lg-4">
+            <!-- Aquí metes tu tercer componente -->
+            <!-- <Tabla data="statistics.sales..." /> -->
+            <div class="card p-3">Columna 3</div>
+          </div>
+
+        </div>
       </div>
+
 
     </Layout>
   </t>

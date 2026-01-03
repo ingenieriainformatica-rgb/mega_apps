@@ -10,6 +10,7 @@
     "depends": ["sale", "web"],
     "data": [
         "views/sale_dashboard_menu.xml",
+        "views/account_journal.xml",
     ],
     "assets": {
         "web.assets_backend": [

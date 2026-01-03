@@ -14,14 +14,40 @@
 
             <!-- Right: inputs -->
             <div class="d-flex flex-wrap align-items-center gap-2">
+
+              <div class="d-flex align-items-center gap-2">
+                <label class="text-muted small m-0">Almacén</label>
+
+                <select class="form-select form-select-sm"
+                        style="min-width: 260px;"
+                        t-att-disabled="props.loadingWarehouses" t-ref="input_warehouse_id">
+                        <!-- t-on-change="onChangeWarehouse" -->
+
+                  <option value="">Todos</option>
+
+                  <t t-if="props.loadingWarehouses">
+                    <option disabled="disabled">Cargando almacenes...</option>
+                  </t>
+
+                  <t t-else="">
+                    <t t-foreach="(props.warehouses || [])" t-as="wh" t-key="wh.id">
+                      <option t-att-value="wh.id"><t t-esc="wh.name"/></option>
+                    </t>
+                  </t>
+
+                </select>
+              </div>
+
+
+
               <div class="d-flex align-items-center gap-2">
                 <label class="text-muted small m-0">Desde</label>
-                <input type="date" class="form-control form-control-sm" t-att-value="state.date_from" t-ref="input_date_from"/>
+                <input type="date" class="form-control" t-att-value="state.date_from" t-ref="input_date_from"/>
               </div>
 
               <div class="d-flex align-items-center gap-2">
                 <label class="text-muted small m-0">Hasta</label>
-                <input type="date" class="form-control form-control-sm" t-att-value="state.date_to" t-ref="input_date_to"/>
+                <input type="date" class="form-control" t-att-value="state.date_to" t-ref="input_date_to"/>
               </div>
 
               <button class="btn btn-primary btn-sm"  t-on-click="onClickFilter">

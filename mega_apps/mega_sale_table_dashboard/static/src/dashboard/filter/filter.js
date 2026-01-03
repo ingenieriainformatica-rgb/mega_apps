@@ -20,32 +20,30 @@ function last30Days() {
 export class DateFilterBar extends Component {
   static template = "mega_dashboard.DateFilterBar";
   static props = {
-    onClickFilter: { type: Function },   // ✅ callback
+    onClickFilter: { type: Function },   
+    warehouses: { type: Array, optional: true },         
+    loadingWarehouses: { type: Boolean, optional: true } 
   };
 
   setup() {
     this.date_from = useRef('input_date_from');
     this.date_to = useRef('input_date_to');
-    
+    this.warehouse_id = useRef('input_warehouse_id');
+
     const def = last30Days();
     this.state = useState({
       date_from: def.date_from,
       date_to: def.date_to,
+      warehouse_id: this.warehouse_id.el ? this.warehouse_id.el.value : null,
     });
-  }
-
-  onChangeFrom(ev) {
-    this.state.date_from = ev.target.value;
-  }
-
-  onChangeTo(ev) {
-    this.state.date_to = ev.target.value;
+    
   }
 
   onClickFilter(ev){
+      const warehouse_id = this.warehouse_id.el.value;
       const date_from = this.date_from.el.value
       const date_to = this.date_to.el.value
-      this.props.onClickFilter({date_from: date_from, date_to: date_to});
+      this.props.onClickFilter({warehouse_id: warehouse_id, date_from: date_from, date_to: date_to});
   }
 
 }

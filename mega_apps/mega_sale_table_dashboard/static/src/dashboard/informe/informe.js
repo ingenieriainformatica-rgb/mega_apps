@@ -4,7 +4,7 @@ import { Component } from "@odoo/owl";
 
 export class Informe extends Component {
   static template = "mega_dashboard.KpiCards";
-  static props = { data: Array, grand: Object};
+  static props = { data: Array, grand: Object, option: false };
 
   get warehouses() {
     const blacklist = ["GRUPOMEGA"]; // 👈 aquí pones las sedes que NO quieres

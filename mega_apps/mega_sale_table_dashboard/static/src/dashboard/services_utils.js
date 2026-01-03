@@ -38,8 +38,10 @@ const statisticsService = {
 
     const statistics = reactive({
       isReady: false,
+      isReadyWarehouse: false,
       date_from: def.date_from,
       date_to: def.date_to,
+      warehouse_id: null, // ✅ IMPORTANTE: declararlo aquí
 
       // aquí quedarán tus datos del endpoint
       kpis: {},
@@ -57,32 +59,37 @@ const statisticsService = {
             date_to: this.date_to,
           });
 
+          const warehouse_id = this.warehouse_id
+
           // Persistimos el rango normalizado
           this.date_from = date_from;
           this.date_to = date_to;
 
-          const updates = await rpc("/sales/statistics", { date_from, date_to });
-
+          const updates = await rpc("/mega_dashboard/sales/statistics", { date_from, date_to,  warehouse_id});
+          
           Object.assign(this, updates, {
             isReady: true,
+            isReadyWarehouse: warehouse_id != 0,
           });
+          
         } catch (e) {
           console.error("sales.statistics reload error:", e);
         }
       },
 
       // ✅ ESTE ES EL QUE TE FALTA
-      async setRange({ date_from, date_to }) {
+      async setRange({ date_from, date_to, warehouse_id }) {
         const norm = normalizeRange({ date_from, date_to });
         this.date_from = norm.date_from;
         this.date_to = norm.date_to;
+        this.warehouse_id = warehouse_id ? Number(warehouse_id) : null;
         await this.reload();
       },
 
-      startAutoRefresh(ms = 60 * 1000) {
-        if (this._timer) clearInterval(this._timer);
-        this._timer = setInterval(() => this.reload(), ms);
-      },
+      // startAutoRefresh(ms = 60 * 1000) {
+      //   if (this._timer) clearInterval(this._timer);
+      //   this._timer = setInterval(() => this.reload(), ms);
+      // },
 
       stopAutoRefresh() {
         if (this._timer) clearInterval(this._timer);
@@ -91,9 +98,9 @@ const statisticsService = {
     });
 
     // Primera carga
-    statistics.reload();
+    // statistics.reload();
     // Auto refresh (recarga con el rango ACTUAL)
-    statistics.startAutoRefresh(60 * 1000);
+    // statistics.startAutoRefresh(60 * 1000);
 
     return statistics;
   },

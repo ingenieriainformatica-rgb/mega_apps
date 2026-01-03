@@ -7,6 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 import { DashboardHero } from "../hero/hero";
 import { DateFilterBar } from "../filter/filter";
 import { Informe } from "../informe/informe";
+import { rpc } from "@web/core/network/rpc";
 
 export default class MegaSaleDashboard extends Component {
     static template = "mega_dashboard.SaleDashboard";
@@ -22,31 +23,51 @@ export default class MegaSaleDashboard extends Component {
         this.display = { controlPanel: {} };
         this.statistics = useState(useService("sales.statistics"));
         this.notification = useService("notification");
-        console.log("Statistics -> ", this.statistics);
+
+        // ✅ estado propio del dashboard
+        this.state = useState({
+            loadingWarehouses: false,
+            warehouses: [],          // [{id, name}]
+        });
+
+        this.loadWarehouses();
+    }
+
+    async loadWarehouses() {
+        this.state.loadingWarehouses = true;
+        try {
+            const res = await rpc("/mega_dashboard/get/warehouses", {});
+            // asumiendo {ok:true, items:[{id, name}, ...]}
+            this.state.warehouses = res?.items || [];
+        } catch (e) {
+            console.error(e);
+            this.notification.add("Error cargando almacenes.", { type: "danger" });
+        } finally {
+            this.state.loadingWarehouses = false;
+        }
     }
 
     async onClickFilter(payload) {
         const date_from = payload?.date_from;
         const date_to = payload?.date_to;
+        const warehouse_id = payload?.warehouse_id || [];
 
-        // ✅ Validación básica
         if (!date_from || !date_to) {
             this.notification.add("Debes seleccionar 'Desde' y 'Hasta'.", { type: "warning" });
             return;
         }
 
-        // ✅ Si date_to < date_from (formato YYYY-MM-DD se puede comparar como string)
         if (date_to < date_from) {
             this.notification.add(
                 "Rango inválido: la fecha 'Hasta' no puede ser menor que la fecha 'Desde'.",
                 { type: "danger" }
             );
-            return; // ⛔ NO aplicar filtro
+            return;
         }
 
-        // ✅ Si pasa la validación, manda al service (si ya tienes setRange)
         if (typeof this.statistics.setRange === "function") {
-            await this.statistics.setRange({ date_from, date_to });
+            await this.statistics.setRange({ date_from, date_to, warehouse_id });
+            console.log("Putas -> ", this.statistics)
             return;
         }
     }
