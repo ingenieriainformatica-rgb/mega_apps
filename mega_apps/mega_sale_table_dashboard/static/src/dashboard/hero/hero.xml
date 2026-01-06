@@ -3,7 +3,7 @@
   <t t-name="mega_dashboard.Hero">
     <section class="container-fluid px-3 px-lg-4 pt-3 pt-lg-4">
       <div class="card shadow-sm border-0">
-        <div class="card-body p-4 p-lg-5">
+        <div class="card-body">
           <!-- Contenido centrado -->
           <div class="d-flex flex-column align-items-center justify-content-center text-center gap-2">
             

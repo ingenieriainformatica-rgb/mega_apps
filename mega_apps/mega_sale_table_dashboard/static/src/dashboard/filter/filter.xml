@@ -3,60 +3,95 @@
     <section class="container-fluid px-3 px-lg-4 pb-2">
       <div class="card border-0 shadow-sm">
         <div class="card-body py-3">
-          <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+
+          <div class="row align-items-center g-3">
 
             <!-- Left: label -->
-            <div class="d-flex align-items-center gap-2">
-              <i class="fa fa-calendar text-muted"/>
-              <span class="fw-semibold">Rango de fechas</span>
-              <span class="text-muted small">Filtra KPIs y ventas por sede</span>
+            <div class="col-12 col-lg-auto">
+              <div class="d-flex align-items-center gap-2">
+                <span class="text-muted">
+                  <i class="fa fa-calendar"/>
+                </span>
+                <div class="d-flex flex-column">
+                  <span class="fw-semibold lh-1">Rango de fechas</span>
+                  <span class="text-muted small">Filtra KPIs y ventas por sede</span>
+                </div>
+              </div>
             </div>
 
-            <!-- Right: inputs -->
-            <div class="d-flex flex-wrap align-items-center gap-2">
+            <!-- Right: filters -->
+            <div class="col-12 col-lg">
+              <div class="row g-2 justify-content-lg-end">
 
-              <div class="d-flex align-items-center gap-2">
-                <label class="text-muted small m-0">Almacén</label>
+                <!-- Almacén -->
+                <div class="col-12 col-md-6 col-lg-4 col-xl-4">
+                  <label class="form-label text-muted small mb-1">Almacén</label>
+                  <div class="input-group input-group-lg">
+                    <span class="input-group-text">
+                      <i class="fa fa-warehouse"/>
+                    </span>
 
-                <select class="form-select form-select-sm"
-                        style="min-width: 260px;"
-                        t-att-disabled="props.loadingWarehouses" t-ref="input_warehouse_id">
-                        <!-- t-on-change="onChangeWarehouse" -->
+                    <select class="form-select"
+                            t-att-disabled="props.loadingWarehouses"
+                            t-ref="input_warehouse_id">
 
-                  <option value="">Todos</option>
+                      <option value="">Todos</option>
 
-                  <t t-if="props.loadingWarehouses">
-                    <option disabled="disabled">Cargando almacenes...</option>
-                  </t>
+                      <t t-if="props.loadingWarehouses">
+                        <option disabled="disabled">Cargando almacenes...</option>
+                      </t>
 
-                  <t t-else="">
-                    <t t-foreach="(props.warehouses || [])" t-as="wh" t-key="wh.id">
-                      <option t-att-value="wh.id"><t t-esc="wh.name"/></option>
-                    </t>
-                  </t>
+                      <t t-else="">
+                        <t t-foreach="(props.warehouses || [])" t-as="wh" t-key="wh.id">
+                          <option t-att-value="wh.id"><t t-esc="wh.name"/></option>
+                        </t>
+                      </t>
+                    </select>
+                  </div>
+                </div>
 
-                </select>
+                <!-- Desde -->
+                <div class="col-6 col-md-3 col-lg-3 col-xl-2">
+                  <label class="form-label text-muted small mb-1">Desde</label>
+                  <div class="input-group input-group-lg">
+                    <input type="date"
+                           class="form-control"
+                           t-att-value="state.date_from"
+                           t-ref="input_date_from"/>
+                    <span class="input-group-text">
+                      <i class="fa fa-calendar"/>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Hasta -->
+                <div class="col-6 col-md-3 col-lg-3 col-xl-2">
+                  <label class="form-label text-muted small mb-1">Hasta</label>
+                  <div class="input-group input-group-lg">
+                    <input type="date"
+                           class="form-control"
+                           t-att-value="state.date_to"
+                           t-ref="input_date_to"/>
+                    <span class="input-group-text">
+                      <i class="fa fa-calendar"/>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Botón -->
+                <div class="col-12 col-lg-auto d-grid align-self-end">
+                  <button class="btn btn-primary btn-lg"
+                          t-on-click="onClickFilter"
+                          t-att-disabled="props.loadingWarehouses">
+                    <i class="fa fa-filter me-1"/>
+                  </button>
+                </div>
+
               </div>
-
-
-
-              <div class="d-flex align-items-center gap-2">
-                <label class="text-muted small m-0">Desde</label>
-                <input type="date" class="form-control" t-att-value="state.date_from" t-ref="input_date_from"/>
-              </div>
-
-              <div class="d-flex align-items-center gap-2">
-                <label class="text-muted small m-0">Hasta</label>
-                <input type="date" class="form-control" t-att-value="state.date_to" t-ref="input_date_to"/>
-              </div>
-
-              <button class="btn btn-primary btn-sm"  t-on-click="onClickFilter">
-                <i class="fa fa-filter me-1"/> Aplicar
-              </button>
-
             </div>
 
           </div>
+
         </div>
       </div>
     </section>

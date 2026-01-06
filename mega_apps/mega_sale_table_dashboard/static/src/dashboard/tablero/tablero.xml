@@ -22,17 +22,8 @@
           </div>
 
           <!-- Columna 2 (placeholder) -->
-          <div class="col-12 col-lg-4">
-            <!-- Aquí metes tu segundo componente -->
-            <!-- <Grafica data="statistics.sales..." /> -->
-            <div class="card p-3">Columna 2</div>
-          </div>
-
-          <!-- Columna 3 (placeholder) -->
-          <div class="col-12 col-lg-4">
-            <!-- Aquí metes tu tercer componente -->
-            <!-- <Tabla data="statistics.sales..." /> -->
-            <div class="card p-3">Columna 3</div>
+          <div class="col-12 col-lg-8">
+            <InvoiceList invoicesList="statistics.sales.invoices_by_warehouse"/>
           </div>
 
         </div>

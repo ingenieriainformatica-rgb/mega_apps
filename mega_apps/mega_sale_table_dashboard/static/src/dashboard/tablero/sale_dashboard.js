@@ -4,14 +4,15 @@ import { Component, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { Layout } from "@web/search/layout";
 import { useService } from "@web/core/utils/hooks";
+import { rpc } from "@web/core/network/rpc";
 import { DashboardHero } from "../hero/hero";
 import { DateFilterBar } from "../filter/filter";
 import { Informe } from "../informe/informe";
-import { rpc } from "@web/core/network/rpc";
+import { InvoiceList } from "../InvoiceList/invoice_list";
 
 export default class MegaSaleDashboard extends Component {
     static template = "mega_dashboard.SaleDashboard";
-    static components = { Layout, DashboardHero, DateFilterBar, Informe };
+    static components = { Layout, DashboardHero, DateFilterBar, Informe, InvoiceList };
     static props = {
         action: Object,
         actionId: Number,
@@ -67,7 +68,6 @@ export default class MegaSaleDashboard extends Component {
 
         if (typeof this.statistics.setRange === "function") {
             await this.statistics.setRange({ date_from, date_to, warehouse_id });
-            console.log("Putas -> ", this.statistics)
             return;
         }
     }
