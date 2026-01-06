@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_warehouse_form_inherit_show_dashboard" model="ir.ui.view">
+        <field name="name">stock.warehouse.form.inherit.show.dashboard</field>
+        <field name="model">stock.warehouse</field>
+        <field name="inherit_id" ref="stock.view_warehouse"/>
+        <field name="arch" type="xml">
+
+            <!-- Lo ponemos en la pestaña "Configuración del almacén" -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Informes">
+                    <group>
+                        <field name="show_in_sales_dashboard" widget="boolean_toggle"/>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

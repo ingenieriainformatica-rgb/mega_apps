@@ -7,10 +7,11 @@
     "website": "https://mega.realnet.com.co/",
     "category": "MegaTecnicentro/SalesDashboard",
     "summary": "Dynamic sales board with KPIs, graphs and rankings",
-    "depends": ["sale", "web"],
+    "depends": ["sale", "web", "account", "stock"],
     "data": [
         "views/sale_dashboard_menu.xml",
         "views/account_journal.xml",
+        "views/stock_warehouse_views.xml",
     ],
     "assets": {
         "web.assets_backend": [
