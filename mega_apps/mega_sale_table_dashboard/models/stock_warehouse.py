@@ -11,5 +11,5 @@ class StockWarehouse(models.Model):
     show_in_sales_dashboard = fields.Boolean(
         string="Mostrar en informe (Tablero)",
         default=False,
-        help="Si está activado, este almacén aparecerá en el Informe Contabilidad / Informes."
+        help="Si está activado, este almacén aparecerá en el Informe Contabilidad / Informes.",
     )

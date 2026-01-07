@@ -1,24 +1,14 @@
 import logging
 from collections import defaultdict
 from odoo.http import request  # type: ignore
+from .utils import (  #type: ignore
+    get_active_warehouses
+)
 
 _logger = logging.getLogger(__name__)
 
 # Campo nuevo en diarios (m2m)
 JOURNAL_WH_FIELD = "warehouse_ids"
-
-
-def get_active_warehouses(warehouse_id=None):
-    Warehouse = request.env["stock.warehouse"].sudo()
-    company = request.env.company
-
-    if warehouse_id:
-        return Warehouse.browse(int(warehouse_id))
-
-    return Warehouse.search([
-        ("company_id", "=", company.id),
-        ("name", "not ilike", "GRUPOMEGA"),
-    ], order="name")
 
 
 def _get_journals_for_warehouses(warehouses):

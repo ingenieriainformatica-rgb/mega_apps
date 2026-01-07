@@ -13,6 +13,7 @@ class AccountJournal(models.Model):
         "journal_id",
         "warehouse_id",
         string="Almacenes asociados",
-        help="Almacenes que facturan usando este diario"
+        help="Almacenes que facturan usando este diario",
+        tracking=True,
     )
     

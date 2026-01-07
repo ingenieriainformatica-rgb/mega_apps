@@ -4,13 +4,23 @@ from odoo.http import request  # type: ignore
 _logger = logging.getLogger(__name__)
 
 
-def get_active_warehouses():
+def get_active_warehouses(warehouse_id=None):
     Warehouse = request.env["stock.warehouse"].sudo()
     company = request.env.company
 
-    excluded_ids = [4] # Example: Exclude warehouse with ID 4: GRUPOMEGA
     domain = [
         ("company_id", "=", company.id),
-        ("id", "not in", excluded_ids),
+        ("show_in_sales_dashboard", "=", True),
     ]
-    return Warehouse.search(domain, order="name")
+
+    if warehouse_id:
+        domain.append(("id", "=", int(warehouse_id)))
+
+    warehouses = Warehouse.search(domain, order="name")
+
+    _logger.info(
+        "Warehouses dashboard -> ids=%s",
+        warehouses.ids
+    )
+
+    return warehouses
