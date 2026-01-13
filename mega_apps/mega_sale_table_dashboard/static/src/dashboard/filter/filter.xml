@@ -5,43 +5,27 @@
         <div class="card-body py-3">
 
           <div class="row align-items-center g-3">
+            <div class="col-12">
+              <!-- IMPORTANTE: quité justify-content-lg-end porque ya no hace falta -->
+              <div class="row g-2">
 
-            <!-- Left: label -->
-            <div class="col-12 col-lg-auto">
-              <div class="d-flex align-items-center gap-2">
-                <span class="text-muted">
-                  <i class="fa fa-calendar"/>
-                </span>
-                <div class="d-flex flex-column">
-                  <span class="fw-semibold lh-1">Rango de fechas</span>
-                  <span class="text-muted small">Filtra KPIs y ventas por sede</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Right: filters -->
-            <div class="col-12 col-lg">
-              <div class="row g-2 justify-content-lg-end">
-
-                <!-- Almacén -->
-                <div class="col-12 col-md-6 col-lg-4 col-xl-4">
-                  <label class="form-label text-muted small mb-1">Almacén</label>
+                <!-- Sede -->
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="form-label text-muted small mb-1">Sede</label>
                   <div class="input-group input-group-lg">
                     <span class="input-group-text">
-                      <i class="fa fa-warehouse"/>
+                      <i class="fa fa-folder-open-o"/>
                     </span>
 
                     <select class="form-select"
-                            t-att-disabled="props.loadingWarehouses"
-                            t-ref="input_warehouse_id">
-
-                      <option value="">Todos</option>
-
-                      <t t-if="props.loadingWarehouses">
-                        <option disabled="disabled">Cargando almacenes...</option>
+                            t-ref="input_warehouse_id"
+                            t-on-change="onChangeWarehouse">
+                      <t t-if="!props.loadingWarehouses">
+                        <option disabled="disabled">No tiene sedes mapeadas...</option>
                       </t>
 
                       <t t-else="">
+                        <option value="allHeadquarters">Todos las sedes</option>
                         <t t-foreach="(props.warehouses || [])" t-as="wh" t-key="wh.id">
                           <option t-att-value="wh.id"><t t-esc="wh.name"/></option>
                         </t>
@@ -50,8 +34,30 @@
                   </div>
                 </div>
 
+                <!-- Diario -->
+                <div class="col-12 col-md-6 col-lg-3">
+                  <label class="form-label text-muted small mb-1">Diario</label>
+                  <div class="input-group input-group-lg">
+                    <span class="input-group-text">
+                      <i class="fa fa-list-alt"/>
+                    </span>
+
+                    <select class="form-select" t-ref="input_journal_id">
+                      <t t-if="!props.loadingJournals">
+                        <option disabled="disabled">Cargando diarios...</option>
+                      </t>
+                      <t t-else="">
+                        <option value="allJournal">Todos los diarios</option>
+                        <t t-foreach="(props.journals || [])" t-as="jour" t-key="jour.id">
+                          <option t-att-value="jour.id"><t t-esc="jour.name"/></option>
+                        </t>
+                      </t>
+                    </select>
+                  </div>
+                </div>
+
                 <!-- Desde -->
-                <div class="col-6 col-md-3 col-lg-3 col-xl-2">
+                <div class="col-6 col-md-3 col-lg-2">
                   <label class="form-label text-muted small mb-1">Desde</label>
                   <div class="input-group input-group-lg">
                     <input type="date"
@@ -65,7 +71,7 @@
                 </div>
 
                 <!-- Hasta -->
-                <div class="col-6 col-md-3 col-lg-3 col-xl-2">
+                <div class="col-6 col-md-3 col-lg-2">
                   <label class="form-label text-muted small mb-1">Hasta</label>
                   <div class="input-group input-group-lg">
                     <input type="date"
@@ -79,17 +85,15 @@
                 </div>
 
                 <!-- Botón -->
-                <div class="col-12 col-lg-auto d-grid align-self-end">
-                  <button class="btn btn-primary btn-lg"
-                          t-on-click="onClickFilter"
-                          t-att-disabled="props.loadingWarehouses">
+                <div class="col-12 col-lg-2 d-grid align-self-end col-lg-auto">
+                  <button class="btn btn-primary btn-lg" t-on-click="onClickFilter">
                     <i class="fa fa-filter me-1"/>
+                    Filtrar
                   </button>
                 </div>
 
               </div>
             </div>
-
           </div>
 
         </div>

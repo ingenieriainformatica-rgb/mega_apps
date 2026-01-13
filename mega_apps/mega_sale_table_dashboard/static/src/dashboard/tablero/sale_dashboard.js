@@ -25,26 +25,26 @@ export default class MegaSaleDashboard extends Component {
         this.statistics = useState(useService("sales.statistics"));
         this.notification = useService("notification");
 
-        // ✅ estado propio del dashboard
         this.state = useState({
             loadingWarehouses: false,
-            warehouses: [],          // [{id, name}]
+            warehouses: [],
+            journals: [],
+            loadingJournals: false
         });
 
         this.loadWarehouses();
     }
 
     async loadWarehouses() {
-        this.state.loadingWarehouses = true;
         try {
             const res = await rpc("/mega_dashboard/get/warehouses", {});
-            // asumiendo {ok:true, items:[{id, name}, ...]}
             this.state.warehouses = res?.items || [];
+            if (this.state.warehouses.length) {
+                this.state.loadingWarehouses = true;
+                this.onChangeWarehouse();
+            }
         } catch (e) {
-            console.error(e);
             this.notification.add("Error cargando almacenes.", { type: "danger" });
-        } finally {
-            this.state.loadingWarehouses = false;
         }
     }
 
@@ -52,6 +52,25 @@ export default class MegaSaleDashboard extends Component {
         const date_from = payload?.date_from;
         const date_to = payload?.date_to;
         const warehouse_id = payload?.warehouse_id || [];
+
+        // lo normal es que journal sea string (id) o null/""
+        const journal_id = payload?.journal_id ?? payload?.journal ?? null;
+
+        const noJournalSelected =
+            journal_id === null ||
+            journal_id === undefined ||
+            journal_id === "" ||
+            journal_id === "0";
+
+        if (noJournalSelected) {
+            this.notification.add("Selecciona un diario (o no hay diarios para esa sede).", { type: "warning" });
+            return;
+        }
+
+        if (warehouse_id == "") {
+            this.notification.add("No tienes sedes registradas, contacta el administrador", { type: "danger" });
+            return;
+        }
 
         if (!date_from || !date_to) {
             this.notification.add("Debes seleccionar 'Desde' y 'Hasta'.", { type: "warning" });
@@ -67,10 +86,28 @@ export default class MegaSaleDashboard extends Component {
         }
 
         if (typeof this.statistics.setRange === "function") {
-            await this.statistics.setRange({ date_from, date_to, warehouse_id });
+            await this.statistics.setRange({ date_from, date_to, warehouse_id, journal_id });
             return;
         }
     }
+
+    // ✅ ONCHANGE (desde DateFilterBar)
+    async onChangeWarehouse(warehouse_id) {
+        try {
+            if (this.state.warehouses.length) {
+                const res = await rpc("/mega_dashboard/get/journals", { warehouse_id });
+                this.state.journals = res?.items || [];
+                if (this.state.journals.length) {
+                    this.state.loadingJournals = true;
+                }else{
+                    this.state.loadingJournals = false;
+                }
+            }
+        } catch (e) {
+            this.notification.add("Error cargando diarios del almacén.", { type: "danger" });
+        }
+    }
+
 }
 
 registry.category("actions").add("realnet_sale_dashboard", MegaSaleDashboard);

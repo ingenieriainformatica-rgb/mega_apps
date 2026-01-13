@@ -11,7 +11,7 @@ _logger = logging.getLogger(__name__)
 JOURNAL_WH_FIELD = "warehouse_ids"
 
 
-def _get_journals_for_warehouses(warehouses):
+def _get_journals_for_warehouses(warehouses, journal_id=None):
     Journal = request.env["account.journal"].sudo()
     company = request.env.company
     wh_ids = warehouses.ids
@@ -21,7 +21,12 @@ def _get_journals_for_warehouses(warehouses):
         ("type", "=", "sale"),
         (JOURNAL_WH_FIELD, "in", wh_ids),
     ]
+
+    if journal_id:
+        domain.append(("id", "=", int(journal_id)))
+
     return Journal.search(domain)
+
 
 
 def _warehouse_id_from_journal(journal):
@@ -151,44 +156,150 @@ def get_sales_by_warehouse_from_invoices(warehouses, date_from=None, date_to=Non
 
     return sales_by_wh, grand, invoices_by_wh, products_out
 
+def _get_kpis_by_warehouse(
+    warehouses,
+    date_from=None,
+    date_to=None,
+    journal_id=None,
+    negate=False,
+):
+    company = request.env.company
+    Move = request.env["account.move"].sudo()
 
-def get_sales_data(date_from=None, date_to=None, warehouse_id=None):
+    journals = _get_journals_for_warehouses(warehouses, journal_id=journal_id)
+    journal_ids = journals.ids
+
+    domain = [
+        ("company_id", "=", company.id),
+        ("state", "not in", ("draft", "cancel")),
+    ]
+
+    # Si hay journals mapeados, filtramos por ellos
+    if journal_ids:
+        domain.append(("journal_id", "in", journal_ids))
+    else:
+        # Si NO hay mapeo, no tiene sentido para tu dashboard
+        return [], {"count": 0, "untaxed": 0.0, "total": 0.0}, defaultdict(list)
+
+    if date_from:
+        domain.append(("invoice_date", ">=", date_from))
+    if date_to:
+        domain.append(("invoice_date", "<=", date_to))
+
+    moves = Move.search(domain)
+
+    sign = -1.0 if negate else 1.0  # ✅ NC en negativo
+
+    bucket = defaultdict(lambda: {"count": 0, "untaxed": 0.0, "total": 0.0})
+    moves_by_wh = defaultdict(list)
+
+    for mv in moves:
+        wh_id = _warehouse_id_from_journal(mv.journal_id)
+
+        bucket[wh_id]["count"] += 1
+        bucket[wh_id]["untaxed"] += (mv.amount_untaxed * sign)
+        bucket[wh_id]["total"] += (mv.amount_total * sign)
+
+        moves_by_wh[wh_id].append({
+            "id": mv.id,
+            "number": mv.name,
+            "partner": mv.partner_id.name or "",
+            "invoice_date": mv.invoice_date.isoformat() if mv.invoice_date else None,
+            "journal_id": mv.journal_id.id,
+            "journal": mv.journal_id.name or "",
+            "concepto": getattr(mv, "x_studio_concepto", "") or "",
+            "move_type": mv.move_type,  # ✅ útil en front
+            "subtotal_untaxed": float(mv.amount_untaxed * sign),
+            "total": float(mv.amount_total * sign),
+        })
+
+    out = []
+    grand = {"count": 0, "untaxed": 0.0, "total": 0.0}
+
+    for wh in warehouses:
+        data = bucket.get(wh.id) or {"count": 0, "untaxed": 0.0, "total": 0.0}
+        out.append({
+            "warehouse_id": wh.id,
+            "warehouse_name": wh.name,
+            "count_invoices": int(data["count"]),
+            "subtotal_untaxed": float(data["untaxed"]),
+            "total_sales": float(data["total"]),
+        })
+        grand["count"] += int(data["count"])
+        grand["untaxed"] += float(data["untaxed"])
+        grand["total"] += float(data["total"])
+
+    return out, {
+        "count_invoices": int(grand["count"]),
+        "subtotal_untaxed": float(grand["untaxed"]),
+        "total_sales": float(grand["total"]),
+    }, moves_by_wh
+
+
+def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=None):
     warehouses = get_active_warehouses(warehouse_id)
+    # 1) JOURNAL SELECCIONADO (para pintar nombre arriba)
+    selected_journal = None
+    if journal_id and journal_id not in ("allJournal", "", None):
+        j = request.env["account.journal"].sudo().browse(int(journal_id))
+        if j.exists():
+            selected_journal = {"id": j.id, "name": j.name}
 
-    sales_by_wh, grand, invoices_by_wh, products_by_wh = get_sales_by_warehouse_from_invoices(
+    # Normalizar journal_id
+    real_journal_id = None
+    if journal_id and journal_id not in ("allJournal", "", None):
+        real_journal_id = int(journal_id)
+
+    _logger.info(f"\n\n Infordata otro -> {date_from} -> {date_to} -> {warehouse_id} -> {journal_id} -> {real_journal_id} \n\n")
+
+    # 2) FACTURAS (out_invoice)
+    sales_by_wh, grand, invoices_by_wh = _get_kpis_by_warehouse(
         warehouses=warehouses,
         date_from=date_from,
         date_to=date_to,
+        journal_id=real_journal_id,
+        negate=False,
     )
 
-    # ✅ 1) invoices_by_warehouse como ARRAY (lista de bodegas con sus facturas)
-    invoices_by_warehouse_arr = []
-    for wh in warehouses:
-        invoices_by_warehouse_arr.append({
-            "warehouse_id": wh.id,
-            "warehouse_name": wh.name,
-            "invoices": invoices_by_wh.get(wh.id, []),  # ✅ siempre list
-        })
+    # 3) NOTAS CRÉDITO (out_refund)  ✅ esto es lo correcto en Odoo
+    refunds_by_wh, grand_refunds, refunds_by_wh_detail = _get_kpis_by_warehouse(
+        warehouses=warehouses,
+        date_from=date_from,
+        date_to=date_to,
+        journal_id=real_journal_id,
+        negate=True,
+    )
 
-    # ✅ 2) invoices_list plano (ARRAY) para UI cuando se filtra por 1 bodega
-    # Si no se filtra bodega, lo dejamos vacío (o puedes concatenar todas si quieres)
+    # 4) invoices_list (solo cuando filtras por una sede)
     invoices_list = []
-    if warehouse_id:
+    if warehouse_id and warehouse_id not in ("allHeadquarters", "", None):
         invoices_list = invoices_by_wh.get(int(warehouse_id), [])
+
+    # 5) refunds_list (solo cuando filtras por una sede)
+    refunds_list = []
+    if warehouse_id and warehouse_id not in ("allHeadquarters", "", None):
+        refunds_list = refunds_by_wh_detail.get(int(warehouse_id), [])
 
     return {
         "ok": True,
         "date_from": date_from,
         "date_to": date_to,
+
+        "selected_journal": selected_journal,
+
         "warehouses": [{"id": wh.id, "name": wh.name} for wh in warehouses],
+
+        # FACTURADO
         "sales_by_warehouse": sales_by_wh,
         "grand": grand,
+        "invoices_by_warehouse": [
+            {"warehouse_id": wh.id, "warehouse_name": wh.name, "invoices": invoices_by_wh.get(wh.id, [])}
+            for wh in warehouses
+        ],
+        "invoices_list": invoices_list,
 
-        # ✅ YA NORMALIZADO PARA FRONT (arrays)
-        "invoices_by_warehouse": invoices_by_warehouse_arr,  # ✅ array
-        "invoices_list": invoices_list,                      # ✅ array
-
-        # productos (ya estaba OK; ojo: products_by_wh ya te lo devuelves como dict con wh_id)
-        "products_by_warehouse": products_by_wh,
+        # NOTAS CRÉDITO
+        "refunds_by_warehouse": refunds_by_wh,
+        "grand_refunds": grand_refunds,
+        "refunds_list": refunds_list,
     }
-

@@ -9,8 +9,10 @@
         warehouses="state.warehouses"
         loadingWarehouses="state.loadingWarehouses"
         onClickFilter.bind="onClickFilter"
+        onChangeWarehouse.bind="onChangeWarehouse"
+        journals="state.journals"
+        loadingJournals="state.loadingJournals"
       />
-
 
       <!-- Layout principal -->
       <div class="container-fluid mb-5 mt-5" t-if="statistics.isReady">

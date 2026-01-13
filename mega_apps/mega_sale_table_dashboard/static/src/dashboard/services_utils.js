@@ -41,7 +41,8 @@ const statisticsService = {
       isReadyWarehouse: false,
       date_from: def.date_from,
       date_to: def.date_to,
-      warehouse_id: null, // ✅ IMPORTANTE: declararlo aquí
+      warehouse_id: null,
+      journal_id: null,
 
       // aquí quedarán tus datos del endpoint
       kpis: {},
@@ -60,29 +61,33 @@ const statisticsService = {
           });
 
           const warehouse_id = this.warehouse_id
+          const journal_id =  this.journal_id
 
           // Persistimos el rango normalizado
           this.date_from = date_from;
           this.date_to = date_to;
 
-          const updates = await rpc("/mega_dashboard/sales/statistics", { date_from, date_to,  warehouse_id});
+          const updates = await rpc("/mega_dashboard/sales/statistics", {date_from, date_to, warehouse_id, journal_id});
           
           Object.assign(this, updates, {
             isReady: true,
             isReadyWarehouse: warehouse_id != 0,
           });
+
+          console.log("Updates -> ", updates)
           
         } catch (e) {
-          console.error("sales.statistics reload error:", e);
+          console.error("sales.statistics reload error:", e); 
         }
       },
 
       // ✅ ESTE ES EL QUE TE FALTA
-      async setRange({ date_from, date_to, warehouse_id }) {
+      async setRange({ date_from, date_to, warehouse_id, journal_id }) {
         const norm = normalizeRange({ date_from, date_to });
         this.date_from = norm.date_from;
         this.date_to = norm.date_to;
         this.warehouse_id = warehouse_id ? Number(warehouse_id) : null;
+        this.journal_id = journal_id ? Number(journal_id) : null
         await this.reload();
       },
 
