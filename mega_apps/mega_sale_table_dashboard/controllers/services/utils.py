@@ -11,30 +11,28 @@ _logger = logging.getLogger(__name__)
 
 def get_active_warehouses(warehouse_id=None):
     Warehouse = request.env["stock.warehouse"].sudo()
-    Journal = request.env["account.journal"].sudo()
     company = request.env.company
-
-    # 1) Warehouses que realmente tienen diarios de venta mapeados
-    mapped_wh_ids = Journal.search([
-        ("company_id", "=", company.id),
-        ("type", "=", JOURNAL_TYPE),
-        (JOURNAL_WH_FIELD, "!=", False),
-    ]).mapped(JOURNAL_WH_FIELD).ids  # flatten de M2M
 
     domain = [
         ("company_id", "=", company.id),
         ("show_in_sales_dashboard", "=", True),
-        ("id", "in", mapped_wh_ids),   # ✅ solo los que tienen diario
     ]
-
-    # 2) Si mandan una sede específica
-    if warehouse_id and warehouse_id != ALL_HEADQUARTERS:
+    if warehouse_id:
         domain.append(("id", "=", int(warehouse_id)))
 
     warehouses = Warehouse.search(domain, order="name")
 
-    _logger.info("Warehouses dashboard (filtered by journals) -> ids=%s", warehouses.ids)
+    # ✅ filtra: solo bodegas que tengan journals sale mapeados
+    Journal = request.env["account.journal"].sudo()
+    mapped_wh_ids = set(Journal.search([
+        ("company_id", "=", company.id),
+        ("type", "=", "sale"),
+        ("warehouse_ids", "!=", False),
+    ]).mapped("warehouse_ids").ids)
+
+    warehouses = warehouses.filtered(lambda w: w.id in mapped_wh_ids)
     return warehouses
+
 
 
 def get_sale_journals(warehouse_id=None):

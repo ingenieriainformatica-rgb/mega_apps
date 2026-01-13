@@ -13,7 +13,7 @@ function formatYMD(d) {
 function last30Days() {
   const to = new Date();
   const from = new Date(to);
-  from.setDate(to.getDate() - 30);
+  from.setDate(to.getDate() - 7);
   return { date_from: formatYMD(from), date_to: formatYMD(to) };
 }
 
@@ -21,10 +21,10 @@ export class DateFilterBar extends Component {
   static template = "mega_dashboard.DateFilterBar";
   static props = {
     onChangeWarehouse: { type: Function, optional: true },
-    onClickFilter: { type: Function },   
-    warehouses: { type: Array, optional: true },         
+    onClickFilter: { type: Function },
+    warehouses: { type: Array, optional: true },
     loadingWarehouses: { type: Boolean, optional: true },
-    journals: { type: Array, optional: true }, 
+    journals: { type: Array, optional: true },
     loadingJournals: { type: Boolean, optional: true },
   };
 
@@ -41,7 +41,7 @@ export class DateFilterBar extends Component {
       date_to: def.date_to,
       warehouse_id: this.warehouse_id.el ? this.warehouse_id.el.value : null,
     });
-    
+
   }
 
   onClickFilter(ev){

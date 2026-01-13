@@ -11,11 +11,11 @@ function formatYMD(dateObj) {
   return `${y}-${m}-${d}`;
 }
 
-// Default: últimos 30 días (puedes cambiar a inicio de mes)
+// Default: últimos 7 días (puedes cambiar a inicio de mes)
 function getDefaultRange() {
   const today = new Date();
   const from = new Date(today);
-  from.setDate(today.getDate() - 30);
+  from.setDate(today.getDate() - 7);
   return { date_from: formatYMD(from), date_to: formatYMD(today) };
 }
 
@@ -30,6 +30,17 @@ function normalizeRange(range) {
     date_from = date_to;
   }
   return { date_from, date_to };
+}
+
+function parseIdOrAll(value) {
+  if (value === null || value === undefined || value === "") return null;
+
+  // si viene un "all..." lo dejamos tal cual
+  if (typeof value === "string" && value.startsWith("all")) return value;
+
+  // si viene número en string ("12") o número (12)
+  const n = Number(value);
+  return Number.isFinite(n) ? n : value; // fallback: deja el string si no es número
 }
 
 const statisticsService = {
@@ -68,16 +79,14 @@ const statisticsService = {
           this.date_to = date_to;
 
           const updates = await rpc("/mega_dashboard/sales/statistics", {date_from, date_to, warehouse_id, journal_id});
-          
+
           Object.assign(this, updates, {
             isReady: true,
             isReadyWarehouse: warehouse_id != 0,
           });
 
-          console.log("Updates -> ", updates)
-          
         } catch (e) {
-          console.error("sales.statistics reload error:", e); 
+          console.error("sales.statistics reload error:", e);
         }
       },
 
@@ -86,15 +95,15 @@ const statisticsService = {
         const norm = normalizeRange({ date_from, date_to });
         this.date_from = norm.date_from;
         this.date_to = norm.date_to;
-        this.warehouse_id = warehouse_id ? Number(warehouse_id) : null;
-        this.journal_id = journal_id ? Number(journal_id) : null
+        this.warehouse_id = parseIdOrAll(warehouse_id);
+        this.journal_id = parseIdOrAll(journal_id);
         await this.reload();
       },
 
-      // startAutoRefresh(ms = 60 * 1000) {
-      //   if (this._timer) clearInterval(this._timer);
-      //   this._timer = setInterval(() => this.reload(), ms);
-      // },
+      startAutoRefresh(ms = 60 * 1000) {
+        if (this._timer) clearInterval(this._timer);
+          this._timer = setInterval(() => this.reload(), ms);
+      },
 
       stopAutoRefresh() {
         if (this._timer) clearInterval(this._timer);
@@ -103,9 +112,9 @@ const statisticsService = {
     });
 
     // Primera carga
-    // statistics.reload();
+    statistics.reload();
     // Auto refresh (recarga con el rango ACTUAL)
-    // statistics.startAutoRefresh(60 * 1000);
+    statistics.startAutoRefresh(60 * 1000);
 
     return statistics;
   },

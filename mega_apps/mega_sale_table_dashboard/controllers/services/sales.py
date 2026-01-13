@@ -1,185 +1,66 @@
 import logging
 from collections import defaultdict
 from odoo.http import request  # type: ignore
-from .utils import (  #type: ignore
-    get_active_warehouses
-)
+from .utils import get_active_warehouses  # type: ignore
 
 _logger = logging.getLogger(__name__)
 
-# Campo nuevo en diarios (m2m)
 JOURNAL_WH_FIELD = "warehouse_ids"
+ALL_HEADQUARTERS = "allHeadquarters"
+ALL_JOURNAL = "allJournal"
+
+
+def _norm_id(value, all_token):
+    """Devuelve None si es vacío o token ALL, si no int()."""
+    if value in ("", None, False, all_token):
+        return None
+    return int(value)
 
 
 def _get_journals_for_warehouses(warehouses, journal_id=None):
+    """Trae diarios de venta mapeados a las bodegas dadas (y opcional filtra 1 diario)."""
     Journal = request.env["account.journal"].sudo()
     company = request.env.company
-    wh_ids = warehouses.ids
 
     domain = [
         ("company_id", "=", company.id),
         ("type", "=", "sale"),
-        (JOURNAL_WH_FIELD, "in", wh_ids),
+        (JOURNAL_WH_FIELD, "in", warehouses.ids),
     ]
-
     if journal_id:
         domain.append(("id", "=", int(journal_id)))
 
-    return Journal.search(domain)
+    return Journal.search(domain, order="name")
 
 
+def _journals_by_warehouse(journals):
+    """Mapa: wh_id -> recordset de journals (asumiendo 1:1 usas el primero; pero aquí soporta N)."""
+    by_wh = defaultdict(lambda: request.env["account.journal"].sudo().browse([]))
+    for j in journals:
+        for wh in getattr(j, JOURNAL_WH_FIELD, request.env["stock.warehouse"].sudo().browse([])):
+            by_wh[wh.id] |= j
+    return by_wh
 
-def _warehouse_id_from_journal(journal):
+
+def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_type=None, negate=False):
     """
-    Como warehouse_ids es m2m, para cuadrar 1:1 con pivot asumimos 1 bodega por diario.
-    Tomamos la primera. Si no hay, 0.
+    KPIs agrupados por (warehouse_id, journal_id).
+    move_type: 'out_invoice' o 'out_refund'
+    negate=True => valores en negativo
     """
-    whs = getattr(journal, JOURNAL_WH_FIELD, False)
-    if not whs:
-        return 0
-    wh = whs[:1]  # first record (recordset de 1)
-    return wh.id if wh else 0
-
-
-def get_sales_by_warehouse_from_invoices(warehouses, date_from=None, date_to=None):
-    """
-    Igual al pivot (account.move):
-    - out_invoice
-    - state NOT IN (draft, cancel)
-    - invoice_date entre fechas
-    - journal_id en diarios mapeados a bodegas
-    - bodega derivada desde journal.warehouse_ids (primera)
-    """
-
-    company = request.env.company
     Move = request.env["account.move"].sudo()
-
-    journals = _get_journals_for_warehouses(warehouses)
-    journal_ids = journals.ids
-
-    domain = [
-        ("company_id", "=", company.id),
-        ("move_type", "=", "out_invoice"),
-        ("state", "not in", ("draft", "cancel")),
-    ]
-
-    if journal_ids:
-        domain.append(("journal_id", "in", journal_ids))
-    else:
-        # Si no hay mapeo diario->bodega, no vas a poder cuadrar con el pivot por "Diario"
-        _logger.warning("No journals mapped to warehouses via %s", JOURNAL_WH_FIELD)
-        # Igual dejamos que consulte todo (si lo prefieres puedes retornar ceros)
-        # return [], {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}, {}, {}
-
-    if date_from:
-        domain.append(("invoice_date", ">=", date_from))
-    if date_to:
-        domain.append(("invoice_date", "<=", date_to))
-
-    # ✅ Para KPI sumamos sobre TODO el set
-    invoices = Move.search(domain)
-
-    # --- buckets KPI ---
-    bucket = defaultdict(lambda: {
-        "count_invoices": 0,
-        "subtotal_untaxed": 0.0,
-        "total_sales": 0.0,
-    })
-
-    # --- detalle facturas por bodega (para UI) ---
-    invoices_by_wh = defaultdict(list)
-
-    # --- productos por bodega (opcional) ---
-    products_by_wh = defaultdict(lambda: defaultdict(lambda: {
-        "product_id": 0,
-        "product_name": "",
-        "qty": 0.0,
-        "subtotal": 0.0,
-        "total": 0.0,
-    }))
-
-    for inv in invoices:
-        wh_id = _warehouse_id_from_journal(inv.journal_id)  # ✅ clave
-
-        bucket[wh_id]["count_invoices"] += 1
-        bucket[wh_id]["subtotal_untaxed"] += inv.amount_untaxed
-        bucket[wh_id]["total_sales"] += inv.amount_total
-
-        # guardar facturas (limit por bodega para no reventar UI)
-        invoices_by_wh[wh_id].append({
-            "id": inv.id,
-            "number": inv.name,  # o inv.payment_reference si usas otro
-            "concepto": inv.x_studio_concepto or "",
-            "partner": inv.partner_id.name or "",
-            "invoice_date": inv.invoice_date.isoformat() if inv.invoice_date else None,
-            "journal": inv.journal_id.name or "",
-            "subtotal_untaxed": float(inv.amount_untaxed),
-            "total": float(inv.amount_total),
-        })
-
-        # productos (opcional)
-        for line in inv.invoice_line_ids:
-            if not line.product_id:
-                continue
-            p = products_by_wh[wh_id][line.product_id.id]
-            p["product_id"] = line.product_id.id
-            p["product_name"] = line.product_id.display_name
-            p["qty"] += float(line.quantity or 0.0)
-            # price_subtotal: sin impuestos, price_total: con impuestos (depende config)
-            p["subtotal"] += float(getattr(line, "price_subtotal", 0.0) or 0.0)
-            p["total"] += float(getattr(line, "price_total", 0.0) or 0.0)
-
-    # salida KPI por bodega (solo bodegas seleccionadas)
-    sales_by_wh = []
-    grand = {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
-
-    for wh in warehouses:
-        data = bucket.get(wh.id) or {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
-        sales_by_wh.append({
-            "warehouse_id": wh.id,
-            "warehouse_name": wh.name,
-            "count_invoices": int(data["count_invoices"]),
-            "subtotal_untaxed": float(data["subtotal_untaxed"]),
-            "total_sales": float(data["total_sales"]),
-        })
-        grand["count_invoices"] += int(data["count_invoices"])
-        grand["subtotal_untaxed"] += float(data["subtotal_untaxed"])
-        grand["total_sales"] += float(data["total_sales"])
-
-    # normalizar products_by_wh a lista top
-    products_out = {}
-    for wh_id, prod_map in products_by_wh.items():
-        arr = list(prod_map.values())
-        # top por total
-        arr.sort(key=lambda x: x["total"], reverse=True)
-        products_out[wh_id] = arr[:20]
-
-    return sales_by_wh, grand, invoices_by_wh, products_out
-
-def _get_kpis_by_warehouse(
-    warehouses,
-    date_from=None,
-    date_to=None,
-    journal_id=None,
-    negate=False,
-):
     company = request.env.company
-    Move = request.env["account.move"].sudo()
 
-    journals = _get_journals_for_warehouses(warehouses, journal_id=journal_id)
-    journal_ids = journals.ids
+    if not journals:
+        return {}, {}
 
     domain = [
         ("company_id", "=", company.id),
         ("state", "not in", ("draft", "cancel")),
+        ("journal_id", "in", journals.ids),
     ]
-
-    # Si hay journals mapeados, filtramos por ellos
-    if journal_ids:
-        domain.append(("journal_id", "in", journal_ids))
-    else:
-        # Si NO hay mapeo, no tiene sentido para tu dashboard
-        return [], {"count": 0, "untaxed": 0.0, "total": 0.0}, defaultdict(list)
+    if move_type:
+        domain.append(("move_type", "=", move_type))
 
     if date_from:
         domain.append(("invoice_date", ">=", date_from))
@@ -187,119 +68,143 @@ def _get_kpis_by_warehouse(
         domain.append(("invoice_date", "<=", date_to))
 
     moves = Move.search(domain)
+    sign = -1.0 if negate else 1.0
 
-    sign = -1.0 if negate else 1.0  # ✅ NC en negativo
+    # KPIs por (wh_id, j_id)
+    kpi = defaultdict(lambda: {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0})
+    detail = defaultdict(list)
 
-    bucket = defaultdict(lambda: {"count": 0, "untaxed": 0.0, "total": 0.0})
-    moves_by_wh = defaultdict(list)
+    # precompute: journal_id -> wh_ids (por si un journal tiene varias bodegas)
+    j_wh_map = {j.id: getattr(j, JOURNAL_WH_FIELD).ids for j in journals}
 
     for mv in moves:
-        wh_id = _warehouse_id_from_journal(mv.journal_id)
+        wh_ids = j_wh_map.get(mv.journal_id.id) or []
+        if not wh_ids:
+            continue
 
-        bucket[wh_id]["count"] += 1
-        bucket[wh_id]["untaxed"] += (mv.amount_untaxed * sign)
-        bucket[wh_id]["total"] += (mv.amount_total * sign)
+        # Si tu regla es 1:1, usa solo la primera bodega:
+        wh_id = wh_ids[0]
 
-        moves_by_wh[wh_id].append({
+        key = (wh_id, mv.journal_id.id)
+        kpi[key]["count_invoices"] += 1
+        kpi[key]["subtotal_untaxed"] += float(mv.amount_untaxed) * sign
+        kpi[key]["total_sales"] += float(mv.amount_total) * sign
+
+        detail[key].append({
             "id": mv.id,
             "number": mv.name,
             "partner": mv.partner_id.name or "",
             "invoice_date": mv.invoice_date.isoformat() if mv.invoice_date else None,
             "journal_id": mv.journal_id.id,
             "journal": mv.journal_id.name or "",
+            "move_type": mv.move_type,
             "concepto": getattr(mv, "x_studio_concepto", "") or "",
-            "move_type": mv.move_type,  # ✅ útil en front
-            "subtotal_untaxed": float(mv.amount_untaxed * sign),
-            "total": float(mv.amount_total * sign),
+            "subtotal_untaxed": float(mv.amount_untaxed) * sign,
+            "total": float(mv.amount_total) * sign,
         })
 
-    out = []
-    grand = {"count": 0, "untaxed": 0.0, "total": 0.0}
-
-    for wh in warehouses:
-        data = bucket.get(wh.id) or {"count": 0, "untaxed": 0.0, "total": 0.0}
-        out.append({
-            "warehouse_id": wh.id,
-            "warehouse_name": wh.name,
-            "count_invoices": int(data["count"]),
-            "subtotal_untaxed": float(data["untaxed"]),
-            "total_sales": float(data["total"]),
-        })
-        grand["count"] += int(data["count"])
-        grand["untaxed"] += float(data["untaxed"])
-        grand["total"] += float(data["total"])
-
-    return out, {
-        "count_invoices": int(grand["count"]),
-        "subtotal_untaxed": float(grand["untaxed"]),
-        "total_sales": float(grand["total"]),
-    }, moves_by_wh
+    return kpi, detail
 
 
 def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=None):
-    warehouses = get_active_warehouses(warehouse_id)
-    # 1) JOURNAL SELECCIONADO (para pintar nombre arriba)
-    selected_journal = None
-    if journal_id and journal_id not in ("allJournal", "", None):
-        j = request.env["account.journal"].sudo().browse(int(journal_id))
-        if j.exists():
-            selected_journal = {"id": j.id, "name": j.name}
+    # 1) Normalizar tokens ALL
+    wh_id = _norm_id(warehouse_id, ALL_HEADQUARTERS)   # None => todas sedes
+    j_id = _norm_id(journal_id, ALL_JOURNAL)           # None => todos diarios
 
-    # Normalizar journal_id
-    real_journal_id = None
-    if journal_id and journal_id not in ("allJournal", "", None):
-        real_journal_id = int(journal_id)
+    # 2) Traer bodegas activas (si wh_id None => todas)
+    warehouses = get_active_warehouses(wh_id)
 
-    _logger.info(f"\n\n Infordata otro -> {date_from} -> {date_to} -> {warehouse_id} -> {journal_id} -> {real_journal_id} \n\n")
+    # 3) Traer diarios mapeados a esas bodegas (si j_id => solo ese)
+    journals = _get_journals_for_warehouses(warehouses, journal_id=j_id)
 
-    # 2) FACTURAS (out_invoice)
-    sales_by_wh, grand, invoices_by_wh = _get_kpis_by_warehouse(
+    # 4) Calcular KPIs por (warehouse, journal)
+    inv_kpi, inv_detail = _get_kpis_grouped(
         warehouses=warehouses,
+        journals=journals,
         date_from=date_from,
         date_to=date_to,
-        journal_id=real_journal_id,
+        move_type="out_invoice",
         negate=False,
     )
 
-    # 3) NOTAS CRÉDITO (out_refund)  ✅ esto es lo correcto en Odoo
-    refunds_by_wh, grand_refunds, refunds_by_wh_detail = _get_kpis_by_warehouse(
+    ref_kpi, ref_detail = _get_kpis_grouped(
         warehouses=warehouses,
+        journals=journals,
         date_from=date_from,
         date_to=date_to,
-        journal_id=real_journal_id,
-        negate=True,
+        move_type="out_refund",
+        negate=True,  # NC en negativo
     )
 
-    # 4) invoices_list (solo cuando filtras por una sede)
-    invoices_list = []
-    if warehouse_id and warehouse_id not in ("allHeadquarters", "", None):
-        invoices_list = invoices_by_wh.get(int(warehouse_id), [])
+    # 5) Armar respuesta por sede -> diarios
+    groups = []
+    grand = {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
+    grand_refunds = {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
 
-    # 5) refunds_list (solo cuando filtras por una sede)
-    refunds_list = []
-    if warehouse_id and warehouse_id not in ("allHeadquarters", "", None):
-        refunds_list = refunds_by_wh_detail.get(int(warehouse_id), [])
+    for wh in warehouses:
+        wh_journals = [j for j in journals if wh.id in getattr(j, JOURNAL_WH_FIELD).ids]
+        wh_block = {"warehouse": {"id": wh.id, "name": wh.name}, "journals": []}
+
+        for j in wh_journals:
+            key = (wh.id, j.id)
+            f = inv_kpi.get(key, {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0})
+            r = ref_kpi.get(key, {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0})
+
+            # sumar grands
+            grand["count_invoices"] += int(f["count_invoices"])
+            grand["subtotal_untaxed"] += float(f["subtotal_untaxed"])
+            grand["total_sales"] += float(f["total_sales"])
+
+            grand_refunds["count_invoices"] += int(r["count_invoices"])
+            grand_refunds["subtotal_untaxed"] += float(r["subtotal_untaxed"])
+            grand_refunds["total_sales"] += float(r["total_sales"])
+
+            # detalle (puedes limitar para UI)
+            moves = (inv_detail.get(key, []) + ref_detail.get(key, []))
+            moves.sort(key=lambda x: x["invoice_date"] or "", reverse=True)
+            moves = moves[:300]  # límite recomendado
+
+            has_invoices = int(f["count_invoices"]) > 0
+            has_credit_notes = int(r["count_invoices"]) > 0
+
+            wh_block["journals"].append({
+                "journal": {"id": j.id, "name": j.name},
+                # ✅ flags
+                # "has_invoices": has_invoices,
+                # "has_credit_notes": has_credit_notes,
+                "is_credit_note_journal": has_credit_notes and not has_invoices,  # opcional: "solo NC"
+
+                "facturado": {
+                    "count_invoices": int(f["count_invoices"]),
+                    "subtotal_untaxed": float(f["subtotal_untaxed"]),
+                    "total_sales": float(f["total_sales"]),
+                },
+                "notas_credito": {
+                    "count_invoices": int(r["count_invoices"]),
+                    "subtotal_untaxed": float(r["subtotal_untaxed"]),
+                    "total_sales": float(r["total_sales"]),
+                },
+                "moves": moves,
+            })
+
+        # si quieres, evita sedes sin diarios mapeados
+        if wh_block["journals"]:
+            groups.append(wh_block)
+
+    selected_journal = None
+    if j_id:
+        j = request.env["account.journal"].sudo().browse(j_id)
+        if j.exists():
+            selected_journal = {"id": j.id, "name": j.name}
 
     return {
         "ok": True,
         "date_from": date_from,
         "date_to": date_to,
-
         "selected_journal": selected_journal,
-
-        "warehouses": [{"id": wh.id, "name": wh.name} for wh in warehouses],
-
-        # FACTURADO
-        "sales_by_warehouse": sales_by_wh,
+        "warehouses": [{"id": w.id, "name": w.name} for w in warehouses],
+        "journals": [{"id": j.id, "name": j.name} for j in journals],
         "grand": grand,
-        "invoices_by_warehouse": [
-            {"warehouse_id": wh.id, "warehouse_name": wh.name, "invoices": invoices_by_wh.get(wh.id, [])}
-            for wh in warehouses
-        ],
-        "invoices_list": invoices_list,
-
-        # NOTAS CRÉDITO
-        "refunds_by_warehouse": refunds_by_wh,
         "grand_refunds": grand_refunds,
-        "refunds_list": refunds_list,
+        "groups": groups,  # ✅ esto es lo que necesitas para pintar “Sede -> diarios”
     }

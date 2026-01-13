@@ -20,12 +20,12 @@
 
           <!-- Columna 1 -->
           <div class="col-12 col-lg-4">
-            <Informe data="statistics.sales.sales_by_warehouse" grand="statistics.sales.grand" option="statistics.isReadyWarehouse"/>
+            <Informe data="statistics.sales.groups" grand="statistics.sales.grand" option="statistics.isReadyWarehouse"/>
           </div>
 
           <!-- Columna 2 (placeholder) -->
           <div class="col-12 col-lg-8">
-            <InvoiceList invoicesList="statistics.sales.invoices_by_warehouse"/>
+            <InvoiceList invoicesList="statistics.sales.groups"/>
           </div>
 
         </div>

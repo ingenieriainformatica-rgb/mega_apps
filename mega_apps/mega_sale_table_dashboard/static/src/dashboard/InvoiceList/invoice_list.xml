@@ -1,64 +1,97 @@
 <templates xml:space="preserve">
   <t t-name="mega_dashboard.InvoiceList">
+
     <t t-set="groups" t-value="invoices || []"/>
 
     <t t-if="!groups.length">
       <div class="text-muted text-center py-3">Sin datos para el filtro seleccionado</div>
     </t>
 
-    <t t-foreach="groups" t-as="g" t-key="g.warehouse_id">
-      <div class="card border-0 shadow-sm mb-3">
+    <!-- ✅ Por sede -->
+    <t t-foreach="groups" t-as="g" t-key="g.warehouse.id">
+      <div class="card border-0 shadow-sm mb-3 rounded-4 overflow-hidden">
 
         <div class="card-header d-flex justify-content-between align-items-center">
           <div>
-            <strong><t t-esc="g.warehouse_name"/></strong>
-            <div class="text-muted small">Facturas relacionadas</div>
+            <strong><t t-esc="g.warehouse.name"/></strong>
+            <div class="text-muted small">Movimientos por diario</div>
           </div>
 
           <span class="badge bg-secondary">
-            <t t-esc="(g.invoices || []).length"/> facturas
+            <t t-esc="(g.journals || []).length"/> diarios
           </span>
         </div>
 
-        <div class="table-responsive">
-          <table class="table table-sm table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th style="width:110px">Factura</th>
-                <th style="min-width:220px">Cliente</th>
-                <th style="min-width:220px">Concepto</th>
-                <th style="width:110px">Fecha</th>
-                <th class="text-end" style="width:140px">Subtotal</th>
-                <th class="text-end" style="width:140px">Total</th>
-              </tr>
-            </thead>
+        <!-- ✅ Por diario -->
+        <t t-foreach="(g.journals || [])" t-as="j" t-key="j.journal.id">
+          <t t-set="rows" t-value="j.moves || []"/>
 
-            <tbody>
-              <t t-if="!(g.invoices || []).length">
-                <tr>
-                  <td colspan="6" class="text-muted text-center py-3">
-                    Sin facturas para esta sede
-                  </td>
-                </tr>
-              </t>
+          <div class="px-3 pt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="fw-semibold">
+                <t t-esc="j.journal.name"/>
+                <t t-if="j.is_credit_note_journal">
+                  <span class="badge rounded-pill bg-light text-dark border ms-2">Nota crédito</span>
+                </t>
+                <t t-else="">
+                  <span class="badge rounded-pill bg-light text-dark border ms-2">Factura</span>
+                </t>
+              </div>
 
-              <t t-foreach="(g.invoices || [])" t-as="inv" t-key="inv.id">
-                <tr class="cursor-pointer"
-                    t-on-click="openInvoice"
-                    t-att-data-id="inv.id"
-                    title="Abrir factura">
-                  <td><t t-esc="inv.number"/></td>
-                  <td><t t-esc="inv.partner"/></td>
-                  <td><t t-esc="inv.concepto"/></td>
-                  <td><t t-esc="inv.invoice_date"/></td>
-                  <td class="text-end"><t t-esc="inv.subtotal_untaxed"/></td>
-                  <td class="text-end"><t t-esc="inv.total"/></td>
-                </tr>
-              </t>
-            </tbody>
-          </table>
-        </div>
+              <span class="badge bg-light text-dark border">
+                <t t-esc="rows.length"/> registros
+              </span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width:120px">Número</th>
+                    <th style="min-width:220px">Cliente</th>
+                    <th style="min-width:260px">Concepto</th>
+                    <th style="width:120px">Fecha</th>
+                    <th class="text-end" style="width:160px">Subtotal</th>
+                    <th class="text-end" style="width:160px">Total</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <t t-if="!rows.length">
+                    <tr>
+                      <td colspan="6" class="text-muted text-center py-3">
+                        Sin movimientos para este diario
+                      </td>
+                    </tr>
+                  </t>
+
+                  <t t-foreach="rows" t-as="inv" t-key="inv.id">
+                    <tr class="cursor-pointer"
+                        t-on-click="openInvoice"
+                        t-att-data-id="inv.id"
+                        title="Abrir documento">
+                      <td><t t-esc="inv.number"/></td>
+                      <td class="text-truncate" style="max-width:260px;"><t t-esc="inv.partner"/></td>
+                      <td class="text-truncate" style="max-width:340px;"><t t-esc="inv.concepto"/></td>
+                      <td><t t-esc="inv.invoice_date"/></td>
+                      <td class="text-end">
+                        $ <t t-esc="(inv.subtotal_untaxed || 0).toLocaleString()"/>
+                      </td>
+                      <td class="text-end">
+                        $ <t t-esc="(inv.total || 0).toLocaleString()"/>
+                      </td>
+                    </tr>
+                  </t>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pb-3"></div>
+          </div>
+        </t>
+
       </div>
     </t>
+
   </t>
 </templates>
