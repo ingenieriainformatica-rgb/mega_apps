@@ -74,16 +74,17 @@
                         </div>
 
                         <div class="fw-bold" style="font-size:1.35rem;">
-                          $ <t t-esc="(((kpi &amp;&amp; kpi.total_sales) || 0)).toLocaleString()"/>
+
+                          <span class="fw-semibold">
+                            Subtotal:
+                            $ <t t-esc="(((kpi &amp;&amp; kpi.subtotal_untaxed) || 0)).toLocaleString()"/>
+                          </span>
                         </div>
 
                         <!-- ✅ Subtotal + conteo MÁS visibles -->
                         <div class="mt-2 d-flex align-items-center gap-2 flex-wrap"
                             style="font-size: 0.98rem; color:#1A3C6B;">
-                          <span class="fw-semibold">
-                            Subtotal:
-                            $ <t t-esc="(((kpi &amp;&amp; kpi.subtotal_untaxed) || 0)).toLocaleString()"/>
-                          </span>
+                            $ <t t-esc="(((kpi &amp;&amp; kpi.total_sales) || 0)).toLocaleString()"/>
 
                           <span style="opacity:.35;">•</span>
 
