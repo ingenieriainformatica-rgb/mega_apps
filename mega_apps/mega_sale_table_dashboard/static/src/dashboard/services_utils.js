@@ -80,6 +80,8 @@ const statisticsService = {
 
           const updates = await rpc("/mega_dashboard/sales/statistics", {date_from, date_to, warehouse_id, journal_id});
 
+          console.log("UPDATES -> ", updates)
+
           Object.assign(this, updates, {
             isReady: true,
             isReadyWarehouse: warehouse_id != 0,
@@ -90,15 +92,21 @@ const statisticsService = {
         }
       },
 
-      // ✅ ESTE ES EL QUE TE FALTA
       async setRange({ date_from, date_to, warehouse_id, journal_id }) {
         const norm = normalizeRange({ date_from, date_to });
         this.date_from = norm.date_from;
         this.date_to = norm.date_to;
-        this.warehouse_id = parseIdOrAll(warehouse_id);
-        this.journal_id = parseIdOrAll(journal_id);
+
+        // Normaliza IDs (si viene "0" -> null)
+        const wh = parseIdOrAll(warehouse_id);
+        const jr = parseIdOrAll(journal_id);
+
+        this.warehouse_id = (wh === 0) ? null : wh;
+        this.journal_id = (jr === 0) ? null : jr;
+
         await this.reload();
       },
+
 
       startAutoRefresh(ms = 60 * 1000) {
         if (this._timer) clearInterval(this._timer);
@@ -112,9 +120,9 @@ const statisticsService = {
     });
 
     // Primera carga
-    statistics.reload();
+    // statistics.reload();
     // Auto refresh (recarga con el rango ACTUAL)
-    statistics.startAutoRefresh(60 * 1000);
+    // statistics.startAutoRefresh(60 * 1000);
 
     return statistics;
   },

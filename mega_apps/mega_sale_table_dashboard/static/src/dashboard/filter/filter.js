@@ -13,7 +13,7 @@ function formatYMD(d) {
 function last30Days() {
   const to = new Date();
   const from = new Date(to);
-  from.setDate(to.getDate() - 7);
+  from.setDate(to.getDate());
   return { date_from: formatYMD(from), date_to: formatYMD(to) };
 }
 
