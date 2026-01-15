@@ -45,7 +45,7 @@
         'views/fleet_vehicle_model_view.xml',
         'views/dashboard.xml',
         'views/templates.xml',
-        'views/fleet_vehicle_view.xml',
+        # 'views/fleet_vehicle_view.xml',
         'report/fleet_repair_label_view.xml',
         'report/fleet_repair_label_menu.xml',
         'report/fleet_repair_receipt_view.xml',

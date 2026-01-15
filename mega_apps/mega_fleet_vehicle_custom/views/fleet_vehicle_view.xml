@@ -1,0 +1,15 @@
+<odoo>
+    <record id="view_fleet_vehicle_form_engine_number" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.engine.number</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insertar Número de motor antes de Número de chasis (vin_sn) -->
+            <xpath expr="//field[@name='vin_sn']" position="before">
+                <field name="engine_number"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
