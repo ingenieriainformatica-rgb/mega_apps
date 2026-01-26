@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- PRODUCTO PLANTILLA (product.template) -->
+    <record id="product_tmpl_hide_update_qty" model="ir.ui.view">
+        <field name="name">product.template.hide.update.qty</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_update_quantity_on_hand']" position="attributes">
+                <attribute name="groups">mega_stock_security.group_inventory_adjustments</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- VARIANTE (product.product) -->
+    <record id="product_var_hide_update_qty" model="ir.ui.view">
+        <field name="name">product.product.hide.update.qty</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_update_quantity_on_hand']" position="attributes">
+                <attribute name="groups">mega_stock_security.group_inventory_adjustments</attribute>
+            </xpath>
+        </field>
+    </record>
+
+
+</odoo>

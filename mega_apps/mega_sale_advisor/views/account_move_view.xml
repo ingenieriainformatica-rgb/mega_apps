@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_move_form_inherit_concepto_edit" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.mega.concepto.always.readonly</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="studio_customization.odoo_studio_account__d2366bcb-bf6f-450f-a35e-d0c145b61f2f"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='x_studio_concepto']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

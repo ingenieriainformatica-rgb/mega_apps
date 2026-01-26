@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Menú: Inventario físico (Ajustes) -->
+    <record id="stock.menu_action_inventory_tree" model="ir.ui.menu">
+        <field name="groups_id"
+               eval="[(6, 0, [ref('mega_stock_security.group_inventory_adjustments')])]"/>
+    </record>
+
+</odoo>

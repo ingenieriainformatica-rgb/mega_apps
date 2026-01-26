@@ -373,7 +373,7 @@ class FleetRepair(models.Model):
         if self.env.user.has_group('base.group_user'):
             return self.env["ir.actions.actions"]._for_xml_id("car_repair_industry.fleet_repair_dashboard")
         return self.env["ir.actions.actions"]._for_xml_id("car_repair_industry.fleet_repair_dashboard")
-    
+
     def write(self, vals):
         images_changed = "images_ids" in vals and not self.env.is_superuser()
 
@@ -549,6 +549,7 @@ class FleetRepairLine(models.Model):
             addr['vin_sn'] = fleet.vin_sn
             addr['fuel_type'] = fleet.fuel_type
             addr['model_id'] = fleet.model_id.id
+            addr['car_year'] = fleet.model_year
         return {'value': addr}
 
 

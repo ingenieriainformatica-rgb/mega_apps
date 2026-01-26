@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_form_inherit_advisor" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.mega.sale.advisor</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Lo insertamos cerca del vendedor (user_id) -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="advisor_id"
+                    options="{'no_create': True, 'no_create_edit': True}"
+                    placeholder="Selecciona un asesor..."
+                    readonly="state == 'sale'"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>
