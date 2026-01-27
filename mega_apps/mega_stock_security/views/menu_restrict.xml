@@ -1,10 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
     <!-- Menú: Inventario físico (Ajustes) -->
     <record id="stock.menu_action_inventory_tree" model="ir.ui.menu">
-        <field name="groups_id"
-               eval="[(6, 0, [ref('mega_stock_security.group_inventory_adjustments')])]"/>
+        <field name="groups_id" eval="[(6, 0, [ref('mega_stock_security.group_inventory_adjustments')])]"/>
+    </record>
+
+    <!-- Restringe la acción Server (ID 700) que abre el ajuste de inventario -->
+    <record id="stock.action_view_inventory_tree" model="ir.actions.server">
+        <field name="groups_id" eval="[(6, 0, [ref('mega_stock_security.group_inventory_adjustments')])]"/>
+    </record>
+
+    <record id="view_stock_report_hide_inventory_pencil" model="ir.ui.view">
+        <field name="name">mega.stock.report.hide.inventory.pencil</field>
+
+        <!-- OJO: usa el modelo REAL del parent (no el "product.product.stock.list") -->
+        <field name="model">product.product</field>
+
+        <!-- Esta es la vista que tú ves en el debug: stock.product_product_stock_tree -->
+        <field name="inherit_id" ref="stock.product_product_stock_tree"/>
+
+        <field name="arch" type="xml">
+            <!-- Botón lápiz "Ajuste de inventario" (action 700) -->
+            <xpath expr="//button[@type='action' and @name='700']" position="attributes">
+                <attribute name="groups">mega_stock_security.group_inventory_adjustments</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mega_stock_quant_tree_create_on_group" model="ir.ui.view">
+        <field name="name">mega.stock.quant.tree.create.on.group</field>
+        <field name="model">stock.quant</field>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree_editable"/>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="create">0</attribute>
+            </xpath>
+        </field>
     </record>
 
 </odoo>
