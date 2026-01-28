@@ -39,4 +39,30 @@
         </field>
     </record>
 
+    <record id="mega_hide_open_button_inventory_overview" model="ir.ui.view">
+        <field name="name">mega.stock.picking.type.kanban.hide.open</field>
+        <field name="model">stock.picking.type</field>
+        <field name="inherit_id" ref="stock.stock_picking_type_kanban"/>  <!-- OJO: este xmlid debes confirmarlo -->
+        <field name="arch" type="xml">
+            <!-- Reemplazamos el botón Abrir -->
+            <xpath expr="//button[@type='object' and @name='get_action_picking_tree_ready']" position="replace">
+                <!-- Para TODO lo que NO sea Recepciones (incoming): mostrar normal -->
+                <t t-if="record.code.raw_value != 'incoming'">
+                    <button type="object"
+                            name="get_action_picking_tree_ready"
+                            string="Abrir"
+                            class="btn btn-primary"/>
+                    </t>
+                <!-- Para Recepciones (incoming): solo grupo -->
+                <t t-else="">
+                    <button type="object"
+                            name="get_action_picking_tree_ready"
+                            string="Abrir"
+                            class="btn btn-primary"
+                            groups="mega_stock_security.group_inventory_adjustments"/>
+                </t>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

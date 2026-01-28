@@ -6,7 +6,7 @@
     "website": "https://mega.realnet.com.co/",
     "sequence": -150,
     "category": "MegaTecnicentro/InventorySecurity",
-    "depends": ["stock"],
+    "depends": ["stock", "product"],
     "data": [
         "security/security.xml",
         "views/menu_restrict.xml",
