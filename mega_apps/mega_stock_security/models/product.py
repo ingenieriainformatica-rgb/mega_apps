@@ -5,6 +5,7 @@ from odoo.exceptions import AccessError  # type: ignore
 _logger = logging.getLogger(__name__)
 
 GROUP = "mega_stock_security.group_inventory_adjustments"
+GROUP_SALES = "mega_stock_security.group_inventory_adjustments_sales"
 
 
 class ProductProduct(models.Model):
@@ -22,7 +23,7 @@ class StockQuant(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        if not self.env.user.has_group(GROUP):
+        if not self.env.user.has_group(GROUP_SALES):
             raise AccessError("No tiene permisos para crear/ajustar existencias (stock.quant).")
         return super().create(vals_list)
 
@@ -30,6 +31,6 @@ class StockQuant(models.Model):
         # si quieres permitir ediciones “inofensivas”, filtra aquí.
         # Por ejemplo, bloquear solo campos sensibles:
         campos_sensibles = {"inventory_quantity", "quantity", "reserved_quantity", "inventory_diff_quantity"}
-        if campos_sensibles.intersection(vals.keys()) and not self.env.user.has_group(GROUP):
+        if campos_sensibles.intersection(vals.keys()) and not self.env.user.has_group(GROUP_SALES):
             raise AccessError("No tiene permisos para modificar cantidades de inventario.")
         return super().write(vals)
