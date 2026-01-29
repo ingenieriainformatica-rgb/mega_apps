@@ -97,8 +97,8 @@
                             title="Abrir documento"
                             style="cursor:pointer;">
                           <td class="fw-semibold"><t t-esc="inv.number"/></td>
-                          <td class="text-truncate" style="max-width:260px;"><t t-esc="inv.partner"/></td>
-                          <td class="text-truncate" style="max-width:380px;"><t t-esc="inv.concepto"/></td>
+                          <td class="text-truncate"><t t-esc="inv.partner"/></td>
+                          <td class="text-truncate"><t t-esc="inv.concepto"/></td>
                           <td class="text-muted"><t t-esc="inv.invoice_date"/></td>
                           <td class="text-end">
                             $ <t t-esc="(inv.subtotal_untaxed || 0).toLocaleString()"/>

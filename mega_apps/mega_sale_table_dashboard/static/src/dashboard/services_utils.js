@@ -80,7 +80,7 @@ const statisticsService = {
 
           const updates = await rpc("/mega_dashboard/sales/statistics", {date_from, date_to, warehouse_id, journal_id});
 
-          console.log("UPDATES -> ", updates)
+          // console.log("UPDATES -> ", updates)
 
           Object.assign(this, updates, {
             isReady: true,

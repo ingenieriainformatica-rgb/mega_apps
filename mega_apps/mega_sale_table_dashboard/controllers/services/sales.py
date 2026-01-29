@@ -33,15 +33,6 @@ def _get_journals_for_warehouses(warehouses, journal_id=None):
     return Journal.search(domain, order="name")
 
 
-def _journals_by_warehouse(journals):
-    """Mapa: wh_id -> recordset de journals (asumiendo 1:1 usas el primero; pero aquí soporta N)."""
-    by_wh = defaultdict(lambda: request.env["account.journal"].sudo().browse([]))
-    for j in journals:
-        for wh in getattr(j, JOURNAL_WH_FIELD, request.env["stock.warehouse"].sudo().browse([])):
-            by_wh[wh.id] |= j
-    return by_wh
-
-
 def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_type=None, negate=False):
     """
     KPIs agrupados por (warehouse_id, journal_id).
@@ -61,7 +52,6 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
     ]
     if move_type:
         domain.append(("move_type", "=", move_type))
-
     if date_from:
         domain.append(("invoice_date", ">=", date_from))
     if date_to:
@@ -70,11 +60,9 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
     moves = Move.search(domain)
     sign = -1.0 if negate else 1.0
 
-    # KPIs por (wh_id, j_id)
     kpi = defaultdict(lambda: {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0})
     detail = defaultdict(list)
 
-    # precompute: journal_id -> wh_ids (por si un journal tiene varias bodegas)
     j_wh_map = {j.id: getattr(j, JOURNAL_WH_FIELD).ids for j in journals}
 
     for mv in moves:
@@ -82,10 +70,9 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
         if not wh_ids:
             continue
 
-        # Si tu regla es 1:1, usa solo la primera bodega:
-        wh_id = wh_ids[0]
-
+        wh_id = wh_ids[0]  # regla 1:1 (tomas la primera)
         key = (wh_id, mv.journal_id.id)
+
         kpi[key]["count_invoices"] += 1
         kpi[key]["subtotal_untaxed"] += float(mv.amount_untaxed) * sign
         kpi[key]["total_sales"] += float(mv.amount_total) * sign
@@ -106,37 +93,85 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
     return kpi, detail
 
 
+def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_type=None, negate=False):
+    """
+    Totales agrupados por (warehouse_id, journal_id, concepto).
+    Devuelve dict: (wh_id, journal_id) -> { concepto -> {count, subtotal_untaxed, total_sales} }
+    """
+    Move = request.env["account.move"].sudo()
+
+    if not journals:
+        return {}
+
+    domain = [
+        ("company_id", "=", request.env.company.id),
+        ("state", "not in", ("draft", "cancel")),
+        ("journal_id", "in", journals.ids),
+    ]
+    if move_type:
+        domain.append(("move_type", "=", move_type))
+    if date_from:
+        domain.append(("invoice_date", ">=", date_from))
+    if date_to:
+        domain.append(("invoice_date", "<=", date_to))
+
+    sign = -1.0 if negate else 1.0
+
+    rows = Move.read_group(
+        domain=domain,
+        fields=["amount_untaxed:sum", "amount_total:sum", "id:count", "journal_id", "x_studio_concepto"],
+        groupby=["journal_id", "x_studio_concepto"],
+        lazy=False,
+    )
+
+    # journal_id -> wh_id (primera bodega)
+    j_wh_map = {j.id: (getattr(j, JOURNAL_WH_FIELD).ids or [None])[0] for j in journals}
+
+    out = defaultdict(lambda: defaultdict(lambda: {"count": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}))
+
+    for r in rows:
+        j_id = r["journal_id"][0] if r.get("journal_id") else None
+        if not j_id:
+            continue
+
+        wh_id = j_wh_map.get(j_id)
+        if not wh_id:
+            continue
+
+        concepto = (r.get("x_studio_concepto") or "").strip() or "SIN CONCEPTO"
+        key = (wh_id, j_id)
+
+        cnt = int(r.get("__count", 0) or r.get("id_count", 0) or 0)
+        untaxed = float(r.get("amount_untaxed", 0.0) or r.get("amount_untaxed_sum", 0.0) or 0.0)
+        total = float(r.get("amount_total", 0.0) or r.get("amount_total_sum", 0.0) or 0.0)
+
+        out[key][concepto]["count"] += cnt
+        out[key][concepto]["subtotal_untaxed"] += untaxed * sign
+        out[key][concepto]["total_sales"] += total * sign
+
+    return out
+
+
 def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=None):
     # 1) Normalizar tokens ALL
     wh_id = _norm_id(warehouse_id, ALL_HEADQUARTERS)   # None => todas sedes
     j_id = _norm_id(journal_id, ALL_JOURNAL)           # None => todos diarios
 
-    # 2) Traer bodegas activas (si wh_id None => todas)
+    # 2) Traer bodegas activas
     warehouses = get_active_warehouses(wh_id)
 
-    # 3) Traer diarios mapeados a esas bodegas (si j_id => solo ese)
+    # 3) Diarios por bodegas
     journals = _get_journals_for_warehouses(warehouses, journal_id=j_id)
 
-    # 4) Calcular KPIs por (warehouse, journal)
-    inv_kpi, inv_detail = _get_kpis_grouped(
-        warehouses=warehouses,
-        journals=journals,
-        date_from=date_from,
-        date_to=date_to,
-        move_type="out_invoice",
-        negate=False,
-    )
+    # 4) KPIs por (warehouse, journal)
+    inv_kpi, inv_detail = _get_kpis_grouped(warehouses, journals, date_from, date_to, "out_invoice", negate=False)
+    ref_kpi, ref_detail = _get_kpis_grouped(warehouses, journals, date_from, date_to, "out_refund", negate=True)
 
-    ref_kpi, ref_detail = _get_kpis_grouped(
-        warehouses=warehouses,
-        journals=journals,
-        date_from=date_from,
-        date_to=date_to,
-        move_type="out_refund",
-        negate=True,  # NC en negativo
-    )
+    # ✅ 5) Totales por concepto (FACTURAS y NC)
+    inv_concept = _get_concept_totals_grouped(journals, date_from, date_to, "out_invoice", negate=False)
+    ref_concept = _get_concept_totals_grouped(journals, date_from, date_to, "out_refund", negate=True)
 
-    # 5) Armar respuesta por sede -> diarios
+    # 6) Armar respuesta por sede -> diarios
     groups = []
     grand = {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
     grand_refunds = {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
@@ -147,6 +182,7 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
 
         for j in wh_journals:
             key = (wh.id, j.id)
+
             f = inv_kpi.get(key, {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0})
             r = ref_kpi.get(key, {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0})
 
@@ -159,20 +195,36 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
             grand_refunds["subtotal_untaxed"] += float(r["subtotal_untaxed"])
             grand_refunds["total_sales"] += float(r["total_sales"])
 
-            # detalle (puedes limitar para UI)
+            # detalle
             moves = (inv_detail.get(key, []) + ref_detail.get(key, []))
             moves.sort(key=lambda x: x["invoice_date"] or "", reverse=True)
-            # moves = moves[:300]  # límite recomendado
 
             has_invoices = int(f["count_invoices"]) > 0
             has_credit_notes = int(r["count_invoices"]) > 0
 
+            # ✅ merge de conceptos (facturas + NC)
+            conceptos = {}
+
+            for name, v in inv_concept.get(key, {}).items():
+                conceptos[name] = {
+                    "count": int(v["count"]),
+                    "subtotal_untaxed": float(v["subtotal_untaxed"]),
+                    "total_sales": float(v["total_sales"]),
+                }
+
+            for name, v in ref_concept.get(key, {}).items():
+                if name not in conceptos:
+                    conceptos[name] = {"count": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
+                conceptos[name]["count"] += int(v["count"])
+                conceptos[name]["subtotal_untaxed"] += float(v["subtotal_untaxed"])
+                conceptos[name]["total_sales"] += float(v["total_sales"])
+
+            conceptos_list = [{"concepto": k, **val} for k, val in conceptos.items()]
+            conceptos_list.sort(key=lambda x: x["total_sales"], reverse=True)
+
             wh_block["journals"].append({
                 "journal": {"id": j.id, "name": j.name},
-                # ✅ flags
-                # "has_invoices": has_invoices,
-                # "has_credit_notes": has_credit_notes,
-                "is_credit_note_journal": has_credit_notes and not has_invoices,  # opcional: "solo NC"
+                "is_credit_note_journal": has_credit_notes and not has_invoices,
 
                 "facturado": {
                     "count_invoices": int(f["count_invoices"]),
@@ -184,10 +236,13 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
                     "subtotal_untaxed": float(r["subtotal_untaxed"]),
                     "total_sales": float(r["total_sales"]),
                 },
+
+                # ✅ NUEVO: totales por concepto (asesor)
+                "conceptos_totales": conceptos_list,
+
                 "moves": moves,
             })
 
-        # si quieres, evita sedes sin diarios mapeados
         if wh_block["journals"]:
             groups.append(wh_block)
 
@@ -206,5 +261,5 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
         "journals": [{"id": j.id, "name": j.name} for j in journals],
         "grand": grand,
         "grand_refunds": grand_refunds,
-        "groups": groups,  # ✅ esto es lo que necesitas para pintar “Sede -> diarios”
+        "groups": groups,
     }

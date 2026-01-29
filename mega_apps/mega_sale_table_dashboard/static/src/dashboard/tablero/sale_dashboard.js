@@ -9,10 +9,12 @@ import { DashboardHero } from "../hero/hero";
 import { DateFilterBar } from "../filter/filter";
 import { Informe } from "../informe/informe";
 import { InvoiceList } from "../InvoiceList/invoice_list";
+import { Advisor } from "../advisor/advisor";
+
 
 export default class MegaSaleDashboard extends Component {
     static template = "mega_dashboard.SaleDashboard";
-    static components = { Layout, DashboardHero, DateFilterBar, Informe, InvoiceList };
+    static components = { Layout, DashboardHero, DateFilterBar, Informe, InvoiceList, Advisor };
     static props = {
         action: Object,
         actionId: Number,
