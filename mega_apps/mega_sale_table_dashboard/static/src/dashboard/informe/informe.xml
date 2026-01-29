@@ -21,16 +21,16 @@
                        t-att-title="wh.warehouse.name">
                     <t t-esc="wh.warehouse.name"/>
                   </div>
-                  <div class="text-muted small">
+                  <!-- <div class="text-muted small">
                     Resultados por diario
-                  </div>
+                  </div> -->
                 </div>
               </div>
 
               <!-- Badge -->
-              <span class="badge rounded-pill bg-light text-dark border">
+              <!-- <span class="badge rounded-pill bg-light text-dark border">
                 <i class="fa fa-warehouse me-1"/> Sede
-              </span>
+              </span> -->
             </div>
 
             <!-- Separador suave -->

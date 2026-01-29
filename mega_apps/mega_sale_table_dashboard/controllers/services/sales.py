@@ -162,7 +162,7 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
             # detalle (puedes limitar para UI)
             moves = (inv_detail.get(key, []) + ref_detail.get(key, []))
             moves.sort(key=lambda x: x["invoice_date"] or "", reverse=True)
-            moves = moves[:300]  # límite recomendado
+            # moves = moves[:300]  # límite recomendado
 
             has_invoices = int(f["count_invoices"]) > 0
             has_credit_notes = int(r["count_invoices"]) > 0

@@ -49,16 +49,16 @@
                 <div class="d-flex justify-content-between align-items-center px-3 py-2 bg-white"
                      style="border-bottom: 1px solid rgba(26,60,107,.08);">
                   <div class="d-flex align-items-center gap-2">
-                    <span class="badge rounded-pill bg-light text-dark border">
+                    <!-- <span class="badge rounded-pill bg-light text-dark border">
                       <i class="fa fa-book me-1"/> Diario
-                    </span>
+                    </span> -->
 
                     <div class="fw-semibold text-truncate" style="max-width: 60vw; color:#1A3C6B;"
                          t-att-title="j.journal.name">
                       <t t-esc="j.journal.name"/>
                     </div>
 
-                    <t t-if="j.is_credit_note_journal">
+                    <!-- <t t-if="j.is_credit_note_journal">
                       <span class="badge rounded-pill bg-light text-dark border">
                         <i class="fa fa-rotate-left me-1"/> Nota crédito
                       </span>
@@ -67,7 +67,7 @@
                       <span class="badge rounded-pill bg-light text-dark border">
                         <i class="fa fa-file-invoice me-1"/> Factura
                       </span>
-                    </t>
+                    </t> -->
                   </div>
 
                   <span class="badge rounded-pill bg-light text-dark border">
