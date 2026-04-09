@@ -209,3 +209,5 @@ out/
 *.swo
 
 developer.code-workspace
+
+mega_apps_old/
