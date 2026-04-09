@@ -1,0 +1,291 @@
+<!-- Codigo para la localizacion con google -->
+<section id="sedes-mapas" aria-label="Sedes Mega Tecnicentro" style="--brand:#00ba6d;">
+  <style>
+    #sedes-mapas{
+      position:relative;
+      isolation:isolate;
+      background:#f3f4f6;
+      color:#020617;
+      overflow-x:clip;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    #sedes-mapas *, #sedes-mapas *::before, #sedes-mapas *::after{ box-sizing:border-box; }
+
+    /* full-bleed móvil (si el builder recorta) */
+    @media (max-width:1023.98px){
+      #sedes-mapas{ width:100dvw; margin-left:calc(50% - 50dvw); margin-right:calc(50% - 50dvw); }
+      @supports not (width:100dvw){
+        #sedes-mapas{ width:100svw; margin-left:calc(50% - 50svw); margin-right:calc(50% - 50svw); }
+      }
+      @supports not (width:100svw){
+        #sedes-mapas{ width:100vw; margin-left:calc(50% - 50vw); margin-right:calc(50% - 50vw); }
+      }
+    }
+
+    /* ✅ MÁS ANGOSTO (cards más pequeñas visualmente) */
+    #sedes-mapas .wrap{
+      max-width: 1040px; /* antes 1240 */
+      margin:0 auto;
+      padding: 2.4rem 1.25rem 3rem; /* un poco menos alto */
+    }
+    @media (min-width:768px){
+      #sedes-mapas .wrap{ padding: 2.8rem 1.5rem 3.6rem; }
+    }
+
+    /* encabezado */
+    #sedes-mapas .kicker{
+      font-size:.7rem;
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:.22em;
+      color:#9ca3af;
+    }
+    #sedes-mapas h2{
+      margin:.65rem 0 .35rem;
+      font-size:1.6rem;
+      line-height:1.25;
+      letter-spacing:-.03em;
+      color:#020617;
+    }
+    @media (min-width:768px){
+      #sedes-mapas h2{ font-size:1.9rem; }
+    }
+    #sedes-mapas .lead{
+      font-size:.92rem;
+      color:#4b5563;
+      max-width: 62ch;
+    }
+
+    /* GRID */
+    #sedes-mapas .grid{
+      display:grid !important;
+      grid-template-columns:minmax(0,1fr) !important;
+      gap: 1.2rem;            /* antes 1.6 */
+      margin-top: 1.8rem;     /* antes 2.2 */
+    }
+    @media (min-width:768px){
+      #sedes-mapas .grid{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        gap: 1.4rem;          /* antes 2rem */
+      }
+    }
+
+    /* ✅ Card más compacta */
+    #sedes-mapas .card{
+      display:flex;
+      flex-direction:column;
+      gap:.85rem; /* antes 1rem */
+      border-radius:20px;
+      background:#f9fafb;
+      border:1px solid rgba(148,163,184,.32);
+      box-shadow:
+        0 14px 32px rgba(15,23,42,.14),
+        -4px -4px 14px rgba(255,255,255,.85);
+      padding: 1.05rem 1.05rem 1.1rem; /* antes 1.3+ */
+      width:100%;
+      min-width:0;
+    }
+    @media (min-width:640px){
+      #sedes-mapas .card{ padding: 1.15rem 1.15rem 1.2rem; }
+    }
+
+    #sedes-mapas .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      align-self:flex-start;
+      padding:.22rem .7rem;
+      border-radius:999px;
+      font-size:.70rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      background:#ecfdf5;
+      color:#047857;
+      border:1px solid rgba(16,185,129,.32);
+    }
+    #sedes-mapas .chip-dot{
+      width:.42rem; height:.42rem;
+      border-radius:999px;
+      background:#22c55e;
+      box-shadow:0 0 0 3px rgba(34,197,94,.28);
+    }
+
+    #sedes-mapas .card-title{
+      margin:.28rem 0 0;
+      font-size:1.02rem;
+      font-weight:800;
+      color:#020617;
+    }
+    #sedes-mapas .card-sub{
+      margin:.12rem 0;
+      font-size:.86rem;
+      color:#4b5563;
+      line-height:1.45;
+    }
+    #sedes-mapas .card-hours{
+      margin:.15rem 0 0;
+      font-size:.78rem;
+      font-weight:600;
+      color:#6b7280;
+    }
+
+    /* ✅ Mapa más bajito */
+    #sedes-mapas .map{
+      position:relative;
+      border-radius:16px;
+      overflow:hidden;
+      background:#020617;
+      box-shadow: 0 14px 30px rgba(15,23,42,.28);
+      aspect-ratio: 16 / 9;
+    }
+    @media (min-width:768px){
+      #sedes-mapas .map{ aspect-ratio: 16 / 9; } /* antes 16/10 (más alto) */
+    }
+    #sedes-mapas .map iframe{
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
+    }
+
+    /* footer */
+    #sedes-mapas .foot{
+      margin-top:.25rem;
+      display:flex;
+      flex-direction:column;
+      gap:.4rem;
+      font-size:.83rem;
+      color:#6b7280;
+    }
+    #sedes-mapas .foot-ctas{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.5rem;
+    }
+    @media (max-width:639.98px){
+      #sedes-mapas .foot-ctas{ flex-direction:column; }
+      #sedes-mapas .maps-link, #sedes-mapas .wa-link{
+        width:100%;
+        justify-content:center;
+      }
+    }
+
+    #sedes-mapas .maps-link{
+      display:inline-flex;
+      align-items:center;
+      gap:.4rem;
+      align-self:flex-start;
+      padding:.30rem .85rem;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.60);
+      background:#ffffff;
+      color:#065f46;
+      font-size:.78rem;
+      text-decoration:none;
+      font-weight:600;
+      transition:background .15s ease, border-color .15s ease, transform .15s ease;
+    }
+    #sedes-mapas .maps-link:hover{
+      background:#ecfdf5;
+      border-color:#22c55e;
+      transform:translateY(-1px);
+    }
+    #sedes-mapas .maps-icon{
+      width:.85rem; height:.85rem;
+      border-radius:999px;
+      background:radial-gradient(circle at 30% 30%, #bbf7d0, #22c55e);
+    }
+
+    #sedes-mapas .wa-link{
+      display:inline-flex;
+      align-items:center;
+      gap:.4rem;
+      align-self:flex-start;
+      padding:.30rem .95rem;
+      border-radius:999px;
+      border:1px solid #16a34a;
+      background:#16a34a;
+      color:#f9fafb;
+      font-size:.78rem;
+      text-decoration:none;
+      font-weight:700;
+      box-shadow:0 10px 20px rgba(22,163,74,.35);
+      transition:background .15s ease, transform .15s ease, box-shadow .15s ease;
+    }
+    #sedes-mapas .wa-link:hover{
+      background:#15803d;
+      transform:translateY(-1px);
+      box-shadow:0 14px 26px rgba(22,163,74,.45);
+    }
+    #sedes-mapas .wa-icon{
+      width:.85rem; height:.85rem;
+      border-radius:999px;
+      background:radial-gradient(circle at 30% 30%,#bbf7d0,#22c55e);
+    }
+  </style>
+
+  <div class="wrap">
+    <header>
+      <p class="kicker">Nuestras sedes</p>
+      <h2>Encuentra tu sede Mega Tecnicentro</h2>
+      <p class="lead">
+        Dos puntos estratégicos: detrás de Premium Plaza y al sur, en Itagüí.
+        Usa el mapa interactivo para ubicar la fachada antes de llegar.
+      </p>
+    </header>
+
+    <div class="grid">
+
+      <article class="card">
+        <div>
+          <div class="chip"><span class="chip-dot"></span><span>Premium Plaza 1 a 1</span></div>
+          <h3 class="card-title">Sede Barrio Colombia</h3>
+          <p class="card-sub">Cra. 44 # 30-65, Medellín (Barrio Colombia). Detrás de Premium Plaza.</p>
+          <p class="card-hours">L–V 7:00–17:00 · S 7:00–14:00</p>
+        </div>
+
+        <div class="map" aria-label="Mapa / Street View Premium Plaza 1 a 1">
+          <iframe src="https://www.google.com/maps/embed?pb=!4v1764011674374!6m8!1m7!1sR4eJFZM1mc59qXzR3-EJxw!2m2!1d6.230630105606674!2d-75.5707111455317!3f278.3880743276029!4f-4.690215575658527!5f0.7820865974627469" loading="lazy" allowfullscreen="" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+
+        <div class="foot">
+          <span>Ideal para usuarios del Poblado, Centro y Laureles.</span>
+          <div class="foot-ctas">
+            <a class="maps-link" href="https://www.google.com/maps/search/?api=1&amp;query=Cra.%2044%20%23%2030-65%2C%20Medell%C3%ADn%2C%20Antioquia%2C%20Colombia" target="_blank" rel="noopener noreferrer">
+              <span class="maps-icon" aria-hidden="true"></span><span>Ver ruta en Google Maps</span>
+            </a>
+            <a class="wa-link btn-ctb" href="https://wa.me/573118844938?text=Hola%20Mega%20Tecnicentro%2C%20quiero%20agendar%20cita%20en%20la%20sede%20Premium%20Plaza%201%20a%201." target="_blank" rel="noopener noreferrer">
+              <span class="wa-icon" aria-hidden="true"></span><span>Agendar en WhatsApp</span>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <div class="chip"><span class="chip-dot"></span><span>Megatecnicentro Sur</span></div>
+          <h3 class="card-title">Sede Itagüí</h3>
+          <p class="card-sub">Cra 42 #64a - 95, Itagüí (La Esmeralda). Frente a Viva Envigado, Autopista Sur.</p>
+          <p class="card-hours">L–V 7:00–17:00 · S 7:00–14:00</p>
+        </div>
+
+        <div class="map" aria-label="Mapa / Street View Megatecnicentro Sur">
+          <iframe src="https://www.google.com/maps/embed?pb=!4v1764011840120!6m8!1m7!1s_6_1XhipOSXYTuDQD18Scw!2m2!1d6.176502510452699!2d-75.59518500853301!3f333.29907!4f0!5f0.7820865974627469" loading="lazy" allowfullscreen="" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+
+        <div class="foot">
+          <span>Ideal para el sur del Valle de Aburrá y flotas corporativas.</span>
+          <div class="foot-ctas">
+            <a class="maps-link" href="https://www.google.com/maps/search/?api=1&amp;query=Cra%2042%20%2364a%20-%2095%2C%20Itag%C3%BC%C3%AD%2C%20Antioquia%2C%20Colombia" target="_blank" rel="noopener noreferrer">
+              <span class="maps-icon" aria-hidden="true"></span><span>Ver ruta en Google Maps</span>
+            </a>
+            <a class="wa-link btn-ctb" href="https://wa.me/573118844938?text=Hola%20Mega%20Tecnicentro%2C%20quiero%20agendar%20cita%20en%20la%20sede%20Megatecnicentro%20Sur%20%28Itagui%29." target="_blank" rel="noopener noreferrer">
+              <span class="wa-icon" aria-hidden="true"></span><span>Agendar en WhatsApp</span>
+            </a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>

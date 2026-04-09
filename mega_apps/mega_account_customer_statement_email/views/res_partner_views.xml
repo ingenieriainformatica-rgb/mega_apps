@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_inherit_statement_tab" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.statement.tab</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Ubicamos el notebook -->
+            <xpath expr="//notebook" position="inside">
+
+                <page string="Envío de Estados de Cuenta">
+
+                    <group>
+                        <field name="statement_recipient_email"/>
+                        <field name="statement_email_opt_out" widget="boolean_toggle" string="Activar envio de cartera?"/>
+                        <field name="last_statement_sent_date" readonly="1"/>
+                    </group>
+
+                </page>
+
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

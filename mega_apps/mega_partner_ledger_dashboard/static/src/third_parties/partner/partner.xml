@@ -1,0 +1,136 @@
+<templates xml:space="preserve">
+  <t t-name="mega_partner_ledger_dashboard.PartnerLedger">
+    <t t-set="p" t-value="props.partner"/>
+
+    <section class="container-fluid px-3 px-lg-4 pb-3">
+      <t t-if="p">
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+
+            <!-- Header -->
+            <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-3">
+                <span class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center"
+                      style="width:44px;height:44px;">
+                  <i class="fa fa-user text-muted"/>
+                </span>
+
+                <div class="lh-sm">
+                  <div class="fw-bold text-uppercase" style="letter-spacing:.4px;">
+                    <t t-esc="p.name or 'SIN NOMBRE'"/>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-1">
+                    <span class="badge rounded-pill bg-light text-dark border" t-if="p.vat">
+                      NIT: <t t-esc="p.vat"/>
+                    </span>
+                    <span class="badge rounded-pill bg-light text-dark border" t-if="p.id">
+                      ID: <t t-esc="p.id"/>
+                    </span>
+                    <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis" t-if="!p.vat">
+                      NIT no registrado
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-3"/>
+
+            <!-- Info blocks -->
+            <div class="row g-3">
+
+              <!-- Dirección -->
+              <div class="col-12 col-lg-6">
+                <div class="p-3 rounded-3 bg-light bg-opacity-50 border h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="fa fa-map-marker text-muted"/>
+                    <div class="text-muted small fw-semibold">Dirección</div>
+                  </div>
+
+                  <div t-if="p.street" class="fw-semibold">
+                    <t t-esc="p.street"/>
+                  </div>
+                  <div t-if="p.street2" class="text-muted">
+                    <t t-esc="p.street2"/>
+                  </div>
+
+                  <div class="text-muted mt-1" t-if="p.city or p.state or p.country">
+                    <t t-if="p.city"><t t-esc="p.city"/></t>
+                    <t t-if="p.state">
+                      <t t-if="p.city"> - </t>
+                      <t t-esc="p.state"/>
+                    </t>
+                    <t t-if="p.country">
+                      <t t-if="p.city or p.state">, </t>
+                      <t t-esc="p.country"/>
+                    </t>
+                  </div>
+
+                  <div class="text-muted fst-italic"
+                       t-if="!p.street and !p.street2 and !p.city and !p.state and !p.country">
+                    Sin dirección registrada.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contacto -->
+              <div class="col-12 col-lg-6">
+                <div class="p-3 rounded-3 bg-light bg-opacity-50 border h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="fa fa-address-book text-muted"/>
+                    <div class="text-muted small fw-semibold">Contacto</div>
+                  </div>
+
+                  <div class="d-flex flex-column gap-2">
+                    <t t-if="p.email">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="fa fa-envelope text-muted" style="width:16px;"/>
+                        <a class="text-decoration-none" t-att-href="'mailto:' + p.email">
+                          <t t-esc="p.email"/>
+                        </a>
+                      </div>
+                    </t>
+
+                    <t t-if="p.phone">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="fa fa-phone text-muted" style="width:16px;"/>
+                        <a class="text-decoration-none" t-att-href="'tel:' + p.phone">
+                          <t t-esc="p.phone"/>
+                        </a>
+                      </div>
+                    </t>
+
+                    <t t-if="p.mobile">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="fa fa-mobile text-muted" style="width:16px;"/>
+                        <a class="text-decoration-none" t-att-href="'tel:' + p.mobile">
+                          <t t-esc="p.mobile"/>
+                        </a>
+                      </div>
+                    </t>
+
+                    <div class="text-muted fst-italic"
+                         t-if="!p.email and !p.phone and !p.mobile">
+                      Sin información de contacto.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </t>
+
+      <t t-else="">
+        <div class="text-muted small">
+          Selecciona un tercero y consulta para ver la información.
+        </div>
+      </t>
+    </section>
+  </t>
+</templates>

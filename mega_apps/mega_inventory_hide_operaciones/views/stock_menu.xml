@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Menú -->
+    <record id="stock.menu_stock_warehouse_mgmt" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('mega_inventory_hide_operaciones.group_stock_operations_menu')])]"/>
+    </record>
+
+</odoo>

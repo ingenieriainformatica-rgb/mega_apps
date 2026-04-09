@@ -1,0 +1,15 @@
+<odoo>
+
+    <!-- Categoría del módulo -->
+    <record id="pc_module_contact" model="ir.module.category">
+        <field name="name">Module contact permissions</field>
+        <field name="sequence">35</field>
+    </record>
+
+    <!-- Grupo de usuario -->
+    <record id="group_module_contact" model="res.groups">
+        <field name="name">Module contact / Users</field>
+        <field name="category_id" ref="pc_module_contact"/>
+    </record>
+
+</odoo>

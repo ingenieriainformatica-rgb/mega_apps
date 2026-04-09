@@ -1,0 +1,146 @@
+<templates xml:space="preserve">
+  <t t-name="mega_partner_ledger_dashboard.ListLedger">
+
+    <t t-set="moves" t-value="invoices_list"/>
+
+    <section class="container-fluid px-3 px-lg-4 pb-3">
+
+      <t t-if="moves and moves.length">
+
+        <!-- Top info -->
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="mb-0 fw-semibold">
+                Facturas encontradas
+            </h6>
+
+            <div class="fw-bold text-primary">
+                <t t-esc="moves.length"/>
+            </div>
+        </div>
+
+        <hr class="mt-0 mb-3"/>
+
+
+        <t t-foreach="moves" t-as="m" t-key="m.id">
+          <div class="card border-0 shadow-sm mb-3 overflow-hidden">
+            <div class="card-body">
+
+              <!-- Header factura -->
+              <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+
+                <div class="d-flex align-items-start gap-3">
+                  <span class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center"
+                        style="width:42px;height:42px;">
+                    <i class="fa fa-file-text-o text-muted"/>
+                  </span>
+
+                  <div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                      <span class="fw-bold text-uppercase" style="letter-spacing:.3px;">
+                        <t t-esc="m.ref or m.name or ('ID ' + m.id)"/>
+                      </span>
+
+                      <!-- Estado pago (mismo campo, mejor look) -->
+                      <t t-if="m.payment_state">
+                        <span class="badge text-uppercase"
+                              t-att-class="
+                                (m.payment_state == 'paid') and 'bg-success' or
+                                (m.payment_state == 'in_payment') and 'bg-info' or
+                                (m.payment_state == 'partial') and 'bg-warning text-dark' or
+                                'bg-secondary'
+                              ">
+                          <t t-esc="m.payment_state"/>
+                        </span>
+                      </t>
+                    </div>
+
+                    <div class="text-muted small mt-1">
+                      <t t-if="m.invoice_date">
+                        <span class="me-2">📅 <t t-esc="m.invoice_date"/></span>
+                      </t>
+                      <t t-if="m.invoice_date_due">
+                        <span class="me-2">⏳ Vence: <t t-esc="m.invoice_date_due"/></span>
+                      </t>
+                      <t t-if="m.journal">
+                        <span>📘 <t t-esc="m.journal"/></span>
+                      </t>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="text-end">
+                  <div class="fw-bold fs-6">
+                    <t t-esc="m.currency or ''"/> <t t-esc="m.amount_total or 0"/>
+                  </div>
+                </div>
+
+              </div>
+
+              <hr class="my-3"/>
+
+              <!-- Tabla líneas -->
+              <t t-if="m.lines and m.lines.length">
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th style="min-width:340px;">Cuenta</th>
+                        <th style="min-width:260px;">Etiqueta</th>
+                        <th class="text-end" style="width:140px;">Débito</th>
+                        <th class="text-end" style="width:140px;">Crédito</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <t t-foreach="m.lines" t-as="l" t-key="l.id">
+                        <tr>
+                          <td>
+                            <div class="fw-semibold">
+                              <t t-esc="(l.account_code or '')"/>
+                              <t t-if="l.account_code"> - </t>
+                              <t t-esc="(l.account_name or 'Sin cuenta')"/>
+                            </div>
+                          </td>
+
+                          <td class="text-muted">
+                            <div class="text-truncate" style="max-width:520px;">
+                              <t t-esc="l.name or '-'"/>
+                            </div>
+                          </td>
+
+                          <td class="text-end">
+                            <t t-esc="l.debit or 0"/>
+                          </td>
+
+                          <td class="text-end">
+                            <t t-esc="l.credit or 0"/>
+                          </td>
+                        </tr>
+                      </t>
+                    </tbody>
+                  </table>
+                </div>
+              </t>
+
+              <t t-else="">
+                <div class="text-muted fst-italic">
+                  Esta factura no tiene líneas contables para mostrar.
+                </div>
+              </t>
+
+            </div>
+          </div>
+        </t>
+
+      </t>
+
+      <t t-else="">
+        <div class="text-muted fst-italic">
+          No hay facturas en el rango seleccionado.
+        </div>
+      </t>
+
+    </section>
+
+  </t>
+</templates>

@@ -1,0 +1,23 @@
+{
+    'name': 'CRM Custom Services',
+    'version': '18.0.1.0.0',
+    'summary': 'Additional fields in CRM for services',
+    "category": "MegaTecnicentro/CRMCustom",
+    'author': 'Jorge Alberto Quiroz Sierra',
+    "website": "https://mega.realnet.com.co/",
+    "sequence": -180,
+    'depends': ['crm', 'fleet'],
+    'data': [
+        'security/ir.model.access.csv',
+        'views/menu.xml',
+        'views/crm_service_type_views.xml',
+        'views/crm_home_zone_views.xml',
+        'views/crm_lead_year_views.xml',
+        'views/crm_change_position_sale.xml',
+        'views/crm_lead_views.xml',
+    ],
+    'installable': True,
+    'application': False,
+    'license': 'LGPL-3',
+    'post_init_hook': 'post_init_hook',
+}

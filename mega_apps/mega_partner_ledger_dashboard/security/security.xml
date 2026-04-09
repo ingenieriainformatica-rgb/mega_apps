@@ -1,0 +1,6 @@
+<odoo>
+  <record id="group_partner_ledger_dashboard" model="res.groups">
+    <field name="name">Dashboard Terceros (Contabilidad)</field>
+    <field name="category_id" ref="base.module_category_accounting_and_finance"/>
+  </record>
+</odoo>

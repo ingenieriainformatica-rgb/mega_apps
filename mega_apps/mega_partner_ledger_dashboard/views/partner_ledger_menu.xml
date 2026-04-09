@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <!-- Acción tipo client para montar OWL -->
+  <record id="action_partner_ledger_dashboard" model="ir.actions.client">
+    <field name="name">Terceros</field>
+    <field name="tag">mega_partner_ledger_dashboard.mega_partner_ledger_dashboard_ledger</field>
+  </record>
+
+  <!-- Submenú debajo de TU menú Informes -->
+  <menuitem id="menu_partner_ledger_dashboard"
+            name="Auxiliar"
+            parent="mega_sale_table_dashboard.menu_sale_dashboard_root"
+            action="action_partner_ledger_dashboard"
+            sequence="20"/>
+
+</odoo>

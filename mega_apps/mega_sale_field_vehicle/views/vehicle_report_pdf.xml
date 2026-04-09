@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+  <template id="report_saleorder_document_vehicle" inherit_id="sale.report_saleorder_document">
+    <xpath expr="//t[@t-set='layout_document_title']" position="before">
+      <div t-if="doc.vehicle" class="row mb-1">
+        <div class="col-12">
+          <strong>Vehículo:</strong>
+          <span t-field="doc.vehicle"/>
+        </div>
+      </div>
+    </xpath>
+  </template>
+
+</odoo>

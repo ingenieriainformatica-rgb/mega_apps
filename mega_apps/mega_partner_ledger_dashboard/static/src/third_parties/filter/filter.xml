@@ -1,0 +1,99 @@
+<templates xml:space="preserve">
+  <t t-name="mega_partner_ledger_dashboard.DateFilterBar">
+    <section class="container-fluid px-3 px-lg-4 pb-3">
+      <div class="rn-filter card border-0 shadow-sm">
+        <div class="card-body py-3">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="d-flex align-items-center gap-2">
+              <span class="rn-icon"><i class="fa fa-sliders"/></span>
+              <div>
+                <div class="rn-title">Filtros</div>
+                <div class="rn-subtitle">Selecciona tercero y rango de fechas</div>
+              </div>
+            </div>
+            <t t-if="state.partnerSelected">
+              <span class="rn-chip">
+                <i class="fa fa-user me-2"/>
+                <t t-esc="state.partnerSelected.name"/>
+                <a href="#" class="rn-chip-clear ms-2" t-on-click.prevent="clearPartner" title="Limpiar">
+                  <i class="fa fa-times"/>
+                </a>
+              </span>
+            </t>
+          </div>
+          <div class="row g-3">
+            <!-- Tercero -->
+            <div class="col-12 col-lg-6 position-relative">
+              <label class="form-label rn-label">Tercero</label>
+              <t t-if="state.partnerSelected">
+                <div class="rn-hint">
+                  <i class="fa fa-check-circle me-1 text-success"/>
+                  Tercero seleccionado correctamente.
+                </div>
+              </t>
+              <div class="input-group rn-input">
+                <span class="input-group-text"><i class="fa fa-search"/></span>
+                <input
+                    class="form-control"
+                    t-model="state.partnerQuery"
+                    t-on-input="onPartnerInput"
+                    placeholder="Nombre / NIT / Documento..."
+                    t-ref="partnerInput"
+                    autocomplete="off"
+                />
+              </div>
+              <t t-if="state.partnerResults.length">
+                <div class="dropdown-menu show w-100 rn-dropdown">
+                  <t t-foreach="state.partnerResults" t-as="p" t-key="p.id">
+                    <button type="button"
+                            class="dropdown-item rn-item"
+                            t-on-click="() => this.selectPartner(p)">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="me-3">
+                          <div class="rn-item-title" t-esc="p.name"/>
+                          <div class="rn-item-sub text-muted">
+                            <t t-esc="(p.vat || p.ref || 'Sin documento')"/>
+                          </div>
+                        </div>
+                        <span class="badge rn-badge"
+                              t-att-class="p.is_company ? 'bg-primary' : 'bg-secondary'">
+                          <t t-esc="p.is_company ? 'Empresa' : 'Persona'"/>
+                        </span>
+                      </div>
+                    </button>
+                  </t>
+                </div>
+              </t>
+            </div>
+            <div class="col-12 col-md-4 col-lg-2">
+              <label class="form-label rn-label">Desde</label>
+              <div class="input-group rn-input text-date-input">
+                <DateTimeInput
+                  type="'date'"
+                  value="state.date_from"
+                  onChange="(value) => this.onDateFromChange(value)"
+                />
+              </div>
+            </div>
+            <div class="col-12 col-md-4 col-lg-2">
+              <label class="form-label rn-label">Hasta</label>
+              <div class="input-group rn-input text-date-input">
+                <DateTimeInput
+                  type="'date'"
+                  value="state.date_to"
+                  onChange="(value) => this.onDateToChange(value)"
+                />
+              </div>
+            </div>
+            <!-- Acción -->
+            <div class="col-12 col-md-4 col-lg-2 align-self-end">
+              <button class="btn btn-primary w-100 rn-btn" t-on-click="onSearch">
+                <i class="fa fa-filter me-2"/> Consultar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </t>
+</templates>

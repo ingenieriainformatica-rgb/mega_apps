@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="mega_partner_ledger_dashboard.ShowLedger">
+    <Layout display="display" className="'o_dashboard h-100 overflow-y-auto'">
+
+        <!-- Botones superiores -->
+        <t t-set-slot="layout-buttons">
+            <button class="btn btn-primary" t-on-click="openContacts">
+                Contactos
+            </button>
+            <button class="btn btn-outline-primary" t-on-click="exportExcel">
+                <i class="fa fa-download me-1"/> Exportar Excel
+            </button>
+        </t>
+
+        <!-- Encabezado -->
+        <section class="text-center bg-light rounded shadow p-4 my-3 w-100">
+            <h1 class="h3 mb-2">📊 Dashboard de Terceros</h1>
+            <p class="text-muted mb-0">
+                Consulta el movimiento contable por tercero en un rango de fechas.
+            </p>
+        </section>
+
+        <!-- Filtros -->
+        <FilterThirdsLedger
+            date_from="state.filters.date_from"
+            date_to="state.filters.date_to"
+            onSearch.bind="onSearch"
+        />
+
+        <t t-if="state.ok and state.partner">
+            <PartnerLedger partner="state.partner"/>
+        </t>
+
+        <t t-if="state.ok and state.partner">
+            <ListLedger invoices="state.invoices"/>
+        </t>
+    </Layout>
+  </t>
+</templates>

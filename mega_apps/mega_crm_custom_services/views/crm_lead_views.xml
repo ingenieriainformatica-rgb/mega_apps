@@ -1,0 +1,37 @@
+<odoo>
+    <record id="view_crm_lead_form_inherit_custom_services" model="ir.ui.view">
+        <field name="name">crm.lead.form.inherit.custom.services</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insertamos dentro del grupo izquierdo -->
+            <xpath expr="//group[.//field[@name='phone']]" position="inside">
+
+                <separator string="Información del Vehículo"/>
+                <group col="2">
+                    <field name="brand_id" options="{'no_create': True, 'no_edit': True}"/>
+                    <field name="modelo_id" string="Modelo" options="{'no_create': True, 'no_edit': True}"/>
+                    <field name="year_vehicule_id" string="Año de fabricación del vehículo" options="{'no_create': True, 'no_edit': True}"/>
+                </group>
+
+                <group col="2">
+                    <field name="tipo_servicio_id" options="{'no_create': True, 'no_edit': True}"/>
+                    <field name="zona_domicilio_id" options="{'no_create': True, 'no_edit': True}"/>
+                </group>
+
+                <separator string="Dirección del servicio"/>
+                <group col="2">
+                    <field name="service_address"/>
+                </group>
+
+                <separator string="Términos y condiciones"/>
+                <group col="2">
+                    <field name="accept_terms" widget="boolean_toggle"/>
+                </group>
+
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

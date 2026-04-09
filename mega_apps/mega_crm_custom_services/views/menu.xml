@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_crm_home_zone_personalized_services"
+              name="Servicios Personalizados"
+              parent="crm.crm_menu_config"
+              sequence="49"/>
+
+</odoo>

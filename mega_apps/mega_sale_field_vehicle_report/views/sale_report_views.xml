@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Search: poder filtrar por Vehículo -->
+  <record id="sale_report_search_inherit_vehicle" model="ir.ui.view">
+    <field name="name">sale.report.search.inherit.vehicle</field>
+    <field name="model">sale.report</field>
+    <field name="inherit_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+    <field name="arch" type="xml">
+      <xpath expr="//search" position="inside">
+        <field name="vehicle"/>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Pivot: poder agrupar por Vehículo -->
+  <record id="sale_report_pivot_inherit_vehicle" model="ir.ui.view">
+    <field name="name">sale.report.pivot.inherit.vehicle</field>
+    <field name="model">sale.report</field>
+    <field name="inherit_id" ref="sale.view_sale_report_pivot"/>
+    <field name="arch" type="xml">
+      <xpath expr="//pivot" position="inside">
+        <field name="vehicle" type="row"/>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Tree: mostrar Vehículo como columna en el análisis -->
+  <record id="sale_report_tree_inherit_vehicle" model="ir.ui.view">
+    <field name="name">sale.report.tree.inherit.vehicle</field>
+    <field name="model">sale.report</field>
+    <field name="inherit_id" ref="sale.view_sale_report_tree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//list" position="inside">
+        <field name="vehicle"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

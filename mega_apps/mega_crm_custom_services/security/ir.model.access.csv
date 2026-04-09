@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+mega_crm_custom_services.access_crm_service_type,access_crm_service_type,mega_crm_custom_services.model_crm_service_type,base.group_user,1,1,1,1
+
+mega_crm_custom_services.access_crm_home_zone,access_crm_home_zone,mega_crm_custom_services.model_crm_home_zone,base.group_user,1,1,1,1
+
+mega_crm_custom_services.access_crm_lead_year,access_crm_lead_year,mega_crm_custom_services.model_crm_lead_year,base.group_user,1,1,1,1

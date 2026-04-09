@@ -11,15 +11,6 @@
       </t>
     </xpath>
 
-    <!-- 2) Firma Aprobado al final (antes del último oe_structure de la página) -->
-    <!-- <xpath expr="(//div[@class='page']//div[@class='oe_structure'])[last()]" position="before">
-      <div class="mt-5" style="page-break-inside: avoid;">
-        <div class="text-center" style="margin-top: 40px;">
-          <div class="mt-1"><strong>Firma Aprobado</strong></div>
-        </div>
-      </div>
-    </xpath> -->
-
     <xpath expr="(//div[@class='page']//div[@class='oe_structure'])[last()]" position="before">
         <div class="mt-5" style="page-break-inside: avoid;">
             <div class="row">
@@ -32,6 +23,13 @@
         </div>
     </xpath>
 
+    <!-- Asesor: después del vendedor -->
+    <xpath expr="//div[@t-field='doc.user_id']/ancestor::div[1]" position="after">
+      <div t-if="doc.advisor_id" class="col">
+        <strong>Asesor</strong>
+        <div t-field="doc.advisor_id"/>
+      </div>
+    </xpath>
 
   </template>
 

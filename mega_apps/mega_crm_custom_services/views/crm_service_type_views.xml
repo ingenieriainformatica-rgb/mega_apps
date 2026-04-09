@@ -1,0 +1,40 @@
+<odoo>
+    <record id="view_crm_service_type_tree" model="ir.ui.view">
+        <field name="name">crm.service.type.tree</field>
+        <field name="model">crm.service.type</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_crm_service_type_form" model="ir.ui.view">
+        <field name="name">crm.service.type.form</field>
+        <field name="model">crm.service.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="active"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_crm_service_type" model="ir.actions.act_window">
+        <field name="name">Tipos de Servicio</field>
+        <field name="res_model">crm.service.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_crm_service_type"
+              name="Tipos de Servicio"
+              parent="mega_crm_custom_services.menu_crm_home_zone_personalized_services"
+              action="action_crm_service_type"
+              sequence="50"/>
+</odoo>

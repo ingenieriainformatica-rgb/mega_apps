@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_document_inherit_vehicle"
+              inherit_id="account.report_invoice_document">
+
+        <xpath expr="//table[contains(@class, 'o_main_table')]" position="before">
+            <div t-if="o.vehicle" style="margin-bottom: 5px;">
+                <strong>Vehículo:</strong>
+                <span t-esc="o.vehicle"/>
+            </div>
+        </xpath>
+
+    </template>
+</odoo>

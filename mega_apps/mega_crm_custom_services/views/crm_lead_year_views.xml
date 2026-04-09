@@ -1,0 +1,37 @@
+<odoo>
+    <record id="view_crm_lead_year_tree" model="ir.ui.view">
+        <field name="name">crm.lead.year.tree</field>
+        <field name="model">crm.lead.year</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="year"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_crm_lead_year_form" model="ir.ui.view">
+        <field name="name">crm.lead.year.form</field>
+        <field name="model">crm.lead.year</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="year"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_crm_lead_year" model="ir.actions.act_window">
+        <field name="name">Año</field>
+        <field name="res_model">crm.lead.year</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_crm_lead_year"
+              name="Año fabricación Vehiculo"
+              parent="mega_crm_custom_services.menu_crm_home_zone_personalized_services"
+              action="action_crm_lead_year"
+              sequence="70"/>
+</odoo>

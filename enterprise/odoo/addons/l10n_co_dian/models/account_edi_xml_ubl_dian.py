@@ -9,7 +9,7 @@ from hashlib import sha384
 from odoo import models, fields, _
 from odoo.addons.l10n_co_dian import xml_utils
 from odoo.tools import cleanup_xml_node, float_repr, frozendict
-from odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20 import FloatFmt
+# from odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20 import FloatFmt
 from odoo.addons.l10n_co_edi.models.res_partner import FINAL_CONSUMER_VAT
 from odoo.addons.l10n_co_edi.models.account_invoice import L10N_CO_EDI_TYPE
 
@@ -1622,7 +1622,8 @@ class AccountEdiXmlUBLDian(models.AbstractModel):
             # (it raises: "FAS01b, Rechazo: Tributo IVA (01), INC (04) informado no coincide, revisar Porcentaje, Nombre y ID.").
             # The majority of taxes have only 2 decimals, but some have 3 (and they should be reported with all their decimals).
             'cbc:Percent': {
-                '_text': FloatFmt(abs(grouping_key['amount']), 2, 3)  # withholding taxes are reported as positives
+                # '_text': FloatFmt(abs(grouping_key['amount']), 2, 3)  # withholding taxes are reported as positives
+                '_text': abs(grouping_key['amount'])
             } if grouping_key['l10n_co_edi_type'].code not in {'32', '34'}
             else None,  # Don't include Percent for ICL/IBUA taxes
             'cac:TaxScheme': {

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="pc_sale_cancel_orders" model="ir.module.category">
+        <field name="name">Sale cancel orders</field>
+        <field name="description">Permissions for canceling sales orders</field>
+        <field name="sequence">35</field>
+    </record>
+
+    <!-- Grupo: puede cancelar órdenes/cotizaciones -->
+    <record id="group_sale_can_cancel_orders" model="res.groups">
+        <field name="name">You can cancel quotes/orders</field>
+        <field name="category_id" ref="pc_sale_cancel_orders"/>
+    </record>
+</odoo>

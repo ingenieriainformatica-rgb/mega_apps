@@ -17,6 +17,7 @@ class SaleOrder(models.Model):
         domain="[('is_advisor', '=', True)]",
         help="Contacto marcado como asesor (en Contactos).",
         index=True,
+        required=True
     )
 
     def _prepare_invoice(self):
