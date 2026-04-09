@@ -61,6 +61,30 @@ class AccountMove(models.Model):
                     "Longitud encontrada: %s"
                 ) % (DIGITOS, ref_clean, len(ref_clean)))
 
+    def _validate_ref_uniqueness(self):
+        for move in self:
+            if not self._should_validate_ref_for_move(move):
+                continue
+
+            if not move.partner_id:
+                continue
+
+            ref_clean = self._sanitize_ref_value(move.ref)
+
+            domain = [
+                ('ref', '=', ref_clean),
+                ('partner_id', '=', move.partner_id.id),
+                ('move_type', 'in', self._REF_MOVE_TYPES),
+                ('id', '!=', move.id),
+            ]
+
+            existing = self.search(domain, limit=1)
+            if existing:
+                raise ValidationError(_(
+                    "Ya existe un documento con la misma referencia '%s' y contacto '%s'.\n"
+                    "Documento existente: %s (ID: %s)"
+                ) % (ref_clean, move.partner_id.name, existing.name, existing.id))
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -70,12 +94,14 @@ class AccountMove(models.Model):
 
         records = super().create(vals_list)
         records._validate_ref_length_limit()
+        records._validate_ref_uniqueness()
         return records
 
     def write(self, vals):
         vals = dict(vals)
 
         validate_ref = 'ref' in vals
+        validate_partner = 'partner_id' in vals
 
         if validate_ref and vals.get('ref'):
             vals['ref'] = self._sanitize_ref_value(vals['ref'])
@@ -85,5 +111,8 @@ class AccountMove(models.Model):
         # Solo validar cuando realmente cambien ref
         if validate_ref:
             self._validate_ref_length_limit()
+
+        if validate_ref or validate_partner:
+            self._validate_ref_uniqueness()
 
         return result
