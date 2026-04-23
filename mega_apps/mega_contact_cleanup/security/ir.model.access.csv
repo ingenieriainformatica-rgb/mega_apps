@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+mega_contact_cleanup.access_contact_menu_wizard,access_contact_menu_wizard,mega_contact_cleanup.model_contact_menu_wizard,base.group_user,1,1,1,1

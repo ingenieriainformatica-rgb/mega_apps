@@ -12,21 +12,23 @@
                 <group col="2">
                     <field name="brand_id" options="{'no_create': True, 'no_edit': True}"/>
                     <field name="modelo_id" string="Modelo" options="{'no_create': True, 'no_edit': True}"/>
-                    <field name="year_vehicule_id" string="Año de fabricación del vehículo" options="{'no_create': True, 'no_edit': True}"/>
+
                 </group>
 
                 <group col="2">
+                    <field name="year_vehicule_id" string="Año de fabricación del vehículo" options="{'no_create': True, 'no_edit': True}"/>
+                    <field name="license_plate" string="Placa del vehículo"/>
+                </group>
+
+                <group col="2">
+                    <separator string="Servicio"/>
                     <field name="tipo_servicio_id" options="{'no_create': True, 'no_edit': True}"/>
                     <field name="zona_domicilio_id" options="{'no_create': True, 'no_edit': True}"/>
-                </group>
-
-                <separator string="Dirección del servicio"/>
-                <group col="2">
                     <field name="service_address"/>
                 </group>
 
-                <separator string="Términos y condiciones"/>
                 <group col="2">
+                    <separator string="Términos y condiciones"/>
                     <field name="accept_terms" widget="boolean_toggle"/>
                 </group>
 

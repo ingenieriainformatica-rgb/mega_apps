@@ -53,17 +53,8 @@
     <field name="target">current</field>
   </record>
 
-  <menuitem id="menu_mega_tools_config_root"
-    name="Saldos iniciales"
-    parent="account.menu_finance_configuration"
-    groups="account_petty_cash.group_pc_user"
-    sequence="999"/>
+  <menuitem id="menu_mega_tools_config_root" name="Saldos iniciales" parent="account.menu_finance_configuration" groups="account_petty_cash.group_pc_user" sequence="999"/>
 
-  <menuitem id="menu_reclass_receivable_saldos_iniciales"
-    name="Configuración de saldos iniciales"
-    parent="menu_mega_tools_config_root"
-    action="action_pc_cashbox_balance_type"
-    groups="account_petty_cash.group_pc_user"
-    sequence="20"/>
+  <menuitem id="menu_reclass_receivable_saldos_iniciales" name="Configuración de saldos iniciales" parent="menu_mega_tools_config_root" action="action_pc_cashbox_balance_type" groups="account_petty_cash.group_pc_user" sequence="20"/>
 
 </odoo>

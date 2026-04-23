@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- FORM -->
+    <record id="view_mega_dian_token_file_form" model="ir.ui.view">
+        <field name="name">mega.dian.token.file.form</field>
+        <field name="model">mega.dian.token.file</field>
+        <field name="arch" type="xml">
+            <form string="Archivo del Token DIAN" create="0" delete="0" edit="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="tipo_documento"/>
+                            <field name="folio"/>
+                            <field name="prefijo"/>
+                            <field name="nit_emisor"/>
+                            <field name="nombre_emisor"/>
+                        </group>
+                        <group>
+                            <field name="iva"/>
+                            <field name="total" string="Total Dian"/>
+                            <field name="is_reconciled" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST -->
+    <record id="view_mega_dian_token_file_list" model="ir.ui.view">
+        <field name="name">mega.dian.token.file.list</field>
+        <field name="model">mega.dian.token.file</field>
+        <field name="arch" type="xml">
+            <list string="Archivos del Token DIAN" create="0" delete="0" edit="0">
+                <field name="tipo_documento"/>
+                <field name="folio"/>
+                <field name="prefijo"/>
+                <field name="nit_emisor"/>
+                <field name="nombre_emisor"/>
+                <field name="iva"/>
+                <field name="total" string="Total Dian"/>
+
+                <field name="partner_id"/>
+                <field name="move_id"/>
+                <field name="odoo_ref"/>
+                <field name="odoo_iva"/>
+                <field name="odoo_total"/>
+                <field name="validation_status"/>
+                <field name="validation_note"/>
+                <field name="is_reconciled" widget="boolean_toggle"/>
+
+            </list>
+        </field>
+    </record>
+
+</odoo>

@@ -41,6 +41,10 @@ class CrmLead(models.Model):
         string='Dirección del servicio',
     )
 
+    license_plate = fields.Char(
+        string='Placa del vehículo'
+    )
+
     @api.onchange('brand_id')
     def _onchange_brand_id(self):
         self.modelo_id = False

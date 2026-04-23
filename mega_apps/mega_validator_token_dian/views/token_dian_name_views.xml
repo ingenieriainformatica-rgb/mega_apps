@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_mega_dian_token_search" model="ir.ui.view">
+        <field name="name">mega.dian.token.search</field>
+        <field name="model">mega.dian.token</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Token DIAN">
+                <field name="name"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <separator/>
+                <filter string="Borrador" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Con archivos" name="filter_loaded" domain="[('state', '=', 'loaded')]"/>
+                <filter string="Procesado" name="filter_processed" domain="[('state', '=', 'processed')]"/>
+                <filter string="Validado" name="filter_validated" domain="[('state', '=', 'validated')]"/>
+                <filter string="Error" name="filter_error" domain="[('state', '=', 'error')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Estado" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- LIST -->
+    <record id="view_mega_dian_token_list" model="ir.ui.view">
+        <field name="name">mega.dian.token.list</field>
+        <field name="model">mega.dian.token</field>
+        <field name="arch" type="xml">
+            <list string="Token DIAN" decoration-success="state == 'validated'" decoration-danger="state == 'error'" decoration-muted="state == 'draft'" decoration-info="state == 'loaded'">
+                <field name="name"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="state"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="view_mega_dian_token_form" model="ir.ui.view">
+        <field name="name">mega.dian.token.form</field>
+        <field name="model">mega.dian.token</field>
+        <field name="arch" type="xml">
+            <form string="Token DIAN">
+
+                <header>
+                    <button name="action_open_upload_wizard" type="object" string="Subir archivo" class="btn-primary" invisible="not id or state != 'draft'" confirm="Seguro de subir el archivo???"/>
+                    <button name="action_process_token" type="object" string="Procesar" class="btn-primary" icon="fa-cogs" invisible="not id or state != 'loaded'" confirm="Estas seguro, se procesara todo el token Dian?"/>
+                    <button name="action_export_excel" type="object" class="btn-danger" invisible="not file_ids" icon="fa-download" help="Exportar a Excel"/>
+                    <button name="action_process_validated" type="object" string="Procesado y validado" class="btn-primary" icon="fa-refresh" invisible="not id or state not in ['loaded', 'processed']" confirm="¿Estás seguro? Esta acción no tiene vuelta atrás y dejará el token en estado Validado."/>
+
+                    <button name="action_open_file_ids_list" type="object" string="Ver registros" class="btn-secondary" invisible="not id or state not in ['validated']"/>
+
+                    <button name="action_reset_to_draft" type="object" string="Volver a borrador" class="btn-secondary" icon="fa-undo" groups="mega_validator_token_dian.group_token_dian_reset_to_draft" confirm="¿Estás seguro de regresar este token al estado Borrador?"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,loaded,processed,validated,error"/>
+                </header>
+
+                <sheet>
+                    <widget name="web_ribbon" title="TOKEN VALIDADO" bg_color="text-bg-success" invisible="state != 'validated'"/>
+                    <widget name="web_ribbon" title="TOKEN CON ERROR" bg_color="text-bg-danger" invisible="state != 'error'"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nombre del token DIAN" readonly="state != 'draft'"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Fechas">
+                            <field name="date_start" readonly="state != 'draft'"/>
+                            <field name="date_end" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Observaciones">
+                            <field name="note" nolabel="1" placeholder="Comentarios u observaciones del token..." readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Archivos / Registros">
+                            <field name="file_ids" limit="20"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_mega_dian_token" model="ir.actions.act_window">
+        <field name="name">Token DIAN</field>
+        <field name="res_model">mega.dian.token</field>
+        <field name="view_mode">list,form</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>

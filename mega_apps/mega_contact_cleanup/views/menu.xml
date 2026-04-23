@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_partner_tools_root_contact" name="Herramientas" parent="contacts.menu_contacts" sequence="4" groups="mega_contact_cleanup.group_contact_tools_menu"/>
+
+    <!-- <menuitem id="menu_partner_tools_root_update" name="Actualizar nombres a MAYÚSCULA" parent="mega_contact_cleanup.menu_partner_tools_root" groups="mega_partner_uppercase.group_partner_uppercase_user" action="action_partner_uppercase_wizard" sequence="3"/> -->
+
+    <menuitem id="menu_partner_tools_root_delete" name="Eliminar contactos, basura" parent="mega_contact_cleanup.menu_partner_tools_root_contact" action="action_contact_cleanup_wizard" sequence="1"/>
+
+</odoo>

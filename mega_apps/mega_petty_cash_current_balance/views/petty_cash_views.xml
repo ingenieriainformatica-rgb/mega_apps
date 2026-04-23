@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_petty_cash_box_form_current_balance" model="ir.ui.view">
+        <field name="name">petty.cash.box.form.current.balance</field>
+        <field name="model">petty.cash.box</field>
+        <field name="inherit_id" ref="account_petty_cash.view_petty_cash_box_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_available']" position="after">
+                <field name="resulting_balance" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

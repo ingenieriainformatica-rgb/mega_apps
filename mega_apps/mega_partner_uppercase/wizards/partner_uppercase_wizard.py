@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _ # type: ignore
 
 class PartnerUppercaseWizard(models.TransientModel):
     _name = "partner.uppercase.wizard"

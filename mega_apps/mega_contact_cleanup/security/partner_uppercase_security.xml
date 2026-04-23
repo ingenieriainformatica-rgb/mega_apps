@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Categoría para agrupar el/los grupos del módulo -->
+  <record id="category_partner_uppercase" model="ir.module.category">
+      <field name="name">Mega Partner Uppercase</field>
+      <field name="description">Permissions for Mega Partner Uppercase</field>
+      <field name="sequence">35</field>
+  </record>
+
+  <!-- Grupo del módulo (ajusta el nombre a gusto) -->
+  <record id="group_partner_uppercase_user" model="res.groups">
+      <field name="name">Mega Partner Uppercase / Users</field>
+      <field name="category_id" ref="category_partner_uppercase"/>
+  </record>
+</odoo>

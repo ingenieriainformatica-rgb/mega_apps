@@ -6,10 +6,16 @@
     "sequence": -250,
     "author": "Jorge Alberto Quiroz Sierra",
     "website": "https://megatecnicentro.com/",
-    'depends': ['website', 'crm'],
+    'depends': ['website', 'crm', 'fleet'],
     'data': [
         'views/website_templates.xml',
     ],
+    'assets': {
+        'web.assets_frontend': [
+            'mega_website_lead_demo/static/src/css/lead_demo_modal.css',
+            'mega_website_lead_demo/static/src/js/website_lead_modal.js',
+        ],
+    },
     "application": False,
     "installable": True,
     "license": "LGPL-3",

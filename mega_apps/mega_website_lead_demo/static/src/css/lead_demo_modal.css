@@ -1,0 +1,328 @@
+/* =========================================
+   FLOATING BUTTON
+========================================= */
+.container-floating-lead {
+    position: fixed;
+    left: 15px;
+    bottom: 20px;
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.container-floating-lead button {
+    animation: pulse 2s infinite;
+}
+
+.button-green {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: #25d366;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease;
+}
+
+.lead-tooltip-text {
+    white-space: nowrap;
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: #1f1f1f;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    animation: fadeInLeft 0.5s ease;
+}
+
+.fa-fa-whatsapp {
+    font-size: 26px;
+    color: #fff;
+}
+
+/* =========================================
+   MODAL
+========================================= */
+.lead-demo-modal .modal-dialog {
+    max-width: 760px;
+    width: calc(100% - 32px);
+    margin: 1rem auto;
+    transform: translateY(36px) scale(0.96);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lead-demo-modal.show .modal-dialog {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.lead-demo-modal .lead-demo-modal-content {
+    overflow: hidden;
+    border: none;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
+}
+
+.lead-demo-modal.show .lead-demo-modal-header,
+.lead-demo-modal.show .lead-demo-modal-body {
+    animation: leadDemoFadeUp 0.45s ease;
+}
+
+/* =========================================
+   MODAL HEADER
+========================================= */
+.lead-demo-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
+    border-bottom: 1px solid #eef2f7;
+}
+
+.lead-demo-header-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.lead-demo-header-text {
+    min-width: 0;
+}
+
+.lead-demo-logo {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+    padding: 5px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: #f3f4f6;
+}
+
+.lead-demo-modal-title {
+    margin: 0;
+    color: #111827;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.lead-demo-header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.lead-demo-modal-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.lead-demo-required-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    padding: 3px 9px;
+    border: 1px solid #fecaca;
+    border-radius: 999px;
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.lead-demo-close-btn {
+    flex-shrink: 0;
+    opacity: 0.75;
+    transition: all 0.2s ease;
+}
+
+.lead-demo-close-btn:hover {
+    opacity: 1;
+    transform: rotate(90deg) scale(1.05);
+}
+
+/* =========================================
+   MODAL BODY
+========================================= */
+.lead-demo-modal-body {
+    padding: 18px 20px 20px;
+    background: #fff;
+}
+
+.lead-demo-input {
+    height: 52px;
+    border: 1px solid #dbe3ec;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: none;
+    font-size: 15px;
+    transition: all 0.2s ease;
+}
+
+.lead-demo-input:focus {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 0.2rem rgba(22, 163, 74, 0.12);
+}
+
+.lead-demo-input::placeholder {
+    color: #9ca3af;
+}
+
+.lead-demo-check-label {
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.lead-demo-required {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.lead-demo-submit-btn {
+    height: 52px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 0 12px 24px rgba(22, 163, 74, 0.22);
+    transition: all 0.22s ease;
+}
+
+.lead-demo-submit-btn:hover {
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 16px 28px rgba(22, 163, 74, 0.28);
+}
+
+.lead-demo-submit-btn:active {
+    transform: scale(0.985);
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 991.98px) {
+    .lead-demo-modal .modal-dialog {
+        width: calc(100% - 24px);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .lead-demo-modal .modal-dialog {
+        max-width: 100%;
+        width: calc(100% - 16px);
+        margin: 8px auto;
+    }
+
+    .lead-demo-modal .lead-demo-modal-content {
+        border-radius: 18px;
+    }
+
+    .lead-demo-modal-header {
+        padding: 14px 16px;
+        align-items: flex-start;
+    }
+
+    .lead-demo-logo {
+        width: 38px;
+        height: 38px;
+    }
+
+    .lead-demo-modal-title {
+        font-size: 1.02rem;
+    }
+
+    .lead-demo-modal-subtitle {
+        font-size: 12px;
+    }
+
+    .lead-demo-required-badge {
+        padding: 3px 8px;
+        font-size: 10px;
+    }
+
+    .lead-demo-modal-body {
+        padding: 16px;
+    }
+
+    .lead-demo-input {
+        height: 48px;
+        font-size: 14px;
+    }
+
+    .lead-demo-submit-btn {
+        height: 50px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lead-demo-modal-title {
+        font-size: 1rem;
+    }
+
+    .lead-demo-modal-subtitle,
+    .lead-demo-check-label {
+        font-size: 12px;
+    }
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+@keyframes leadDemoFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6);
+    }
+
+    70% {
+        box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+    }
+}

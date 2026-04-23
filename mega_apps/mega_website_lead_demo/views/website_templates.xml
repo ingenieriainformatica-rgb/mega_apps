@@ -4,228 +4,131 @@
     <template id="lead_demo_floating_button_home" inherit_id="website.layout">
         <xpath expr="//body" position="inside">
 
-            <t t-if="website and website.id == 1 and request and request.httprequest and request.httprequest.path == '/'">
+            <!-- <t t-if="website and website.id == 1 and request and request.httprequest and request.httprequest.path == '/'"> -->
+            <t t-if="website and website.id == 1 and request and request.httprequest">
 
                 <!-- CONTENEDOR -->
-                <div id="floating-lead-wrapper"
-                    style="
-                        position: fixed;
-                        left: 15px;
-                        bottom: 120px;
-                        z-index: 1050;
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                    ">
+                <div id="floating-lead-wrapper" class="container-floating-lead">
 
                     <!-- BOTÓN VERDE -->
-                    <button type="button"
-                            data-bs-toggle="modal"
-                            data-bs-target="#leadDemoModal"
-                            style="
-                                width: 60px;
-                                height: 60px;
-                                border-radius: 50%;
-                                border: none;
-                                background: #25D366;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-                                transition: transform 0.2s ease;
-                                flex-shrink: 0;
-                            "
-                            onmouseover="this.style.transform='scale(1.08)'"
-                            onmouseout="this.style.transform='scale(1)'">
-                        <i class="fa fa-whatsapp" style="font-size: 26px; color: white;"></i>
+                    <button type="button" data-bs-toggle="modal" data-bs-target="#leadDemoModal" class="button-green" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+                        <i class="fa fa-whatsapp fa-fa-whatsapp"></i>
                     </button>
 
                     <!-- TEXTO -->
-                    <div id="lead-tooltip"
-                        style="
-                            background: #1f1f1f;
-                            color: #fff;
-                            padding: 12px 16px;
-                            border-radius: 999px;
-                            font-size: 14px;
-                            font-weight: 500;
-                            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-                            white-space: nowrap;
-                            animation: fadeInLeft 0.5s ease;
-                        ">
+                    <div id="lead-tooltip" class="lead-tooltip-text">
                         ¿Interesado en un servicio?
                     </div>
 
                 </div>
 
                 <!-- MODAL -->
-                <div class="modal fade" id="leadDemoModal" tabindex="-1">
+                <div class="modal fade lead-demo-modal" id="leadDemoModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="leadDemoModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
+                        <div class="modal-content lead-demo-modal-content">
 
-                            <div class="modal-header">
-                                <h5 class="modal-title">Déjanos tus datos</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"/>
+                            <!-- Header -->
+                            <div class="lead-demo-modal-header">
+
+                                <div class="lead-demo-header-main">
+                                    <img src="/mega_website_lead_demo/static/description/icon.png" alt="Logo" class="lead-demo-logo"/>
+
+                                    <div class="lead-demo-header-text">
+                                        <h4 id="leadDemoModalLabel" class="lead-demo-modal-title">
+                                            Solicita tu servicio
+                                        </h4>
+
+                                        <div class="lead-demo-header-meta">
+                                            <small class="lead-demo-modal-subtitle">
+                                                Continuamos por WhatsApp
+                                            </small>
+
+                                            <span class="lead-demo-required-badge">
+                                                * Campos obligatorios
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn-close lead-demo-close-btn" data-bs-dismiss="modal" aria-label="Cerrar"/>
                             </div>
 
-                            <div class="modal-body">
-                                <form action="/lead_demo/test" method="post">
+                            <!-- Body -->
+                            <div class="modal-body lead-demo-modal-body">
+                                <form id="leadDemoForm">
 
-                                    <!-- Mensaje superior -->
-                                    <div class="mb-3 text-end">
-                                        <small style="color:#6c757d;">
-                                            Los campos con <span style="color:red;">*</span> son obligatorios
-                                        </small>
-                                    </div>
-
-                                    <!-- Nombre -->
-                                    <div class="row mb-3 align-items-center">
-                                        <label class="col-4 col-form-label">
-                                            Nombre <span style="color:red;">*</span>
-                                        </label>
-                                        <div class="col-8">
-                                            <input type="text" name="invoice_name" class="form-control"
-                                                placeholder="Ej: Juan Pérez"
-                                                required="required"/>
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-6">
+                                            <input type="text" name="invoice_name" class="form-control lead-demo-input" placeholder="Nombre completo *" required="required"/>
                                         </div>
-                                    </div>
 
-                                    <!-- NIT -->
-                                    <div class="row mb-3 align-items-center">
-                                        <label class="col-4 col-form-label">
-                                            Cédula / NIT <span style="color:red;">*</span>
-                                        </label>
-                                        <div class="col-8">
-                                            <input type="text" name="vat" class="form-control"
-                                                placeholder="Ej: 900123456"
-                                                required="required"/>
+                                        <div class="col-12 col-md-6">
+                                            <input type="text" name="vat" class="form-control lead-demo-input" placeholder="Cédula o NIT *" required="required"/>
                                         </div>
-                                    </div>
 
-                                    <!-- Teléfono -->
-                                    <div class="row mb-3 align-items-center">
-                                        <label class="col-4 col-form-label">
-                                            Teléfono <span style="color:red;">*</span>
-                                        </label>
-                                        <div class="col-8">
-                                            <input type="text" name="phone" class="form-control"
-                                                placeholder="Ej: 3001234567"
-                                                required="required"/>
+                                        <div class="col-12 col-md-6">
+                                            <input type="text" name="phone" class="form-control lead-demo-input" placeholder="Teléfono *" required="required"/>
                                         </div>
-                                    </div>
 
-                                    <!-- Dirección -->
-                                    <div class="row mb-3 align-items-center">
-                                        <label class="col-4 col-form-label">
-                                            Dirección
-                                        </label>
-                                        <div class="col-8">
-                                            <input type="text" name="street" class="form-control"
-                                                placeholder="Ej: Calle 10 #20-30"/>
+                                        <div class="col-12 col-md-6">
+                                            <input type="email" name="email" class="form-control lead-demo-input" placeholder="Correo electrónico *" required="required"/>
                                         </div>
-                                    </div>
 
-                                    <!-- Email -->
-                                    <div class="row mb-3 align-items-center">
-                                        <label class="col-4 col-form-label">
-                                            Correo <span style="color:red;">*</span>
-                                        </label>
-                                        <div class="col-8">
-                                            <input type="email" name="email" class="form-control"
-                                                placeholder="Ej: correo@empresa.com"
-                                                required="required"/>
-                                        </div>
-                                    </div>
-
-                                    <!-- Marca -->
-                                    <div class="row mb-3 align-items-center">
-                                        <label class="col-4 col-form-label">
-                                            Marca
-                                        </label>
-                                        <div class="col-8">
-                                            <input type="text" name="brand_brand" class="form-control"
-                                                placeholder="Ej: Mazda"/>
-                                        </div>
-                                    </div>
-
-                                    <!-- Modelo -->
-                                    <div class="row mb-3 align-items-center">
-                                        <label class="col-4 col-form-label">
-                                            Modelo
-                                        </label>
-                                        <div class="col-8">
-                                            <input type="text" name="brand_model" class="form-control"
-                                                placeholder="Ej: CX-5 2020"/>
-                                        </div>
-                                    </div>
-
-                                    <!-- Placa -->
-                                    <div class="row mb-3 align-items-center">
-                                        <label class="col-4 col-form-label">
-                                            Placa <span style="color:red;">*</span>
-                                        </label>
-                                        <div class="col-8">
-                                            <input type="text" name="license_plate" class="form-control"
-                                                placeholder="Ej: ABC123"
-                                                required="required"/>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
                                         <div class="col-12">
-                                            <div class="form-check">
-                                                <input class="form-check-input"
-                                                    type="checkbox"
-                                                    id="accept_terms"
-                                                    name="accept_terms"
-                                                    value="1"
-                                                    required="required"/>
-                                                <label class="form-check-label" for="accept_terms">
-                                                    Acepto los <a href="/terminos-y-condiciones" target="_blank">términos y condiciones</a>
-                                                    y el tratamiento de mis datos personales <span style="color:red;">*</span>
-                                                </label>
-                                            </div>
+                                            <input type="text" name="street" class="form-control lead-demo-input" placeholder="Dirección"/>
+                                        </div>
+
+                                        <div class="col-12 col-md-6">
+                                            <select id="brand_id" name="brand_id" class="form-select lead-demo-input">
+                                                <option value="">Seleccione una marca...</option>
+                                            </select>
+                                            <input type="hidden" id="brand_name" name="brand_name"/>
+                                        </div>
+
+                                        <div class="col-12 col-md-6">
+                                            <select id="model_id" name="model_id" class="form-select lead-demo-input">
+                                                <option value="">Seleccione un modelo...</option>
+                                            </select>
+                                            <input type="hidden" id="model_name" name="model_name"/>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <input type="text" name="license_plate" class="form-control lead-demo-input" placeholder="Placa *" required="required"/>
                                         </div>
                                     </div>
 
-                                    <!-- Hidden -->
+                                    <div class="lead-demo-check-wrap mt-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="accept_terms" name="accept_terms" value="1" required="required"/>
+                                            <label class="form-check-label lead-demo-check-label" for="accept_terms">
+                                                Acepto los términos y condiciones y el tratamiento de mis datos personales
+                                                <span class="lead-demo-required">*</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
                                     <input type="hidden" name="page_url" t-att-value="request.httprequest.path"/>
                                     <input type="hidden" name="website_id" t-att-value="website.id"/>
                                     <input type="hidden" name="website_name" t-att-value="website.name"/>
 
-                                    <!-- Botón -->
-                                    <div class="d-grid mt-3">
-                                        <button type="submit" class="btn btn-success">
-                                            Enviar información
+                                    <div id="leadDemoMessage" class="alert d-none mt-3"></div>
+
+                                    <div class="d-grid mt-4">
+                                        <button type="submit" id="leadDemoSubmitBtn" class="btn lead-demo-submit-btn">
+                                        Solicitar servicio
                                         </button>
                                     </div>
 
                                 </form>
                             </div>
-
                         </div>
                     </div>
                 </div>
-
-                <!-- ANIMACIÓN -->
-                <style>
-                    @keyframes fadeInLeft {
-                        from {
-                            opacity: 0;
-                            transform: translateX(-20px);
-                        }
-                        to {
-                            opacity: 1;
-                            transform: translateX(0);
-                        }
-                    }
-                </style>
 
             </t>
 
         </xpath>
     </template>
-
 
     <!-- Página de confirmación -->
     <template id="lead_demo_thank_you" name="Lead Demo Thank You">
@@ -233,7 +136,8 @@
             <div class="container mt-5 mb-5">
                 <div class="alert alert-success">
                     <h4>Lead creado correctamente</h4>
-                    <p>Se creó el registro: <strong t-esc="lead_name"/></p>
+                    <p>Se creó el registro: <strong t-esc="lead_name"/>
+                    </p>
                 </div>
             </div>
         </t>
