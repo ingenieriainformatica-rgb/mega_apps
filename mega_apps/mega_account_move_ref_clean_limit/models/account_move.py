@@ -85,6 +85,19 @@ class AccountMove(models.Model):
                     "Documento existente: %s (ID: %s)"
                 ) % (ref_clean, move.partner_id.name, existing.name, existing.id))
 
+    def _validate_ref_numeric_only(self):
+        for move in self:
+            if not self._should_validate_ref_for_move(move):
+                continue
+
+            ref_clean = move._sanitize_ref_value(move.ref)
+
+            if ref_clean and not ref_clean.isdigit():
+                raise ValidationError(_(
+                    "La referencia de la factura del proveedor debe contener únicamente números.\n\n"
+                    "Valor actual: %s"
+                ) % ref_clean)
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -93,6 +106,7 @@ class AccountMove(models.Model):
                 vals['ref'] = self._sanitize_ref_value(ref)
 
         records = super().create(vals_list)
+        records._validate_ref_numeric_only()
         records._validate_ref_length_limit()
         records._validate_ref_uniqueness()
         return records
@@ -110,6 +124,7 @@ class AccountMove(models.Model):
 
         # Solo validar cuando realmente cambien ref
         if validate_ref:
+            self._validate_ref_numeric_only()
             self._validate_ref_length_limit()
 
         if validate_ref or validate_partner:
