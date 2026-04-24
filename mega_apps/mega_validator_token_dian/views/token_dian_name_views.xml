@@ -46,14 +46,17 @@
             <form string="Token DIAN">
 
                 <header>
-                    <button name="action_open_upload_wizard" type="object" string="Subir archivo" class="btn-primary" invisible="not id or state != 'draft'" confirm="Seguro de subir el archivo???"/>
-                    <button name="action_process_token" type="object" string="Procesar" class="btn-primary" icon="fa-cogs" invisible="not id or state != 'loaded'" confirm="Estas seguro, se procesara todo el token Dian?"/>
+                    <button name="action_open_upload_wizard" type="object" string="Subir archivo" class="btn-primary" invisible="not id or state != 'draft'" confirm="¿Estás seguro de cargar el archivo del Token DIAN?"/>
+
+                    <button name="action_process_token" type="object" string="Procesar" class="btn-primary" icon="fa-cogs" invisible="not id or state != 'loaded'" confirm="¿Estás seguro de procesar este Token DIAN? El sistema validará todos los registros cargados."/>
+
                     <button name="action_export_excel" type="object" class="btn-danger" invisible="not file_ids" icon="fa-download" help="Exportar a Excel"/>
-                    <button name="action_process_validated" type="object" string="Procesado y validado" class="btn-primary" icon="fa-refresh" invisible="not id or state not in ['loaded', 'processed']" confirm="¿Estás seguro? Esta acción no tiene vuelta atrás y dejará el token en estado Validado."/>
+
+                    <button name="action_process_validated" type="object" string="Procesado y validado" class="btn-primary" icon="fa-refresh" invisible="not id or state not in ['loaded', 'processed']" confirm="¿Estás seguro de marcar este Token DIAN como Validado? Esta acción no tiene vuelta atrás."/>
 
                     <button name="action_open_file_ids_list" type="object" string="Ver registros" class="btn-secondary" invisible="not id or state not in ['validated']"/>
 
-                    <button name="action_reset_to_draft" type="object" string="Volver a borrador" class="btn-secondary" icon="fa-undo" groups="mega_validator_token_dian.group_token_dian_reset_to_draft" confirm="¿Estás seguro de regresar este token al estado Borrador?"/>
+                    <button name="action_reset_to_draft" type="object" string="Volver a borrador" class="btn-secondary" icon="fa-undo" groups="mega_validator_token_dian.group_token_dian_reset_to_draft" confirm="¿Estás seguro de regresar este Token DIAN al estado Borrador? Esta acción debe realizarse únicamente si el proceso requiere corrección o reproceso."/>
 
                     <field name="state" widget="statusbar" statusbar_visible="draft,loaded,processed,validated,error"/>
                 </header>
@@ -72,7 +75,7 @@
                             <field name="date_end" readonly="state != 'draft'"/>
                         </group>
                         <group string="Observaciones">
-                            <field name="note" nolabel="1" placeholder="Comentarios u observaciones del token..." readonly="state != 'draft'"/>
+                            <field name="note" nolabel="1" placeholder="Comentarios u observaciones del token..." readonly="state in ['validated', 'error']"/>
                         </group>
                     </group>
                     <notebook>

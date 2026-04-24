@@ -3,6 +3,7 @@ import base64
 import logging
 import os
 from io import BytesIO
+from datetime import datetime
 
 from openpyxl import load_workbook  # type: ignore
 
@@ -117,6 +118,7 @@ class MegaDianTokenUploadWizard(models.TransientModel):
                 "folio": parsed_row["folio"],
                 "prefijo": parsed_row["prefijo"],
                 "nit_emisor": parsed_row["nit_emisor"],
+                "fecha_emision_dian": parsed_row["fecha_emision_dian"],
                 "nombre_emisor": parsed_row["nombre_emisor"],
                 "iva": parsed_row["iva"],
                 "total": parsed_row["total"],
@@ -124,6 +126,23 @@ class MegaDianTokenUploadWizard(models.TransientModel):
             created_count += 1
 
         return created_count
+
+
+    def _parse_excel_date(self, value):
+        if not value:
+            return False
+
+        if hasattr(value, "date"):
+            return value.date()
+
+        if isinstance(value, str):
+            for fmt in ("%d-%m-%Y", "%Y-%m-%d", "%d/%m/%Y"):
+                try:
+                    return datetime.strptime(value.strip(), fmt).date()
+                except ValueError:
+                    continue
+
+        return False
 
     def _parse_row_data(self, row_data):
         tipo_documento = self._normalize_text(row_data.get("Tipo de documento"))
@@ -135,6 +154,7 @@ class MegaDianTokenUploadWizard(models.TransientModel):
             "prefijo": self._normalize_text(row_data.get("Prefijo")),
             "nit_emisor": nit_emisor,
             "nombre_emisor": self._normalize_text(row_data.get("Nombre Emisor")),
+            "fecha_emision_dian": self._parse_excel_date(row_data.get("Fecha Emisión")),
             "iva": self._to_float(row_data.get("IVA")),
             "total": self._to_float(row_data.get("Total")),
         }

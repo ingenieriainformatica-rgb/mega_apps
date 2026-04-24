@@ -4,6 +4,7 @@ import base64
 import re
 import logging
 from decimal import Decimal, ROUND_HALF_UP
+from datetime import datetime
 
 from httplib2 import FailedToDecompressContent
 
@@ -297,6 +298,7 @@ class MegaDianToken(models.Model):
                 "partner_id": move.partner_id.id,
                 "move_id": move.id,
                 "odoo_ref": move.ref or move.name,
+                "fecha_factura_odoo": move.invoice_date,
                 "odoo_total": self._get_move_dian_total(move),
                 "odoo_iva": self._get_move_dian_iva(move),
             },
@@ -396,13 +398,17 @@ class MegaDianToken(models.Model):
     # ============================================================
     # EXPORTACIÓN EXCEL
     # ============================================================
+    # ============================================================
+    # EXPORTACIÓN EXCEL
+    # ============================================================
     def action_export_excel(self):
         """
         Exporta los registros del token DIAN a Excel con:
         - columnas DIAN
         - columnas Odoo
+        - fechas DIAN y Odoo
         - estado de conciliación
-        - diferencias de IVA y total
+        - diferencias de IVA, total y fecha
         - resaltado visual cuando existan diferencias
         """
         self.ensure_one()
@@ -452,6 +458,7 @@ class MegaDianToken(models.Model):
             "target": "self",
         }
 
+
     def _get_excel_formats(self, workbook):
         return {
             "header_dian": workbook.add_format({
@@ -489,6 +496,10 @@ class MegaDianToken(models.Model):
             "text": workbook.add_format({
                 "border": 1,
             }),
+            "date": workbook.add_format({
+                "border": 1,
+                "num_format": "dd/mm/yyyy",
+            }),
             "money": workbook.add_format({
                 "border": 1,
                 "num_format": '#,##0.00',
@@ -502,17 +513,24 @@ class MegaDianToken(models.Model):
                 "border": 1,
                 "bg_color": "#FFF2CC",
             }),
+            "warning_date": workbook.add_format({
+                "border": 1,
+                "bg_color": "#FFF2CC",
+                "num_format": "dd/mm/yyyy",
+            }),
             "boolean": workbook.add_format({
                 "border": 1,
                 "align": "center",
             }),
         }
 
+
     def _get_excel_headers(self):
         return [
             ("Tipo documento", "header_dian"),
             ("Folio", "header_dian"),
             ("Prefijo", "header_dian"),
+            ("Fecha DIAN", "header_dian"),
             ("NIT emisor", "header_dian"),
             ("Nombre emisor", "header_dian"),
             ("IVA DIAN", "header_dian"),
@@ -521,6 +539,7 @@ class MegaDianToken(models.Model):
             ("Proveedor encontrado", "header_odoo"),
             ("Factura Odoo", "header_odoo"),
             ("Referencia Odoo", "header_odoo"),
+            ("Fecha Odoo", "header_odoo"),
             ("IVA Odoo", "header_odoo"),
             ("Total Odoo", "header_odoo"),
 
@@ -532,26 +551,30 @@ class MegaDianToken(models.Model):
             ("Diferencia Total", "header_diff"),
         ]
 
+
     def _get_excel_column_widths(self):
         return {
             0: 22,
             1: 15,
             2: 15,
-            3: 18,
-            4: 30,
-            5: 14,
+            3: 14,   # Fecha DIAN
+            4: 18,
+            5: 30,
             6: 14,
-            7: 28,
-            8: 20,
+            7: 14,
+            8: 28,
             9: 20,
-            10: 14,
-            11: 14,
-            12: 18,
-            13: 40,
-            14: 12,
-            15: 16,
-            16: 16,
+            10: 20,
+            11: 14,  # Fecha Odoo
+            12: 14,
+            13: 14,
+            14: 18,
+            15: 40,
+            16: 12,
+            17: 16,
+            18: 16,
         }
+
 
     def _write_excel_line(self, sheet, row, line, formats):
         iva_dian = self._to_amount(line.iva)
@@ -565,6 +588,10 @@ class MegaDianToken(models.Model):
         has_iva_diff = abs(diff_iva) >= 0.01
         has_total_diff = abs(diff_total) >= 0.01
 
+        fecha_dian = line.fecha_emision_dian
+        fecha_odoo = line.fecha_factura_odoo
+        has_date_diff = bool(fecha_dian and fecha_odoo and fecha_dian != fecha_odoo)
+
         iva_dian_fmt = formats["warning_money"] if has_iva_diff else formats["money"]
         iva_odoo_fmt = formats["warning_money"] if has_iva_diff else formats["money"]
         diff_iva_fmt = formats["warning_money"] if has_iva_diff else formats["money"]
@@ -573,32 +600,44 @@ class MegaDianToken(models.Model):
         total_odoo_fmt = formats["warning_money"] if has_total_diff else formats["money"]
         diff_total_fmt = formats["warning_money"] if has_total_diff else formats["money"]
 
-        status_fmt = formats["warning_text"] if (has_iva_diff or has_total_diff) else formats["text"]
+        fecha_dian_fmt = formats["warning_date"] if has_date_diff else formats["date"]
+        fecha_odoo_fmt = formats["warning_date"] if has_date_diff else formats["date"]
+
+        status_fmt = formats["warning_text"] if (has_iva_diff or has_total_diff or has_date_diff) else formats["text"]
 
         sheet.write(row, 0, line.tipo_documento or "", formats["text"])
         sheet.write(row, 1, line.folio or "", formats["text"])
         sheet.write(row, 2, line.prefijo or "", formats["text"])
-        sheet.write(row, 3, line.nit_emisor or "", formats["text"])
-        sheet.write(row, 4, line.nombre_emisor or "", formats["text"])
 
-        sheet.write_number(row, 5, iva_dian, iva_dian_fmt)
-        sheet.write_number(row, 6, total_dian, total_dian_fmt)
+        if fecha_dian:
+            sheet.write_datetime(row, 3, datetime.combine(fecha_dian, datetime.min.time()), fecha_dian_fmt)
+        else:
+            sheet.write(row, 3, "", fecha_dian_fmt)
 
-        sheet.write(row, 7, line.partner_id.display_name if line.partner_id else "", formats["text"])
-        sheet.write(row, 8, line.move_id.name if line.move_id else "", formats["text"])
-        sheet.write(row, 9, line.odoo_ref or "", formats["text"])
+        sheet.write(row, 4, line.nit_emisor or "", formats["text"])
+        sheet.write(row, 5, line.nombre_emisor or "", formats["text"])
 
-        sheet.write_number(row, 10, iva_odoo, iva_odoo_fmt)
-        sheet.write_number(row, 11, total_odoo, total_odoo_fmt)
+        sheet.write_number(row, 6, iva_dian, iva_dian_fmt)
+        sheet.write_number(row, 7, total_dian, total_dian_fmt)
 
-        sheet.write(row, 12, line.validation_status or "", status_fmt)
-        sheet.write(row, 13, line.validation_note or "", status_fmt)
-        sheet.write(row, 14, "Sí" if line.is_reconciled else "No", formats["boolean"])
+        sheet.write(row, 8, line.partner_id.display_name if line.partner_id else "", formats["text"])
+        sheet.write(row, 9, line.move_id.name if line.move_id else "", formats["text"])
+        sheet.write(row, 10, line.odoo_ref or "", formats["text"])
 
-        sheet.write_number(row, 15, diff_iva, diff_iva_fmt)
-        sheet.write_number(row, 16, diff_total, diff_total_fmt)
+        if fecha_odoo:
+            sheet.write_datetime(row, 11, datetime.combine(fecha_odoo, datetime.min.time()), fecha_odoo_fmt)
+        else:
+            sheet.write(row, 11, "", fecha_odoo_fmt)
 
+        sheet.write_number(row, 12, iva_odoo, iva_odoo_fmt)
+        sheet.write_number(row, 13, total_odoo, total_odoo_fmt)
 
+        sheet.write(row, 14, line.validation_status or "", status_fmt)
+        sheet.write(row, 15, line.validation_note or "", status_fmt)
+        sheet.write(row, 16, "Sí" if line.is_reconciled else "No", formats["boolean"])
+
+        sheet.write_number(row, 17, diff_iva, diff_iva_fmt)
+        sheet.write_number(row, 18, diff_total, diff_total_fmt)
     # ============================================================
     # Validated and processed action (no vuelta atrás)
     # ============================================================

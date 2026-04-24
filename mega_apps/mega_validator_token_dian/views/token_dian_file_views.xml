@@ -35,20 +35,22 @@
             <list string="Archivos del Token DIAN" create="0" delete="0" edit="0">
                 <field name="tipo_documento"/>
                 <field name="folio"/>
-                <field name="prefijo"/>
-                <field name="nit_emisor"/>
-                <field name="nombre_emisor"/>
-                <field name="iva"/>
-                <field name="total" string="Total Dian"/>
+                <field name="prefijo" optional="hide"/>
+                <field name="nit_emisor" optional="show"/>
+                <field name="nombre_emisor" optional="hide"/>
+                <field name="iva" optional="show"/>
+                <field name="total" string="Total Dian" optional="show"/>
+                <field name="fecha_emision_dian" string="Fecha emisión DIAN" optional="show"/>
 
-                <field name="partner_id"/>
-                <field name="move_id"/>
-                <field name="odoo_ref"/>
-                <field name="odoo_iva"/>
-                <field name="odoo_total"/>
-                <field name="validation_status"/>
-                <field name="validation_note"/>
-                <field name="is_reconciled" widget="boolean_toggle"/>
+                <field name="partner_id" optional="hide"/>
+                <field name="move_id" optional="show"/>
+                <field name="odoo_ref" optional="show"/>
+                <field name="odoo_iva" optional="show"/>
+                <field name="odoo_total" optional="show"/>
+                <field name="validation_status" optional="show"/>
+                <field name="validation_note" optional="show"/>
+                <field name="fecha_factura_odoo" string="Fecha factura Odoo" optional="show"/>
+                <field name="is_reconciled" widget="boolean_toggle" optional="show"/>
 
             </list>
         </field>
