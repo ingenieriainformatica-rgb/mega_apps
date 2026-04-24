@@ -9,20 +9,30 @@
 
             <!-- Alertas -->
             <xpath expr="//sheet" position="before">
-                <div class="alert alert-info oe_edit_only" role="alert" invisible="vat">
-                    <strong>1.</strong> Ingresa el <strong>NIT</strong> o la <strong>cédula</strong> para habilitar los demás campos del contacto.
+                <div class="alert alert-primary oe_edit_only fs-5 py-3" role="alert" invisible="vat">
+                    <strong>1.</strong> Ingresa el
+                    <span class="badge rounded-pill text-bg-primary">NIT</span>
+                        o la
+                    <span class="badge rounded-pill text-bg-primary">cédula</span>
+                        para habilitar los demás campos del contacto.
                 </div>
 
-                <div class="alert alert-info oe_edit_only" role="alert" invisible="not vat or country_id">
-                    <strong>2.</strong> Selecciona el <strong>País</strong> para continuar.
+                <div class="alert alert-warning oe_edit_only fs-5 py-3" role="alert" invisible="not vat or country_id">
+                    <strong>2.</strong> Selecciona el
+                    <span class="badge rounded-pill text-bg-warning">País</span>
+                        para continuar.
                 </div>
 
-                <div class="alert alert-info oe_edit_only" role="alert" invisible="not vat or not country_id or state_id">
-                    <strong>3.</strong> Selecciona el <strong>Estado</strong> para continuar.
+                <div class="alert alert-info oe_edit_only fs-5 py-3" role="alert" invisible="not vat or not country_id or state_id">
+                    <strong>3.</strong> Selecciona el
+                    <span class="badge rounded-pill text-bg-info">Estado</span>
+                        para continuar.
                 </div>
 
-                <div class="alert alert-info oe_edit_only" role="alert" invisible="not vat or not country_id or not state_id or city">
-                    <strong>4.</strong> Ingresa la <strong>Ciudad</strong> para habilitar el resto de los campos.
+                <div class="alert alert-success oe_edit_only fs-5 py-3" role="alert" invisible="not vat or not country_id or not state_id or city">
+                    <strong>4.</strong> Ingresa la
+                    <span class="badge rounded-pill text-bg-success">Ciudad</span>
+                    para habilitar el resto de los campos.
                 </div>
             </xpath>
 
