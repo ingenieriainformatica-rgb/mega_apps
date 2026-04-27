@@ -12,4 +12,4 @@
     "installable": True,
     "application": False,
     "license": "LGPL-3",
-}
+}# type: ignore

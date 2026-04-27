@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_obligacion_tributaria_manager,obligacion.tributaria manager,model_obligacion_tributaria,account.group_account_manager,1,1,1,1
+access_obligacion_tributaria_user,obligacion.tributaria user,model_obligacion_tributaria,account.group_account_invoice,1,1,0,0
+access_historial_alerta_manager,historial.alerta.tributaria manager,model_historial_alerta_tributaria,account.group_account_manager,1,1,1,1
+access_historial_alerta_user,historial.alerta.tributaria user,model_historial_alerta_tributaria,account.group_account_invoice,1,0,0,0

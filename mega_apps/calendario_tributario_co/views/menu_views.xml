@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Menú raíz -->
+  <menuitem id="menu_tributario_root"
+            name="Calendario Tributario"
+            sequence="90"
+            web_icon="calendario_tributario_co,static/description/icon.png"/>
+
+  <!-- Submenús -->
+  <menuitem id="menu_obligaciones_all"
+            name="Todas las Obligaciones"
+            parent="menu_tributario_root"
+            action="action_obligacion_tributaria"
+            sequence="10"/>
+
+  <menuitem id="menu_obligaciones_urgentes"
+            name="⚠️ Urgentes (≤ 5 días)"
+            parent="menu_tributario_root"
+            action="action_obligaciones_urgentes"
+            sequence="20"/>
+
+</odoo>

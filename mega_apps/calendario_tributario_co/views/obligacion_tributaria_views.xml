@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ═══ VISTA LISTA ═══ -->
+  <record id="view_obligacion_tributaria_list" model="ir.ui.view">
+    <field name="name">obligacion.tributaria.list</field>
+    <field name="model">obligacion.tributaria</field>
+    <field name="arch" type="xml">
+      <list string="Obligaciones Tributarias 2026">
+        <field name="empresa"/>
+        <field name="tipo_obligacion"/>
+        <field name="fecha_limite"/>
+        <field name="dias_restantes" string="Días restantes"/>
+        <field name="monto" optional="hide"/>
+        <field name="estado"/>
+        <field name="alerta_enviada_5d" optional="hide"/>
+        <field name="alerta_enviada_3d" optional="hide"/>
+        <field name="alerta_enviada_1d" optional="hide"/>
+      </list>
+    </field>
+  </record>
+
+  <!-- ═══ VISTA FORMULARIO ═══ -->
+  <record id="view_obligacion_tributaria_form" model="ir.ui.view">
+    <field name="name">obligacion.tributaria.form</field>
+    <field name="model">obligacion.tributaria</field>
+    <field name="arch" type="xml">
+      <form string="Obligación Tributaria">
+        <header>
+          <button name="action_enviar_alerta_manual" string="Enviar Alerta Ahora" type="object" class="btn-secondary" invisible="estado in ['pagado','no_aplica']"/>
+          <button name="action_marcar_pagado" string="Marcar como Pagado" type="object" class="btn-primary" invisible="estado in ['pagado','no_aplica']" confirm="¿Confirmar que esta obligación fue pagada/presentada hoy?"/>
+          <field name="estado" widget="statusbar" statusbar_visible="pendiente,en_proceso,pagado"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <h1>
+              <field name="display_name" readonly="1"/>
+            </h1>
+          </div>
+
+          <!-- Banner de alerta -->
+          <div class="alert alert-danger" role="alert" invisible="dias_restantes &gt; 1 or estado in ['pagado','no_aplica']">
+            <strong>🚨 URGENTE:</strong> Esta obligación vence
+            <field name="dias_restantes" readonly="1"/>
+ día(s).
+            ¡Acción inmediata requerida!
+          </div>
+          <div class="alert alert-warning" role="alert" invisible="dias_restantes &lt;= 1 or dias_restantes &gt; 5 or estado in ['pagado','no_aplica']">
+            <strong>⚠️ ALERTA:</strong> Quedan
+            <field name="dias_restantes" readonly="1"/>
+ días para el vencimiento.
+          </div>
+
+          <group>
+            <group string="Identificación">
+              <field name="empresa"/>
+              <field name="tipo_obligacion"/>
+              <field name="aplica"/>
+            </group>
+            <group string="Fechas y Estado">
+              <field name="fecha_limite"/>
+              <field name="dias_restantes" readonly="1"/>
+              <field name="fecha_pago"/>
+            </group>
+          </group>
+
+          <group>
+            <group string="Financiero">
+              <field name="monto"/>
+              <field name="currency_id" invisible="1"/>
+              <field name="numero_formulario"/>
+            </group>
+            <group string="Alertas enviadas">
+              <field name="alerta_enviada_5d" readonly="1"/>
+              <field name="alerta_enviada_3d" readonly="1"/>
+              <field name="alerta_enviada_1d" readonly="1"/>
+            </group>
+          </group>
+
+          <group string="Responsables">
+            <field name="responsable_ids" widget="many2many_tags"/>
+          </group>
+
+          <group string="Notas">
+            <field name="notas" nolabel="1"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+
+  <!-- ═══ VISTA KANBAN ═══ -->
+  <record id="view_obligacion_tributaria_kanban" model="ir.ui.view">
+    <field name="name">obligacion.tributaria.kanban</field>
+    <field name="model">obligacion.tributaria</field>
+    <field name="arch" type="xml">
+      <kanban default_group_by="empresa" class="o_kanban_small_column">
+        <field name="empresa"/>
+        <field name="tipo_obligacion"/>
+        <field name="fecha_limite"/>
+        <field name="dias_restantes"/>
+        <field name="estado"/>
+        <field name="monto"/>
+        <templates>
+          <t t-name="card">
+            <div t-attf-class="oe_kanban_card #{record.dias_restantes.raw_value &lt;= 1 and record.estado.raw_value == 'pendiente' ? 'border-danger' : record.dias_restantes.raw_value &lt;= 5 and record.estado.raw_value == 'pendiente' ? 'border-warning' : ''}">
+              <div class="o_kanban_record_top">
+                <div class="o_kanban_record_headings">
+                  <strong class="o_kanban_record_title">
+                    <field name="tipo_obligacion"/>
+                  </strong>
+                </div>
+                <field name="estado" widget="badge" decoration-danger="estado == 'pendiente'" decoration-warning="estado == 'en_proceso'" decoration-success="estado == 'pagado'"/>
+              </div>
+              <div class="o_kanban_record_body">
+                <div>📅                  <field name="fecha_limite"/>
+                </div>
+                <div t-if="record.dias_restantes.raw_value >= 0">
+                  ⏳                  <field name="dias_restantes"/>
+ días restantes
+                </div>
+                <div t-if="record.monto.raw_value">
+                  💰                  <field name="monto"/>
+                </div>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <!-- ═══ BÚSQUEDA ═══ -->
+  <record id="view_obligacion_tributaria_search" model="ir.ui.view">
+    <field name="name">obligacion.tributaria.search</field>
+    <field name="model">obligacion.tributaria</field>
+    <field name="arch" type="xml">
+      <search string="Buscar Obligaciones">
+        <field name="empresa"/>
+        <field name="tipo_obligacion"/>
+        <field name="estado"/>
+        <separator/>
+        <!-- <filter string="Pendientes" name="pendientes" domain="[('estado','=','pendiente')]"/>
+        <filter string="En proceso" name="en_proceso" domain="[('estado','=','en_proceso')]"/>
+        <filter string="Pagadas" name="pagadas" domain="[('estado','=','pagado')]"/>
+        <separator/>
+        <filter string="Vencen en 5 días" name="proximas_5" domain="[('dias_restantes','&lt;=',5),('estado','not in',['pagado','no_aplica'])]"/>
+        <filter string="Urgentes (≤ 1 día)" name="urgentes" domain="[('dias_restantes','&lt;=',1),('estado','not in',['pagado','no_aplica'])]"/> -->
+        <separator/>
+        <!-- <filter string="Megabaterias" name="mega" domain="[('empresa','=','megabaterias')]"/>
+        <filter string="Metatecnicentro" name="meta" domain="[('empresa','=','metatecnicentro')]"/> -->
+        <!-- <filter string="Impullsar" name="imp" domain="[('empresa','=','impullsar')]"/>
+        <group expand="0" string="Agrupar por">
+          <filter string="Empresa" name="group_empresa" context="{'group_by':'empresa'}"/>
+          <filter string="Tipo" name="group_tipo" context="{'group_by':'tipo_obligacion'}"/>
+          <filter string="Estado" name="group_estado" context="{'group_by':'estado'}"/>
+          <filter string="Mes" name="group_mes" context="{'group_by':'fecha_limite:month'}"/>
+        </group> -->
+      </search>
+    </field>
+  </record>
+
+  <!-- ═══ ACCIÓN PRINCIPAL ═══ -->
+  <record id="action_obligacion_tributaria" model="ir.actions.act_window">
+    <field name="name">Calendario Tributario 2026</field>
+    <field name="res_model">obligacion.tributaria</field>
+    <field name="view_mode">list,kanban,form</field>
+    <field name="context">{'search_default_pendientes': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">
+        No hay obligaciones registradas
+      </p>
+      <p>Crea tu primer registro de obligación tributaria.</p>
+    </field>
+  </record>
+
+  <!-- Acción: sólo pendientes urgentes (dashboard) -->
+  <record id="action_obligaciones_urgentes" model="ir.actions.act_window">
+    <field name="name">Obligaciones Urgentes</field>
+    <field name="res_model">obligacion.tributaria</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('dias_restantes','&lt;=',5),('estado','not in',['pagado','no_aplica']),('aplica','=',True)]</field>
+    <field name="context">{'search_default_proximas_5': 1}</field>
+  </record>
+
+</odoo>
