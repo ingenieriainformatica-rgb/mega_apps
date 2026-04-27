@@ -535,6 +535,7 @@ class MegaDianToken(models.Model):
             ("Nombre emisor", "header_dian"),
             ("IVA DIAN", "header_dian"),
             ("Total DIAN", "header_dian"),
+            ("CUFE", "header_dian"),
 
             ("Proveedor encontrado", "header_odoo"),
             ("Factura Odoo", "header_odoo"),
@@ -557,22 +558,23 @@ class MegaDianToken(models.Model):
             0: 22,
             1: 15,
             2: 15,
-            3: 14,   # Fecha DIAN
+            3: 14,
             4: 18,
             5: 30,
             6: 14,
             7: 14,
-            8: 28,
-            9: 20,
+            8: 55,   # CUFE
+            9: 28,
             10: 20,
-            11: 14,  # Fecha Odoo
+            11: 20,
             12: 14,
             13: 14,
-            14: 18,
-            15: 40,
-            16: 12,
-            17: 16,
+            14: 14,
+            15: 18,
+            16: 40,
+            17: 12,
             18: 16,
+            19: 16,
         }
 
 
@@ -619,25 +621,27 @@ class MegaDianToken(models.Model):
 
         sheet.write_number(row, 6, iva_dian, iva_dian_fmt)
         sheet.write_number(row, 7, total_dian, total_dian_fmt)
+        sheet.write(row, 8, line.cufe or "", formats["text"])
 
-        sheet.write(row, 8, line.partner_id.display_name if line.partner_id else "", formats["text"])
-        sheet.write(row, 9, line.move_id.name if line.move_id else "", formats["text"])
-        sheet.write(row, 10, line.odoo_ref or "", formats["text"])
+        sheet.write(row, 9, line.partner_id.display_name if line.partner_id else "", formats["text"])
+        sheet.write(row, 10, line.move_id.name if line.move_id else "", formats["text"])
+        sheet.write(row, 11, line.odoo_ref or "", formats["text"])
 
         if fecha_odoo:
-            sheet.write_datetime(row, 11, datetime.combine(fecha_odoo, datetime.min.time()), fecha_odoo_fmt)
+            sheet.write_datetime(row, 12, datetime.combine(fecha_odoo, datetime.min.time()), fecha_odoo_fmt)
         else:
-            sheet.write(row, 11, "", fecha_odoo_fmt)
+            sheet.write(row, 12, "", fecha_odoo_fmt)
 
-        sheet.write_number(row, 12, iva_odoo, iva_odoo_fmt)
-        sheet.write_number(row, 13, total_odoo, total_odoo_fmt)
+        sheet.write_number(row, 13, iva_odoo, iva_odoo_fmt)
+        sheet.write_number(row, 14, total_odoo, total_odoo_fmt)
 
-        sheet.write(row, 14, line.validation_status or "", status_fmt)
-        sheet.write(row, 15, line.validation_note or "", status_fmt)
-        sheet.write(row, 16, "Sí" if line.is_reconciled else "No", formats["boolean"])
+        sheet.write(row, 15, line.validation_status or "", status_fmt)
+        sheet.write(row, 16, line.validation_note or "", status_fmt)
+        sheet.write(row, 17, "Sí" if line.is_reconciled else "No", formats["boolean"])
 
-        sheet.write_number(row, 17, diff_iva, diff_iva_fmt)
-        sheet.write_number(row, 18, diff_total, diff_total_fmt)
+        sheet.write_number(row, 18, diff_iva, diff_iva_fmt)
+        sheet.write_number(row, 19, diff_total, diff_total_fmt)
+
     # ============================================================
     # Validated and processed action (no vuelta atrás)
     # ============================================================

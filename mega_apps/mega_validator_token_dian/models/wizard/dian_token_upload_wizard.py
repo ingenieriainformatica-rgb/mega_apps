@@ -122,6 +122,7 @@ class MegaDianTokenUploadWizard(models.TransientModel):
                 "nombre_emisor": parsed_row["nombre_emisor"],
                 "iva": parsed_row["iva"],
                 "total": parsed_row["total"],
+                "cufe": self._normalize_text(row_data.get("CUFE/CUDE")),
             })
             created_count += 1
 

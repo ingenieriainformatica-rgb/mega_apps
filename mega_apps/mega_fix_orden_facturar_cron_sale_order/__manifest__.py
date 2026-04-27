@@ -8,7 +8,9 @@
     "depends": [
         "sale_management",
     ],
-    "data": [],
+    "data": [
+        "data/ir_cron.xml",
+    ],
     "installable": True,
     "application": False,
     "license": "LGPL-3",

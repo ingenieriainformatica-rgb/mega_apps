@@ -19,6 +19,7 @@
                         <group>
                             <field name="iva"/>
                             <field name="total" string="Total Dian"/>
+                            <field name="cufe"/>
                             <field name="is_reconciled" widget="boolean_toggle"/>
                         </group>
                     </group>
@@ -38,6 +39,7 @@
                 <field name="prefijo" optional="hide"/>
                 <field name="nit_emisor" optional="show"/>
                 <field name="nombre_emisor" optional="hide"/>
+                <field name="cufe" optional="show"/>
                 <field name="iva" optional="show"/>
                 <field name="total" string="Total Dian" optional="show"/>
                 <field name="fecha_emision_dian" string="Fecha emisión DIAN" optional="show"/>

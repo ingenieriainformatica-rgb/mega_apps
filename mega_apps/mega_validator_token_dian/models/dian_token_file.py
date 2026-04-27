@@ -49,6 +49,10 @@ class MegaDianTokenFile(models.Model):
         digits=(16, 2),
     )
 
+    cufe = fields.Char(
+        string="CUFE",
+    )
+
 
     ######## Estos nuevos campos son para el proceso de validación token Dian ########
 
