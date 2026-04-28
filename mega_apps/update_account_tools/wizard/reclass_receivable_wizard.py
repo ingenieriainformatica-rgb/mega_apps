@@ -1,6 +1,6 @@
 import logging
-from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo import api, fields, models, _  #type: ignore
+from odoo.exceptions import UserError  #type: ignore
 
 _logger = logging.getLogger(__name__)
 
@@ -303,10 +303,9 @@ class ReclassReceivableWizard(models.TransientModel):
                 'type': 'rainbow_man',
             }
         }
-    
+
 
     def action_confirm_bulk_journal(self):
-        # _logger.info("\n[BULK_JOURNAL] Bulk journal reclassification initiated.\n")
         self.ensure_one()
         rec = self
 
@@ -330,8 +329,8 @@ class ReclassReceivableWizard(models.TransientModel):
             ("name", "=ilike", f"{journal_code}%"),
             # ("state", "=", "posted"),  # si quieres
         ]
-
         moves = Move.search(domain, order="date desc, id desc")
+
         if not moves:
             raise UserError(f"No encontré documentos con prefijo {journal_code}%.")
 
