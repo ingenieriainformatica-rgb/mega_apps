@@ -48,6 +48,7 @@
                 <field name="move_id" optional="show"/>
                 <field name="odoo_ref" optional="show"/>
                 <field name="odoo_iva" optional="show"/>
+                <field name="impuestos_info" optional="show"/>
                 <field name="odoo_total" optional="show"/>
                 <field name="validation_status" optional="show"/>
                 <field name="validation_note" optional="show"/>

@@ -288,6 +288,32 @@ class MegaDianToken(models.Model):
 
         return list(dict.fromkeys(candidates))
 
+    def _get_move_dian_other_taxes(self, move):
+        """
+        Retorna impuestos diferentes al IVA en formato texto,
+        conservando el signo contable original.
+        """
+        impuestos = []
+
+        for line in move.line_ids.filtered(lambda l: l.tax_line_id):
+            tax = line.tax_line_id
+            tax_name = (tax.name or "").lower()
+
+            # Excluir IVA
+            if "iva" in tax_name:
+                continue
+
+            amount = line.amount_currency if line.currency_id else line.balance
+
+            if not amount:
+                continue
+
+            impuestos.append(
+                f"{tax.name}: ${amount:,.2f}"
+            )
+
+        return "\n".join(impuestos) if impuestos else ""
+
     def _write_line_match(self, line, move, status, note, is_reconciled):
         self._write_line_result(
             line=line,
@@ -301,6 +327,8 @@ class MegaDianToken(models.Model):
                 "fecha_factura_odoo": move.invoice_date,
                 "odoo_total": self._get_move_dian_total(move),
                 "odoo_iva": self._get_move_dian_iva(move),
+                # 🔥 NUEVO CAMPO
+                "impuestos_info": self._get_move_dian_other_taxes(move),
             },
         )
 
@@ -386,18 +414,38 @@ class MegaDianToken(models.Model):
 
         return iva_amount
 
+    def _get_move_dian_other_taxes_amount(self, move):
+        """
+        Retorna la suma de impuestos diferentes al IVA.
+        Conserva el signo: retenciones negativas, impuestos positivos.
+        """
+        other_taxes_amount = 0.0
+
+        for line in move.line_ids.filtered(lambda l: l.tax_line_id):
+            tax_name = (line.tax_line_id.name or "").lower()
+
+            if "iva" in tax_name:
+                continue
+
+            amount = line.amount_currency if line.currency_id else line.balance
+
+            if amount:
+                other_taxes_amount += amount
+
+        return other_taxes_amount
+
+
     def _get_move_dian_total(self, move):
         """
-        Total DIAN bruto = base + IVA positivo.
-        No descuenta retenciones.
+        Total Odoo = subtotal + IVA + otros impuestos.
+        Las retenciones vienen negativas, por eso se restan automáticamente.
         """
         untaxed = move.amount_untaxed or 0.0
         iva_amount = self._get_move_dian_iva(move)
-        return untaxed + iva_amount
+        other_taxes_amount = self._get_move_dian_other_taxes_amount(move)
 
-    # ============================================================
-    # EXPORTACIÓN EXCEL
-    # ============================================================
+        return untaxed + iva_amount + other_taxes_amount
+
     # ============================================================
     # EXPORTACIÓN EXCEL
     # ============================================================
@@ -542,6 +590,7 @@ class MegaDianToken(models.Model):
             ("Referencia Odoo", "header_odoo"),
             ("Fecha Odoo", "header_odoo"),
             ("IVA Odoo", "header_odoo"),
+            ("Impuestos", "header_odoo"),
             ("Total Odoo", "header_odoo"),
 
             ("Estado validación", "header_status"),
@@ -568,13 +617,14 @@ class MegaDianToken(models.Model):
             10: 20,
             11: 20,
             12: 14,
-            13: 14,
-            14: 14,
-            15: 18,
-            16: 40,
-            17: 12,
-            18: 16,
+            13: 14,  # IVA Odoo
+            14: 35,  # Impuestos
+            15: 14,  # Total Odoo
+            16: 18,
+            17: 40,
+            18: 12,
             19: 16,
+            20: 16,
         }
 
 
@@ -633,14 +683,15 @@ class MegaDianToken(models.Model):
             sheet.write(row, 12, "", fecha_odoo_fmt)
 
         sheet.write_number(row, 13, iva_odoo, iva_odoo_fmt)
-        sheet.write_number(row, 14, total_odoo, total_odoo_fmt)
+        sheet.write(row, 14, line.impuestos_info or "", formats["text"])
+        sheet.write_number(row, 15, total_odoo, total_odoo_fmt)
 
-        sheet.write(row, 15, line.validation_status or "", status_fmt)
-        sheet.write(row, 16, line.validation_note or "", status_fmt)
-        sheet.write(row, 17, "Sí" if line.is_reconciled else "No", formats["boolean"])
+        sheet.write(row, 16, line.validation_status or "", status_fmt)
+        sheet.write(row, 17, line.validation_note or "", status_fmt)
+        sheet.write(row, 18, "Sí" if line.is_reconciled else "No", formats["boolean"])
 
-        sheet.write_number(row, 18, diff_iva, diff_iva_fmt)
-        sheet.write_number(row, 19, diff_total, diff_total_fmt)
+        sheet.write_number(row, 19, diff_iva, diff_iva_fmt)
+        sheet.write_number(row, 20, diff_total, diff_total_fmt)
 
     # ============================================================
     # Validated and processed action (no vuelta atrás)
