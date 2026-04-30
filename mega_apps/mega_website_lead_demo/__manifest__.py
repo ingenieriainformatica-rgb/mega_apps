@@ -8,10 +8,12 @@
     "website": "https://megatecnicentro.com/",
     'depends': ['website', 'crm', 'fleet', 'partner_terms_conditions', 'mega_crm_custom_services'],
     'data': [
+        'security/ir.model.access.csv',
         'views/website_templates.xml',
         'views/fleet_vehicle_model_brand_views.xml',
         'views/fleet_vehicle_model_views.xml',
         'views/res_partner_views.xml',
+        'views/website_views.xml',
     ],
     'assets': {
         'web.assets_frontend': [

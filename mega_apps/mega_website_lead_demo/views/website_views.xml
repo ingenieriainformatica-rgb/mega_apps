@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="website_form_inherit_lead_whatsapp_model" model="ir.ui.view">
+        <field name="name">website.form.inherit.lead.whatsapp.model</field>
+        <field name="model">website</field>
+        <field name="inherit_id" ref="website.view_website_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Números WhatsApp">
+                    <field name="lead_whatsapp_ids">
+                        <list editable="bottom">
+                            <field name="sequence" optional="hide"/>
+                            <field name="name" optional="show"/>
+                            <field name="phone" optional="show"/>
+                            <field name="user_id" optional="show"/>
+                            <field name="active" optional="show"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
