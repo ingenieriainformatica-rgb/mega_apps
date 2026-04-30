@@ -6,6 +6,11 @@ from odoo.http import request  # type: ignore
 
 _logger = logging.getLogger(__name__)
 
+COUNTRY_ID = 49  # Colombia
+STATE_ID = 651  # Bogotá
+CITY_ID = 1  # MEDELLÍN
+MEDIUM_ID = 1  # Website
+
 
 def _safe_int(value: Any) -> int | None:
     try:
@@ -40,6 +45,7 @@ def _get_or_create_partner(post: dict[str, Any]) -> Any:
     phone = _clean(post.get("phone"))
     street = _clean(post.get("street"))
     email = _clean(post.get("email"))
+    accept_terms = post.get("accept_terms")
 
     identification_type = _get_identification_type_cc()
 
@@ -61,6 +67,10 @@ def _get_or_create_partner(post: dict[str, Any]) -> Any:
             vals_to_update["email"] = email
         if not partner.street and street:
             vals_to_update["street"] = street
+
+        if not partner.accept_web_terms_conditions and accept_terms:
+            vals_to_update["accept_web_terms_conditions"] = True
+
         if not partner.l10n_latam_identification_type_id and identification_type:
             vals_to_update["l10n_latam_identification_type_id"] = identification_type.id
 
@@ -77,7 +87,11 @@ def _get_or_create_partner(post: dict[str, Any]) -> Any:
         "email": email,
         "street": street,
         "company_type": "person",
+        "accept_web_terms_conditions": accept_terms,
         "is_company": False,
+        "country_id": COUNTRY_ID,
+        "state_id": STATE_ID,
+        "city_id": CITY_ID,
     }
 
     if identification_type:
@@ -87,7 +101,7 @@ def _get_or_create_partner(post: dict[str, Any]) -> Any:
 
 def get_lead_brands() -> list[dict[str, Any]]:
     brand_model = request.env["fleet.vehicle.model.brand"].sudo()
-    brands = brand_model.search([], order="name asc")
+    brands = brand_model.search([("show_on_website", "=", True)], order="name asc")
     return [{"id": brand.id, "name": brand.name} for brand in brands]
 
 def get_lead_models(brand_id: Any = None) -> list[dict[str, Any]]:
@@ -96,7 +110,7 @@ def get_lead_models(brand_id: Any = None) -> list[dict[str, Any]]:
         return []
 
     model_model = request.env["fleet.vehicle.model"].sudo()
-    models = model_model.search([("brand_id", "=", brand_id_int)], order="name asc")
+    models = model_model.search([("brand_id", "=", brand_id_int), ("show_on_website", "=", True)], order="name asc")
     return [{"id": model.id, "name": model.name} for model in models]
 
 def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
@@ -157,6 +171,7 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
             "phone": phone,
             "street": street,
             "email": email,
+            "accept_terms": accept_terms
         })
 
         lead_model = request.env["crm.lead"].sudo()
@@ -172,6 +187,7 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
             "accept_terms": accept_terms,
             "website": base_url,
             "license_plate": license_plate,
+            "medium_id": MEDIUM_ID,  # Website
         }
 
         if brand_id and "brand_id" in lead_model._fields:

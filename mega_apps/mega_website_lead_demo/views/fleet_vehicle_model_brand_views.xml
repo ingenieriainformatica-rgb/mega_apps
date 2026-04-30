@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_vehicle_brand_form_inherit_website" model="ir.ui.view">
+        <field name="name">fleet.vehicle.model.brand.form.website</field>
+        <field name="model">fleet.vehicle.model.brand</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_model_brand_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insertamos notebook después del nombre si no existe -->
+            <xpath expr="//sheet" position="inside">
+                <notebook>
+                    <page string="Opciones Website">
+                        <group>
+                            <field name="show_on_website" widget="boolean_toggle" help="Si está activo, esta marca se mostrará en el sitio web"/>
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -10,12 +10,12 @@
                 <!-- CONTENEDOR -->
                 <div id="floating-lead-wrapper" class="container-floating-lead">
 
-                    <!-- BOTÓN VERDE -->
+
                     <button type="button" data-bs-toggle="modal" data-bs-target="#leadDemoModal" class="button-green" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
                         <i class="fa fa-whatsapp fa-fa-whatsapp"></i>
                     </button>
 
-                    <!-- TEXTO -->
+
                     <div id="lead-tooltip" class="lead-tooltip-text">
                         ¿Interesado en un servicio?
                     </div>

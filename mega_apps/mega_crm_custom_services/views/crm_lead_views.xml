@@ -20,17 +20,16 @@
                     <field name="license_plate" string="Placa del vehículo"/>
                 </group>
 
-                <group col="2">
-                    <separator string="Servicio"/>
+                <group string="Información del Servicio">
                     <field name="tipo_servicio_id" options="{'no_create': True, 'no_edit': True}"/>
                     <field name="zona_domicilio_id" options="{'no_create': True, 'no_edit': True}"/>
                     <field name="service_address"/>
                 </group>
 
-                <group col="2">
+                <!-- <group col="2">
                     <separator string="Términos y condiciones"/>
                     <field name="accept_terms" widget="boolean_toggle"/>
-                </group>
+                </group> -->
 
             </xpath>
 
