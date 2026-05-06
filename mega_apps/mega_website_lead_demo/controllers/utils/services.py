@@ -42,47 +42,32 @@ def _get_or_create_partner(post: dict[str, Any]) -> Any:
     partner_model = request.env["res.partner"].sudo()
 
     invoice_name = _clean(post.get("invoice_name"))
-    vat = _normalize_vat(_clean(post.get("vat")))
     phone = _clean(post.get("phone"))
-    street = _clean(post.get("street"))
     email = _clean(post.get("email"))
     accept_terms = post.get("accept_terms")
-
-    identification_type = _get_identification_type_cc()
+    website_url = post.get("website_url", "")
 
     partner = partner_model.search([
-            ("phone", "=", phone),
-            ("email", "=", email),
-            ("is_company", "=", False),
-        ], limit=1)
+        # ("phone", "=", phone),
+        ("email", "=", email),
+        ("is_company", "=", False),
+    ], limit=1)
 
     if partner:
         vals_to_update = {}
-
-        if not partner.name and invoice_name:
-            vals_to_update["name"] = invoice_name
-        if not partner.phone and phone:
-            vals_to_update["phone"] = phone
-        if not partner.mobile and phone:
-            vals_to_update["mobile"] = phone
-        if not partner.email and email:
-            vals_to_update["email"] = email
-        if not partner.street and street:
-            vals_to_update["street"] = street
-
         if not partner.accept_web_terms_conditions and accept_terms:
             vals_to_update["accept_web_terms_conditions"] = True
-
-        if not partner.l10n_latam_identification_type_id and identification_type:
-            vals_to_update["l10n_latam_identification_type_id"] = identification_type.id
 
         if vals_to_update:
             partner.write(vals_to_update)
 
         return partner
 
+    identification_type = _get_identification_type_cc()
+
+    # Crear nuevo partner
     create_vals = {
-        "name": invoice_name,
+        "name": invoice_name or "Cliente Web",
         "phone": phone,
         "mobile": phone,
         "email": email,
@@ -94,10 +79,28 @@ def _get_or_create_partner(post: dict[str, Any]) -> Any:
         "city_id": CITY_ID,
     }
 
+    # ✅ Solo asignar el ID, no el objeto completo
     if identification_type:
         create_vals["l10n_latam_identification_type_id"] = identification_type.id
 
-    return partner_model.create(create_vals)
+    partner = partner_model.create(create_vals)
+
+    # ✅ Mensaje en chatter cuando se crea
+    message_lines = [
+        "Contacto creado desde el sitio web.",
+        "",
+        f"Teléfono: {phone}",
+        f"Email: {email}",
+    ]
+    if website_url:
+        message_lines.append(f"🔗 URL: {website_url}")
+
+    partner.message_post(
+        body="\n".join(message_lines),
+        message_type="notification",
+    )
+
+    return partner
 
 def _get_whatsapp_line():
     website = request.website
@@ -106,7 +109,7 @@ def _get_whatsapp_line():
 
     if not lines:
         return {
-            "phone": "573164307199",
+            "phone": "573508338984",
             "name": "Default",
         }
 
@@ -134,17 +137,14 @@ def get_lead_models(brand_id: Any = None) -> list[dict[str, Any]]:
 
 def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
     try:
-
-        _logger.info(f"\n\n Post -->  {post} \n\n")
-
-        invoice_name = _clean(post.get("invoice_name"))
+        invoice_name = _clean(post.get("invoice_name")).upper().strip()
         # vat = _normalize_vat(_clean(post.get("vat")))
-        phone = _clean(post.get("phone"))
+        phone = _clean(post.get("phone")).strip()
         # street = _clean(post.get("street"))
-        email = _clean(post.get("email"))
+        email = _clean(post.get("email")).strip()
         # brand_name = _clean(post.get("brand_name"))
         # model_name = _clean(post.get("model_name"))
-        license_plate = _clean(post.get("license_plate")).upper().replace(" ", "")
+        license_plate = _clean(post.get("license_plate")).upper().replace(" ", "").strip()
         website_name = _clean(post.get("website_name"))
         website_url = _clean(post.get("website_url"))
 
