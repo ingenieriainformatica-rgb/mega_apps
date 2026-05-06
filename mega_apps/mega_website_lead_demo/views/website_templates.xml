@@ -4,53 +4,45 @@
     <template id="lead_demo_floating_button_home" inherit_id="website.layout">
         <xpath expr="//body" position="inside">
 
-            <!-- <t t-if="website and website.id == 1 and request and request.httprequest and request.httprequest.path == '/'"> -->
-            <t t-if="website and website.id == 1 and request and request.httprequest">
+            <t t-if="website and website.id == 1 and request and request.httprequest and request.httprequest.path != '/mega-leads'">
 
-                <!-- CONTENEDOR -->
-                <div id="floating-lead-wrapper" class="container-floating-lead">
-
-
-                    <button type="button" data-bs-toggle="modal" data-bs-target="#leadDemoModal" class="button-green" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+                <!-- BOTÓN FLOTANTE -->
+                <!-- <div id="floating-lead-wrapper" class="container-floating-lead">
+                    <button type="button" data-bs-toggle="modal" data-bs-target="#leadDemoModal" class="button-green">
                         <i class="fa fa-whatsapp fa-fa-whatsapp"></i>
                     </button>
-
-
                     <div id="lead-tooltip" class="lead-tooltip-text">
-                        ¿Interesado en un servicio?
+                        ¿Interesado en un batería?
                     </div>
+                </div> -->
 
-                </div>
-
-                <!-- MODAL -->
+                <!-- MODAL MEGABATERÍAS -->
                 <div class="modal fade lead-demo-modal" id="leadDemoModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="leadDemoModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content lead-demo-modal-content">
 
                             <!-- Header -->
                             <div class="lead-demo-modal-header">
-
                                 <div class="lead-demo-header-main">
-                                    <img src="/mega_website_lead_demo/static/description/icon.png" alt="Logo" class="lead-demo-logo"/>
-
+                                    <img src="/mega_website_lead_demo/static/description/icon.png" alt="Megabaterías" class="lead-demo-logo"/>
                                     <div class="lead-demo-header-text">
                                         <h4 id="leadDemoModalLabel" class="lead-demo-modal-title">
-                                            Solicita tu servicio
+                                                Cotiza tu batería
                                         </h4>
-
                                         <div class="lead-demo-header-meta">
                                             <small class="lead-demo-modal-subtitle">
-                                                Continuamos por WhatsApp
+                                                <i class="fa fa-truck me-1"/>
+                                                Instalación a domicilio en 30 min
                                             </small>
-
                                             <span class="lead-demo-required-badge">
-                                                * Campos obligatorios
+                                                <i class="fa fa-asterisk me-1"/>
+                                                Campos obligatorios
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-
-                                <button type="button" class="btn-close lead-demo-close-btn" data-bs-dismiss="modal" aria-label="Cerrar"/>
+                                <button type="button" class="btn-close lead-demo-close-btn" data-bs-dismiss="modal" aria-label="Cerrar">
+                                </button>
                             </div>
 
                             <!-- Body -->
@@ -58,65 +50,88 @@
                                 <form id="leadDemoForm">
 
                                     <div class="row g-3">
-                                        <div class="col-12 col-md-6">
-                                            <input type="text" name="invoice_name" class="form-control lead-demo-input" placeholder="Nombre completo *" required="required"/>
-                                        </div>
-
-                                        <div class="col-12 col-md-6">
-                                            <input type="text" name="vat" class="form-control lead-demo-input" placeholder="Cédula o NIT *" required="required"/>
-                                        </div>
-
-                                        <div class="col-12 col-md-6">
-                                            <input type="text" name="phone" class="form-control lead-demo-input" placeholder="Teléfono *" required="required"/>
-                                        </div>
-
-                                        <div class="col-12 col-md-6">
-                                            <input type="email" name="email" class="form-control lead-demo-input" placeholder="Correo electrónico *" required="required"/>
-                                        </div>
-
+                                        <!-- Nombre -->
                                         <div class="col-12">
-                                            <input type="text" name="street" class="form-control lead-demo-input" placeholder="Dirección"/>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="fa fa-user text-muted"/>
+                                                </span>
+                                                <input type="text" name="invoice_name" class="form-control lead-demo-input border-start-0" placeholder="Nombre completo *" required="required"/>
+                                            </div>
                                         </div>
 
-                                        <div class="col-12 col-md-6">
-                                            <select id="brand_id" name="brand_id" class="form-select lead-demo-input">
-                                                <option value="">Seleccione una marca...</option>
-                                            </select>
-                                            <input type="hidden" id="brand_name" name="brand_name"/>
-                                        </div>
-
-                                        <div class="col-12 col-md-6">
-                                            <select id="model_id" name="model_id" class="form-select lead-demo-input">
-                                                <option value="">Seleccione un modelo...</option>
-                                            </select>
-                                            <input type="hidden" id="model_name" name="model_name"/>
-                                        </div>
-
+                                        <!-- Teléfono -->
                                         <div class="col-12">
-                                            <input type="text" name="license_plate" class="form-control lead-demo-input" placeholder="Placa *" required="required"/>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="fa fa-whatsapp text-success"/>
+                                                </span>
+                                                <input type="tel" name="phone" class="form-control lead-demo-input border-start-0" placeholder="Teléfono / WhatsApp *" required="required"/>
+                                            </div>
+                                        </div>
+
+                                        <!-- Email -->
+                                        <div class="col-12">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="fa fa-envelope text-muted"/>
+                                                </span>
+                                                <input type="email" name="email" class="form-control lead-demo-input border-start-0" placeholder="Correo electrónico *" required="required"/>
+                                            </div>
+                                        </div>
+
+                                        <!-- Placa -->
+                                        <div class="col-12">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="fa fa-car text-muted"/>
+                                                </span>
+                                                <input type="text" name="license_plate" class="form-control lead-demo-input border-start-0 text-uppercase" placeholder="Placa del vehículo" />
+                                            </div>
                                         </div>
                                     </div>
 
+                                    <!-- Términos -->
                                     <div class="lead-demo-check-wrap mt-3">
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" id="accept_terms" name="accept_terms" value="1" required="required"/>
                                             <label class="form-check-label lead-demo-check-label" for="accept_terms">
-                                                Acepto los términos y condiciones y el tratamiento de mis datos personales
+                                                <i class="fa fa-check-circle text-success me-1"/>
+                                                    Acepto los términos y condiciones y el tratamiento de mis datos personales
                                                 <span class="lead-demo-required">*</span>
                                             </label>
                                         </div>
                                     </div>
 
+                                    <!-- Campos ocultos -->
                                     <input type="hidden" name="page_url" t-att-value="request.httprequest.path"/>
                                     <input type="hidden" name="website_id" t-att-value="website.id"/>
                                     <input type="hidden" name="website_name" t-att-value="website.name"/>
+                                    <input type="hidden" name="website_url" t-att-value="request.httprequest.url"/>
 
-                                    <div id="leadDemoMessage" class="alert d-none mt-3"></div>
+                                    <!-- Mensaje -->
+                                    <div id="leadDemoMessage" class="alert mt-3">
+                                        <i class="fa fa-info-circle me-2"/>
+                                            oelo
+                                    </div>
 
+                                    <!-- Botón -->
                                     <div class="d-grid mt-4">
                                         <button type="submit" id="leadDemoSubmitBtn" class="btn lead-demo-submit-btn">
-                                        Solicitar servicio
+                                            <i class="fa fa-bolt me-2"/>
+                                            Quiero mi batería
                                         </button>
+                                    </div>
+
+                                    <!-- Beneficio rápido -->
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted">
+                                            <i class="fa fa-check-circle text-success me-1"/>
+                                                Diagnóstico gratis
+                                            <i class="fa fa-circle text-muted mx-1" style="font-size:4px; vertical-align:middle;"/>
+                                            <i class="fa fa-money text-success me-1"/>
+                                                Pago contra entrega
+                                        </small>
                                     </div>
 
                                 </form>

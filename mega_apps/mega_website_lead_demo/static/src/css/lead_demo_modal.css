@@ -3,10 +3,13 @@
 ========================================= */
 .container-floating-lead {
     position: fixed;
-    left: 15px;
+    right: 15px;
+    /* ← CAMBIAR left por right */
     bottom: 20px;
     z-index: 1050;
     display: flex;
+    flex-direction: row-reverse;
+    /* ← Invertir orden (tooltip a la izquierda del botón) */
     align-items: center;
     gap: 12px;
 }
@@ -38,7 +41,21 @@
     font-size: 14px;
     font-weight: 500;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-    animation: fadeInLeft 0.5s ease;
+    animation: fadeInRight 0.5s ease;
+    /* ← Cambiar animación */
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+        /* ← Viene de la derecha */
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .fa-fa-whatsapp {
@@ -47,44 +64,33 @@
 }
 
 /* =========================================
-   MODAL
+   MODAL - TAMAÑO FIJO Y CENTRADO
 ========================================= */
 .lead-demo-modal .modal-dialog {
-    max-width: 760px;
+    max-width: 400px;
+    /* ← MÁS PEQUEÑO */
     width: calc(100% - 32px);
     margin: 1rem auto;
-    transform: translateY(36px) scale(0.96);
-    opacity: 0;
     transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.lead-demo-modal.show .modal-dialog {
-    transform: translateY(0) scale(1);
-    opacity: 1;
 }
 
 .lead-demo-modal .lead-demo-modal-content {
     overflow: hidden;
     border: none;
-    border-radius: 22px;
+    border-radius: 20px;
     background: #fff;
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
 }
 
-.lead-demo-modal.show .lead-demo-modal-header,
-.lead-demo-modal.show .lead-demo-modal-body {
-    animation: leadDemoFadeUp 0.45s ease;
-}
-
 /* =========================================
-   MODAL HEADER
+   MODAL HEADER - MÁS COMPACTO
 ========================================= */
 .lead-demo-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 14px;
-    padding: 16px 20px;
+    gap: 10px;
+    padding: 12px 16px;
     background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
     border-bottom: 1px solid #eef2f7;
 }
@@ -92,7 +98,7 @@
 .lead-demo-header-main {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     min-width: 0;
 }
 
@@ -101,19 +107,21 @@
 }
 
 .lead-demo-logo {
-    width: 70px;
-    height: 70px;
+    width: 45px;
+    /* ← MÁS PEQUEÑO */
+    height: 45px;
     flex-shrink: 0;
-    padding: 5px;
+    padding: 4px;
     object-fit: contain;
-    border-radius: 10px;
+    border-radius: 8px;
     background: #f3f4f6;
 }
 
 .lead-demo-modal-title {
     margin: 0;
     color: #111827;
-    font-size: 1.15rem;
+    font-size: 1rem;
+    /* ← MÁS PEQUEÑO */
     font-weight: 800;
     line-height: 1.1;
 }
@@ -122,14 +130,14 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-    margin-top: 4px;
+    gap: 6px;
+    margin-top: 2px;
 }
 
 .lead-demo-modal-subtitle {
     margin: 0;
     color: #6b7280;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .lead-demo-required-badge {
@@ -137,57 +145,59 @@
     align-items: center;
     justify-content: center;
     white-space: nowrap;
-    padding: 3px 9px;
+    padding: 2px 7px;
     border: 1px solid #fecaca;
     border-radius: 999px;
     background: #fef2f2;
     color: #dc2626;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
 }
 
 .lead-demo-close-btn {
     flex-shrink: 0;
     opacity: 0.75;
-    transition: all 0.2s ease;
+    font-size: 0.9rem;
 }
 
 .lead-demo-close-btn:hover {
     opacity: 1;
-    transform: rotate(90deg) scale(1.05);
 }
 
 /* =========================================
-   MODAL BODY
+   MODAL BODY - MÁS COMPACTO
 ========================================= */
 .lead-demo-modal-body {
-    padding: 18px 20px 20px;
+    padding: 14px 16px 16px;
     background: #fff;
 }
 
 .lead-demo-input {
-    height: 52px;
+    height: 44px;
+    /* ← MÁS PEQUEÑO */
     border: 1px solid #dbe3ec;
-    border-radius: 12px;
+    border-radius: 10px;
     background: #fff;
     box-shadow: none;
-    font-size: 15px;
+    font-size: 14px;
+    padding: 8px 12px;
     transition: all 0.2s ease;
 }
 
 .lead-demo-input:focus {
     border-color: #16a34a;
-    box-shadow: 0 0 0 0.2rem rgba(22, 163, 74, 0.12);
+    box-shadow: 0 0 0 0.15rem rgba(22, 163, 74, 0.12);
 }
 
 .lead-demo-input::placeholder {
     color: #9ca3af;
+    font-size: 13px;
 }
 
 .lead-demo-check-label {
     color: #4b5563;
-    font-size: 14px;
-    line-height: 1.45;
+    font-size: 13px;
+    line-height: 1.4;
 }
 
 .lead-demo-required {
@@ -196,21 +206,22 @@
 }
 
 .lead-demo-submit-btn {
-    height: 52px;
+    height: 46px;
+    /* ← MÁS PEQUEÑO */
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
     color: #fff;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
-    box-shadow: 0 12px 24px rgba(22, 163, 74, 0.22);
+    box-shadow: 0 8px 18px rgba(22, 163, 74, 0.2);
     transition: all 0.22s ease;
 }
 
 .lead-demo-submit-btn:hover {
     color: #fff;
     transform: translateY(-1px);
-    box-shadow: 0 16px 28px rgba(22, 163, 74, 0.28);
+    box-shadow: 0 12px 24px rgba(22, 163, 74, 0.25);
 }
 
 .lead-demo-submit-btn:active {
@@ -218,28 +229,43 @@
 }
 
 /* =========================================
-   RESPONSIVE
+   RESPONSIVE - MÓVIL
 ========================================= */
-@media (max-width: 991.98px) {
-    .lead-demo-modal .modal-dialog {
-        width: calc(100% - 24px);
-    }
-}
-
 @media (max-width: 767.98px) {
     .lead-demo-modal .modal-dialog {
         max-width: 100%;
-        width: calc(100% - 16px);
-        margin: 8px auto;
+        width: calc(100% - 24px);
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        min-height: 100vh;
     }
 
-    .lead-demo-modal .lead-demo-modal-content {
-        border-radius: 18px;
+    .lead-demo-modal .modal-content {
+        border-radius: 18px !important;
+        max-height: 85vh;
+        width: 100%;
+    }
+
+    .lead-demo-input {
+        height: 48px;
+        font-size: 16px;
+        /* Evita zoom en iOS */
+    }
+
+    .lead-demo-submit-btn {
+        height: 48px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lead-demo-modal .modal-dialog {
+        width: calc(100% - 16px);
     }
 
     .lead-demo-modal-header {
-        padding: 14px 16px;
-        align-items: flex-start;
+        padding: 10px 14px;
     }
 
     .lead-demo-logo {
@@ -248,39 +274,23 @@
     }
 
     .lead-demo-modal-title {
-        font-size: 1.02rem;
-    }
-
-    .lead-demo-modal-subtitle {
-        font-size: 12px;
-    }
-
-    .lead-demo-required-badge {
-        padding: 3px 8px;
-        font-size: 10px;
+        font-size: 0.9rem;
     }
 
     .lead-demo-modal-body {
-        padding: 16px;
+        padding: 12px;
     }
 
     .lead-demo-input {
-        height: 48px;
-        font-size: 14px;
+        height: 44px;
+        font-size: 15px;
     }
 
     .lead-demo-submit-btn {
-        height: 50px;
-        font-size: 15px;
-    }
-}
-
-@media (max-width: 480px) {
-    .lead-demo-modal-title {
-        font-size: 1rem;
+        height: 46px;
+        font-size: 14px;
     }
 
-    .lead-demo-modal-subtitle,
     .lead-demo-check-label {
         font-size: 12px;
     }
@@ -325,4 +335,33 @@
     100% {
         box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
     }
+}
+
+/* Input group sin bordes dobles */
+.lead-demo-modal-body .input-group .input-group-text {
+    border: 1px solid #dbe3ec;
+    border-radius: 10px 0 0 10px;
+    padding: 0 12px;
+}
+
+.lead-demo-modal-body .input-group .lead-demo-input {
+    border-radius: 0 10px 10px 0;
+}
+
+.lead-demo-modal-body .input-group:focus-within .input-group-text {
+    border-color: #16a34a;
+}
+
+.lead-demo-modal-body .input-group:focus-within {
+    box-shadow: 0 0 0 0.15rem rgba(22, 163, 74, 0.12);
+    border-radius: 10px;
+}
+
+/* =========================================
+   EVITAR SCROLL DEL BODY
+========================================= */
+body.modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
 }

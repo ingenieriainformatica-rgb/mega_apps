@@ -1,6 +1,7 @@
 import logging
+import random
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import parse_qs, quote, urlparse
 
 from odoo.http import request  # type: ignore
 
@@ -49,10 +50,11 @@ def _get_or_create_partner(post: dict[str, Any]) -> Any:
 
     identification_type = _get_identification_type_cc()
 
-    partner = partner_model.search(
-        [("vat", "=", vat), ("is_company", "=", False)],
-        limit=1
-    )
+    partner = partner_model.search([
+            ("phone", "=", phone),
+            ("email", "=", email),
+            ("is_company", "=", False),
+        ], limit=1)
 
     if partner:
         vals_to_update = {}
@@ -81,11 +83,9 @@ def _get_or_create_partner(post: dict[str, Any]) -> Any:
 
     create_vals = {
         "name": invoice_name,
-        "vat": vat,
         "phone": phone,
         "mobile": phone,
         "email": email,
-        "street": street,
         "company_type": "person",
         "accept_web_terms_conditions": accept_terms,
         "is_company": False,
@@ -98,6 +98,25 @@ def _get_or_create_partner(post: dict[str, Any]) -> Any:
         create_vals["l10n_latam_identification_type_id"] = identification_type.id
 
     return partner_model.create(create_vals)
+
+def _get_whatsapp_line():
+    website = request.website
+
+    lines = website.sudo().lead_whatsapp_ids.filtered(lambda l: l.active)
+
+    if not lines:
+        return {
+            "phone": "573164307199",
+            "name": "Default",
+        }
+
+    selected = random.choice(lines)
+
+    return {
+        "phone": (selected.phone or "").replace("+", "").replace(" ", "").strip(),
+        "name": selected.name,
+        "user_id": selected.user_id.id if selected.user_id else False,
+    }
 
 def get_lead_brands() -> list[dict[str, Any]]:
     brand_model = request.env["fleet.vehicle.model.brand"].sudo()
@@ -115,24 +134,26 @@ def get_lead_models(brand_id: Any = None) -> list[dict[str, Any]]:
 
 def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
     try:
-        _logger.info("Lead demo submit called with post: %s", post)
+
+        _logger.info(f"\n\n Post -->  {post} \n\n")
 
         invoice_name = _clean(post.get("invoice_name"))
-        vat = _normalize_vat(_clean(post.get("vat")))
+        # vat = _normalize_vat(_clean(post.get("vat")))
         phone = _clean(post.get("phone"))
-        street = _clean(post.get("street"))
+        # street = _clean(post.get("street"))
         email = _clean(post.get("email"))
-        brand_name = _clean(post.get("brand_name"))
-        model_name = _clean(post.get("model_name"))
+        # brand_name = _clean(post.get("brand_name"))
+        # model_name = _clean(post.get("model_name"))
         license_plate = _clean(post.get("license_plate")).upper().replace(" ", "")
         website_name = _clean(post.get("website_name"))
+        website_url = _clean(post.get("website_url"))
 
-        brand_id = _safe_int(post.get("brand_id"))
-        model_id = _safe_int(post.get("model_id"))
+        # brand_id = _safe_int(post.get("brand_id"))
+        # model_id = _safe_int(post.get("model_id"))
 
         accept_terms = post.get("accept_terms") in (True, "1", "true", "True", 1)
 
-        if not all([invoice_name, vat, phone, email, license_plate]):
+        if not all([invoice_name, phone, email]):
             return {
                 "success": False,
                 "message": "Faltan campos obligatorios.",
@@ -146,6 +167,7 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
 
         client_ip = _get_client_ip()
         base_url = request.httprequest.host_url.rstrip("/")
+        utm_params = _extract_all_url_params(request.httprequest, website_url)
 
         description_lines = [
             "Lead creado desde modal website.",
@@ -155,24 +177,24 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
             "Aceptó términos: Sí",
             "",
             f"Nombre de quien sale la factura: {invoice_name}",
-            f"Cédula o NIT: {vat}",
             f"Teléfono: {phone}",
-            f"Dirección: {street}",
             f"Correo electrónico: {email}",
-            f"Marca: {brand_name}",
-            f"Modelo: {model_name}",
-            f"Placa: {license_plate}",
         ]
+
+        # ✅ Solo agregar placa si viene
+        if license_plate:
+            description_lines.append(f"Placa: {license_plate}")
+
         description = "<br/>".join(description_lines)
 
         partner = _get_or_create_partner({
             "invoice_name": invoice_name,
-            "vat": vat,
             "phone": phone,
-            "street": street,
             "email": email,
             "accept_terms": accept_terms
         })
+
+        utm_ids = utm_params['utm_ids']
 
         lead_model = request.env["crm.lead"].sudo()
         lead_vals: dict[str, Any] = {
@@ -182,35 +204,37 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
             "phone": phone,
             "mobile": phone,
             "email_from": email,
-            "street": street,
+            # "street": street,
             "description": description,
             "accept_terms": accept_terms,
             "website": base_url,
             "license_plate": license_plate,
-            "medium_id": MEDIUM_ID,  # Website
+            # ✅ UTMs procesados - Si tiene valor lo usa, si no pone False o nada
+            "medium_id": utm_ids.get('medium_id') or MEDIUM_ID,  # Si no hay UTM, usa el default
+            "campaign_id": utm_ids.get('campaign_id'),            # Puede ser False si no vino
+            "source_id": utm_ids.get('source_id'),                # Puede ser False si no vino
         }
 
-        if brand_id and "brand_id" in lead_model._fields:
-            lead_vals["brand_id"] = brand_id
+        # if brand_id and "brand_id" in lead_model._fields:
+        #     lead_vals["brand_id"] = brand_id
 
-        if model_id and "modelo_id" in lead_model._fields:
-            lead_vals["modelo_id"] = model_id
+        # if model_id and "modelo_id" in lead_model._fields:
+        #     lead_vals["modelo_id"] = model_id
 
         lead = lead_model.create(lead_vals)
 
-        whatsapp_number = "573193662738"
+        # whatsapp_number = "573193662738"
+        whatsapp_data = _get_whatsapp_line()
+        whatsapp_number = whatsapp_data["phone"]
+        # advisor_name = whatsapp_data["name"]
+
         whatsapp_message = "\n".join([
             "Nuevo lead desde la web",
             "",
             f"Nombre: {invoice_name}",
-            f"Cédula/NIT: {vat}",
             f"Teléfono: {phone}",
-            f"Dirección: {street}",
             f"Correo: {email}",
-            f"Placa: {license_plate}",
-            f"Marca: {brand_name}",
-            f"Modelo: {model_name}",
-        ])
+        ] + ([f"Placa: {license_plate}"] if license_plate else []))
         whatsapp_url = f"https://wa.me/{whatsapp_number}?text={quote(whatsapp_message)}"
 
         return {
@@ -218,6 +242,7 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
             "lead_id": lead.id,
             "partner_id": partner.id,
             "whatsapp_url": whatsapp_url,
+            "message": "¡Cotización enviada! Pronto te contactaremos para coordinar la instalación de tu batería a domicilio.",
         }
 
     except Exception as error:
@@ -226,3 +251,71 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
             "success": False,
             "message": "No fue posible procesar la solicitud.",
         }
+
+def _extract_all_url_params(httprequest, website_url):
+    """Extrae TODOS los parámetros de la URL automáticamente"""
+
+    full_url = website_url
+    path_url = httprequest.path
+
+    parsed_url = urlparse(full_url)
+    all_params = parse_qs(parsed_url.query)
+
+    # ✅ Convertir listas a strings SEGURO
+    clean_params = {}
+    for key, value in all_params.items():
+        if isinstance(value, list):
+            clean_params[key] = value[0] if len(value) == 1 else value[0]
+        else:
+            clean_params[key] = value
+
+    # Solo procesar si vienen los UTMs
+    utm_ids = {
+        'source_id': _get_or_create_utm('utm.source', clean_params.get('utm_source')),
+        'medium_id': _get_or_create_utm('utm.medium', clean_params.get('utm_medium')),
+        'campaign_id': _get_or_create_utm('utm.campaign', clean_params.get('utm_campaign')),
+    }
+
+    tracking_data = {
+        'params': clean_params,
+        'utm_ids': utm_ids,
+        'full_url': full_url,
+        'path_url': path_url,
+        'referrer': httprequest.referrer or '',
+        'user_agent': httprequest.user_agent.string or '',
+        'remote_addr': httprequest.remote_addr or '',
+    }
+
+    return tracking_data
+
+def _get_or_create_utm(model_name, value):
+    """Busca o crea UTM y retorna el ID"""
+
+    # ✅ Si es lista, tomar el primer elemento
+    if isinstance(value, list):
+        value = value[0] if value else None
+
+    # ✅ Si no hay valor o está vacío
+    if not value:
+        return False
+
+    # ✅ Convertir a string por si acaso
+    value = str(value).strip()
+
+    if not value:
+        return False
+
+    # Buscar si ya existe
+    record = request.env[model_name].sudo().search([
+        ('name', 'ilike', value)
+    ], limit=1)
+
+    if record:
+        return record.id
+
+    # Crear nuevo
+    new_record = request.env[model_name].sudo().create({
+        'name': value
+    })
+
+    return new_record.id

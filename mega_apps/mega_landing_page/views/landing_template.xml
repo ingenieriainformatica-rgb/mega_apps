@@ -1,0 +1,610 @@
+<odoo>
+    <template id="mega_landing_leads" name="Landing Servicios Megatecnicentro">
+
+        <t t-call="website.layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <!-- SEO AVANZADO -->
+            <t t-set="title">
+                Megatecnicentro | Baterías y Llantas a Domicilio en Medellín
+            </t>
+            <t t-set="meta_description">
+                Megatecnicentro: baterías a domicilio, llantas, mecánica rápida y mega combos en Medellín. Diagnóstico gratis, instalación inmediata y pago contra entrega. ¡Solicita ahora!
+            </t>
+            <t t-set="meta_keywords">
+                baterías Medellín, llantas Medellín, servicio automotriz Medellín, baterías a domicilio, llantas a domicilio, mecánica rápida Medellín, mega combos automotriz, Megatecnicentro
+            </t>
+            <t t-set="meta_author">Megatecnicentro</t>
+            <t t-set="meta_robots">index, follow</t>
+
+            <!-- Open Graph para redes sociales -->
+            <t t-set="og_title">
+                Megatecnicentro | Servicio Automotriz Premium en Medellín
+            </t>
+            <t t-set="og_description">
+                Baterías, llantas, mecánica rápida y mega combos. Atención inmediata con garantía.
+            </t>
+            <t t-set="og_image">
+                /mega_website_lead_demo/static/description/icon.png
+            </t>
+            <t t-set="og_type">website</t>
+
+            <!-- HERO PRINCIPAL OPTIMIZADO -->
+            <section class="text-white d-flex align-items-center position-relative" style="min-height:85vh; background:linear-gradient(135deg,#0b1a2b 0%,#1a2a3a 50%,#0d1b2a 100%);">
+
+                <div class="container position-relative">
+                    <div class="row align-items-center">
+
+                        <!-- CONTENIDO PRINCIPAL -->
+                        <div class="col-lg-6 text-center text-lg-start">
+
+                            <!-- Badge de urgencia -->
+                            <span class="badge bg-danger mb-3 px-3 py-2 animate__animated animate__pulse animate__infinite">
+                                <i class="fa fa-clock me-2"/>
+                                Atención inmediata 24/7 en Medellín
+                            </span>
+
+                            <!-- H1 mejorado con keywords -->
+                            <h1 class="display-3 fw-bold mb-3" style="line-height:1.2;">
+                                <span class="text-danger">Megatecnicentro</span>
+                                <br/>
+                                <span style="font-size:2.5rem;">Baterías y Llantas a Domicilio</span>
+                            </h1>
+
+                            <!-- Subtítulo mejorado -->
+                            <p class="lead mb-4 fs-5">
+                                Expertos en <strong>baterías</strong>,                                <strong>llantas</strong>,                                <strong>mecánica rápida</strong> y
+                                <strong>mega combos automotrices</strong> en Medellín y área metropolitana.
+                            </p>
+
+                            <!-- Beneficios con íconos mejorados -->
+                            <div class="row mb-4 g-2">
+                                <div class="col-auto">
+                                    <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-pill px-3 py-2">
+                                        <i class="fa fa-bolt text-warning me-2"/>
+                                        <small>Llegamos en 30 min</small>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-pill px-3 py-2">
+                                        <i class="fa fa-shield text-success me-2"/>
+                                        <small>Garantía total</small>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-pill px-3 py-2">
+                                        <i class="fa fa-money text-info me-2"/>
+                                        <small>Pago contra entrega</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CTAs mejorados -->
+                            <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                                <a href="#servicios" class="btn btn-danger btn-lg px-4 shadow">
+                                    <i class="fa fa-tools me-2"/>
+                                    Ver Mega Combos
+                                </a>
+                                <a href="#formulario" class="btn btn-success btn-lg px-4 shadow">
+                                    <i class="fa fa-bolt me-2"/>
+                                    Solicitar Servicio
+                                </a>
+                                <a href="https://wa.me/573164307199?text=Hola%20Megatecnicentro,%20necesito%20información" class="btn btn-outline-light btn-lg px-4" target="_blank" rel="noopener">
+                                    <i class="fa fa-whatsapp me-2"/>
+                                    WhatsApp
+                                </a>
+                            </div>
+
+                            <!-- Sellos de confianza -->
+                            <div class="mt-4 d-flex gap-3 justify-content-center justify-content-lg-start">
+                                <small class="text-white-50">
+                                    <i class="fa fa-star text-warning"/>
+                                    <i class="fa fa-star text-warning"/>
+                                    <i class="fa fa-star text-warning"/>
+                                    <i class="fa fa-star text-warning"/>
+                                    <i class="fa fa-star text-warning"/>
+                                    +500 clientes satisfechos
+                                </small>
+                            </div>
+
+                        </div>
+
+                        <!-- IMAGEN HERO -->
+                        <div class="col-lg-6 text-center mt-5 mt-lg-0">
+                            <img src="/mega_website_lead_demo/static/description/icon.png" alt="Megatecnicentro - Baterías y llantas a domicilio en Medellín" class="img-fluid rounded-4 shadow-lg floating" style="max-height:400px; background:rgba(255,255,255,0.05); backdrop-filter: blur(10px); padding:20px;" title="Servicio automotriz Megatecnicentro Medellín"/>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN DE TEXTO SEO OPTIMIZADO -->
+            <section class="py-4 bg-light" aria-label="Descripción de servicios">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10">
+                            <p class="text-center lead mb-0">
+                                <strong>Megatecnicentro</strong> es líder en <strong>servicio automotriz a domicilio en Medellín</strong>.
+                                Ofrecemos instalación de <strong>baterías</strong>, venta y montaje de <strong>llantas</strong>,
+                                <strong>mecánica rápida</strong>, diagnóstico computarizado y <strong>mega combos</strong> con descuentos exclusivos.
+                                Nuestro equipo de técnicos profesionales está disponible para atenderte con rapidez y garantía en toda el área metropolitana.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN DE MEGA COMBOS DESTACADOS (NUEVA) -->
+            <section id="combos" class="py-5 bg-gradient" style="background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);">
+                <div class="container">
+                    <div class="text-center mb-5">
+                        <span class="badge bg-danger mb-3 px-3 py-2">🔥 MEGA COMBOS</span>
+                        <h2 class="fw-bold display-5 mb-3">Combos con Descuento Especial</h2>
+                        <p class="lead text-muted">Ahorra hasta 30% combinando nuestros servicios premium</p>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Combo 1: Batería + Llantas -->
+                        <div class="col-md-4">
+                            <div class="card h-100 border-danger border-2 shadow-sm hover-card">
+                                <div class="card-header bg-danger text-white text-center py-3">
+                                    <h3 class="h5 mb-0">
+                                        <i class="fa fa-star me-2"/>
+                                        Mega Combo Full
+                                    </h3>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="fa fa-battery-full text-danger me-2" style="font-size:2rem;"/>
+                                        <i class="fa fa-circle text-dark" style="font-size:2rem;"/>
+                                    </div>
+                                    <h4 class="card-title">Batería + 4 Llantas</h4>
+                                    <p class="card-text">Cambio completo con el mejor precio del mercado</p>
+                                    <ul class="list-unstyled text-start mb-4">
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Batería premium instalada
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            4 llantas nuevas montadas
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Alineación y balanceo GRATIS
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Diagnóstico eléctrico incluido
+                                        </li>
+                                    </ul>
+                                    <span class="h3 text-danger fw-bold">30% DTO.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Combo 2: Batería + Mecánica -->
+                        <div class="col-md-4">
+                            <div class="card h-100 border-primary border-2 shadow-sm hover-card">
+                                <div class="card-header bg-primary text-white text-center py-3">
+                                    <h3 class="h5 mb-0">
+                                        <i class="fa fa-bolt me-2"/>
+                                        Combo Eléctrico
+                                    </h3>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="fa fa-battery-full text-primary me-2" style="font-size:2rem;"/>
+                                        <i class="fa fa-wrench text-primary" style="font-size:2rem;"/>
+                                    </div>
+                                    <h4 class="card-title">Batería + Diagnóstico</h4>
+                                    <p class="card-text">Revisión completa del sistema eléctrico</p>
+                                    <ul class="list-unstyled text-start mb-4">
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Batería nueva instalada
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Diagnóstico computarizado
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Revisión de alternador
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Limpieza de bornes incluida
+                                        </li>
+                                    </ul>
+                                    <span class="h3 text-primary fw-bold">25% DTO.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Combo 3: Llantas + Servicio -->
+                        <div class="col-md-4">
+                            <div class="card h-100 border-success border-2 shadow-sm hover-card">
+                                <div class="card-header bg-success text-white text-center py-3">
+                                    <h3 class="h5 mb-0">
+                                        <i class="fa fa-shield me-2"/>
+                                        Combo Seguridad
+                                    </h3>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="fa fa-circle text-success me-2" style="font-size:2rem;"/>
+                                        <i class="fa fa-cogs text-success" style="font-size:2rem;"/>
+                                    </div>
+                                    <h4 class="card-title">Llantas + Mantenimiento</h4>
+                                    <p class="card-text">Todo incluido para tu tranquilidad</p>
+                                    <ul class="list-unstyled text-start mb-4">
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            2 llantas nuevas montadas
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Alineación computarizada
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Balanceo electrónico
+                                        </li>
+                                        <li>
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Revisión de frenos GRATIS
+                                        </li>
+                                    </ul>
+                                    <span class="h3 text-success fw-bold">20% DTO.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SERVICIOS INDIVIDUALES DETALLADOS -->
+            <section id="servicios" class="py-5">
+                <div class="container">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold display-5 mb-3">Todos Nuestros Servicios</h2>
+                        <p class="lead text-muted">Soluciones completas para tu vehículo en Medellín</p>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Baterías -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card h-100 shadow-sm hover-card">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="fa fa-battery-full text-danger" style="font-size:3rem;"/>
+                                    </div>
+                                    <h3 class="h4">Baterías a Domicilio</h3>
+                                    <p class="text-muted">Instalación inmediata de baterías para todo tipo de vehículos</p>
+                                    <ul class="list-unstyled text-start small">
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Marcas premium garantizadas
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Diagnóstico eléctrico GRATIS
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Instalación en 30 minutos
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Recibimos tu batería usada
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Llantas -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card h-100 shadow-sm hover-card">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="fa fa-circle text-dark" style="font-size:3rem;"/>
+                                    </div>
+                                    <h3 class="h4">Llantas Nuevas</h3>
+                                    <p class="text-muted">Venta y montaje de llantas de las mejores marcas</p>
+                                    <ul class="list-unstyled text-start small">
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Todas las medidas disponibles
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Alineación y balanceo incluido
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Servicio a domicilio sin costo
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Garantía de fábrica
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mecánica Rápida -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card h-100 shadow-sm hover-card">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="fa fa-wrench text-primary" style="font-size:3rem;"/>
+                                    </div>
+                                    <h3 class="h4">Mecánica Rápida</h3>
+                                    <p class="text-muted">Reparaciones express sin salir de casa</p>
+                                    <ul class="list-unstyled text-start small">
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Frenos, suspensión y más
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Cambio de aceite a domicilio
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Scanner computarizado
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Presupuesto sin compromiso
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Servicios Técnicos -->
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card h-100 shadow-sm hover-card">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="fa fa-cogs text-info" style="font-size:3rem;"/>
+                                    </div>
+                                    <h3 class="h4">Servicios Técnicos</h3>
+                                    <p class="text-muted">Diagnóstico y reparación especializada</p>
+                                    <ul class="list-unstyled text-start small">
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Electricidad automotriz
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Aire acondicionado
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Sistemas de arranque
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fa fa-check text-success me-2"/>
+                                            Reparaciones garantizadas
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BENEFICIOS MEJORADOS -->
+            <section class="py-5 bg-light">
+                <div class="container">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold display-5 mb-3">¿Por qué elegir Megatecnicentro?</h2>
+                        <p class="lead text-muted">La mejor opción en servicio automotriz a domicilio en Medellín</p>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fa fa-clock text-danger mb-3" style="font-size:2.5rem;"/>
+                                <h3 class="h5 fw-bold">Atención 24/7</h3>
+                                <p class="text-muted small">Servicio de emergencia todo el día, todos los días</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fa fa-truck text-primary mb-3" style="font-size:2.5rem;"/>
+                                <h3 class="h5 fw-bold">A Domicilio</h3>
+                                <p class="text-muted small">Llegamos a cualquier punto de Medellín en 30 min</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fa fa-certificate text-success mb-3" style="font-size:2.5rem;"/>
+                                <h3 class="h5 fw-bold">Garantía Real</h3>
+                                <p class="text-muted small">Todos nuestros servicios con garantía por escrito</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="fa fa-credit-card text-warning mb-3" style="font-size:2.5rem;"/>
+                                <h3 class="h5 fw-bold">Pago Seguro</h3>
+                                <p class="text-muted small">Paga contra entrega, efectivo o transferencia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FORMULARIO MEJORADO -->
+            <section id="formulario" class="py-5" style="background:linear-gradient(135deg,#0b1a2b,#1a2a3a);">
+                <div class="container">
+                    <div class="row justify-content-center align-items-center">
+
+                        <!-- TEXTO IZQUIERDA MEJORADO -->
+                        <div class="col-lg-5 text-white mb-4 mb-lg-0">
+                            <span class="badge bg-danger mb-3 px-3 py-2">⚡ RESPUESTA INMEDIATA</span>
+                            <h2 class="fw-bold mb-3 display-5">
+                                Solicita tu servicio en minutos
+                            </h2>
+                            <p class="fs-5 mb-4 opacity-90">
+                                Déjanos tus datos y un técnico especializado te contactará de inmediato por WhatsApp
+                            </p>
+
+                            <div class="bg-white bg-opacity-10 rounded-3 p-3 mb-4">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-3">
+                                        <i class="fa fa-check-circle text-success me-2"/>
+                                        Cotización 100% personalizada
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="fa fa-check-circle text-success me-2"/>
+                                        Diagnóstico inicial sin costo
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="fa fa-check-circle text-success me-2"/>
+                                        Aplicamos a MEGA COMBOS con descuento
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="mt-4">
+                                <p class="mb-2">
+                                    <strong>También puedes contactarnos:</strong>
+                                </p>
+                                <a href="tel:+573164307199" class="text-white text-decoration-none me-3">
+                                    <i class="fa fa-phone me-2"/>
+                                    316 430 7199
+                                </a>
+                                <a href="https://wa.me/573164307199" class="text-white text-decoration-none" target="_blank">
+                                    <i class="fa fa-whatsapp me-2"/>
+                                    WhatsApp
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- FORMULARIO DERECHA MEJORADO -->
+                        <div class="col-lg-6">
+                            <div class="bg-white p-4 p-md-5 rounded-4 shadow-lg">
+
+                                <!-- HEADER -->
+                                <div class="text-center mb-4">
+                                    <h4 class="fw-bold mb-1">Solicita tu servicio ahora</h4>
+                                    <p class="text-muted small">Te respondemos en menos de 5 minutos</p>
+                                </div>
+
+                                <form id="leadFormMega">
+
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-6">
+                                            <input type="text" name="invoice_name" class="form-control lead-demo-input" placeholder="Nombre completo *" required="required"/>
+                                        </div>
+
+                                        <div class="col-12 col-md-6">
+                                            <input type="text" name="vat" class="form-control lead-demo-input" placeholder="Cédula o NIT *" required="required"/>
+                                        </div>
+
+                                        <div class="col-12 col-md-6">
+                                            <input type="text" name="phone" class="form-control lead-demo-input" placeholder="Teléfono *" required="required"/>
+                                        </div>
+
+                                        <div class="col-12 col-md-6">
+                                            <input type="email" name="email" class="form-control lead-demo-input" placeholder="Correo electrónico *" required="required"/>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <input type="text" name="street" class="form-control lead-demo-input" placeholder="Dirección"/>
+                                        </div>
+
+                                        <div class="col-12 col-md-6">
+                                            <select id="brand_id" name="brand_id" class="form-select lead-demo-input">
+                                                <option value="">Seleccione una marca...</option>
+                                            </select>
+                                            <input type="hidden" id="brand_name" name="brand_name"/>
+                                        </div>
+
+                                        <div class="col-12 col-md-6">
+                                            <select id="model_id" name="model_id" class="form-select lead-demo-input">
+                                                <option value="">Seleccione un modelo...</option>
+                                            </select>
+                                            <input type="hidden" id="model_name" name="model_name"/>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <input type="text" name="license_plate" class="form-control lead-demo-input" placeholder="Placa *" required="required"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="lead-demo-check-wrap mt-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="accept_terms" name="accept_terms" value="1" required="required"/>
+                                            <label class="form-check-label lead-demo-check-label" for="accept_terms">
+                                                Acepto los términos y condiciones y el tratamiento de mis datos personales
+                                                <span class="lead-demo-required">*</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" name="page_url" t-att-value="request.httprequest.path"/>
+                                    <input type="hidden" name="website_id" t-att-value="website.id"/>
+                                    <input type="hidden" name="website_name" t-att-value="website.name"/>
+                                    <input type="hidden" name="website_url" t-att-value="request.httprequest.url"/>
+
+                                    <div id="leadDemoMessage" class="alert d-none mt-3"></div>
+
+                                    <div class="d-grid mt-4">
+                                        <button type="submit" id="leadDemoSubmitBtn" class="btn lead-demo-submit-btn">
+                                        Solicitar servicio
+                                        </button>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FOOTER SEO -->
+            <section class="py-4 bg-dark text-white">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <h5 class="fw-bold">Megatecnicentro</h5>
+                            <p class="small opacity-75">Servicio automotriz premium en Medellín. Baterías, llantas y mecánica rápida a domicilio.</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h5 class="fw-bold">Servicios</h5>
+                            <ul class="list-unstyled small opacity-75">
+                                <li>Baterías a domicilio</li>
+                                <li>Llantas nuevas</li>
+                                <li>Mecánica rápida</li>
+                                <li>Mega combos</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h5 class="fw-bold">Contacto</h5>
+                            <p class="small opacity-75">
+                                <i class="fa fa-phone me-2"/>
+                                316 430 7199
+                                <br/>
+                                <i class="fa fa-map-marker me-2"/>
+                                Medellín, Antioquia
+                                <br/>
+                                <i class="fa fa-clock me-2"/>
+                                    24/7
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </t>
+    </template>
+</odoo>
