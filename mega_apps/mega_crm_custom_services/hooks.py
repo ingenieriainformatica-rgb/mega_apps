@@ -54,7 +54,28 @@ def post_init_hook_year(env):
     if vals_list:
         Year.create(vals_list)
 
+def post_init_hook_service_type(env):
+    ServiceType = env['crm.service.type']
+
+    servicios = [
+        {
+            'name': 'Baterías',
+            'description': 'Servicio de baterías a domicilio en Medellín. Instalación rápida, diagnóstico gratis y atención inmediata.'
+        },
+    ]
+
+    existentes = set(ServiceType.search([]).mapped('name'))
+
+    nuevos = []
+    for servicio in servicios:
+        if servicio['name'] not in existentes:
+            nuevos.append(servicio)
+
+    if nuevos:
+        ServiceType.create(nuevos)
+
 
 def post_init_hook(env):
     post_init_hook_year(env)
     post_init_hook_zone(env)
+    post_init_hook_service_type(env)
