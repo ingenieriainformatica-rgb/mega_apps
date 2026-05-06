@@ -9,6 +9,7 @@
     'depends': ['website', 'crm', 'fleet', 'partner_terms_conditions', 'mega_crm_custom_services'],
     'data': [
         'security/ir.model.access.csv',
+        'security/group.xml',
         'views/website_templates.xml',
         'views/fleet_vehicle_model_brand_views.xml',
         'views/fleet_vehicle_model_views.xml',
