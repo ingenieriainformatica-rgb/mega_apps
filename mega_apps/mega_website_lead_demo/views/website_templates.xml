@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
+    <!-- website_id = 1  https://megatecnicentro.com/ pero este todavia no va -->
+    <!-- website_id = 2  https://megabaterias.co/ -->
+    <!-- website_id = 19  https://nacionaldebaterias.com/ -->
+
     <template id="lead_demo_floating_button_home" inherit_id="website.layout">
         <xpath expr="//body" position="inside">
 
-            <t t-if="website and website.id == 1 and request and request.httprequest and request.httprequest.path != '/mega-leads'">
+            <t t-if="website and website.id in (1, 2, 19) and request and request.httprequest and request.httprequest.path != '/mega-leads'">
 
                 <!-- BOTÓN FLOTANTE -->
                 <!-- <div id="floating-lead-wrapper" class="container-floating-lead">

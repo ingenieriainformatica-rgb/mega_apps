@@ -4,103 +4,24 @@ from typing import Any
 from urllib.parse import parse_qs, quote, urlparse
 
 from odoo.http import request  # type: ignore
+from ._helpers import (
+    _clean,
+    _safe_int,
+    _get_client_ip,
+    MEDIUM_ID,
+)
+from ._partner import (
+    _get_or_create_partner
+)
+from ._utm import (
+    _extract_all_url_params,
+)
 
 _logger = logging.getLogger(__name__)
 
-COUNTRY_ID = 49  # Colombia
-STATE_ID = 651  # Bogotá
-CITY_ID = 1  # MEDELLÍN
-MEDIUM_ID = 1  # Website
-
-
-def _safe_int(value: Any) -> int | None:
-    try:
-        return int(value) if value not in (None, "", False) else None
-    except (TypeError, ValueError):
-        return None
-
-def _clean(value: Any) -> str:
-    return (value or "").strip()
-
-def _get_client_ip() -> str:
-    forwarded_for = request.httprequest.headers.get("X-Forwarded-For")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
-    return request.httprequest.remote_addr or ""
 
 def _normalize_vat(value: str) -> str:
     return (value or "").replace(".", "").replace(",", "").replace(" ", "").strip()
-
-def _get_identification_type_cc() -> Any:
-    identification_type = request.env["l10n_latam.identification.type"].sudo().search([
-        ("name", "ilike", "Cédula de ciudadanía")
-    ], limit=1)
-
-    return identification_type
-
-def _get_or_create_partner(post: dict[str, Any]) -> Any:
-    partner_model = request.env["res.partner"].sudo()
-
-    invoice_name = _clean(post.get("invoice_name"))
-    phone = _clean(post.get("phone"))
-    email = _clean(post.get("email"))
-    accept_terms = post.get("accept_terms")
-    website_url = post.get("website_url", "")
-
-    partner = partner_model.search([
-        # ("phone", "=", phone),
-        ("email", "=", email),
-        ("is_company", "=", False),
-    ], limit=1)
-
-    if partner:
-        vals_to_update = {}
-        if not partner.accept_web_terms_conditions and accept_terms:
-            vals_to_update["accept_web_terms_conditions"] = True
-
-        if vals_to_update:
-            partner.write(vals_to_update)
-
-        return partner
-
-    identification_type = _get_identification_type_cc()
-
-    # Crear nuevo partner
-    create_vals = {
-        "name": invoice_name or "Cliente Web",
-        "phone": phone,
-        "mobile": phone,
-        "email": email,
-        "company_type": "person",
-        "accept_web_terms_conditions": accept_terms,
-        "is_company": False,
-        "country_id": COUNTRY_ID,
-        "state_id": STATE_ID,
-        "city_id": CITY_ID,
-    }
-
-    # ✅ Solo asignar el ID, no el objeto completo
-    if identification_type:
-        create_vals["l10n_latam_identification_type_id"] = identification_type.id
-
-    partner = partner_model.create(create_vals)
-
-    # ✅ Mensaje en chatter cuando se crea
-    message_lines = [
-        "Contacto creado desde el sitio web.",
-        "",
-        f"Teléfono: {phone}",
-        f"Email: {email}",
-    ]
-    if website_url:
-        message_lines.append(f"🔗 URL: {website_url}")
-
-    partner.message_post(
-        body="\n".join(message_lines),
-        message_type="notification",
-    )
-
-    return partner
 
 def _get_whatsapp_line():
     website = request.website
@@ -251,71 +172,3 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
             "success": False,
             "message": "No fue posible procesar la solicitud.",
         }
-
-def _extract_all_url_params(httprequest, website_url):
-    """Extrae TODOS los parámetros de la URL automáticamente"""
-
-    full_url = website_url
-    path_url = httprequest.path
-
-    parsed_url = urlparse(full_url)
-    all_params = parse_qs(parsed_url.query)
-
-    # ✅ Convertir listas a strings SEGURO
-    clean_params = {}
-    for key, value in all_params.items():
-        if isinstance(value, list):
-            clean_params[key] = value[0] if len(value) == 1 else value[0]
-        else:
-            clean_params[key] = value
-
-    # Solo procesar si vienen los UTMs
-    utm_ids = {
-        'source_id': _get_or_create_utm('utm.source', clean_params.get('utm_source')),
-        'medium_id': _get_or_create_utm('utm.medium', clean_params.get('utm_medium')),
-        'campaign_id': _get_or_create_utm('utm.campaign', clean_params.get('utm_campaign')),
-    }
-
-    tracking_data = {
-        'params': clean_params,
-        'utm_ids': utm_ids,
-        'full_url': full_url,
-        'path_url': path_url,
-        'referrer': httprequest.referrer or '',
-        'user_agent': httprequest.user_agent.string or '',
-        'remote_addr': httprequest.remote_addr or '',
-    }
-
-    return tracking_data
-
-def _get_or_create_utm(model_name, value):
-    """Busca o crea UTM y retorna el ID"""
-
-    # ✅ Si es lista, tomar el primer elemento
-    if isinstance(value, list):
-        value = value[0] if value else None
-
-    # ✅ Si no hay valor o está vacío
-    if not value:
-        return False
-
-    # ✅ Convertir a string por si acaso
-    value = str(value).strip()
-
-    if not value:
-        return False
-
-    # Buscar si ya existe
-    record = request.env[model_name].sudo().search([
-        ('name', 'ilike', value)
-    ], limit=1)
-
-    if record:
-        return record.id
-
-    # Crear nuevo
-    new_record = request.env[model_name].sudo().create({
-        'name': value
-    })
-
-    return new_record.id
