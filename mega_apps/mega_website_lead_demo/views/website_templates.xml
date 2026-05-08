@@ -8,7 +8,7 @@
     <template id="lead_demo_floating_button_home" inherit_id="website.layout">
         <xpath expr="//body" position="inside">
 
-            <t t-if="website and website.id in (1, 2, 19) and request and request.httprequest and request.httprequest.path != '/mega-leads'">
+            <t t-if="website and website.id in (2, 19) and request and request.httprequest and request.httprequest.path != '/mega-leads'">
 
                 <!-- BOTÓN FLOTANTE -->
                 <!-- <div id="floating-lead-wrapper" class="container-floating-lead">

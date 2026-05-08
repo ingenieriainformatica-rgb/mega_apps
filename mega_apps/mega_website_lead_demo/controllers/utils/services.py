@@ -2,6 +2,7 @@ import logging
 import random
 from typing import Any
 from urllib.parse import parse_qs, quote, urlparse
+from odoo import fields  #type: ignore
 
 from odoo.http import request  # type: ignore
 from ._helpers import (
@@ -58,38 +59,37 @@ def get_lead_models(brand_id: Any = None) -> list[dict[str, Any]]:
 
 def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
     try:
+        # ============================================
+        # 1. LIMPIAR DATOS DE ENTRADA
+        # ============================================
         invoice_name = _clean(post.get("invoice_name")).upper().strip()
-        # vat = _normalize_vat(_clean(post.get("vat")))
         phone = _clean(post.get("phone")).strip()
-        # street = _clean(post.get("street"))
         email = _clean(post.get("email")).strip()
-        # brand_name = _clean(post.get("brand_name"))
-        # model_name = _clean(post.get("model_name"))
         license_plate = _clean(post.get("license_plate")).upper().replace(" ", "").strip()
         website_name = _clean(post.get("website_name"))
         website_url = _clean(post.get("website_url"))
-
-        # brand_id = _safe_int(post.get("brand_id"))
-        # model_id = _safe_int(post.get("model_id"))
-
         accept_terms = post.get("accept_terms") in (True, "1", "true", "True", 1)
 
+        # ============================================
+        # 2. VALIDACIONES
+        # ============================================
         if not all([invoice_name, phone, email]):
-            return {
-                "success": False,
-                "message": "Faltan campos obligatorios.",
-            }
+            return {"success": False, "message": "Faltan campos obligatorios."}
 
         if not accept_terms:
-            return {
-                "success": False,
-                "message": "Debes aceptar términos y condiciones.",
-            }
+            return {"success": False, "message": "Debes aceptar términos y condiciones."}
 
+        # ============================================
+        # 3. DATOS DE CONTEXTO
+        # ============================================
         client_ip = _get_client_ip()
         base_url = request.httprequest.host_url.rstrip("/")
         utm_params = _extract_all_url_params(request.httprequest, website_url)
+        website = request.website
 
+        # ============================================
+        # 4. DESCRIPCIÓN DEL LEAD
+        # ============================================
         description_lines = [
             "Lead creado desde modal website.",
             f"Website: {website_name}",
@@ -97,27 +97,50 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
             f"IP Cliente: {client_ip}",
             "Aceptó términos: Sí",
             "",
-            f"Nombre de quien sale la factura: {invoice_name}",
+            f"Nombre: {invoice_name}",
             f"Teléfono: {phone}",
             f"Correo electrónico: {email}",
         ]
-
-        # ✅ Solo agregar placa si viene
         if license_plate:
             description_lines.append(f"Placa: {license_plate}")
 
         description = "<br/>".join(description_lines)
 
+        # ============================================
+        # 5. CREAR/ACTUALIZAR PARTNER
+        # ============================================
         partner = _get_or_create_partner({
             "invoice_name": invoice_name,
             "phone": phone,
             "email": email,
-            "accept_terms": accept_terms
+            "accept_terms": accept_terms,
         })
 
+        # ============================================
+        # 6. EQUIPO Y VENDEDOR SEGÚN WEBSITE
+        # ============================================
+        team_id = False
+        user_id = False
+
+        # Websites: 2 = megabaterias.co, 19 = nacionaldebaterias.com
+        if website.id in (2, 19):
+            team = request.env['crm.team'].sudo().search([
+                ('name', '=', 'Baterías')
+            ], limit=1)
+            if team:
+                team_id = team.id
+
+            user = request.env['res.users'].sudo().search([
+                ('name', '=', 'TIENDA DIGITAL')
+            ], limit=1)
+            if user:
+                user_id = user.id
+
+        # ============================================
+        # 7. CREAR LEAD
+        # ============================================
         utm_ids = utm_params['utm_ids']
 
-        lead_model = request.env["crm.lead"].sudo()
         lead_vals: dict[str, Any] = {
             "name": f"Lead web - {invoice_name}",
             "partner_id": partner.id,
@@ -125,39 +148,47 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
             "phone": phone,
             "mobile": phone,
             "email_from": email,
-            # "street": street,
             "description": description,
             "accept_terms": accept_terms,
             "website": base_url,
             "license_plate": license_plate,
-            # ✅ UTMs procesados - Si tiene valor lo usa, si no pone False o nada
-            "medium_id": utm_ids.get('medium_id') or MEDIUM_ID,  # Si no hay UTM, usa el default
-            "campaign_id": utm_ids.get('campaign_id'),            # Puede ser False si no vino
-            "source_id": utm_ids.get('source_id'),                # Puede ser False si no vino
+            "medium_id": utm_ids.get('medium_id') or MEDIUM_ID,
+            "campaign_id": utm_ids.get('campaign_id'),
+            "source_id": utm_ids.get('source_id'),
+            "crm_fecha_instalacion": fields.Datetime.now(),
         }
 
-        # if brand_id and "brand_id" in lead_model._fields:
-        #     lead_vals["brand_id"] = brand_id
+        if team_id:
+            lead_vals["team_id"] = team_id
+        if user_id:
+            lead_vals["user_id"] = user_id
 
-        # if model_id and "modelo_id" in lead_model._fields:
-        #     lead_vals["modelo_id"] = model_id
+        lead = request.env["crm.lead"].sudo().create(lead_vals)
 
-        lead = lead_model.create(lead_vals)
-
-        # whatsapp_number = "573193662738"
+        # ============================================
+        # 8. WHATSAPP
+        # ============================================
         whatsapp_data = _get_whatsapp_line()
-        whatsapp_number = whatsapp_data["phone"]
-        # advisor_name = whatsapp_data["name"]
 
-        whatsapp_message = "\n".join([
+        whatsapp_lines = [
             "Nuevo lead desde la web",
             "",
             f"Nombre: {invoice_name}",
             f"Teléfono: {phone}",
             f"Correo: {email}",
-        ] + ([f"Placa: {license_plate}"] if license_plate else []))
-        whatsapp_url = f"https://wa.me/{whatsapp_number}?text={quote(whatsapp_message)}"
+        ]
+        if license_plate:
+            whatsapp_lines.append(f"Placa: {license_plate}")
 
+        # whatsapp_url = f"https://wa.me/{whatsapp_data['phone']}?text={quote('\n'.join(whatsapp_lines))}"
+
+         # ✅ CORREGIDO: Variable separada para evitar backslash en f-string
+        whatsapp_message = "\n".join(whatsapp_lines)
+        whatsapp_url = f"https://wa.me/{whatsapp_data['phone']}?text={quote(whatsapp_message)}"
+
+        # ============================================
+        # 9. RESPUESTA
+        # ============================================
         return {
             "success": True,
             "lead_id": lead.id,
@@ -167,8 +198,5 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
         }
 
     except Exception as error:
-        _logger.exception("Error en get_lead_demo_submit: %s", error)
-        return {
-            "success": False,
-            "message": "No fue posible procesar la solicitud.",
-        }
+        _logger.exception("Error en get_lead_submit: %s", error)
+        return {"success": False, "message": "No fue posible procesar la solicitud."}

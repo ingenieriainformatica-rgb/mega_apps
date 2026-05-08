@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Heredar el formulario del CRM -->
+    <record id="view_crm_lead_form_inherit_mega" model="ir.ui.view">
+        <field name="name">crm.lead.form.inherit.mega</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Agregar después del campo license_plate -->
+            <xpath expr="//field[@name='user_id']" position="after">
+
+                <!-- Fecha de Instalación -->
+                <field name="crm_fecha_instalacion" widget="datetime" string="Fecha de creación"/>
+
+                <!-- Tiempo Transcurrido -->
+                <field name="crm_tiempo_transcurrido" string="Tiempo Transcurrido"/>
+
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -10,10 +10,12 @@
     'data': [
         'security/ir.model.access.csv',
         'security/group.xml',
+        'data/cron_actualizar_tiempos.xml',
         'views/website_templates.xml',
         'views/fleet_vehicle_model_brand_views.xml',
         'views/fleet_vehicle_model_views.xml',
         'views/res_partner_views.xml',
+        'views/crm_lead_views.xml',
         'views/website_views.xml',
     ],
     'assets': {
