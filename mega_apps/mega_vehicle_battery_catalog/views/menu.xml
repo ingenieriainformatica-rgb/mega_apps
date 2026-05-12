@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <menuitem id="menu_mega_battery_catalog_root" name="Catálogo de baterías" parent="fleet.menu_root" sequence="80" />
+
+    <menuitem id="menu_mega_battery_application" name="Aplicaciones MAC" parent="menu_mega_battery_catalog_root" action="action_mega_battery_application" sequence="10" />
+
+    <menuitem id="menu_mega_battery_import" name="Importar catálogo MAC" parent="menu_mega_battery_catalog_root" action="action_mega_battery_catalog_import_wizard" sequence="20" />
+
+    <menuitem id="menu_battery_price_import_wizard" name="Importar precios baterías" parent="menu_mega_battery_catalog_root" action="action_battery_price_import_wizard" sequence="30"/>
+
+</odoo>

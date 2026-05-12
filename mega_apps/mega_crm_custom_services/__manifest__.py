@@ -6,7 +6,7 @@
     'author': 'Jorge Alberto Quiroz Sierra',
     "website": "https://mega.realnet.com.co/",
     "sequence": -180,
-    'depends': ['crm', 'fleet'],
+    'depends': ['crm', 'fleet', 'mega_vehicle_website_base', 'mega_vehicle_battery_catalog'],
     'data': [
         'security/ir.model.access.csv',
         'views/menu.xml',

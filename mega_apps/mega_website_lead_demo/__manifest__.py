@@ -6,7 +6,14 @@
     "sequence": -250,
     "author": "Jorge Alberto Quiroz Sierra",
     "website": "https://megatecnicentro.com/",
-    'depends': ['website', 'crm', 'fleet', 'partner_terms_conditions', 'mega_crm_custom_services'],
+    'depends': [
+        'website',
+        'crm',
+        'fleet',
+        'partner_terms_conditions',
+        'mega_vehicle_website_base',
+        'mega_crm_custom_services',
+    ],
     'data': [
         'security/ir.model.access.csv',
         'security/group.xml',

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_mega_battery_application_list" model="ir.ui.view">
+        <field name="name">mega.battery.application.list</field>
+        <field name="model">mega.battery.application</field>
+        <field name="arch" type="xml">
+            <list string="Aplicaciones MAC">
+                <field name="application_type"/>
+                <field name="brand_id"/>
+                <field name="model_id"/>
+                <field name="original_vehicle_name"/>
+                <field name="fuel_type"/>
+                <field name="year_from"/>
+                <field name="year_to"/>
+                <field name="engine_capacity"/>
+                <field name="battery_qty"/>
+                <field name="option_count"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_mega_battery_application_form" model="ir.ui.view">
+        <field name="name">mega.battery.application.form</field>
+        <field name="model">mega.battery.application</field>
+        <field name="arch" type="xml">
+            <form string="Aplicación de batería">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Vehículo">
+                            <field name="application_type"/>
+                            <field name="brand_id"/>
+                            <field name="model_id"/>
+                            <field name="original_vehicle_name"/>
+                            <field name="active"/>
+                        </group>
+
+                        <group string="Datos técnicos">
+                            <field name="fuel_type"/>
+                            <field name="year_from"/>
+                            <field name="year_to"/>
+                            <field name="engine_capacity"/>
+                            <field name="start_stop"/>
+                            <field name="battery_qty"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Opciones de batería">
+                            <field name="option_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="battery_line"/>
+                                    <field name="option_number"/>
+                                    <field name="reference"/>
+                                    <field name="sale_price"/>
+                                    <field name="stock_qty"/>
+                                    <field name="description"/>
+                                    <field name="uom_name" optional="hide"/>
+                                    <field name="average_cost" optional="hide"/>
+                                    <field name="tax_amount" optional="hide"/>
+                                    <field name="cost_with_tax" optional="hide"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="product_id" optional="hide"/>
+                                    <field name="product_found" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_mega_battery_application_search" model="ir.ui.view">
+        <field name="name">mega.battery.application.search</field>
+        <field name="model">mega.battery.application</field>
+        <field name="arch" type="xml">
+            <search string="Buscar aplicaciones">
+                <field name="brand_id"/>
+                <field name="model_id"/>
+                <field name="original_vehicle_name"/>
+                <field name="fuel_type"/>
+                <field name="engine_capacity"/>
+
+                <filter name="active" string="Activos" domain="[('active', '=', True)]" />
+
+                <separator/>
+
+                <filter name="group_by_type" string="Tipo de aplicación" context="{'group_by': 'application_type'}" />
+
+                <filter name="group_by_brand" string="Marca" context="{'group_by': 'brand_id'}" />
+
+                <filter name="group_by_model" string="Modelo" context="{'group_by': 'model_id'}" />
+            </search>
+        </field>
+    </record>
+
+    <record id="action_mega_battery_application" model="ir.actions.act_window">
+        <field name="name">Aplicaciones MAC</field>
+        <field name="res_model">mega.battery.application</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_mega_battery_application_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+    </record>
+
+</odoo>

@@ -21,6 +21,32 @@ from ._utm import (
 _logger = logging.getLogger(__name__)
 
 
+def _format_phone_colombia(phone: str) -> str:
+    """Formatea el teléfono con prefijo +57 de Colombia"""
+    if not phone:
+        return ""
+
+    # Limpiar el teléfono (solo dígitos)
+    clean_phone = "".join(c for c in phone if c.isdigit())
+
+    if not clean_phone:
+        return ""
+
+    # Si ya tiene 12 dígitos (57 + 10), solo formatear
+    if len(clean_phone) == 12 and clean_phone.startswith("57"):
+        return f"+{clean_phone}"
+
+    # Si tiene 10 dígitos, agregar +57
+    if len(clean_phone) == 10:
+        return f"+57{clean_phone}"
+
+    # Si ya empieza con 57 y tiene más de 10
+    if clean_phone.startswith("57"):
+        return f"+{clean_phone}"
+
+    # Si no cumple ninguna condición, devolver como está
+    return f"+57{clean_phone}" if clean_phone else phone
+
 def _normalize_vat(value: str) -> str:
     return (value or "").replace(".", "").replace(",", "").replace(" ", "").strip()
 
@@ -63,7 +89,8 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
         # 1. LIMPIAR DATOS DE ENTRADA
         # ============================================
         invoice_name = _clean(post.get("invoice_name")).upper().strip()
-        phone = _clean(post.get("phone")).strip()
+        phone_raw = _clean(post.get("phone")).strip()
+        phone = _format_phone_colombia(phone_raw)  # ← Formatear con +57
         email = _clean(post.get("email")).strip()
         license_plate = _clean(post.get("license_plate")).upper().replace(" ", "").strip()
         website_name = _clean(post.get("website_name"))

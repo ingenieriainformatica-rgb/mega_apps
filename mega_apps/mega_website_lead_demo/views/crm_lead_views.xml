@@ -22,4 +22,33 @@
         </field>
     </record>
 
+    <record id="view_crm_lead_kanban_inherit_installation_date" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.inherit.installation.date</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//kanban/templates" position="before">
+                <field name="crm_fecha_instalacion"/>
+                <field name="crm_tiempo_transcurrido"/>
+                <field name="crm_kanban_alert"/>
+            </xpath>
+
+            <xpath expr="//kanban/templates/t[@t-name='card']" position="inside">
+                <div class="mt-1 text-muted" t-if="record.crm_fecha_instalacion.raw_value">
+                    <i class="fa fa-calendar me-1"/>
+                    <span>Creado: </span>
+                    <span t-esc="record.crm_fecha_instalacion.value"/>
+                </div>
+
+                <div class="mt-1 text-muted" t-if="record.crm_tiempo_transcurrido.raw_value">
+                    <i class="fa fa-clock-o me-1"/>
+                    <span>Tiempo: </span>
+                    <span t-esc="record.crm_tiempo_transcurrido.value"/>
+                </div>
+
+            </xpath>
+
+        </field>
+    </record>
 </odoo>

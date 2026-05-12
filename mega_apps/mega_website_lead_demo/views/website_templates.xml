@@ -31,17 +31,13 @@
                                     <img src="/mega_website_lead_demo/static/description/icon.png" alt="Megabaterías" class="lead-demo-logo"/>
                                     <div class="lead-demo-header-text">
                                         <h4 id="leadDemoModalLabel" class="lead-demo-modal-title">
-                                                Cotiza tu batería
+                                            Tu batería a domicilio
                                         </h4>
                                         <div class="lead-demo-header-meta">
                                             <small class="lead-demo-modal-subtitle">
                                                 <i class="fa fa-truck me-1"/>
                                                 Instalación a domicilio en 30 min
                                             </small>
-                                            <span class="lead-demo-required-badge">
-                                                <i class="fa fa-asterisk me-1"/>
-                                                Campos obligatorios
-                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -85,7 +81,7 @@
                                         </div>
 
                                         <!-- Placa -->
-                                        <div class="col-12">
+                                        <div class="col-12 d-none">
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white border-end-0">
                                                     <i class="fa fa-car text-muted"/>
@@ -96,15 +92,13 @@
                                     </div>
 
                                     <!-- Términos -->
-                                    <div class="lead-demo-check-wrap mt-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="accept_terms" name="accept_terms" value="1" required="required"/>
-                                            <label class="form-check-label lead-demo-check-label" for="accept_terms">
-                                                <i class="fa fa-check-circle text-success me-1"/>
+                                    <div class="form-check form-switch mb-3 mt-3">
+                                        <input class="form-check-input" type="checkbox" id="accept_terms" name="accept_terms" value="1" required="required"/>
+                                        <label class="form-check-label lead-demo-check-label" for="accept_terms">
+                                            <i class="text-success me-1"/>
                                                     Acepto los términos y condiciones y el tratamiento de mis datos personales
-                                                <span class="lead-demo-required">*</span>
-                                            </label>
-                                        </div>
+                                            <span class="lead-demo-required">*</span>
+                                        </label>
                                     </div>
 
                                     <!-- Campos ocultos -->
@@ -116,14 +110,13 @@
                                     <!-- Mensaje -->
                                     <div id="leadDemoMessage" class="alert mt-3">
                                         <i class="fa fa-info-circle me-2"/>
-                                            oelo
                                     </div>
 
                                     <!-- Botón -->
                                     <div class="d-grid mt-4">
                                         <button type="submit" id="leadDemoSubmitBtn" class="btn lead-demo-submit-btn">
                                             <i class="fa fa-bolt me-2"/>
-                                            Quiero mi batería
+                                            Cotizar mi batería
                                         </button>
                                     </div>
 
@@ -147,19 +140,6 @@
             </t>
 
         </xpath>
-    </template>
-
-    <!-- Página de confirmación -->
-    <template id="lead_demo_thank_you" name="Lead Demo Thank You">
-        <t t-call="website.layout">
-            <div class="container mt-5 mb-5">
-                <div class="alert alert-success">
-                    <h4>Lead creado correctamente</h4>
-                    <p>Se creó el registro: <strong t-esc="lead_name"/>
-                    </p>
-                </div>
-            </div>
-        </t>
     </template>
 
 </odoo>
