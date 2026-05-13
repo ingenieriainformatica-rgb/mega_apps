@@ -1,138 +1,205 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-    <!-- website_id = 1  https://megatecnicentro.com/ pero este todavia no va -->
-    <!-- website_id = 2  https://megabaterias.co/ -->
-    <!-- website_id = 19  https://nacionaldebaterias.com/ -->
+    <!--
+        website_id = 2  https://megabaterias.co/
+        website_id = 19 https://nacionaldebaterias.com/
+    -->
 
     <template id="lead_demo_floating_button_home" inherit_id="website.layout">
         <xpath expr="//body" position="inside">
 
             <t t-if="website and website.id in (2, 19) and request and request.httprequest and request.httprequest.path != '/mega-leads'">
 
-                <!-- BOTÓN FLOTANTE -->
-                <!-- <div id="floating-lead-wrapper" class="container-floating-lead">
-                    <button type="button" data-bs-toggle="modal" data-bs-target="#leadDemoModal" class="button-green">
-                        <i class="fa fa-whatsapp fa-fa-whatsapp"></i>
-                    </button>
-                    <div id="lead-tooltip" class="lead-tooltip-text">
-                        ¿Interesado en un batería?
-                    </div>
-                </div> -->
+                <!-- ========================= -->
+                <!-- Variables por sitio web   -->
+                <!-- ========================= -->
+                <t t-set="lead_logo_src" t-value="'/mega_website_lead_demo/static/description/icon.png'"/>
+                <t t-set="lead_logo_alt" t-value="'Logo del grupo Mega Tecnicentro'"/>
 
-                <!-- MODAL MEGABATERÍAS -->
+                <t t-if="website.id == 2">
+                    <t t-set="lead_brand_name" t-value="'Megabaterías'"/>
+                    <t t-set="lead_brand_code" t-value="'megabaterias'"/>
+                    <t t-set="lead_logo_alt" t-value="'Logo de Megabaterías - baterías a domicilio en Medellín'"/>
+                    <t t-set="lead_modal_title" t-value="'Cotiza tu batería a domicilio'"/>
+                    <t t-set="lead_modal_subtitle" t-value="'Entrega e instalación a domicilio en 30 min'"/>
+                    <t t-set="lead_cta_text" t-value="'Cotizar mi batería'"/>
+                    <t t-set="lead_terms_text" t-value="'Acepto los términos y condiciones y el tratamiento de mis datos personales.'"/>
+                    <t t-set="lead_benefit_one" t-value="'Diagnóstico gratis'"/>
+                    <t t-set="lead_benefit_two" t-value="'Pago contra entrega'"/>
+                    <t t-set="lead_success_message" t-value="'¡Cotización enviada! Pronto te contactaremos para asesorarte con la batería ideal para tu vehículo.'"/>
+                </t>
+
+                <t t-elif="website.id == 19">
+                    <t t-set="lead_brand_name" t-value="'Nacional de Baterías'"/>
+                    <t t-set="lead_brand_code" t-value="'nacional_baterias'"/>
+                    <t t-set="lead_logo_alt" t-value="'Logo de Nacional de Baterías - baterías para carro a domicilio en Medellín'"/>
+                    <t t-set="lead_modal_title" t-value="'Recibe asesoría para tu batería'"/>
+                    <t t-set="lead_modal_subtitle" t-value="'Entrega e instalación a domicilio en 30 min'"/>
+                    <t t-set="lead_cta_text" t-value="'Solicitar asesoría'"/>
+                    <t t-set="lead_terms_text" t-value="'Acepto los términos y condiciones y el tratamiento de mis datos personales.'"/>
+                    <t t-set="lead_benefit_one" t-value="'Instalación a domicilio'"/>
+                    <t t-set="lead_benefit_two" t-value="'Pago contra entrega'"/>
+                    <t t-set="lead_success_message" t-value="'¡Solicitud enviada! Un asesor te contactará para coordinar la entrega e instalación de tu batería a domicilio.'"/>
+                </t>
+
+                <!-- ========================= -->
+                <!-- Modal principal           -->
+                <!-- ========================= -->
+
                 <div class="modal fade lead-demo-modal" id="leadDemoModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="leadDemoModalLabel" aria-hidden="true">
+
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content lead-demo-modal-content">
 
                             <!-- Header -->
                             <div class="lead-demo-modal-header">
                                 <div class="lead-demo-header-main">
-                                    <img src="/mega_website_lead_demo/static/description/icon.png" alt="Megabaterías" class="lead-demo-logo"/>
+
+                                    <img t-att-src="lead_logo_src" t-att-alt="lead_logo_alt" class="lead-demo-logo" loading="lazy"/>
+
                                     <div class="lead-demo-header-text">
                                         <h4 id="leadDemoModalLabel" class="lead-demo-modal-title">
-                                            Tu batería a domicilio
+                                            <t t-esc="lead_modal_title"/>
                                         </h4>
+
                                         <div class="lead-demo-header-meta">
                                             <small class="lead-demo-modal-subtitle">
-                                                <i class="fa fa-truck me-1"/>
-                                                Instalación a domicilio en 30 min
+                                                <i class="fa fa-truck me-1" aria-hidden="true"/>
+                                                <t t-esc="lead_modal_subtitle"/>
                                             </small>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn-close lead-demo-close-btn" data-bs-dismiss="modal" aria-label="Cerrar">
+
+                                <button type="button" class="btn-close lead-demo-close-btn" data-bs-dismiss="modal" aria-label="Cerrar formulario de cotización">
                                 </button>
                             </div>
 
                             <!-- Body -->
                             <div class="modal-body lead-demo-modal-body">
-                                <form id="leadDemoForm">
+                                <form id="leadDemoForm" class="lead-demo-form">
+
+                                    <!-- CSRF -->
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
                                     <div class="row g-3">
+
                                         <!-- Nombre -->
                                         <div class="col-12">
+                                            <label for="lead_invoice_name" class="visually-hidden">
+                                                Nombre completo
+                                            </label>
+
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white border-end-0">
-                                                    <i class="fa fa-user text-muted"/>
+                                                    <i class="fa fa-user text-muted" aria-hidden="true"/>
                                                 </span>
-                                                <input type="text" name="invoice_name" class="form-control lead-demo-input border-start-0" placeholder="Nombre completo *" required="required"/>
+
+                                                <input type="text" id="lead_invoice_name" name="invoice_name" class="form-control lead-demo-input border-start-0" placeholder="Nombre completo *" autocomplete="name" maxlength="120" required="required"/>
                                             </div>
                                         </div>
 
                                         <!-- Teléfono -->
                                         <div class="col-12">
+                                            <label for="lead_phone" class="visually-hidden">
+                                                Teléfono o WhatsApp
+                                            </label>
+
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white border-end-0">
-                                                    <i class="fa fa-whatsapp text-success"/>
+                                                    <i class="fa fa-whatsapp text-success" aria-hidden="true"/>
                                                 </span>
-                                                <input type="tel" name="phone" class="form-control lead-demo-input border-start-0" placeholder="Teléfono / WhatsApp *" required="required"/>
+
+                                                <input type="tel" id="lead_phone" name="phone" class="form-control lead-demo-input border-start-0" placeholder="Teléfono / WhatsApp *" autocomplete="tel" inputmode="tel" minlength="7" maxlength="20" required="required"/>
                                             </div>
                                         </div>
 
                                         <!-- Email -->
                                         <div class="col-12">
+                                            <label for="lead_email" class="visually-hidden">
+                                                Correo electrónico
+                                            </label>
+
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white border-end-0">
-                                                    <i class="fa fa-envelope text-muted"/>
+                                                    <i class="fa fa-envelope text-muted" aria-hidden="true"/>
                                                 </span>
-                                                <input type="email" name="email" class="form-control lead-demo-input border-start-0" placeholder="Correo electrónico *" required="required"/>
+
+                                                <input type="email" id="lead_email" name="email" class="form-control lead-demo-input border-start-0" placeholder="Correo electrónico *" autocomplete="email" maxlength="120" required="required"/>
                                             </div>
                                         </div>
 
-                                        <!-- Placa -->
+                                        <!-- Placa opcional oculta por ahora -->
                                         <div class="col-12 d-none">
+                                            <label for="lead_license_plate" class="visually-hidden">
+                                                Placa del vehículo
+                                            </label>
+
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white border-end-0">
-                                                    <i class="fa fa-car text-muted"/>
+                                                    <i class="fa fa-car text-muted" aria-hidden="true"/>
                                                 </span>
-                                                <input type="text" name="license_plate" class="form-control lead-demo-input border-start-0 text-uppercase" placeholder="Placa del vehículo" />
+
+                                                <input type="text" id="lead_license_plate" name="license_plate" class="form-control lead-demo-input border-start-0 text-uppercase" placeholder="Placa del vehículo" autocomplete="off" maxlength="10"/>
                                             </div>
                                         </div>
+
                                     </div>
 
                                     <!-- Términos -->
-                                    <div class="form-check form-switch mb-3 mt-3">
-                                        <input class="form-check-input" type="checkbox" id="accept_terms" name="accept_terms" value="1" required="required"/>
-                                        <label class="form-check-label lead-demo-check-label" for="accept_terms">
-                                            <i class="text-success me-1"/>
-                                                    Acepto los términos y condiciones y el tratamiento de mis datos personales
-                                            <span class="lead-demo-required">*</span>
-                                        </label>
+                                    <div class="lead-demo-check-wrap mt-3">
+                                        <div class="form-check lead-demo-terms">
+                                            <input class="form-check-input lead-demo-terms-check" type="checkbox" id="accept_terms" name="accept_terms" value="1" required="required"/>
+
+                                            <label class="form-check-label lead-demo-check-label" for="accept_terms">
+                                                <i class="fa fa-check-circle text-success me-1" aria-hidden="true"/>
+                                                <t t-esc="lead_terms_text"/>
+                                                <span class="lead-demo-required">*</span>
+                                            </label>
+                                        </div>
                                     </div>
 
-                                    <!-- Campos ocultos -->
+                                    <!-- Campos ocultos de trazabilidad -->
+                                    <input type="hidden" name="lead_brand_name" t-att-value="lead_brand_name"/>
+                                    <input type="hidden" name="lead_brand_code" t-att-value="lead_brand_code"/>
                                     <input type="hidden" name="page_url" t-att-value="request.httprequest.path"/>
                                     <input type="hidden" name="website_id" t-att-value="website.id"/>
                                     <input type="hidden" name="website_name" t-att-value="website.name"/>
                                     <input type="hidden" name="website_url" t-att-value="request.httprequest.url"/>
 
-                                    <!-- Mensaje -->
-                                    <div id="leadDemoMessage" class="alert mt-3">
-                                        <i class="fa fa-info-circle me-2"/>
+                                    <!-- Mensaje de respuesta -->
+                                    <div id="leadDemoMessage" class="alert mt-3 d-none" role="alert" aria-live="polite" t-att-data-success-message="lead_success_message">
+                                        <i class="fa fa-info-circle me-2" aria-hidden="true"/>
+                                        <span class="lead-demo-message-text"></span>
                                     </div>
 
                                     <!-- Botón -->
                                     <div class="d-grid mt-4">
                                         <button type="submit" id="leadDemoSubmitBtn" class="btn lead-demo-submit-btn">
-                                            <i class="fa fa-bolt me-2"/>
-                                            Cotizar mi batería
+                                            <i class="fa fa-bolt me-2" aria-hidden="true"/>
+                                            <span>
+                                                <t t-esc="lead_cta_text"/>
+                                            </span>
                                         </button>
                                     </div>
 
-                                    <!-- Beneficio rápido -->
+                                    <!-- Beneficios rápidos -->
                                     <div class="text-center mt-2">
                                         <small class="text-muted">
-                                            <i class="fa fa-check-circle text-success me-1"/>
-                                                Diagnóstico gratis
-                                            <i class="fa fa-circle text-muted mx-1" style="font-size:4px; vertical-align:middle;"/>
-                                            <i class="fa fa-money text-success me-1"/>
-                                                Pago contra entrega
+                                            <i class="fa fa-check-circle text-success me-1" aria-hidden="true"/>
+                                            <t t-esc="lead_benefit_one"/>
+
+                                            <i class="fa fa-circle text-muted mx-1" style="font-size:4px; vertical-align:middle;" aria-hidden="true"/>
+
+                                            <i class="fa fa-money text-success me-1" aria-hidden="true"/>
+                                            <t t-esc="lead_benefit_two"/>
                                         </small>
                                     </div>
 
                                 </form>
                             </div>
+
                         </div>
                     </div>
                 </div>
