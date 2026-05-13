@@ -5,7 +5,8 @@ from odoo.exceptions import ValidationError  #type:ignore
 class MegaBatteryApplication(models.Model):
     _name = "mega.battery.application"
     _description = "Aplicación de batería por vehículo"
-    _order = "brand_id, model_id, year_from, year_to"
+    # _order = "brand_id, model_id, year_from, year_to"
+    _order = "brand_id, model_id, year_from, year_to, engine_capacity"
 
     name = fields.Char(
         string="Nombre",
@@ -101,29 +102,67 @@ class MegaBatteryApplication(models.Model):
     ]
 
     @api.depends(
-        "brand_id",
-        "model_id",
-        "original_vehicle_name",
-        "year_from",
-        "year_to",
-        "engine_capacity",
-    )
+    "brand_id",
+    "model_id",
+    "original_vehicle_name",
+    "fuel_type",
+    "year_from",
+    "year_to",
+    "engine_capacity",
+    "start_stop",
+)
     def _compute_name(self):
         for rec in self:
-            years = ""
-            if rec.year_from and rec.year_to:
-                years = f" {rec.year_from}-{rec.year_to}"
-            elif rec.year_from:
-                years = f" desde {rec.year_from}"
+            main_parts = []
 
-            engine = f" {rec.engine_capacity}" if rec.engine_capacity else ""
+            if rec.brand_id:
+                main_parts.append(rec.brand_id.name)
 
-            rec.name = "%s / %s%s%s" % (
-                rec.brand_id.name or "",
-                rec.model_id.name or "",
-                years,
-                engine,
-            )
+            if rec.model_id:
+                main_parts.append(rec.model_id.name)
+
+            main_label = " / ".join(main_parts)
+
+            detail_parts = []
+
+            if rec.fuel_type:
+                detail_parts.append(rec.fuel_type)
+
+            year_range = rec._get_year_range_label()
+            if year_range:
+                detail_parts.append(year_range)
+
+            if rec.engine_capacity:
+                detail_parts.append(rec.engine_capacity)
+
+            if rec.start_stop:
+                detail_parts.append("Start-Stop")
+
+            detail_label = " | ".join(detail_parts)
+
+            if main_label and detail_label:
+                rec.name = f"{main_label} | {detail_label}"
+            elif main_label:
+                rec.name = main_label
+            elif rec.original_vehicle_name:
+                rec.name = rec.original_vehicle_name
+            else:
+                rec.name = _("Aplicación MAC")
+
+
+    def _get_year_range_label(self):
+        self.ensure_one()
+
+        if self.year_from and self.year_to:
+            return f"{self.year_from}-{self.year_to}"
+
+        if self.year_from:
+            return f"Desde {self.year_from}"
+
+        if self.year_to:
+            return f"Hasta {self.year_to}"
+
+        return ""
 
     @api.depends("option_ids")
     def _compute_option_count(self):

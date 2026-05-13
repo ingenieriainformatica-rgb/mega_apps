@@ -25,7 +25,7 @@
 
                         <field name="customer_leaves_battery" string="¿Cliente deja batería?" widget="boolean_toggle"/>
 
-                        <field name="left_battery_reference" string="Referencia batería dejada" invisible="not customer_leaves_battery" required="customer_leaves_battery"/>
+                        <field name="left_battery_reference" string="Referencia batería dejada" invisible="not customer_leaves_battery"/>
                     </group>
                 </group>
 
@@ -33,10 +33,11 @@
                     <field name="battery_option_ids" nolabel="1" readonly="1" colspan="2">
                         <list create="0" delete="0" edit="0">
                             <field name="option_number" string="Opción"/>
+                            <field name="application_id" string="Pertenece a" readonly="1" options="{'no_create': True, 'no_edit': True}"/>
                             <field name="battery_line" string="Línea"/>
                             <field name="reference" string="Referencia"/>
                             <field name="sale_price" string="Precio venta"/>
-                            <field name="stock_qty" string="Existencias" optional="hide"/>
+                            <field name="stock_qty" string="Existencias" optional="show"/>
                             <field name="description" string="Descripción" optional="show"/>
                             <field name="currency_id" optional="hide"/>
                         </list>

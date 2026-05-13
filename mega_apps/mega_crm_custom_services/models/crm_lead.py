@@ -66,6 +66,7 @@ class CrmLead(models.Model):
     customer_leaves_battery = fields.Boolean(
         string="¿Cliente deja batería?",
         help="Indica si el cliente deja una batería usada o de referencia.",
+        default=True
     )
 
     left_battery_reference = fields.Char(
@@ -154,14 +155,6 @@ class CrmLead(models.Model):
         for lead in self:
             if not lead.customer_leaves_battery:
                 lead.left_battery_reference = False
-
-    @api.constrains("customer_leaves_battery", "left_battery_reference")
-    def _check_left_battery_reference(self):
-        for lead in self:
-            if lead.customer_leaves_battery and not lead.left_battery_reference:
-                raise ValidationError(_(
-                    "Debe ingresar la referencia de la batería dejada por el cliente."
-                ))
 
     def _get_battery_application_domain(self):
         self.ensure_one()
