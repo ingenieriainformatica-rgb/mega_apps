@@ -5,13 +5,14 @@ from odoo.exceptions import ValidationError  #type:ignore
 class MegaBatteryApplication(models.Model):
     _name = "mega.battery.application"
     _description = "Aplicación de batería por vehículo"
-    # _order = "brand_id, model_id, year_from, year_to"
     _order = "brand_id, model_id, year_from, year_to, engine_capacity"
+    _rec_name = "name"
 
     name = fields.Char(
         string="Nombre",
         compute="_compute_name",
         store=True,
+        index=True,
     )
 
     active = fields.Boolean(
@@ -102,25 +103,21 @@ class MegaBatteryApplication(models.Model):
     ]
 
     @api.depends(
-    "brand_id",
-    "model_id",
-    "original_vehicle_name",
-    "fuel_type",
-    "year_from",
-    "year_to",
-    "engine_capacity",
-    "start_stop",
-)
+        "brand_id.name",
+        "model_id.name",
+        "original_vehicle_name",
+        "fuel_type",
+        "year_from",
+        "year_to",
+        "engine_capacity",
+        "start_stop",
+    )
     def _compute_name(self):
         for rec in self:
-            main_parts = []
+            brand_name = rec.brand_id.name or ""
+            model_name = rec._get_model_display_name()
 
-            if rec.brand_id:
-                main_parts.append(rec.brand_id.name)
-
-            if rec.model_id:
-                main_parts.append(rec.model_id.name)
-
+            main_parts = [part for part in [brand_name, model_name] if part]
             main_label = " / ".join(main_parts)
 
             detail_parts = []
@@ -149,6 +146,30 @@ class MegaBatteryApplication(models.Model):
             else:
                 rec.name = _("Aplicación MAC")
 
+    def _get_model_display_name(self):
+        self.ensure_one()
+
+        model_name = (self.model_id.name or "").strip()
+        brand_name = (self.brand_id.name or "").strip()
+
+        if not model_name:
+            return ""
+
+        if not brand_name:
+            return model_name
+
+        possible_prefixes = [
+            f"{brand_name}/",
+            f"{brand_name} /",
+            f"{brand_name}-",
+            f"{brand_name} -",
+        ]
+
+        for prefix in possible_prefixes:
+            if model_name.lower().startswith(prefix.lower()):
+                return model_name[len(prefix):].strip(" /-")
+
+        return model_name
 
     def _get_year_range_label(self):
         self.ensure_one()
@@ -179,13 +200,22 @@ class MegaBatteryApplication(models.Model):
 
     @api.onchange("brand_id")
     def _onchange_brand_id(self):
-        self.model_id = False
+        for rec in self:
+            rec.model_id = False
 
 
 class MegaBatteryApplicationOption(models.Model):
     _name = "mega.battery.application.option"
     _description = "Opción de batería por aplicación"
-    _order = "application_id, sequence, battery_line, option_number"
+    _order = "application_id, sequence, battery_line, option_number, reference"
+    _rec_name = "name"
+
+    name = fields.Char(
+        string="Nombre",
+        compute="_compute_name",
+        store=True,
+        index=True,
+    )
 
     sequence = fields.Integer(
         string="Secuencia",
@@ -228,7 +258,6 @@ class MegaBatteryApplicationOption(models.Model):
         index=True,
     )
 
-
     description = fields.Char(
         string="Descripción",
         help="Descripción completa de la batería según el archivo de precios.",
@@ -268,6 +297,18 @@ class MegaBatteryApplicationOption(models.Model):
         help="Precio de venta sugerido. En el archivo corresponde a la columna 30%.",
     )
 
+    min_sale_price = fields.Monetary(
+        string="Precio mínimo venta",
+        currency_field="currency_id",
+        help="Precio mínimo autorizado para vender esta batería.",
+    )
+
+    max_sale_price = fields.Monetary(
+        string="Precio máximo venta",
+        currency_field="currency_id",
+        help="Precio máximo autorizado o sugerido para vender esta batería.",
+    )
+
     currency_id = fields.Many2one(
         comodel_name="res.currency",
         string="Moneda",
@@ -287,7 +328,78 @@ class MegaBatteryApplicationOption(models.Model):
         store=True,
     )
 
+    @api.depends(
+        "application_id.name",
+        "battery_line",
+        "option_number",
+        "reference",
+    )
+    def _compute_name(self):
+        for rec in self:
+            parts = []
+
+            if rec.application_id:
+                parts.append(rec.application_id.display_name)
+
+            if rec.option_number:
+                parts.append(_("Opción %s") % rec.option_number)
+
+            line_label = rec._get_battery_line_label()
+            if line_label:
+                parts.append(line_label)
+
+            if rec.reference:
+                parts.append(rec.reference)
+
+            rec.name = " | ".join(parts) if parts else _("Opción de batería")
+
     @api.depends("product_id")
     def _compute_product_found(self):
         for rec in self:
             rec.product_found = bool(rec.product_id)
+
+    @api.constrains("min_sale_price", "max_sale_price")
+    def _check_min_max_sale_price(self):
+        for rec in self:
+            if rec.min_sale_price < 0:
+                raise ValidationError(
+                    _("El precio mínimo de venta no puede ser negativo.")
+                )
+
+            if rec.max_sale_price < 0:
+                raise ValidationError(
+                    _("El precio máximo de venta no puede ser negativo.")
+                )
+
+            if (
+                rec.min_sale_price
+                and rec.max_sale_price
+                and rec.min_sale_price > rec.max_sale_price
+            ):
+                raise ValidationError(
+                    _("El precio mínimo de venta no puede ser mayor que el precio máximo.")
+                )
+
+    def _get_battery_line_label(self):
+        self.ensure_one()
+
+        selection = self._fields["battery_line"].selection
+
+        if isinstance(selection, str):
+            selection = getattr(self, selection)()
+
+        elif callable(selection):
+            selection = selection(self.env[self._name])
+
+        if not selection:
+            return self.battery_line or ""
+
+        selection_map = {
+            key: label
+            for key, label in selection  #type:ignore
+        }
+
+        return selection_map.get(
+            self.battery_line,
+            self.battery_line or "",
+        )

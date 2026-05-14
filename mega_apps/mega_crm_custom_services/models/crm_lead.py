@@ -74,6 +74,70 @@ class CrmLead(models.Model):
         help="Referencia de la batería que deja el cliente.",
     )
 
+
+    #######################################################
+    ########### Nuevos campos para el lead sold_battery
+    #######################################################
+    sold_battery_option_id = fields.Many2one(
+        comodel_name="mega.battery.application.option",
+        string="Batería vendida / instalada",
+        copy=False,
+        help="Batería seleccionada entre las opciones sugeridas para este vehículo.",
+    )
+
+    sold_battery_application_name = fields.Char(
+        string="Aplicación MAC seleccionada",
+        readonly=True,
+        copy=False,
+    )
+
+    sold_battery_line_name = fields.Char(
+        string="Línea vendida",
+        readonly=True,
+        copy=False,
+    )
+
+    sold_battery_reference = fields.Char(
+        string="Referencia vendida",
+        readonly=True,
+        copy=False,
+    )
+
+    sold_battery_suggested_price = fields.Monetary(
+        string="Precio sugerido",
+        currency_field="sold_battery_currency_id",
+        readonly=True,
+        copy=False,
+    )
+
+    sold_battery_price = fields.Monetary(
+        string="Precio vendido",
+        currency_field="sold_battery_currency_id",
+        copy=False,
+    )
+
+    sold_battery_min_price = fields.Monetary(
+        string="Precio mínimo permitido",
+        currency_field="sold_battery_currency_id",
+        readonly=True,
+        copy=False,
+    )
+
+    sold_battery_max_price = fields.Monetary(
+        string="Precio máximo permitido",
+        currency_field="sold_battery_currency_id",
+        readonly=True,
+        copy=False,
+    )
+
+    sold_battery_currency_id = fields.Many2one(
+        comodel_name="res.currency",
+        string="Moneda batería vendida",
+        default=lambda self: self.env.company.currency_id,
+        readonly=True,
+        copy=False,
+    )
+
     @api.depends(
         "brand_id",
         "modelo_id",
@@ -206,3 +270,33 @@ class CrmLead(models.Model):
                 return int(match.group(1))
 
         return 0
+
+    @api.onchange("sold_battery_option_id")
+    def _onchange_sold_battery_option_id(self):
+        for lead in self:
+            lead._apply_sold_battery_option_values()
+
+
+    def _apply_sold_battery_option_values(self):
+        for lead in self:
+            option = lead.sold_battery_option_id
+
+            if not option:
+                lead.sold_battery_application_name = False
+                lead.sold_battery_line_name = False
+                lead.sold_battery_reference = False
+                lead.sold_battery_suggested_price = 0.0
+                lead.sold_battery_price = 0.0
+                lead.sold_battery_min_price = 0.0
+                lead.sold_battery_max_price = 0.0
+                lead.sold_battery_currency_id = lead.env.company.currency_id
+                continue
+
+            lead.sold_battery_application_name = option.application_id.display_name
+            lead.sold_battery_line_name = option._get_battery_line_label()
+            lead.sold_battery_reference = option.reference
+            lead.sold_battery_suggested_price = option.sale_price
+            lead.sold_battery_price = option.sale_price
+            lead.sold_battery_min_price = option.min_sale_price
+            lead.sold_battery_max_price = option.max_sale_price
+            lead.sold_battery_currency_id = option.currency_id
