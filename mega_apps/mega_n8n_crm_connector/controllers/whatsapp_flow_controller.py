@@ -17,6 +17,7 @@ from ..helpers.whatsapp_session_helper import (
     parse_ai_result,
     session_snapshot,
     whatsapp_response,
+    get_welcome_message,
 )
 
 
@@ -59,26 +60,44 @@ class N8nWhatsappSessionController(http.Controller):
                 should_use_ai=False,
             )
 
-        session, _created = get_or_create_session(
+        session, created = get_or_create_session(
             request.env,
             phone,
             message,
             phone_number_id,
         )
 
+        if created:
+            return {
+                "success": True,
+                "should_use_ai": False,
+                "should_send": True,
+                "kind": "welcome",
+                "phone": session.phone,
+                "phone_number_id": session.phone_number_id,
+                "step": session.step,
+                "reply": get_welcome_message(),
+                "session": session_snapshot(session),
+            }
+
         if session.step == "advisor_handoff":
             return {
                 "success": True,
                 "should_use_ai": False,
                 "should_send": False,
+                "kind": "advisor_handoff",
+                "phone": session.phone,
+                "phone_number_id": session.phone_number_id,
                 "step": session.step,
                 "reply": "",
+                "session": session_snapshot(session),
             }
 
         return {
             "success": True,
             "should_use_ai": True,
             "should_send": False,
+            "kind": "ai_context",
             "phone": session.phone,
             "phone_number_id": session.phone_number_id,
             "step": session.step,
@@ -87,6 +106,7 @@ class N8nWhatsappSessionController(http.Controller):
             "location": session.location or "",
             "last_message": message,
             "ai_instruction": get_ai_instruction(session, message),
+            "session": session_snapshot(session),
         }
 
     @http.route(

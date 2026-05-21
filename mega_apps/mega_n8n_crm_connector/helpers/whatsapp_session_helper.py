@@ -6,6 +6,7 @@ from datetime import datetime
 from textwrap import dedent
 from typing import Any
 from zoneinfo import ZoneInfo
+import random
 
 
 _logger = logging.getLogger(__name__)
@@ -138,17 +139,44 @@ def get_colombia_greeting() -> str:
 
 
 def get_welcome_message() -> str:
-    return dedent(
+    greeting = get_colombia_greeting()
+
+    messages = [
         f"""
-        Hola, muy {get_colombia_greeting()}. Un gusto saludarte.
+        Hola, muy {greeting}. Un gusto saludarte.
         Te habla Moisés Castrillón, asesor de Mega Baterías. 🔋🚗
 
         ¿Me regalas por favor tu nombre?
-        Y cuéntame, ¿qué tipo de batería estás buscando y para qué vehículo la necesitas?
 
         Estoy atento para asesorarte y recomendarte la mejor opción según tu vehículo y presupuesto. 👍
-        """
-    ).strip()
+        """,
+        f"""
+        Muy {greeting}, gracias por escribir a Mega Baterías. 🔋🚗
+        Te habla Moisés Castrillón.
+
+        Para iniciar la asesoría, ¿me regalas por favor tu nombre?
+
+        Con gusto te ayudo a encontrar la batería adecuada para tu vehículo.
+        """,
+        f"""
+        Hola, muy {greeting}. Bienvenido a Mega Baterías. 🔋
+        Soy Moisés Castrillón y con gusto te voy a asesorar.
+
+        ¿Me compartes por favor tu nombre?
+
+        Así podemos continuar con la cotización de la batería para tu vehículo.
+        """,
+        f"""
+        Muy {greeting}. Gracias por comunicarte con Mega Baterías. 🚗🔋
+        Te habla Moisés Castrillón.
+
+        Para atenderte mejor, ¿me confirmas por favor tu nombre?
+
+        Estoy atento para ayudarte con la mejor opción según tu vehículo.
+        """,
+    ]
+
+    return dedent(random.choice(messages)).strip()
 
 
 def get_confirmation_message(session) -> str:
