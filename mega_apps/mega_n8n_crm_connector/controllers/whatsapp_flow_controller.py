@@ -19,6 +19,9 @@ from ..helpers.whatsapp_session_helper import (
     whatsapp_response,
     get_welcome_message,
     is_terminal_step,
+    create_or_update_lead_from_session,
+    log_whatsapp_conversation_on_lead,
+    log_customer_message_on_lead_from_session,
 )
 
 
@@ -152,14 +155,110 @@ class N8nWhatsappSessionController(http.Controller):
 
         session.write(vals)
 
+        lead = create_or_update_lead_from_session(request.env, session)
+
         if next_step == "confirm_data":
             reply = get_confirmation_message(session)
             should_send = True
+
+        if lead:
+            log_whatsapp_conversation_on_lead(
+                lead,
+                customer_message=session.last_message,
+                bot_reply=reply if should_send else "",
+            )
 
         return whatsapp_response(
             True,
             session.step,
             reply,
             should_send=should_send,
+            session=session_snapshot(session),
+            lead_id=lead.id if lead else False,
+        )
+
+
+
+    @http.route(
+        "/n8n/whatsapp/session/log-message",
+        type="json",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+        website=False,
+    )
+    def n8n_whatsapp_session_log_message(self, **post):
+        payload = get_n8n_payload()
+
+        phone = (payload.get("phone") or "").strip()
+        message = (payload.get("message") or "").strip()
+        message_id = (payload.get("message_id") or "").strip()
+
+        _logger.info(
+            "N8N WhatsApp log message phone=%s message_id=%s",
+            phone,
+            message_id,
+        )
+
+        if not phone:
+            return missing_phone_response(
+                error="missing_phone",
+                should_use_ai=False,
+                should_send=False,
+            )
+
+        session = get_active_session(request.env, phone)
+
+        if not session:
+            return whatsapp_response(
+                False,
+                "error",
+                "No encontré una sesión activa para registrar el mensaje.",
+                should_send=False,
+                should_use_ai=False,
+                kind="no_active_session",
+            )
+
+        # Seguridad: aunque n8n ya validó el IF, Odoo vuelve a validar.
+        if not is_terminal_step(session.step):
+            return whatsapp_response(
+                True,
+                session.step,
+                "",
+                should_send=False,
+                should_use_ai=False,
+                kind="ignored_not_terminal_session",
+                session=session_snapshot(session),
+            )
+
+        # Este es el punto clave:
+        # NO buscamos otro lead por teléfono.
+        # El lead correcto es el vinculado a la sesión activa.
+        if not session.lead_id:
+            return whatsapp_response(
+                False,
+                session.step,
+                "",
+                should_send=False,
+                should_use_ai=False,
+                kind="session_without_lead",
+                session=session_snapshot(session),
+            )
+
+        logged = log_customer_message_on_lead_from_session(
+            session,
+            message=message,
+            message_id=message_id,
+        )
+
+        return whatsapp_response(
+            True,
+            session.step,
+            "",
+            should_send=False,
+            should_use_ai=False,
+            kind="message_logged" if logged else "message_not_logged",
+            logged=logged,
+            lead_id=session.lead_id.id,
             session=session_snapshot(session),
         )

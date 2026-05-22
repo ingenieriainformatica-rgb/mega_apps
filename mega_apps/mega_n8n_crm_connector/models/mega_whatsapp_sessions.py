@@ -26,3 +26,17 @@ class MegaWhatsappSession(models.Model):
 
     lead_id = fields.Many2one("crm.lead", string="Lead")
     active = fields.Boolean(default=True)
+
+    last_inbound_message_id = fields.Char(index=True)
+
+    def init(self):
+        self.env.cr.execute("""
+            ALTER TABLE mega_whatsapp_session
+            DROP CONSTRAINT IF EXISTS mega_whatsapp_session_phone_unique_active
+        """)
+
+        self.env.cr.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS mega_whatsapp_session_unique_active_phone_idx
+            ON mega_whatsapp_session (phone)
+            WHERE active IS TRUE
+        """)
