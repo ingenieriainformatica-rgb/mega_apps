@@ -18,6 +18,7 @@ from ..helpers.whatsapp_session_helper import (
     session_snapshot,
     whatsapp_response,
     get_welcome_message,
+    is_terminal_step,
 )
 
 
@@ -80,12 +81,12 @@ class N8nWhatsappSessionController(http.Controller):
                 "session": session_snapshot(session),
             }
 
-        if session.step == "advisor_handoff":
+        if is_terminal_step(session.step):
             return {
                 "success": True,
                 "should_use_ai": False,
                 "should_send": False,
-                "kind": "advisor_handoff",
+                "kind": "terminal_session",
                 "phone": session.phone,
                 "phone_number_id": session.phone_number_id,
                 "step": session.step,

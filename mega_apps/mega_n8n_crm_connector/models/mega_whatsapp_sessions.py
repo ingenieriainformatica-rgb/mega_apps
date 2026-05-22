@@ -26,11 +26,3 @@ class MegaWhatsappSession(models.Model):
 
     lead_id = fields.Many2one("crm.lead", string="Lead")
     active = fields.Boolean(default=True)
-
-    _sql_constraints = [
-        (
-            "phone_unique_active",
-            "unique(phone, active)",
-            "Ya existe una sesión activa para este teléfono.",
-        )
-    ]

@@ -7,6 +7,7 @@ from textwrap import dedent
 from typing import Any
 from zoneinfo import ZoneInfo
 import random
+from odoo import fields  # type: ignore
 
 
 _logger = logging.getLogger(__name__)
@@ -39,6 +40,23 @@ RESET_SESSION_REPLY = (
     "Sin problema. Vamos a corregir la información. ¿Me regalas por favor tu nombre?"
 )
 
+TERMINAL_STEPS = {"advisor_handoff", "done"}
+
+SESSION_REOPEN_MINUTES = 60 * 24 * 8
+
+NEW_SESSION_KEYWORDS = {
+    "otra batería",
+    "otra bateria",
+    "nueva batería",
+    "nueva bateria",
+    "nueva cotización",
+    "nueva cotizacion",
+    "otro carro",
+    "otro vehículo",
+    "otro vehiculo",
+    "reiniciar",
+    "empezar de nuevo",
+}
 
 def whatsapp_response(
     success: bool,
@@ -108,10 +126,50 @@ def write_last_message(session, message: str, phone_number_id: str) -> None:
 def get_or_create_session(env, phone: str, message: str, phone_number_id: str):
     session = get_active_session(env, phone)
 
+    _logger.info(
+        "\n\nWHATSAPP SESSION CHECK phone=%s session=%s step=%s active=%s write_date=%s message=%s \n\n",
+        phone,
+        session.id if session else False,
+        session.step if session else False,
+        session.active if session else False,
+        session.write_date if session else False,
+        message,
+    )
+
+    if session and is_terminal_step(session.step):
+        expired = terminal_session_expired(session)
+        new_request = message_requests_new_session(message)
+
+        _logger.info(
+            "\n\n WHATSAPP TERMINAL SESSION phone=%s session=%s expired=%s new_request=%s \n\n",
+            phone,
+            session.id,
+            expired,
+            new_request,
+        )
+
+        if expired or new_request:
+            _logger.info(
+                "\n\nWHATSAPP CLOSING SESSION id=%s and creating new session\n\n",
+                session.id,
+            )
+            close_session(session)
+            new_session = create_session(env, phone, message, phone_number_id)
+
+            _logger.info(
+                "\n\nWHATSAPP NEW SESSION id=%s phone=%s step=%s\n\n",
+                new_session.id,
+                new_session.phone,
+                new_session.step,
+            )
+
+            return new_session, True
+
     if session:
         write_last_message(session, message, phone_number_id)
         return session, False
 
+    _logger.info("\n\nWHATSAPP CREATING FIRST SESSION phone=%s\n\n", phone)
     return create_session(env, phone, message, phone_number_id), True
 
 
@@ -143,36 +201,36 @@ def get_welcome_message() -> str:
 
     messages = [
         f"""
-        Hola, muy {greeting}. Un gusto saludarte.
-        Te habla Moisés Castrillón, asesor de Mega Baterías. 🔋🚗
-
-        ¿Me regalas por favor tu nombre?
-
-        Estoy atento para asesorarte y recomendarte la mejor opción según tu vehículo y presupuesto. 👍
-        """,
-        f"""
-        Muy {greeting}, gracias por escribir a Mega Baterías. 🔋🚗
+        Hola, muy {greeting}. Gracias por comunicarte con Mega Baterías. 🔋🚗
         Te habla Moisés Castrillón.
 
-        Para iniciar la asesoría, ¿me regalas por favor tu nombre?
+        Con gusto te ayudo a encontrar la batería más adecuada para tu vehículo, según la referencia, disponibilidad y ubicación.
 
-        Con gusto te ayudo a encontrar la batería adecuada para tu vehículo.
+        Para iniciar la asesoría, ¿me confirmas por favor tu nombre?
         """,
         f"""
-        Hola, muy {greeting}. Bienvenido a Mega Baterías. 🔋
+        Muy {greeting}. Bienvenido a Mega Baterías. 🚗🔋
+        Te habla Moisés Castrillón.
+
+        Estoy aquí para ayudarte a cotizar la batería ideal para tu vehículo y validar la mejor opción disponible.
+
+        Para atenderte de manera personalizada, ¿me regalas por favor tu nombre?
+        """,
+        f"""
+        Hola, muy {greeting}. Gracias por escribirnos a Mega Baterías. 🔋
         Soy Moisés Castrillón y con gusto te voy a asesorar.
 
-        ¿Me compartes por favor tu nombre?
+        Te ayudaré a revisar la mejor alternativa de batería de acuerdo con tu vehículo y ubicación.
 
-        Así podemos continuar con la cotización de la batería para tu vehículo.
+        Para comenzar, ¿me compartes por favor tu nombre?
         """,
         f"""
-        Muy {greeting}. Gracias por comunicarte con Mega Baterías. 🚗🔋
+        Muy {greeting}. Gracias por contactar a Mega Baterías. 🚗🔋
         Te habla Moisés Castrillón.
 
-        Para atenderte mejor, ¿me confirmas por favor tu nombre?
+        Con gusto revisamos la opción de batería que mejor se ajuste a tu vehículo, disponibilidad y necesidad.
 
-        Estoy atento para ayudarte con la mejor opción según tu vehículo.
+        Para brindarte una atención más personalizada, ¿me confirmas por favor tu nombre?
         """,
     ]
 
@@ -401,3 +459,39 @@ def build_session_vals(
         )
 
     return vals
+
+
+def is_terminal_step(step: str | None) -> bool:
+    return step in TERMINAL_STEPS
+
+
+def message_requests_new_session(message: str | None) -> bool:
+    normalized = normalize_answer(message)
+
+    return any(keyword in normalized for keyword in NEW_SESSION_KEYWORDS)
+
+
+def terminal_session_expired(session) -> bool:
+    if not is_terminal_step(session.step):
+        return False
+
+    if not session.write_date:
+        return False
+
+    expiration_limit = fields.Datetime.subtract(
+        fields.Datetime.now(),
+        minutes=SESSION_REOPEN_MINUTES,
+    )
+
+    return session.write_date < expiration_limit
+
+
+def close_session(session) -> None:
+    session.write(
+        {
+            "active": False,
+            "step": "done",
+        }
+    )
+
+    session.flush_recordset(["active", "step"])
