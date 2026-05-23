@@ -6,8 +6,8 @@ from odoo import http  # type: ignore
 from odoo.http import request  # type: ignore
 
 from ..helpers.n8n_payload_helper import get_n8n_payload
+from ..helpers.constants import NO_ACTIVE_SESSION_REPLY
 from ..helpers.whatsapp_session_helper import (
-    NO_ACTIVE_SESSION_REPLY,
     build_ai_session_update,
     get_active_session,
     get_ai_instruction,
@@ -155,7 +155,12 @@ class N8nWhatsappSessionController(http.Controller):
 
         session.write(vals)
 
-        lead = create_or_update_lead_from_session(request.env, session)
+        # lead = create_or_update_lead_from_session(request.env, session)
+        lead = create_or_update_lead_from_session(
+            request.env,
+            session,
+            ai_result=ai_result,
+        )
 
         if next_step == "confirm_data":
             reply = get_confirmation_message(session)

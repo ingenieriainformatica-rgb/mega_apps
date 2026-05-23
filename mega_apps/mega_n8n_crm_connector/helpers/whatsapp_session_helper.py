@@ -1,95 +1,79 @@
 # -*- coding: utf-8 -*-
 
 import json
+import re
 import logging
 from datetime import datetime
 from textwrap import dedent
 from typing import Any
-from zoneinfo import ZoneInfo
 import random
 from odoo import fields  # type: ignore
 # from odoo.tools import html_escape  # type: ignore
 from markupsafe import Markup, escape
 
+from .constants import (
+    CONFIRMATION_YES,
+    CONFIRMATION_NO,
+    ALLOWED_STEPS,
+    MISSING_PHONE_REPLY,
+    CONFIRMATION_RETRY_REPLY,
+    RESET_SESSION_REPLY,
+    TERMINAL_STEPS,
+    SESSION_REOPEN_MINUTES,
+    NEW_SESSION_KEYWORDS,
+    WHATSAPP_LINE_CONFIGS,
+    DEFAULT_WHATSAPP_LINE_CONFIG,
+    COVERAGE_LOCATIONS,
+    OUT_OF_COVERAGE_LOCATIONS,
+    LEAD_BRAND_FIELD,
+    LEAD_MODEL_FIELD,
+    LEAD_YEAR_FIELD,
+    COLOMBIA_TZ,
+)
+
 
 _logger = logging.getLogger(__name__)
 
-COLOMBIA_TZ = ZoneInfo("America/Bogota")
+def normalize_text(value: str) -> str:
+    value = (value or "").lower().strip()
+    replacements = {
+        "á": "a",
+        "é": "e",
+        "í": "i",
+        "ó": "o",
+        "ú": "u",
+        "ü": "u",
+        "ñ": "n",
+    }
+    for old, new in replacements.items():
+        value = value.replace(old, new)
+    return value
 
-CONFIRMATION_YES = {"si", "sí", "s", "correcto", "ok", "listo", "confirmo"}
-CONFIRMATION_NO = {"no", "n", "incorrecto", "corregir"}
 
-ALLOWED_STEPS = {
-    "ask_name",
-    "ask_vehicle",
-    "ask_location",
-    "confirm_data",
-    "advisor_handoff",
-    "done",
-}
+def is_out_of_coverage(location: str) -> bool:
+    normalized = normalize_text(location)
 
-MISSING_PHONE_REPLY = "No fue posible identificar tu número de WhatsApp."
+    if not normalized:
+        return False
 
-NO_ACTIVE_SESSION_REPLY = (
-    "No encontré una sesión activa. Escríbeme nuevamente para iniciar la atención."
-)
+    allowed = [normalize_text(x) for x in COVERAGE_LOCATIONS]
+    denied = [normalize_text(x) for x in OUT_OF_COVERAGE_LOCATIONS]
 
-CONFIRMATION_RETRY_REPLY = (
-    "Por favor respóndeme únicamente con Sí o No para confirmar si los datos están correctos."
-)
+    if any(place in normalized for place in allowed):
+        return False
 
-RESET_SESSION_REPLY = (
-    "Sin problema. Vamos a corregir la información. ¿Me regalas por favor tu nombre?"
-)
+    if any(place in normalized for place in denied):
+        return True
 
-TERMINAL_STEPS = {"advisor_handoff", "done"}
+    return False
 
-SESSION_REOPEN_MINUTES = 60 * 24 * 8
 
-NEW_SESSION_KEYWORDS = {
-    "otra batería",
-    "otra bateria",
-    "nueva batería",
-    "nueva bateria",
-    "nueva cotización",
-    "nueva cotizacion",
-    "otro carro",
-    "otro vehículo",
-    "otro vehiculo",
-    "reiniciar",
-    "empezar de nuevo",
-}
-
-WHATSAPP_LINE_LABELS = {
-    # phone_number_id de Meta / WhatsApp
-    # Reemplaza estos valores por los reales de tus líneas
-    "1115813888271835": "Mega Baterías",
-}
-
-WHATSAPP_LINE_CONFIGS = {
-    # Línea Mega Baterías
-    "1115813888271835": {
-        "label": "Mega Baterías",
-        "website": "https://megabaterias.co",
-        "team_name": "Baterías",
-        "user_name": "TIENDA DIGITAL",
-    },
-
-    # Ejemplo futuro: otra línea
-    # "2222222222222222": {
-    #     "label": "Mega Tecnicentro",
-    #     "website": "https://megatecnicentro.com",
-    #     "team_name": "Autos Mega",
-    #     "user_name": "TIENDA DIGITAL",
-    # },
-}
-
-DEFAULT_WHATSAPP_LINE_CONFIG = {
-    "label": "Mega Baterías",
-    "website": "https://megabaterias.co",
-    "team_name": "Baterías",
-    "user_name": "TIENDA DIGITAL",
-}
+def get_out_of_coverage_message() -> str:
+    return (
+        "Gracias por la información. Por el momento solo tenemos cobertura "
+        "en Medellín y el área metropolitana. 🙏\n\n"
+        "Si te encuentras dentro de esta zona, con gusto continúo ayudándote."
+    )
 
 def whatsapp_response(
     success: bool,
@@ -237,7 +221,7 @@ def get_welcome_message() -> str:
         Hola, muy {greeting}. Gracias por comunicarte con Mega Baterías. 🔋🚗
         Te habla Moisés Castrillón.
 
-        Con gusto te ayudo a encontrar la batería más adecuada para tu vehículo, según la referencia, disponibilidad y ubicación.
+        Con gusto te ayudo a encontrar la batería más adecuada para carros, camiones o aplicaciones industriales, según referencia, disponibilidad y ubicación.
 
         Para iniciar la asesoría, ¿me confirmas por favor tu nombre?
         """,
@@ -245,7 +229,7 @@ def get_welcome_message() -> str:
         Muy {greeting}. Bienvenido a Mega Baterías. 🚗🔋
         Te habla Moisés Castrillón.
 
-        Estoy aquí para ayudarte a cotizar la batería ideal para tu vehículo y validar la mejor opción disponible.
+        Estoy aquí para ayudarte a cotizar baterías para carros, camiones o equipos industriales y validar la mejor opción disponible.
 
         Para atenderte de manera personalizada, ¿me regalas por favor tu nombre?
         """,
@@ -253,7 +237,7 @@ def get_welcome_message() -> str:
         Hola, muy {greeting}. Gracias por escribirnos a Mega Baterías. 🔋
         Soy Moisés Castrillón y con gusto te voy a asesorar.
 
-        Te ayudaré a revisar la mejor alternativa de batería de acuerdo con tu vehículo y ubicación.
+        Te ayudaré a revisar la mejor alternativa de batería para tu carro, camión o aplicación industrial, de acuerdo con tu necesidad y ubicación.
 
         Para comenzar, ¿me compartes por favor tu nombre?
         """,
@@ -261,14 +245,13 @@ def get_welcome_message() -> str:
         Muy {greeting}. Gracias por contactar a Mega Baterías. 🚗🔋
         Te habla Moisés Castrillón.
 
-        Con gusto revisamos la opción de batería que mejor se ajuste a tu vehículo, disponibilidad y necesidad.
+        Con gusto revisamos la opción de batería que mejor se ajuste a carros, camiones o necesidades industriales, según disponibilidad y ubicación.
 
         Para brindarte una atención más personalizada, ¿me confirmas por favor tu nombre?
         """,
     ]
 
     return dedent(random.choice(messages)).strip()
-
 
 def get_confirmation_message(session) -> str:
     name = session.customer_name or "No registrado"
@@ -307,6 +290,9 @@ def get_ai_instruction(session, message: str) -> str:
         {{
           "customer_name": "",
           "vehicle_info": "",
+          "vehicle_brand": "",
+          "vehicle_model": "",
+          "vehicle_year": "",
           "location": "",
           "intent": "",
           "confidence": 0,
@@ -319,13 +305,14 @@ def get_ai_instruction(session, message: str) -> str:
         - No inventes datos.
         - Si el cliente da nombre, extrae customer_name.
         - Si menciona marca, modelo, línea o año del vehículo, extrae vehicle_info.
+        - Si identifica la marca del vehículo, extrae vehicle_brand. Ejemplo: Mazda, Chevrolet, Renault.
+        - Si identifica la línea/modelo del vehículo, extrae vehicle_model. Ejemplo: 3, Spark GT, Logan, Twingo.
+        - Si identifica el año del vehículo, extrae vehicle_year. Ejemplo: 2018.
+        - Si no estás seguro de marca, modelo o año, déjalo vacío.
         - Si menciona barrio, ciudad o ubicación, extrae location.
         - Si busca batería, intent debe ser "battery_quote".
         - Si falta nombre, next_step debe ser "ask_name".
-        - Si next_step es "ask_name", el campo reply debe ser EXACTAMENTE este texto:
-
-        {get_welcome_message()}
-
+        - Si falta nombre y ya existe una sesión, responde corto y natural pidiendo solo el nombre.
         - Si falta vehículo, next_step debe ser "ask_vehicle".
         - Si falta ubicación, next_step debe ser "ask_location".
         - Si están nombre, vehículo y ubicación, next_step debe ser "confirm_data".
@@ -335,6 +322,13 @@ def get_ai_instruction(session, message: str) -> str:
         - No confirmes disponibilidad.
         - Responde corto y natural para WhatsApp.
         - Devuelve únicamente JSON válido, sin markdown, sin explicación y sin texto adicional.
+        - Mega Baterías atiende en Medellín y área metropolitana.
+        - Si el cliente pregunta por motos, celulares, electrodomésticos u otro producto diferente, responde amablemente que por ahora solo asesoras baterías para carros.
+        - Si el cliente está fuera de Medellín o área metropolitana, captura la ubicación y responde que un asesor validará cobertura antes de confirmar disponibilidad.
+        - Mega Baterías atiende baterías para carros, camiones y aplicaciones industriales, no para otros productos.
+        - Mega Baterías solo tiene cobertura en Medellín y área metropolitana.
+        - Si el cliente indica una ubicación fuera de Medellín o área metropolitana, next_step debe ser "out_of_coverage".
+        - En ese caso should_send debe ser true y reply debe indicar amablemente que por ahora no contamos con cobertura en esa zona.
 
         Estado actual: {session.step}
         Nombre actual: {session.customer_name or ""}
@@ -343,7 +337,6 @@ def get_ai_instruction(session, message: str) -> str:
         Mensaje del cliente: {message}
         """
     ).strip()
-
 
 def parse_ai_result(ai_result: Any) -> dict[str, Any]:
     if isinstance(ai_result, dict):
@@ -379,6 +372,20 @@ def build_ai_session_update(
     current_vehicle = vehicle_info or session.vehicle_info or ""
     current_location = location or session.location or ""
     normalized_message = normalize_answer(session.last_message)
+
+    if current_location and is_out_of_coverage(current_location):
+        next_step = "out_of_coverage"
+        should_send = True
+        reply = get_out_of_coverage_message()
+
+        vals = build_session_vals(
+            next_step,
+            current_name,
+            current_vehicle,
+            current_location,
+        )
+
+        return next_step, should_send, reply, vals
 
     if session.step == "confirm_data":
         (
@@ -416,6 +423,7 @@ def build_ai_session_update(
     elif next_step not in {"confirm_data", "advisor_handoff"}:
         next_step = "confirm_data"
         should_send = True
+
 
     vals = build_session_vals(
         next_step,
@@ -633,7 +641,7 @@ def build_lead_description_from_session(session) -> str:
         ]
     )
 
-def create_or_update_lead_from_session(env, session):
+def create_or_update_lead_from_session(env, session, ai_result=None):
     """
     Crea o actualiza el lead CRM asociado a la sesión.
 
@@ -645,7 +653,7 @@ def create_or_update_lead_from_session(env, session):
     - crm_fecha_instalacion solo se asigna al crear el lead.
     - team_id, user_id y website solo se asignan al crear el lead.
     """
-
+    ai_result = ai_result or {}
     customer_name = (session.customer_name or "").strip()
 
     if not customer_name:
@@ -667,6 +675,9 @@ def create_or_update_lead_from_session(env, session):
         "description": build_lead_description_from_session(session),
         "type": "opportunity",
     }
+
+    vehicle_values = build_vehicle_lead_values(env, Lead, ai_result)
+    common_values.update(vehicle_values)
 
     # Si ya existe lead, solo actualizamos datos variables.
     # No tocamos:
@@ -879,3 +890,140 @@ def post_whatsapp_message_on_lead(lead, title: str, message: str | None) -> None
         body=body,
         subtype_xmlid="mail.mt_note",
     )
+
+
+def clean_vehicle_text(value: str | None) -> str:
+    value = (value or "").strip()
+    value = re.sub(r"\s+", " ", value)
+    return value
+
+
+def find_vehicle_brand(env, brand_name: str | None):
+    brand_name = clean_vehicle_text(brand_name)
+
+    if not brand_name:
+        return False
+
+    Brand = env["fleet.vehicle.model.brand"].sudo()
+
+    brand = Brand.search([("name", "=ilike", brand_name)], limit=1)
+    if brand:
+        return brand
+
+    return Brand.search([("name", "ilike", brand_name)], limit=1)
+
+
+def find_vehicle_model(env, model_name: str | None, brand=None):
+    model_name = clean_vehicle_text(model_name)
+
+    if not model_name:
+        return False
+
+    Model = env["fleet.vehicle.model"].sudo()
+
+    domain_base = []
+    if brand and getattr(brand, "id", False):
+        domain_base.append(("brand_id", "=", brand.id))
+
+    # Caso ideal: modelo exacto
+    model = Model.search(domain_base + [("name", "=ilike", model_name)], limit=1)
+    if model:
+        return model
+
+    # Caso normal: modelo parcial
+    model = Model.search(domain_base + [("name", "ilike", model_name)], limit=1)
+    if model:
+        return model
+
+    # Si la IA mandó "Mazda 2 2026", limpiamos marca y año
+    cleaned = model_name
+
+    if brand:
+        cleaned = re.sub(
+            rf"\b{re.escape(brand.name)}\b",
+            "",
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+
+    cleaned = re.sub(r"\b(19|20)\d{2}\b", "", cleaned).strip()
+    cleaned = clean_vehicle_text(cleaned)
+
+    if cleaned:
+        model = Model.search(domain_base + [("name", "=ilike", cleaned)], limit=1)
+        if model:
+            return model
+
+        model = Model.search(domain_base + [("name", "ilike", cleaned)], limit=1)
+        if model:
+            return model
+
+    return False
+
+
+def find_vehicle_year(env, Lead, year_value: str | None):
+    year_value = clean_vehicle_text(year_value)
+
+    if not year_value:
+        return False
+
+    if not year_value.isdigit():
+        return False
+
+    if LEAD_YEAR_FIELD not in Lead._fields:
+        return False
+
+    field = Lead._fields[LEAD_YEAR_FIELD]
+
+    if field.type == "integer":
+        return int(year_value)
+
+    if field.type == "char":
+        return year_value
+
+    if field.type == "many2one":
+        Year = env[field.comodel_name].sudo()
+
+        year = Year.search([("year", "=", year_value)], limit=1)
+        if year:
+            return year.id
+
+    return False
+
+
+def build_vehicle_lead_values(env, Lead, ai_result: dict) -> dict:
+    values = {}
+
+    vehicle_brand = clean_vehicle_text(ai_result.get("vehicle_brand"))
+    vehicle_model = clean_vehicle_text(ai_result.get("vehicle_model"))
+    vehicle_year = clean_vehicle_text(ai_result.get("vehicle_year"))
+
+    _logger.info(
+        "BUILD VEHICLE VALUES brand=%s model=%s year=%s ai_result=%s",
+        vehicle_brand,
+        vehicle_model,
+        vehicle_year,
+        ai_result,
+    )
+
+    brand = find_vehicle_brand(env, vehicle_brand)
+    model = find_vehicle_model(env, vehicle_model, brand)
+    year_value = find_vehicle_year(env, Lead, vehicle_year)
+
+    _logger.info(
+        "FOUND VEHICLE RECORDS brand=%s model=%s year_value=%s",
+        brand.id if brand else False,
+        model.id if model else False,
+        year_value,
+    )
+
+    if brand and LEAD_BRAND_FIELD in Lead._fields:
+        values[LEAD_BRAND_FIELD] = brand.id
+
+    if model and LEAD_MODEL_FIELD in Lead._fields:
+        values[LEAD_MODEL_FIELD] = model.id
+
+    if year_value and LEAD_YEAR_FIELD in Lead._fields:
+        values[LEAD_YEAR_FIELD] = year_value
+
+    return values

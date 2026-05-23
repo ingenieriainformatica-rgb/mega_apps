@@ -15,6 +15,7 @@ class MegaWhatsappSession(models.Model):
         ("ask_vehicle", "Preguntar vehículo"),
         ("ask_location", "Preguntar ubicación"),
         ("confirm_data", "Confirmar datos"),
+        ("out_of_coverage", "Fuera de cobertura"),
         ("advisor_handoff", "Pasado a asesor"),
         ("done", "Finalizado"),
     ], default="new", required=True, index=True)

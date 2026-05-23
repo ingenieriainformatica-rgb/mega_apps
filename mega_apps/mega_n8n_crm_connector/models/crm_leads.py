@@ -13,12 +13,22 @@ _logger = logging.getLogger(__name__)
 class CrmLead(models.Model):
     _inherit = "crm.lead"
 
-    def _stage_is_won(self, stage) -> bool:
-        return bool(
-            stage
-            and "is_won" in stage._fields
-            and stage.is_won
-        )
+    def _stage_is_terminal(self, stage) -> bool:
+        """
+        Una etapa es terminal si:
+        - Está marcada como ganada.
+        - Está plegada/fold, normalmente usada para cerrado/perdido/no viable.
+        """
+        if not stage:
+            return False
+
+        if "is_won" in stage._fields and stage.is_won:
+            return True
+
+        if "fold" in stage._fields and stage.fold:
+            return True
+
+        return False
 
     def _is_whatsapp_terminal_lead(self) -> bool:
         self.ensure_one()
@@ -26,7 +36,7 @@ class CrmLead(models.Model):
         if "active" in self._fields and not self.active:
             return True
 
-        if self._stage_is_won(self.stage_id):
+        if self._stage_is_terminal(self.stage_id):
             return True
 
         return False
@@ -44,7 +54,7 @@ class CrmLead(models.Model):
         if "stage_id" in vals and vals.get("stage_id"):
             target_stage = self.env["crm.stage"].browse(vals["stage_id"])
 
-        return self._stage_is_won(target_stage)
+        return self._stage_is_terminal(target_stage)
 
     def _prevent_reopening_closed_whatsapp_leads(self, vals: dict) -> None:
         """
