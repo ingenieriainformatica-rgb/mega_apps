@@ -30,6 +30,11 @@ class MegaWhatsappSession(models.Model):
 
     last_inbound_message_id = fields.Char(index=True)
 
+    conversation_summary = fields.Text(
+        string="Resumen conversación IA",
+        help="Resumen corto del contexto conversacional enviado al modelo IA.",
+    )
+
     def init(self):
         self.env.cr.execute("""
             ALTER TABLE mega_whatsapp_session

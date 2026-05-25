@@ -70,9 +70,13 @@ def is_out_of_coverage(location: str) -> bool:
 
 def get_out_of_coverage_message() -> str:
     return (
-        "Gracias por la información. Por el momento solo tenemos cobertura "
-        "en Medellín y el área metropolitana. 🙏\n\n"
-        "Si te encuentras dentro de esta zona, con gusto continúo ayudándote."
+        "¡Recuerda que en Mega Baterías estamos ubicados en la ciudad de Medellín "
+        "y actualmente contamos con cobertura únicamente en Medellín y su área metropolitana! 🔋🚗\n\n"
+        "Además de baterías, también ofrecemos servicios como alineación y balanceo, "
+        "reparación de frenos y suspensión, venta de llantas y mantenimientos preventivos "
+        "y correctivos para tu vehículo.\n\n"
+        "Si necesitas algo más, no dudes en contactarnos. "
+        "¡Gracias por confiar en nosotros y que tengas un excelente día! 🙌"
     )
 
 def whatsapp_response(
@@ -218,36 +222,88 @@ def get_welcome_message() -> str:
 
     messages = [
         f"""
-        Hola, muy {greeting}. Gracias por comunicarte con Mega Baterías. 🔋🚗
-        Te habla Moisés Castrillón.
+        Hola, muy {greeting}. 👋
+        Gracias por comunicarte con Mega Baterías. 🔋🚗
 
-        Con gusto te ayudo a encontrar la batería más adecuada para carros, camiones o aplicaciones industriales, según referencia, disponibilidad y ubicación.
+        Estamos listos para ayudarte a encontrar la batería ideal para tu carro o camión según tu vehículo y ubicación.
 
-        Para iniciar la asesoría, ¿me confirmas por favor tu nombre?
+        ¿Me regalas por favor tu nombre?
         """,
+
         f"""
-        Muy {greeting}. Bienvenido a Mega Baterías. 🚗🔋
-        Te habla Moisés Castrillón.
+        Muy {greeting}. Bienvenido a Mega Baterías. 🔋
 
-        Estoy aquí para ayudarte a cotizar baterías para carros, camiones o equipos industriales y validar la mejor opción disponible.
+        Con gusto te ayudamos a cotizar la batería adecuada para tu carro o camión.
 
-        Para atenderte de manera personalizada, ¿me regalas por favor tu nombre?
+        Para comenzar, ¿me compartes tu nombre?
         """,
+
         f"""
-        Hola, muy {greeting}. Gracias por escribirnos a Mega Baterías. 🔋
-        Soy Moisés Castrillón y con gusto te voy a asesorar.
+        Hola, muy {greeting}. 👋
+        Estás hablando con el equipo de Mega Baterías. 🚗🔋
 
-        Te ayudaré a revisar la mejor alternativa de batería para tu carro, camión o aplicación industrial, de acuerdo con tu necesidad y ubicación.
+        Podemos ayudarte a validar la mejor opción de batería según referencia, disponibilidad y ubicación.
 
-        Para comenzar, ¿me compartes por favor tu nombre?
+        ¿Me indicas por favor tu nombre?
         """,
+
         f"""
-        Muy {greeting}. Gracias por contactar a Mega Baterías. 🚗🔋
-        Te habla Moisés Castrillón.
+        Muy {greeting}. Gracias por escribirnos. 🔋🚗
 
-        Con gusto revisamos la opción de batería que mejor se ajuste a carros, camiones o necesidades industriales, según disponibilidad y ubicación.
+        Estamos atentos para ayudarte a encontrar la batería adecuada para tu carro o camión.
 
-        Para brindarte una atención más personalizada, ¿me confirmas por favor tu nombre?
+        Para iniciar la asesoría, ¿me compartes tu nombre?
+        """,
+
+        f"""
+        Hola, muy {greeting}. 👋
+        Gracias por contactar a Mega Baterías.
+
+        Te ayudamos a revisar la batería ideal para tu vehículo y validar disponibilidad en Medellín y área metropolitana.
+
+        ¿Cuál es tu nombre?
+        """,
+
+        f"""
+        Muy {greeting}. 🚗🔋
+
+        En Mega Baterías estamos listos para asesorarte con la mejor opción de batería para tu carro o camión.
+
+        ¿Me confirmas tu nombre?
+        """,
+
+        f"""
+        Hola, muy {greeting}. 👋
+        Gracias por escribir a Mega Baterías. 🔋
+
+        Podemos ayudarte con la cotización y recomendación de batería para tu vehículo.
+
+        ¿Me compartes por favor tu nombre?
+        """,
+
+        f"""
+        Muy {greeting}. Bienvenido. 🚗
+
+        Con gusto revisamos contigo la mejor batería para tu carro o camión según tu necesidad y ubicación.
+
+        Para comenzar, ¿me indicas tu nombre?
+        """,
+
+        f"""
+        Hola, muy {greeting}. 🔋🚗
+
+        Somos el equipo de Mega Baterías y estamos atentos para ayudarte con tu cotización.
+
+        ¿Me regalas por favor tu nombre?
+        """,
+
+        f"""
+        Muy {greeting}. 👋
+        Gracias por comunicarte con Mega Baterías.
+
+        Estamos listos para ayudarte a encontrar la mejor opción de batería para tu carro o camión.
+
+        ¿Cuál es tu nombre?
         """,
     ]
 
@@ -258,34 +314,243 @@ def get_confirmation_message(session) -> str:
     vehicle = session.vehicle_info or "No registrado"
     location = session.location or "No registrada"
 
-    return dedent(
+    messages = [
         f"""
-        Perfecto {name}, por favor confirma si estos datos están correctos:
+        Perfecto {name}, ya tengo la información inicial para continuar con la asesoría:
 
         Nombre: {name}
         Vehículo: {vehicle}
         Ubicación: {location}
 
-        ¿La información es correcta? Responde Sí o No.
-        """
-    ).strip()
+        ¿Me confirmas por favor si estos datos están correctos? Responde Sí o No.
+        """,
+        f"""
+        Gracias {name}. Con estos datos podemos revisar mejor la opción de batería:
+
+        Nombre: {name}
+        Vehículo: {vehicle}
+        Ubicación: {location}
+
+        ¿La información está correcta? Respóndeme Sí o No, por favor.
+        """,
+        f"""
+        Muy bien {name}, ya registré estos datos para avanzar con la cotización:
+
+        Nombre: {name}
+        Vehículo: {vehicle}
+        Ubicación: {location}
+
+        ¿Me ayudas confirmando si todo está correcto? Responde Sí o No.
+        """,
+    ]
+    return dedent(random.choice(messages)).strip()
 
 
 def advisor_handoff_reply(name: str | None) -> str:
-    return (
-        f"Excelente {name or 'señor/a'}, ya tengo tus datos confirmados. "
-        "En breve un asesor de Mega continuará contigo para recomendarte la mejor batería. 🔋🚗"
-    )
+    customer = name or "señor/a"
+
+    messages = [
+        f"""
+        Perfecto {customer}, ya tenemos tus datos registrados correctamente. 🔋🚗
+
+        En unos momentos uno de nuestros asesores continuará contigo para recomendarte la mejor opción según tu vehículo y ubicación.
+
+        ¡Gracias por comunicarte con Mega Baterías!
+        """,
+
+        f"""
+        Excelente {customer}. Ya validamos tu información correctamente. ✅
+
+        Ahora uno de nuestros asesores especializados continuará la atención para ayudarte con la mejor alternativa para tu vehículo.
+
+        Gracias por confiar en Mega Baterías. 🔋
+        """,
+
+        f"""
+        Muchas gracias {customer}. Ya dejamos registrada toda tu información. 🚗🔋
+
+        En breve un asesor de Mega Baterías seguirá contigo para ayudarte con la batería más adecuada para tu vehículo.
+
+        ¡Quedamos atentos!
+        """,
+    ]
+
+    return dedent(random.choice(messages)).strip()
 
 
 def get_ai_instruction(session, message: str) -> str:
     return dedent(
         f"""
-        Eres un asesor virtual de Mega Baterías en Medellín.
+        # CONTEXTO
 
-        Tu tarea es interpretar el mensaje del cliente y ayudar a capturar datos para cotizar una batería de vehículo.
+        Mega Baterías es una empresa ubicada en Medellín, Colombia.
+        Atiende clientes por WhatsApp para cotizar baterías para carros y camiones.
 
-        Debes devolver SOLO JSON válido con esta estructura:
+        Cobertura actual:
+        Medellín y área metropolitana:
+        Medellín, Bello, Itagüí, Envigado, Sabaneta, La Estrella, Caldas,
+        Copacabana, Girardota y Barbosa.
+
+        La conversación hace parte de un flujo conectado con Odoo CRM.
+        El objetivo es capturar datos correctos del cliente para crear o actualizar un lead
+        y luego pasarlo a un asesor humano.
+
+        ----------------------------------------------------------------
+
+        # ROL
+
+        Actúas como asesor virtual profesional de Mega Baterías.
+
+        Debes responder:
+        - corto
+        - natural
+        - amable
+        - comercial
+        - claro
+        - como atención real por WhatsApp
+
+        Nunca menciones que eres IA, modelo, bot o sistema automático.
+
+        ----------------------------------------------------------------
+
+        # ACCIÓN PRINCIPAL
+
+        Debes interpretar el mensaje del cliente y devolver únicamente un JSON válido con:
+        - datos extraídos
+        - siguiente paso del flujo
+        - respuesta sugerida para WhatsApp
+        - resumen actualizado de la conversación
+
+        ----------------------------------------------------------------
+
+        # PASOS DEL FLUJO
+
+        Pasos válidos:
+        - ask_name
+        - ask_vehicle
+        - ask_location
+        - confirm_data
+        - advisor_handoff
+        - out_of_coverage
+        - done
+
+        Reglas estrictas:
+        - NO avances al siguiente paso si el paso actual no está completo.
+        - NO pidas ubicación si todavía falta el vehículo.
+        - NO confirmes datos si falta nombre, vehículo o ubicación.
+        - NO pases al asesor si los datos no han sido confirmados.
+        - Si falta nombre, pide solo el nombre.
+        - Si falta vehículo, pide marca, línea/modelo y año.
+        - Si falta ubicación, pide barrio, municipio o zona.
+        - Si ya están nombre, vehículo y ubicación, next_step debe ser confirm_data.
+        - Si el cliente confirma con sí, ok, correcto o listo, next_step debe ser advisor_handoff.
+        - Si ya existe un vehículo actual y el cliente solo complementa un dato faltante, conserva el vehículo actual y complétalo. No vuelvas a pedir marca/modelo/año si ya fueron entregados.
+
+        ----------------------------------------------------------------
+
+        # REGLAS DE NEGOCIO
+
+        - Solo se atienden baterías para carros y camiones.
+        - No se atienden baterías para motos.
+        - No se venden celulares, electrodomésticos ni otros productos.
+        - No des precios.
+        - No confirmes disponibilidad.
+        - No prometas cobertura.
+        - No inventes datos.
+
+        Si el cliente está fuera de Medellín o área metropolitana:
+        - next_step debe ser "out_of_coverage"
+        - should_send debe ser true
+        - location debe contener la ubicación detectada
+        - reply debe indicar amablemente que actualmente solo hay cobertura en Medellín y área metropolitana.
+
+        ----------------------------------------------------------------
+
+        # MANEJO DE ERRORES DE ESCRITURA
+
+        Puedes corregir errores evidentes si la intención es clara.
+
+        Ejemplos de marcas:
+        - "masda" probablemente es "Mazda"
+        - "chebrolet" probablemente es "Chevrolet"
+        - "renol" probablemente es "Renault"
+        - "volswagen" probablemente es "Volkswagen"
+        - "hiunday" probablemente es "Hyundai"
+
+        Ejemplos de nombres:
+        - "jroge" probablemente es "Jorge"
+        - "josee" probablemente es "José"
+        - "andres" puede guardarse como "Andrés"
+        - "maria" puede guardarse como "María"
+        - "alejndro" probablemente es "Alejandro"
+
+        Reglas:
+        - Si no estás seguro, deja el dato vacío.
+        - No inventes apellidos.
+        - No inventes marcas, modelos ni años.
+        - Usa mayúscula inicial en nombres y apellidos.
+
+        ----------------------------------------------------------------
+
+        # CLIENTE NO SABE LOS DATOS DEL VEHÍCULO
+
+        Si el cliente no sabe la marca, línea/modelo o año:
+        - No lo bloquees.
+        - Explícale de forma breve que puede revisar la tarjeta de propiedad.
+        - También puede enviar una foto de la tarjeta de propiedad o decir los datos que recuerde.
+        - Mantén next_step en "ask_vehicle".
+        - No avances a ask_location hasta tener al menos información útil del vehículo.
+
+        Ejemplo de respuesta:
+        "No te preocupes. Puedes revisar esos datos en la tarjeta de propiedad del vehículo. También puedes enviarnos una foto o decirme lo que recuerdes: marca, línea o año."
+
+        ----------------------------------------------------------------
+
+        # MANEJO DE LENGUAJE OFENSIVO
+
+        Si el cliente escribe groserías, insultos o habla agresivo:
+        - Mantén tono profesional.
+        - No respondas con groserías.
+        - No confrontes.
+        - Continúa pidiendo el dato necesario según el paso actual.
+        - Si no trae datos útiles, responde breve y amable.
+
+        ----------------------------------------------------------------
+
+        # EXTRACCIÓN DE DATOS
+
+        Extrae:
+        - nombre → customer_name
+        - marca → vehicle_brand
+        - línea/modelo → vehicle_model
+        - año → vehicle_year
+        - ubicación → location
+
+        vehicle_info debe contener el vehículo completo cuando sea posible.
+
+        Ejemplos:
+        - "Mazda 3 2017"
+        - "Spark GT 2019"
+        - "Logan 2016"
+
+        ----------------------------------------------------------------
+
+        # RESUMEN DE CONVERSACIÓN
+
+        conversation_summary:
+        - máximo 300 caracteres
+        - incluye nombre, vehículo, ubicación e intención
+        - no copies toda la conversación
+        - no inventes información
+
+        ----------------------------------------------------------------
+
+        # FORMATO OBLIGATORIO
+
+        Devuelve únicamente JSON válido.
+        No uses markdown.
+        No expliques nada.
+        No agregues texto fuera del JSON.
 
         {{
           "customer_name": "",
@@ -294,6 +559,7 @@ def get_ai_instruction(session, message: str) -> str:
           "vehicle_model": "",
           "vehicle_year": "",
           "location": "",
+          "conversation_summary": "",
           "intent": "",
           "confidence": 0,
           "next_step": "",
@@ -301,42 +567,89 @@ def get_ai_instruction(session, message: str) -> str:
           "reply": ""
         }}
 
-        Reglas:
-        - No inventes datos.
-        - Si el cliente da nombre, extrae customer_name.
-        - Si menciona marca, modelo, línea o año del vehículo, extrae vehicle_info.
-        - Si identifica la marca del vehículo, extrae vehicle_brand. Ejemplo: Mazda, Chevrolet, Renault.
-        - Si identifica la línea/modelo del vehículo, extrae vehicle_model. Ejemplo: 3, Spark GT, Logan, Twingo.
-        - Si identifica el año del vehículo, extrae vehicle_year. Ejemplo: 2018.
-        - Si no estás seguro de marca, modelo o año, déjalo vacío.
-        - Si menciona barrio, ciudad o ubicación, extrae location.
-        - Si busca batería, intent debe ser "battery_quote".
-        - Si falta nombre, next_step debe ser "ask_name".
-        - Si falta nombre y ya existe una sesión, responde corto y natural pidiendo solo el nombre.
-        - Si falta vehículo, next_step debe ser "ask_vehicle".
-        - Si falta ubicación, next_step debe ser "ask_location".
-        - Si están nombre, vehículo y ubicación, next_step debe ser "confirm_data".
-        - Si el cliente confirma los datos con sí, ok, correcto o listo, next_step debe ser "advisor_handoff".
-        - Si el cliente pide asesor humano, next_step debe ser "advisor_handoff".
-        - No des precios.
-        - No confirmes disponibilidad.
-        - Responde corto y natural para WhatsApp.
-        - Devuelve únicamente JSON válido, sin markdown, sin explicación y sin texto adicional.
-        - Mega Baterías atiende en Medellín y área metropolitana.
-        - Si el cliente pregunta por motos, celulares, electrodomésticos u otro producto diferente, responde amablemente que por ahora solo asesoras baterías para carros.
-        - Si el cliente está fuera de Medellín o área metropolitana, captura la ubicación y responde que un asesor validará cobertura antes de confirmar disponibilidad.
-        - Mega Baterías atiende baterías para carros, camiones y aplicaciones industriales, no para otros productos.
-        - Mega Baterías solo tiene cobertura en Medellín y área metropolitana.
-        - Si el cliente indica una ubicación fuera de Medellín o área metropolitana, next_step debe ser "out_of_coverage".
-        - En ese caso should_send debe ser true y reply debe indicar amablemente que por ahora no contamos con cobertura en esa zona.
+        ----------------------------------------------------------------
 
-        Estado actual: {session.step}
-        Nombre actual: {session.customer_name or ""}
-        Vehículo actual: {session.vehicle_info or ""}
-        Ubicación actual: {session.location or ""}
-        Mensaje del cliente: {message}
+        # ESTADO ACTUAL
+
+        Paso actual: {session.step}
+        Nombre actual: {session.customer_name or "Sin registrar"}
+        Vehículo actual: {session.vehicle_info or "Sin registrar"}
+        Ubicación actual: {session.location or "Sin registrar"}
+        Resumen actual: {session.conversation_summary or "Sin resumen previo"}
+
+        ----------------------------------------------------------------
+
+        # MENSAJE DEL CLIENTE
+
+        {message}
         """
     ).strip()
+
+# def get_ai_instruction(session, message: str) -> str:
+#     return dedent(
+#         f"""
+#         Eres un asesor virtual de Mega Baterías en Medellín.
+
+#         Tu tarea es interpretar el mensaje del cliente y ayudar a capturar datos para cotizar una batería de vehículo.
+
+#         Debes devolver SOLO JSON válido con esta estructura:
+
+#         {{
+#           "customer_name": "",
+#           "vehicle_info": "",
+#           "vehicle_brand": "",
+#           "vehicle_model": "",
+#           "vehicle_year": "",
+#           "location": "",
+#           "conversation_summary": "",
+#           "intent": "",
+#           "confidence": 0,
+#           "next_step": "",
+#           "should_send": true,
+#           "reply": ""
+#         }}
+
+#         Reglas:
+#         - conversation_summary debe resumir en máximo 300 caracteres lo importante de la conversación.
+#         - Incluye nombre, vehículo, ubicación, intención y datos útiles para continuar la venta.
+#         - No copies toda la conversación.
+#         - No inventes datos.
+#         - Si el cliente da nombre, extrae customer_name.
+#         - Si menciona marca, modelo, línea o año del vehículo, extrae vehicle_info.
+#         - Si identifica la marca del vehículo, extrae vehicle_brand. Ejemplo: Mazda, Chevrolet, Renault.
+#         - Si identifica la línea/modelo del vehículo, extrae vehicle_model. Ejemplo: 3, Spark GT, Logan, Twingo.
+#         - Si identifica el año del vehículo, extrae vehicle_year. Ejemplo: 2018.
+#         - Si no estás seguro de marca, modelo o año, déjalo vacío.
+#         - Si menciona barrio, ciudad o ubicación, extrae location.
+#         - Si busca batería, intent debe ser "battery_quote".
+#         - Si falta nombre, next_step debe ser "ask_name".
+#         - Si falta nombre y ya existe una sesión, responde corto y natural pidiendo solo el nombre.
+#         - Si falta vehículo, next_step debe ser "ask_vehicle".
+#         - Si falta ubicación, next_step debe ser "ask_location".
+#         - Si están nombre, vehículo y ubicación, next_step debe ser "confirm_data".
+#         - Si el cliente confirma los datos con sí, ok, correcto o listo, next_step debe ser "advisor_handoff".
+#         - Si el cliente pide asesor humano, next_step debe ser "advisor_handoff".
+#         - No des precios.
+#         - No confirmes disponibilidad.
+#         - Responde corto y natural para WhatsApp.
+#         - Devuelve únicamente JSON válido, sin markdown, sin explicación y sin texto adicional.
+#         - Mega Baterías atiende en Medellín y área metropolitana.
+#         - Si el cliente pregunta por motos, celulares, electrodomésticos u otro producto diferente, responde amablemente que por ahora solo asesoras baterías para carros.
+#         - Si el cliente está fuera de Medellín o área metropolitana, captura la ubicación y responde que un asesor validará cobertura antes de confirmar disponibilidad.
+#         - Mega Baterías atiende baterías para carros, camiones y aplicaciones industriales, no para otros productos.
+#         - Mega Baterías solo tiene cobertura en Medellín y área metropolitana.
+#         - Si el cliente indica una ubicación fuera de Medellín o área metropolitana, next_step debe ser "out_of_coverage".
+#         - En ese caso should_send debe ser true y reply debe indicar amablemente que por ahora no contamos con cobertura en esa zona.
+
+#         Estado actual: {session.step}
+#         Nombre actual: {session.customer_name or ""}
+#         Vehículo actual: {session.vehicle_info or ""}
+#         Ubicación actual: {session.location or ""}
+#         Mensaje del cliente: {message}
+
+#         Resumen actual: {session.conversation_summary or "Sin resumen previo"}
+#         """
+#     ).strip()
 
 def parse_ai_result(ai_result: Any) -> dict[str, Any]:
     if isinstance(ai_result, dict):
@@ -359,8 +672,12 @@ def build_ai_session_update(
     ai_result: dict[str, Any],
 ) -> tuple[str, bool, str, dict[str, Any]]:
     customer_name = (ai_result.get("customer_name") or "").strip()
-    vehicle_info = (ai_result.get("vehicle_info") or "").strip()
+    vehicle_info = build_vehicle_info_from_ai(
+        ai_result,
+        fallback=session.vehicle_info or "",
+    )
     location = (ai_result.get("location") or "").strip()
+    conversation_summary = (ai_result.get("conversation_summary") or "").strip()
     next_step = (ai_result.get("next_step") or session.step).strip()
     reply = (ai_result.get("reply") or "").strip()
     should_send = bool(ai_result.get("should_send", True))
@@ -384,6 +701,9 @@ def build_ai_session_update(
             current_vehicle,
             current_location,
         )
+
+        if conversation_summary and "conversation_summary" in session._fields:
+            vals["conversation_summary"] = conversation_summary[:500]
 
         return next_step, should_send, reply, vals
 
@@ -431,6 +751,9 @@ def build_ai_session_update(
         current_vehicle,
         current_location,
     )
+
+    if conversation_summary and "conversation_summary" in session._fields:
+        vals["conversation_summary"] = conversation_summary[:500]
 
     return next_step, should_send, reply, vals
 
@@ -1027,3 +1350,29 @@ def build_vehicle_lead_values(env, Lead, ai_result: dict) -> dict:
         values[LEAD_YEAR_FIELD] = year_value
 
     return values
+
+
+def build_vehicle_info_from_ai(ai_result: dict, fallback: str = "") -> str:
+    vehicle_info = (ai_result.get("vehicle_info") or "").strip()
+    vehicle_brand = (ai_result.get("vehicle_brand") or "").strip()
+    vehicle_model = (ai_result.get("vehicle_model") or "").strip()
+    vehicle_year = str(ai_result.get("vehicle_year") or "").strip()
+
+    if vehicle_info:
+        return vehicle_info
+
+    parts = []
+
+    if fallback:
+        parts.append(fallback)
+
+    if vehicle_brand and vehicle_brand.lower() not in " ".join(parts).lower():
+        parts.append(vehicle_brand)
+
+    if vehicle_model and vehicle_model.lower() not in " ".join(parts).lower():
+        parts.append(vehicle_model)
+
+    if vehicle_year and vehicle_year not in " ".join(parts):
+        parts.append(vehicle_year)
+
+    return " ".join(parts).strip()
