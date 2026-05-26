@@ -17,6 +17,7 @@ class MegaWhatsappSession(models.Model):
         ("confirm_data", "Confirmar datos"),
         ("out_of_coverage", "Fuera de cobertura"),
         ("catalog_sent", "Catálogo enviado"),
+        ("battery_selected", "Batería seleccionada"),
         ("advisor_handoff", "Pasado a asesor"),
         ("done", "Finalizado"),
     ], default="new", required=True, index=True)

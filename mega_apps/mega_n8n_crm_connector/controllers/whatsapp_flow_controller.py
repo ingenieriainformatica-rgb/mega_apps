@@ -74,6 +74,7 @@ class N8nWhatsappSessionController(http.Controller):
         )
 
         if created:
+            _logger.info("\n\n\n Primer mensaje debe de ser mensaje de bienvenida \n\n\n")
             return {
                 "success": True,
                 "should_use_ai": False,

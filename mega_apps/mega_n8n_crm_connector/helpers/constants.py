@@ -13,9 +13,10 @@ ALLOWED_STEPS = {
     "ask_vehicle",
     "ask_location",
     "confirm_data",
-    "catalog_sent",
-    "advisor_handoff",
     "out_of_coverage",
+    "catalog_sent",
+    "battery_selected",
+    "advisor_handoff",
     "done",
 }
 

@@ -220,94 +220,52 @@ def get_colombia_greeting() -> str:
 def get_welcome_message() -> str:
     greeting = get_colombia_greeting()
 
-    messages = [
+    templates = [
         f"""
+        🔋🚗 *MEGA BATERÍAS*
+
         Hola, muy {greeting}. 👋
-        Gracias por comunicarte con Mega Baterías. 🔋🚗
+        Un gusto saludarte.
 
-        Estamos listos para ayudarte a encontrar la batería ideal para tu carro o camión según tu vehículo y ubicación.
+        Te ayudamos a encontrar la batería adecuada para tu carro o camión, según tu vehículo y ubicación.
 
-        ¿Me regalas por favor tu nombre?
+        • 📍 Cobertura: Medellín y área metropolitana
+        • ⏰ Horario: 7am - 7pm (Lun a Sáb)
+        • 🚗 Servicio para carros y camiones
+
+        Para iniciar, ¿me regalas por favor tu nombre?
         """,
 
         f"""
-        Muy {greeting}. Bienvenido a Mega Baterías. 🔋
+        *BIENVENIDO A MEGA BATERÍAS* 🔋
 
-        Con gusto te ayudamos a cotizar la batería adecuada para tu carro o camión.
-
-        Para comenzar, ¿me compartes tu nombre?
-        """,
-
-        f"""
-        Hola, muy {greeting}. 👋
-        Estás hablando con el equipo de Mega Baterías. 🚗🔋
-
-        Podemos ayudarte a validar la mejor opción de batería según referencia, disponibilidad y ubicación.
-
-        ¿Me indicas por favor tu nombre?
-        """,
-
-        f"""
-        Muy {greeting}. Gracias por escribirnos. 🔋🚗
-
-        Estamos atentos para ayudarte a encontrar la batería adecuada para tu carro o camión.
-
-        Para iniciar la asesoría, ¿me compartes tu nombre?
-        """,
-
-        f"""
-        Hola, muy {greeting}. 👋
-        Gracias por contactar a Mega Baterías.
-
-        Te ayudamos a revisar la batería ideal para tu vehículo y validar disponibilidad en Medellín y área metropolitana.
-
-        ¿Cuál es tu nombre?
-        """,
-
-        f"""
-        Muy {greeting}. 🚗🔋
-
-        En Mega Baterías estamos listos para asesorarte con la mejor opción de batería para tu carro o camión.
-
-        ¿Me confirmas tu nombre?
-        """,
-
-        f"""
-        Hola, muy {greeting}. 👋
-        Gracias por escribir a Mega Baterías. 🔋
-
-        Podemos ayudarte con la cotización y recomendación de batería para tu vehículo.
-
-        ¿Me compartes por favor tu nombre?
-        """,
-
-        f"""
-        Muy {greeting}. Bienvenido. 🚗
-
-        Con gusto revisamos contigo la mejor batería para tu carro o camión según tu necesidad y ubicación.
-
-        Para comenzar, ¿me indicas tu nombre?
-        """,
-
-        f"""
-        Hola, muy {greeting}. 🔋🚗
-
-        Somos el equipo de Mega Baterías y estamos atentos para ayudarte con tu cotización.
-
-        ¿Me regalas por favor tu nombre?
-        """,
-
-        f"""
         Muy {greeting}. 👋
-        Gracias por comunicarte con Mega Baterías.
+        Gracias por comunicarte con nosotros.
 
-        Estamos listos para ayudarte a encontrar la mejor opción de batería para tu carro o camión.
+        Cotizamos baterías para carros y camiones, validando la mejor opción según referencia, disponibilidad y ubicación.
+
+        • 📍 Medellín y área metropolitana
+        • ⏰ 7am - 7pm (Lun a Sáb)
+
+        ¿Me compartes tu nombre para comenzar?
+        """,
+
+        f"""
+        🚗🔋 *MEGA BATERÍAS*
+
+        Muy {greeting}. Gracias por escribirnos.
+
+        Estamos listos para asesorarte con la batería adecuada para tu vehículo.
+
+        • 📍 Cobertura: Medellín y área metropolitana
+        • ⏰ Horario: 7am - 7pm (Lun a Sáb)
+        • 🚗 Carros y camiones
 
         ¿Cuál es tu nombre?
         """,
     ]
 
-    return dedent(random.choice(messages)).strip()
+    return dedent(random.choice(templates)).strip()
 
 def get_confirmation_message(session) -> str:
     name = session.customer_name or "No registrado"
@@ -345,7 +303,6 @@ def get_confirmation_message(session) -> str:
     ]
     return dedent(random.choice(messages)).strip()
 
-
 def advisor_handoff_reply(name: str | None) -> str:
     customer = name or "señor/a"
 
@@ -376,7 +333,6 @@ def advisor_handoff_reply(name: str | None) -> str:
     ]
 
     return dedent(random.choice(messages)).strip()
-
 
 def get_ai_instruction(session, message: str) -> str:
     return dedent(
@@ -462,29 +418,53 @@ def get_ai_instruction(session, message: str) -> str:
 
         ----------------------------------------------------------------
 
-        # TONO
+        # TONO Y JERGA COLOMBIANA (ANTIOQUEÑA)
 
-        Debes responder:
-        - natural
-        - profesional
-        - amable
-        - comercial
-        - claro
-        - humano
-        - como atención real por WhatsApp en Colombia
+        Debes responder como un asesor real de Medellín.
 
-        Usa frases naturales como:
-        - claro que sí
-        - perfecto
-        - con gusto
-        - ya te ayudo
-        - gracias por escribirnos
+        Usa expresiones naturales colombianas:
 
-        Evita:
-        - modismos exagerados
-        - regionalismos fuertes
-        - respuestas robóticas
-        - respuestas largas
+        ## Saludos y apertura
+        - ¡Hola!, ¡Quiubo!, ¡Qué más!
+        - ¿Todo bien?, ¿Qué cuentas?
+        - ¡Dios te bendiga! (opcional, para clientes mayores)
+
+        ## Afirmaciones
+        - ¡Claro que sí!, ¡Dale!, ¡De una!
+        - ¡Listo!, ¡Perfecto!, ¡Quedó!
+
+        ## Para pedir información
+        - ¿Me regalas tu nombre?
+        - ¿Qué carro manejas?
+        - ¿En qué parte te encuentras?
+        - ¿Por qué barrio andas?
+
+        ## Expresiones de cortesía
+        - Parcero / Parcera (con cuidado, solo si hay confianza)
+        - Vecino / Vecina
+        - Señor / Señora (formal)
+
+        ## Cierres
+        - ¡Quedamos atentos!
+        - ¡Ya te confirmamos!
+        - ¡Pa' lo que necesites!
+
+        ## Ejemplos prácticos
+
+        ❌ Robótico: "Hola, ¿puede proporcionarme su nombre por favor?"
+        ✅ Natural: "¡Quiubo! ¿Me regalas tu nombre para comenzar?"
+
+        ❌ Robótico: "Gracias, ¿podría indicarme el modelo de su vehículo?"
+        ✅ Natural: "¡Dale! ¿Qué carro manejas? Cuéntame marca y línea."
+
+        ❌ Robótico: "Lo siento, no entendí su solicitud"
+        ✅ Natural: "¡Uy!, no entendí bien. ¿Me explicas otra vez?"
+
+        ## Advertencias
+        - NO uses groserías
+        - NO uses regionalismos muy cerrados
+        - Adapta el nivel de confianza según el cliente
+        - Si el cliente habla formal, responde formal también
 
         ----------------------------------------------------------------
 
@@ -492,20 +472,67 @@ def get_ai_instruction(session, message: str) -> str:
 
         PROHIBIDO:
         - inventar información
-        - inventar nombres
-        - inventar marcas
-        - inventar modelos
-        - inventar años
-        - inventar ubicaciones
+        - inventar nombres, marcas, modelos, años, ubicaciones
         - dar precios
         - confirmar disponibilidad
         - prometer cobertura
         - discutir con clientes
         - salirte del flujo
         - hacer múltiples preguntas al tiempo
+        - SEGUIR EL FLUJO SI EL CLIENTE INSULTA ⭐
 
         Si no sabes un dato:
         déjalo vacío.
+
+        ----------------------------------------------------------------
+
+        # MANEJO DE GROSERÍAS Y LENGUAJE OFENSIVO
+
+        ## Palabras a detectar (lenguaje ofensivo colombiano)
+
+        | Grosería | Variantes |
+        |----------|-----------|
+        | hijueputa | hijo de puta, hpta, hp, hijuepucha |
+        | malparido | malparida, mp, malparío |
+        | carechimba | carechimbas |
+        | gonorrea | gonorrea, gonor |
+        | marica | maricón, marica, mk, marico |
+        | sapo | sapa, sapo hpta |
+        | webon | huevón, webón, güevón |
+        | culo | culero |
+        | mierda | mierda, mrda |
+        | pirobo | piroba |
+
+        ## Frases ofensivas comunes
+
+        - "atendame bien hijueputa"
+        - "no me venga con maricadas"
+        - "son unos sapos hp"
+        - "qué gonorrea de servicio"
+        - "no joda marica"
+        - "me tienen mamado"
+        - "qué pereza con ustedes"
+        - "no sirven pa mierda"
+
+        ## Acción ANTE CUALQUIER GROSERÍA
+
+        Si el cliente usa lenguaje ofensivo:
+
+        1. NO continúes con el flujo normal.
+        2. NO respondas con groserías.
+        3. NO confrontes.
+        4. NO sigas pidiendo datos.
+
+        next_step = "done"
+        should_send = true
+
+        reply (primer aviso):
+        "Entiendo tu molestia. Por favor, mantengamos una comunicación respetuosa para poder ayudarte mejor. ¿En qué más puedo colaborarte?"
+
+        Si el cliente insiste con groserías en el siguiente mensaje:
+
+        next_step = "done"
+        reply = "Quedamos atentos por si requieres ayuda más adelante. ¡Gracias por contactarnos!"
 
         ----------------------------------------------------------------
 
@@ -576,7 +603,7 @@ def get_ai_instruction(session, message: str) -> str:
         solicita únicamente el nombre.
 
         Ejemplo:
-        "Hola 👋 Gracias por comunicarte con Mega Baterías. ¿Me regalas tu nombre por favor?"
+        "¡Quiubo! 👋 ¿Me regalas tu nombre para comenzar?"
 
         ----------------------------------------------------------------
 
@@ -589,7 +616,7 @@ def get_ai_instruction(session, message: str) -> str:
         - año
 
         Ejemplo:
-        "Perfecto 👍 ¿Qué vehículo tienes? Por favor indícame marca, línea y año."
+        "¡Dale! 👍 ¿Qué carro manejas? Cuéntame marca, línea y año."
 
         ----------------------------------------------------------------
 
@@ -629,19 +656,12 @@ def get_ai_instruction(session, message: str) -> str:
         # PASO 5 — advisor_handoff
 
         SOLO si el cliente confirma:
-        - sí
-        - si
-        - correcto
-        - ok
-        - listo
-        - confirmado
-        - perfecto
-        - dale
+        - sí, si, correcto, ok, listo, confirmado, perfecto, dale, de una
 
         Debes transferir.
 
         Ejemplo:
-        "Perfecto 👍 Ya comparto tu información con un asesor especializado de Mega Baterías."
+        "¡Listo! 👍 Ya comparto tu información con un asesor especializado de Mega Baterías. ¡Quedamos atentos!"
 
         ----------------------------------------------------------------
 
@@ -713,7 +733,7 @@ def get_ai_instruction(session, message: str) -> str:
 
         ----------------------------------------------------------------
 
-        # MANEJO DE DUDAS
+        # MANEJO DE DUDAS (moto vs carro)
 
         Si NO estás seguro si es moto o carro:
 
@@ -757,17 +777,8 @@ def get_ai_instruction(session, message: str) -> str:
         Mantén:
         next_step = "ask_vehicle"
 
-        ----------------------------------------------------------------
-
-        # MANEJO DE CLIENTES OFENSIVOS
-
-        Mantén siempre:
-        - calma
-        - respeto
-        - tono profesional
-
-        Nunca insultes.
-        Nunca discutas.
+        Ejemplo:
+        "No te preocupes. Puedes revisar esos datos en la tarjeta de propiedad. ¿Qué marca o año recuerdas?"
 
         ----------------------------------------------------------------
 
@@ -794,11 +805,7 @@ def get_ai_instruction(session, message: str) -> str:
 
         conversation_summary:
         - máximo 400 caracteres
-        - incluir:
-        - intención
-        - vehículo
-        - ubicación
-        - estado actual
+        - incluir: intención, vehículo, ubicación, estado actual
 
         No copies toda la conversación.
 
@@ -857,8 +864,8 @@ def get_ai_instruction(session, message: str) -> str:
         # MENSAJE DEL CLIENTE
 
         {message}
-                """
-            ).strip()
+        """
+    ).strip()
 
 def parse_ai_result(ai_result: Any) -> dict[str, Any]:
     if isinstance(ai_result, dict):
@@ -874,7 +881,6 @@ def parse_ai_result(ai_result: Any) -> dict[str, Any]:
         return parsed if isinstance(parsed, dict) else {}
 
     return {}
-
 
 def build_ai_session_update(
     session,
@@ -900,10 +906,27 @@ def build_ai_session_update(
     normalized_message = normalize_answer(session.last_message)
 
     if session.step == "catalog_sent":
+        if any(word in normalized_message for word in [
+            "opcion", "opción", "1", "2", "3",
+            "economica", "económica", "barata",
+            "mejor", "asesor"
+        ]):
+            return (
+                "battery_selected",
+                True,
+                get_battery_selected_message(current_name),
+                {
+                    "step": "battery_selected",
+                },
+            )
+
         return (
             "catalog_sent",
-            False,
-            "",
+            True,
+            (
+                "Para continuar, puedes responder con la opción que prefieres: "
+                "opción 1, opción 2, la más económica, la mejor opción o quiero asesor. 🔋🚗"
+            ),
             {
                 "step": "catalog_sent",
             },
@@ -1641,7 +1664,7 @@ def get_lead_vehicle_year(lead) -> int | None:
     return None
 
 
-def find_battery_options_for_lead(env, lead, limit: int = 5):
+def find_battery_options_for_lead(env, lead, limit: int = 3):
     if not lead:
         return env["mega.battery.application.option"].sudo().browse()
 
@@ -1736,7 +1759,8 @@ def build_battery_catalog_message_for_lead(env, lead) -> str:
     lines = [
         f"Perfecto {customer} 👍",
         "",
-        "Según los datos de tu vehículo, estas son algunas opciones de batería que podemos revisar:",
+        "Según los datos de tu vehículo, encontré varias baterías compatibles.",
+        "Para hacerlo más fácil, te comparto las opciones más recomendadas:",
         "",
     ]
 
@@ -1762,10 +1786,23 @@ def build_battery_catalog_message_for_lead(env, lead) -> str:
         lines.append("\n".join(option_lines))
         lines.append("")
 
-    lines.append("Un asesor de Mega Baterías continuará contigo para confirmar disponibilidad y la mejor opción. 🔋🚗")
+    lines.append("")
+    lines.append("Estos precios se sostienen dejando la batería usada")
+    lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
     return "\n".join(lines).strip()
 
 
 def lead_has_battery_options(env, lead) -> bool:
     return bool(find_battery_options_for_lead(env, lead, limit=1))
+
+
+def get_battery_selected_message(name: str | None) -> str:
+    customer = name or "señor/a"
+
+    return (
+        f"Perfecto {customer} 👍\n\n"
+        "Ya registramos tu selección. Un asesor de Mega Baterías se pondrá en contacto contigo "
+        "para confirmar disponibilidad, valor final y coordinar la entrega.\n\n"
+        "El tiempo estimado de atención es de 30 a 45 minutos, según ubicación y disponibilidad. 🔋🚗"
+    )
