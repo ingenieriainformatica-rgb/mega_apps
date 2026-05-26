@@ -7,21 +7,26 @@ from odoo.http import request  # type: ignore
 
 from ..helpers.n8n_payload_helper import get_n8n_payload
 from ..helpers.constants import NO_ACTIVE_SESSION_REPLY
+from ..helpers.whatsapp_messages import (
+    get_confirmation_message,
+    get_welcome_message
+)
+from ..helpers.whatsapp_ai_prompt import get_ai_instruction
 from ..helpers.whatsapp_session_helper import (
     build_ai_session_update,
     get_active_session,
-    get_ai_instruction,
-    get_confirmation_message,
     get_or_create_session,
     missing_phone_response,
     parse_ai_result,
     session_snapshot,
     whatsapp_response,
-    get_welcome_message,
     is_terminal_step,
     create_or_update_lead_from_session,
     log_whatsapp_conversation_on_lead,
     log_customer_message_on_lead_from_session,
+)
+
+from ..helpers.whatsapp_catalog_helper import (
     build_battery_catalog_message_for_lead,
     lead_has_battery_options,
 )
