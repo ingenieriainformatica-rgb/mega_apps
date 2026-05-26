@@ -21,8 +21,6 @@ from ..helpers.whatsapp_session_helper import (
     session_snapshot,
     whatsapp_response,
     is_terminal_step,
-    log_whatsapp_conversation_on_lead,
-    log_customer_message_on_lead_from_session,
 )
 
 from ..helpers.whatsapp_crm_helper import (
@@ -34,6 +32,10 @@ from ..helpers.whatsapp_catalog_helper import (
     lead_has_battery_options,
 )
 
+from ..helpers.whatsapp_chatter_helper import (
+    log_whatsapp_conversation_on_lead,
+    log_customer_message_on_lead_from_session,
+)
 
 _logger = logging.getLogger(__name__)
 
