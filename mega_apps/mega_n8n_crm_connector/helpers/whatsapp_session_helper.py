@@ -7,13 +7,10 @@ from textwrap import dedent
 from typing import Any
 import random
 from odoo import fields  # type: ignore
-from markupsafe import Markup, escape
-
 from .whatsapp_messages import (
     get_out_of_coverage_message,
     get_battery_selected_message,
 )
-
 from .constants import (
     CONFIRMATION_YES,
     CONFIRMATION_NO,
@@ -28,7 +25,6 @@ from .constants import (
     OUT_OF_COVERAGE_LOCATIONS,
     COLOMBIA_TZ,
 )
-
 from ..helpers.whatsapp_vehicle_helper import (
     build_vehicle_info_from_ai
 )
