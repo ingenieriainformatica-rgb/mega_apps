@@ -22,6 +22,8 @@ from ..helpers.whatsapp_session_helper import (
     create_or_update_lead_from_session,
     log_whatsapp_conversation_on_lead,
     log_customer_message_on_lead_from_session,
+    build_battery_catalog_message_for_lead,
+    lead_has_battery_options,
 )
 
 
@@ -161,6 +163,14 @@ class N8nWhatsappSessionController(http.Controller):
             session,
             ai_result=ai_result,
         )
+
+        if next_step == "catalog_sent" and lead:
+            has_options = lead_has_battery_options(request.env, lead)
+            reply = build_battery_catalog_message_for_lead(request.env, lead)
+            should_send = True
+            if not has_options:
+                session.write({"step": "advisor_handoff"})
+
 
         if next_step == "confirm_data":
             reply = get_confirmation_message(session)

@@ -13,9 +13,10 @@ ALLOWED_STEPS = {
     "ask_vehicle",
     "ask_location",
     "confirm_data",
+    "catalog_sent",
     "advisor_handoff",
-    "done",
     "out_of_coverage",
+    "done",
 }
 
 MISSING_PHONE_REPLY = "No fue posible identificar tu número de WhatsApp."
