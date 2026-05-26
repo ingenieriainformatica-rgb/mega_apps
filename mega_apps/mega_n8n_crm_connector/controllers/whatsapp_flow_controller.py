@@ -21,9 +21,12 @@ from ..helpers.whatsapp_session_helper import (
     session_snapshot,
     whatsapp_response,
     is_terminal_step,
-    create_or_update_lead_from_session,
     log_whatsapp_conversation_on_lead,
     log_customer_message_on_lead_from_session,
+)
+
+from ..helpers.whatsapp_crm_helper import (
+    create_or_update_lead_from_session
 )
 
 from ..helpers.whatsapp_catalog_helper import (
