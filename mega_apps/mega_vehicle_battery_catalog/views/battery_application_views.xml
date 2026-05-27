@@ -62,7 +62,7 @@
                                     <field name="reference"/>
                                     <field name="min_sale_price" />
                                     <field name="sale_price"/>
-                                    <field name="max_sale_price" invisible_colum="1"/>
+                                    <field name="max_sale_price" optional="hide"/>
                                     <field name="description"/>
                                     <field name="stock_qty" optional="hide" help="Cantidad en stock"/>
                                     <field name="old_reference" optional="hide" help="Referencia anterior usada para empatar actualizaciones de precios desde archivos históricos."/>
