@@ -328,6 +328,12 @@ class MegaBatteryApplicationOption(models.Model):
         store=True,
     )
 
+    old_reference = fields.Char(
+        string="Referencia anterior",
+        index=True,
+        help="Referencia anterior usada para empatar actualizaciones de precios desde archivos históricos.",
+    )
+
     @api.depends(
         "application_id.name",
         "battery_line",

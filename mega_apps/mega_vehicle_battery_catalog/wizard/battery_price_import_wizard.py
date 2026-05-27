@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import base64
 import csv
 import io
@@ -5,8 +7,8 @@ import logging
 import re
 import unicodedata
 
-from odoo import models, _ , fields # type: ignore
-from odoo.exceptions import UserError  # type: ignore
+from odoo import fields, models, _  #type:ignore
+from odoo.exceptions import UserError  #type:ignore
 
 _logger = logging.getLogger(__name__)
 
@@ -15,34 +17,20 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
     _name = "mega.battery.price.import.wizard"
     _description = "Importar precios de baterías MAC"
 
-    file = fields.Binary(
-        string="Archivo",
-        required=True,
-    )
+    file = fields.Binary(string="Archivo", required=True)
+    filename = fields.Char(string="Nombre del archivo")
 
-    filename = fields.Char(
-        string="Nombre del archivo",
-    )
+    update_description = fields.Boolean(string="Actualizar descripción", default=True)
+    update_stock = fields.Boolean(string="Actualizar existencias", default=True)
+    update_prices = fields.Boolean(string="Actualizar precios", default=True)
 
-    update_description = fields.Boolean(
-        string="Actualizar descripción",
+    clear_existing_prices = fields.Boolean(
+        string="Limpiar precios actuales antes de importar",
         default=True,
+        help="Si está activo, se pondrán en cero los precios actuales antes de cargar el archivo.",
     )
 
-    update_stock = fields.Boolean(
-        string="Actualizar existencias",
-        default=True,
-    )
-
-    update_prices = fields.Boolean(
-        string="Actualizar precios",
-        default=True,
-    )
-
-    summary = fields.Text(
-        string="Resumen",
-        readonly=True,
-    )
+    summary = fields.Text(string="Resumen", readonly=True)
 
     def action_import_prices(self):
         self.ensure_one()
@@ -54,37 +42,59 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
         Option = self.env["mega.battery.application.option"].sudo()
         currency = self.env.company.currency_id
 
-        total_rows = 0
-        updated_references = 0
-        updated_options = 0
-        not_found = 0
-        skipped = 0
+        if self.clear_existing_prices:
+            Option.search([]).write({
+                "sale_price": 0.0,
+                "min_sale_price": 0.0,
+                "max_sale_price": 0.0,
+            })
 
-        updated_option_ids = []
+        total_rows = updated_references = updated_options = not_found = skipped = 0
         not_found_refs = []
 
         for row_number, row in rows:
             total_rows += 1
 
             description = self._get_value(row, ["descripcion", "description"])
-            reference = self._extract_reference(description)
+            new_reference = self._normalize_reference(
+                self._get_value(row, ["referencia", "reference"])
+            )
+            old_reference = self._normalize_reference(
+                self._get_value(row, ["referencia_anterior", "referencia_vieja", "old_reference"])
+            )
+            brand_line = self._normalize_brand_line(
+                self._get_value(row, ["marca", "linea", "línea"])
+            )
 
-            if not reference:
+            if not new_reference and description:
+                new_reference = self._normalize_reference(self._extract_reference(description))
+
+            if not new_reference and not old_reference:
                 skipped += 1
                 continue
 
-            options = Option.search([
-                ("reference", "=ilike", reference),
-            ])
+            options = self._find_options_for_price_import(
+                Option,
+                new_reference=new_reference,
+                old_reference=old_reference,
+                brand_line=brand_line,
+            )
 
             if not options:
                 not_found += 1
-                not_found_refs.append(reference)
+                not_found_refs.append(
+                    f"Fila {row_number}: nueva={new_reference or '-'} "
+                    f"anterior={old_reference or '-'} marca={brand_line or '-'}"
+                )
                 continue
 
-            vals = {
-                "currency_id": currency.id,
-            }
+            vals = {"currency_id": currency.id}
+
+            if new_reference:
+                vals["reference"] = new_reference
+
+            if old_reference and "old_reference" in Option._fields:
+                vals["old_reference"] = old_reference
 
             if self.update_description:
                 vals.update({
@@ -93,21 +103,13 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
                 })
 
             if self.update_stock:
-                vals.update({
-                    "stock_qty": self._parse_number(
-                        self._get_value(row, ["existencias", "stock"])
-                    ),
-                })
+                vals["stock_qty"] = self._parse_number(
+                    self._get_value(row, ["existencias", "stock"])
+                )
 
             if self.update_prices:
-                average_cost = self._parse_money(
-                    self._get_value(row, ["promedio"])
-                )
-
-                tax_amount = self._parse_money(
-                    self._get_value(row, ["iva"])
-                )
-
+                average_cost = self._parse_money(self._get_value(row, ["promedio"]))
+                tax_amount = self._parse_money(self._get_value(row, ["iva"]))
                 cost_with_tax = self._parse_money(
                     self._get_value(row, [
                         "costo_iva",
@@ -118,43 +120,42 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
                     ])
                 )
 
-                sale_price_from_file = self._get_sale_price_from_file(row)
-                sale_price = self._calculate_sale_price(
-                    cost_with_tax=cost_with_tax,
-                    sale_price_from_file=sale_price_from_file,
-                )
+                min_sale_price = self._get_min_sale_price_from_file(row)
+                sale_price = self._get_full_sale_price_from_file(row)
+
+                if not min_sale_price:
+                    min_sale_price = self._calculate_sale_price(cost_with_tax)
+
+                if not sale_price:
+                    sale_price = min_sale_price
 
                 vals.update({
                     "average_cost": average_cost,
                     "tax_amount": tax_amount,
                     "cost_with_tax": cost_with_tax,
-                    "sale_price": sale_price,
+                    "min_sale_price": min_sale_price,   # VENTA 30%
+                    "sale_price": sale_price,           # VENTA FULL
+                    "max_sale_price": sale_price,       # VENTA FULL también
                 })
 
                 _logger.info(
-                    "[MAC Price Import] Fila %s | Ref %s | Promedio=%s | IVA=%s | "
-                    "Costo+IVA=%s | Venta archivo=%s | Venta final=%s | Columnas=%s",
+                    "[MAC Price Import] Fila %s | Nueva=%s | Anterior=%s | Marca=%s | "
+                    "Promedio=%s | IVA=%s | Costo+IVA=%s | Min=%s | Venta=%s",
                     row_number,
-                    reference,
+                    new_reference,
+                    old_reference,
+                    brand_line,
                     average_cost,
                     tax_amount,
                     cost_with_tax,
-                    sale_price_from_file,
+                    min_sale_price,
                     sale_price,
-                    sorted(row.keys()),
                 )
 
             options.write(vals)
 
             updated_references += 1
             updated_options += len(options)
-            updated_option_ids.extend(options.ids)
-
-            _logger.info(
-                "[MAC Price Import] Ref %s actualizada en %s opciones.",
-                reference,
-                len(options),
-            )
 
         not_found_refs = sorted(set(not_found_refs))
 
@@ -175,64 +176,31 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
             "not_found_refs": "\n".join(not_found_refs[:80]),
         }
 
-        if updated_options:
-            return {
-                "type": "ir.actions.client",
-                "tag": "display_notification",
-                "params": {
-                    "title": _("Importación finalizada"),
-                    "message": _(
-                        "Importación terminada correctamente.\n"
-                        "Filas leídas: %(total_rows)s\n"
-                        "Referencias actualizadas: %(updated_references)s\n"
-                        "Opciones actualizadas: %(updated_options)s\n"
-                        "Referencias no encontradas: %(not_found)s\n"
-                        "Filas omitidas: %(skipped)s"
-                    ) % {
-                        "total_rows": total_rows,
-                        "updated_references": updated_references,
-                        "updated_options": updated_options,
-                        "not_found": not_found,
-                        "skipped": skipped,
-                    },
-                    "type": "success",
-                    "sticky": False,
-                    "next": {
-                        "type": "ir.actions.act_window_close",
-                    },
-                },
-            }
-
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
-                "title": _("Importación de precios"),
+                "title": _("Importación finalizada" if updated_options else "Importación de precios"),
                 "message": _(
-                    "No se actualizó ninguna referencia.\n"
                     "Filas leídas: %(total_rows)s\n"
+                    "Referencias actualizadas: %(updated_references)s\n"
+                    "Opciones actualizadas: %(updated_options)s\n"
                     "Referencias no encontradas: %(not_found)s\n"
                     "Filas omitidas: %(skipped)s"
                 ) % {
                     "total_rows": total_rows,
+                    "updated_references": updated_references,
+                    "updated_options": updated_options,
                     "not_found": not_found,
                     "skipped": skipped,
                 },
-                "type": "warning",
-                "sticky": True,
-                "next": {
-                    "type": "ir.actions.act_window_close",
-                },
+                "type": "success" if updated_options else "warning",
+                "sticky": not bool(updated_options),
+                "next": {"type": "ir.actions.act_window_close"},
             },
         }
 
-    # ============================================================
-    # Lectura de archivo
-    # ============================================================
-
     def _read_file(self):
-        self.ensure_one()
-
         file_content = base64.b64decode(self.file or b"")
         filename = (self.filename or "").lower()
 
@@ -246,11 +214,9 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
 
     def _read_xlsx(self, file_content):
         try:
-            from openpyxl import load_workbook  # type: ignore
+            from openpyxl import load_workbook  #type:ignore
         except ImportError as exc:
-            raise UserError(_(
-                "Para importar XLSX debes instalar openpyxl en el entorno de Odoo."
-            )) from exc
+            raise UserError(_("Debes instalar openpyxl para importar XLSX.")) from exc
 
         workbook = load_workbook(
             filename=io.BytesIO(file_content),
@@ -266,20 +232,17 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
         except StopIteration:
             return []
 
-        headers = []
-        for index, header in enumerate(raw_headers):
-            normalized = self._normalize_header(header)
-            headers.append(normalized or f"column_{index}")
+        headers = [
+            self._normalize_header(header) or f"column_{index}"
+            for index, header in enumerate(raw_headers)
+        ]
 
         rows = []
         for row_number, raw_row in enumerate(iterator, start=2):
             row = {}
-
             for index, value in enumerate(raw_row):
-                if index >= len(headers):
-                    continue
-
-                row[headers[index]] = self._cell_to_str(value)
+                if index < len(headers):
+                    row[headers[index]] = self._cell_to_str(value)
 
             if any(row.values()):
                 rows.append((row_number, row))
@@ -299,15 +262,12 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
         if text is None:
             raise UserError(_("No fue posible leer el CSV. Revisa la codificación."))
 
-        sample = text[:4096]
-
         try:
-            dialect = csv.Sniffer().sniff(sample, delimiters=";,")
+            dialect = csv.Sniffer().sniff(text[:4096], delimiters=";,")
         except csv.Error:
             dialect = csv.excel
 
         reader = csv.DictReader(io.StringIO(text), dialect=dialect)
-
         headers = {
             original: self._normalize_header(original)
             for original in reader.fieldnames or []
@@ -327,98 +287,111 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
 
         return rows
 
-    # ============================================================
-    # Precios
-    # ============================================================
+    def _get_min_sale_price_from_file(self, row):
+        return self._parse_money(
+            self._get_value(row, [
+                "venta_30",
+                "venta_30_",
+                "venta_30_porcentaje",
+                "venta_30_percent",
+                "precio_minimo",
+                "min_sale_price",
+            ])
+        )
 
-    def _get_sale_price_from_file(self, row):
-        """
-        Intenta tomar el precio de venta directamente del archivo.
 
-        Primero busca nombres exactos normalizados.
-        Luego hace una búsqueda flexible por columnas que parezcan precio de venta.
-        """
+    def _get_full_sale_price_from_file(self, row):
+        return self._parse_money(
+            self._get_value(row, [
+                "venta_full",
+                "venta_full_",
+                "venta_final",
+                "precio_full",
+                "precio_venta_full",
+                "precio_venta",
+                "sale_price",
+                "precio_publico",
+                "precio_al_publico",
+            ])
+        )
 
-        exact_keys = [
-            "30",
-            "30_",
-            "30_porcentaje",
-            "precio_venta",
-            "precio_de_venta",
-            "precio_publico",
-            "precio_al_publico",
-            "venta",
-            "pvp",
-            "valor_venta",
-            "precio",
-        ]
-
-        value = self._get_value(row, exact_keys)
-        parsed_value = self._parse_money(value)
-
-        if parsed_value:
-            return parsed_value
-
-        excluded_words = [
-            "costo",
-            "iva",
-            "promedio",
-            "existencia",
-            "stock",
-            "descripcion",
-            "description",
-            "unidad",
-            "um",
-            "u_m",
-        ]
-
-        included_words = [
-            "venta",
-            "publico",
-            "pvp",
-            "precio",
-            "30",
-        ]
-
-        for key, raw_value in row.items():
-            if not raw_value:
-                continue
-
-            normalized_key = self._normalize_header(key)
-
-            if any(word in normalized_key for word in excluded_words):
-                continue
-
-            if any(word in normalized_key for word in included_words):
-                parsed_value = self._parse_money(raw_value)
-                if parsed_value:
-                    return parsed_value
-
-        return 0.0
-
-    def _calculate_sale_price(self, cost_with_tax, sale_price_from_file):
-        """
-        Si el archivo trae precio de venta, se respeta.
-
-        Si no lo trae o no se puede leer, se calcula como margen del 30%:
-        Precio venta = Costo con IVA / 0.70
-
-        Ejemplo:
-        294.983,42 / 0.70 = 421.404,88
-        Redondeado = 421.405
-        """
-
-        if sale_price_from_file:
-            return sale_price_from_file
-
+    def _calculate_sale_price(self, cost_with_tax):
         if not cost_with_tax:
             return 0.0
 
         return round(cost_with_tax / 0.70, 0)
 
-    # ============================================================
-    # Utilidades
-    # ============================================================
+    def _find_options_for_price_import(
+        self,
+        Option,
+        new_reference: str,
+        old_reference: str,
+        brand_line: str,
+    ):
+        domains = self._build_price_import_search_domains(
+            Option,
+            new_reference,
+            old_reference,
+            brand_line,
+        )
+
+        for domain in domains:
+            options = Option.search(domain)
+            if options:
+                _logger.info(
+                    "[MAC Price Import] Match | nueva=%s anterior=%s marca=%s domain=%s ids=%s",
+                    new_reference,
+                    old_reference,
+                    brand_line,
+                    domain,
+                    options.ids,
+                )
+                return options
+
+        _logger.warning(
+            "[MAC Price Import] Sin match | nueva=%s anterior=%s marca=%s",
+            new_reference,
+            old_reference,
+            brand_line,
+        )
+
+        return Option.browse()
+
+    def _build_price_import_search_domains(
+        self,
+        Option,
+        new_reference: str,
+        old_reference: str,
+        brand_line: str,
+    ):
+        domains = []
+
+        if old_reference and brand_line:
+            domains.append([
+                ("reference", "=ilike", old_reference),
+                "|",
+                ("battery_line", "ilike", brand_line),
+                ("description", "ilike", brand_line),
+            ])
+
+        if old_reference:
+            domains.append([("reference", "=ilike", old_reference)])
+
+        if "old_reference" in Option._fields and old_reference:
+            domains.append([("old_reference", "=ilike", old_reference)])
+
+        if new_reference and brand_line:
+            domains.append([
+                ("reference", "=ilike", new_reference),
+                "|",
+                ("battery_line", "ilike", brand_line),
+                ("description", "ilike", brand_line),
+            ])
+
+        if new_reference:
+            domains.append([("reference", "=ilike", new_reference)])
+
+        return domains
 
     def _extract_reference(self, description):
         description = self._cell_to_str(description)
@@ -427,14 +400,11 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
             return ""
 
         match = re.search(r"^\s*([A-Za-z0-9\-]+)", description)
-        if not match:
-            return ""
-
-        return match.group(1).strip().upper()
+        return match.group(1).strip().upper() if match else ""
 
     def _get_value(self, row, keys):
         for key in keys:
-            value = row.get(key)
+            value = row.get(self._normalize_header(key))
             if value not in (None, ""):
                 return self._cell_to_str(value)
 
@@ -449,17 +419,16 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
         if not value:
             return 0.0
 
-        value = value.replace("$", "")
-        value = value.replace("COP", "")
-        value = value.replace(" ", "")
-        value = value.strip()
+        value = (
+            value.replace("$", "")
+            .replace("COP", "")
+            .replace(" ", "")
+            .strip()
+        )
 
-        # Formato colombiano: 374.739,72
         if "," in value:
-            value = value.replace(".", "")
-            value = value.replace(",", ".")
+            value = value.replace(".", "").replace(",", ".")
         else:
-            # Formato miles: 421.405 => 421405
             parts = value.split(".")
             if len(parts) > 1 and len(parts[-1]) == 3:
                 value = value.replace(".", "")
@@ -468,6 +437,26 @@ class MegaBatteryPriceImportWizard(models.TransientModel):
             return float(value)
         except ValueError:
             return 0.0
+
+    def _normalize_reference(self, value):
+        value = self._cell_to_str(value)
+
+        if not value:
+            return ""
+
+        return re.sub(r"\s+", "", value.strip().upper())
+
+    def _normalize_brand_line(self, value):
+        value = self._cell_to_str(value)
+
+        if not value:
+            return ""
+
+        value = self._strip_accents(value).lower()
+        value = re.sub(r"[^a-z0-9]+", " ", value)
+        value = re.sub(r"\s+", " ", value)
+
+        return value.strip()
 
     def _cell_to_str(self, value):
         if value is None:

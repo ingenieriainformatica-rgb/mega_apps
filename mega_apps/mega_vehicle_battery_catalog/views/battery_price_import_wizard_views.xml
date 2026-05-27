@@ -15,6 +15,10 @@
                     <field name="update_prices" widget="boolean_toggle"/>
                 </group>
 
+                <group string="Borrar precios anteriores">
+                    <field name="clear_existing_prices" widget="boolean_toggle" string="Borrar precios actuales antes de importar"/>
+                </group>
+
                 <group string="Resumen" invisible="not summary">
                     <field name="summary" nolabel="1" readonly="1"/>
                 </group>
