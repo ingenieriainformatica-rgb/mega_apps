@@ -262,6 +262,7 @@ def build_ai_session_update(
     session,
     ai_result: dict[str, Any],
 ) -> tuple[str, bool, str, dict[str, Any]]:
+
     customer_name = (ai_result.get("customer_name") or "").strip()
     vehicle_info = build_vehicle_info_from_ai(
         ai_result,
@@ -283,29 +284,120 @@ def build_ai_session_update(
 
     if session.step == "catalog_sent":
         if any(word in normalized_message for word in [
-            "opcion", "opción", "1", "2", "3",
-            "economica", "económica", "barata",
-            "mejor", "asesor"
+            "acepto",
+            "aceptar",
+            "esa",
+            "esa esta bien",
+            "esa está bien",
+            "me sirve",
+            "quiero esa",
+            "tomar esa",
+            "continuar",
+            "siga",
+            "1",
+            "opcion 1",
+            "opción 1",
+            "la 1",
+            "quiero la 1",
+            "comprar",
+            "quiero comprar",
         ]):
             return (
                 "battery_selected",
                 True,
                 get_battery_selected_message(current_name),
-                {
-                    "step": "battery_selected",
-                },
+                {"step": "battery_selected"},
+            )
+
+        if any(word in normalized_message for word in [
+            "mas opciones",
+            "más opciones",
+            "ver mas",
+            "ver más",
+            "otras",
+            "otra",
+            "otra opcion",
+            "otra opción",
+            "opciones",
+        ]):
+            return (
+                "more_options_sent",
+                True,
+                "",
+                {"step": "more_options_sent"},
+            )
+
+        if any(word in normalized_message for word in [
+            "asesor",
+            "persona",
+            "humano",
+            "vendedor",
+            "llamar",
+            "llamada",
+        ]):
+            return (
+                "advisor_handoff",
+                True,
+                "Claro que sí. En breve un asesor de Mega Baterías continuará contigo para ayudarte. 🔋🚗",
+                {"step": "advisor_handoff"},
             )
 
         return (
             "catalog_sent",
             True,
             (
-                "Para continuar, puedes responder con la opción que prefieres: "
-                "opción 1, opción 2, la más económica, la mejor opción o quiero asesor. 🔋🚗"
+                "Para continuar, puedes responder: "
+                "acepto esta opción, ver más opciones o quiero hablar con un asesor. 🔋🚗"
             ),
-            {
-                "step": "catalog_sent",
-            },
+            {"step": "catalog_sent"},
+        )
+
+    if session.step == "more_options_sent":
+        if any(word in normalized_message for word in [
+            "opcion 1",
+            "opción 1",
+            "1",
+            "opcion 2",
+            "opción 2",
+            "2",
+            "opcion 3",
+            "opción 3",
+            "3",
+            "mas economica",
+            "más económica",
+            "barata",
+            "mejor",
+            "acepto",
+            "me sirve",
+        ]):
+            return (
+                "battery_selected",
+                True,
+                get_battery_selected_message(current_name),
+                {"step": "battery_selected"},
+            )
+
+        if any(word in normalized_message for word in [
+            "asesor",
+            "persona",
+            "humano",
+            "vendedor",
+        ]):
+            return (
+                "advisor_handoff",
+                True,
+                "Claro que sí. En breve un asesor de Mega Baterías continuará contigo para ayudarte. 🔋🚗",
+                {"step": "advisor_handoff"},
+            )
+
+        return (
+            "more_options_sent",
+            True,
+            (
+                "Puedes responder con la opción que prefieres: opción 1, opción 2, "
+                "opción 3, la más económica o quiero hablar con un asesor. 🔋🚗"
+            ),
+            {"step": "more_options_sent"},
         )
 
     if current_location and is_out_of_coverage(current_location):

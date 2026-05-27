@@ -21,7 +21,8 @@ from ...helpers.whatsapp_crm_helper import (
     create_or_update_lead_from_session
 )
 from ...helpers.whatsapp_catalog_helper import (
-    build_battery_catalog_message_for_lead,
+    build_recommended_battery_message_for_lead,
+    build_more_battery_options_message_for_lead,
     lead_has_battery_options,
 )
 from ...helpers.whatsapp_chatter_helper import (
@@ -146,14 +147,22 @@ def apply_ai_to_whatsapp_session(self, **post):
 
     if next_step == "catalog_sent" and lead:
         has_options = lead_has_battery_options(request.env, lead)
-        reply = build_battery_catalog_message_for_lead(request.env, lead)
-        should_send = True
-        if not has_options:
+
+        if has_options:
+            reply = build_recommended_battery_message_for_lead(request.env, lead)
+            should_send = True
+        else:
+            reply = build_more_battery_options_message_for_lead(request.env, lead)
+            should_send = True
             session.write({"step": "advisor_handoff"})
 
 
     if next_step == "confirm_data":
         reply = get_confirmation_message(session)
+        should_send = True
+
+    if next_step == "more_options_sent" and lead:
+        reply = build_more_battery_options_message_for_lead(request.env, lead)
         should_send = True
 
     if lead:

@@ -16,8 +16,12 @@ class MegaWhatsappSession(models.Model):
         ("ask_location", "Preguntar ubicación"),
         ("confirm_data", "Confirmar datos"),
         ("out_of_coverage", "Fuera de cobertura"),
-        ("catalog_sent", "Catálogo enviado"),
+
+        ("catalog_sent", "Opción recomendada enviada"),
+        ("more_options_sent", "Más opciones enviadas"),
         ("battery_selected", "Batería seleccionada"),
+        ("dispatch_requested", "Despacho solicitado"),
+
         ("advisor_handoff", "Pasado a asesor"),
         ("done", "Finalizado"),
     ], default="new", required=True, index=True)

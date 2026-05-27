@@ -163,9 +163,100 @@ def build_battery_catalog_message_for_lead(env, lead) -> str:
     lines.append("")
     lines.append("Estos precios se sostienen dejando la batería usada")
     lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    lines.append("Para continuar, respóndeme con una de estas opciones:")
+    lines.append("• Opción 1")
+    lines.append("• Opción 2")
+    lines.append("• Quiero hablar con un asesor")
+    lines.append("")
+    lines.append("Si decides continuar, un asesor confirmará disponibilidad y coordinará la entrega. 🔋🚗")
 
     return "\n".join(lines).strip()
 
 
 def lead_has_battery_options(env, lead) -> bool:
     return bool(find_battery_options_for_lead(env, lead, limit=1))
+
+
+def build_more_battery_options_message_for_lead(env, lead) -> str:
+    options = find_battery_options_for_lead(env, lead, limit=3)
+    customer = lead.contact_name or lead.partner_id.name or "señor/a"
+
+    if not options:
+        return build_battery_catalog_message_for_lead(env, lead)
+
+    lines = [
+        f"Claro {customer} 👍",
+        "",
+        "Te comparto más opciones compatibles para tu vehículo:",
+        "",
+    ]
+
+    for index, option in enumerate(options, start=1):
+        price = option.sale_price or option.min_sale_price or option.max_sale_price
+        line_label = option._get_battery_line_label() if hasattr(option, "_get_battery_line_label") else option.battery_line
+
+        option_lines = [
+            f"Opción {index}:",
+            f"• Línea: {line_label}",
+            f"• Referencia: {option.reference}",
+        ]
+
+        if price:
+            option_lines.append(f"• Precio sugerido: {format_money(price)}")
+
+        if option.stock_qty:
+            option_lines.append(f"• Existencias: {option.stock_qty:g}")
+
+        if option.description:
+            option_lines.append(f"• Descripción: {option.description}")
+
+        lines.append("\n".join(option_lines))
+        lines.append("")
+
+    lines.append("Los precios aplican entregando la batería usada.")
+    lines.append("Si deseas quedarte con la batería usada, se adicionan $40.000.")
+    lines.append("")
+    lines.append("Para continuar, responde con la opción que prefieres o escribe “quiero asesor”.")
+
+    return "\n".join(lines).strip()
+
+
+def build_recommended_battery_message_for_lead(env, lead) -> str:
+    options = find_battery_options_for_lead(env, lead, limit=1)
+    customer = lead.contact_name or lead.partner_id.name or "señor/a"
+
+    if not options:
+        return build_battery_catalog_message_for_lead(env, lead)
+
+    option = options[0]
+    price = option.sale_price or option.min_sale_price or option.max_sale_price
+    line_label = option._get_battery_line_label() if hasattr(option, "_get_battery_line_label") else option.battery_line
+
+    lines = [
+        f"Perfecto {customer} 👍",
+        "",
+        "Según los datos de tu vehículo, esta es la opción recomendada:",
+        "",
+        f"🔋 Línea: {line_label}",
+        f"📌 Referencia: {option.reference}",
+    ]
+
+    if price:
+        lines.append(f"💰 Precio sugerido: {format_money(price)}")
+
+    if option.stock_qty:
+        lines.append(f"📦 Disponibilidad: {option.stock_qty:g}")
+
+    if option.description:
+        lines.append(f"📝 {option.description}")
+
+    lines.append("")
+    lines.append("Este precio aplica entregando la batería usada.")
+    lines.append("Si deseas quedarte con la batería usada, se adicionan $40.000.")
+    lines.append("")
+    lines.append("Para continuar, puedes responder:")
+    lines.append("• Acepto esta opción")
+    lines.append("• Ver más opciones")
+    lines.append("• Quiero hablar con un asesor")
+
+    return "\n".join(lines).strip()

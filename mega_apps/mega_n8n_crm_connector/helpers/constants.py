@@ -15,7 +15,9 @@ ALLOWED_STEPS = {
     "confirm_data",
     "out_of_coverage",
     "catalog_sent",
+    "more_options_sent",
     "battery_selected",
+    "dispatch_requested",
     "advisor_handoff",
     "done",
 }
@@ -34,7 +36,12 @@ RESET_SESSION_REPLY = (
     "Sin problema. Vamos a corregir la información. ¿Me regalas por favor tu nombre?"
 )
 
-TERMINAL_STEPS = {"advisor_handoff", "done", "out_of_coverage"}
+TERMINAL_STEPS = {
+    "out_of_coverage",
+    "advisor_handoff",
+    "dispatch_requested",
+    "done",
+}
 
 SESSION_REOPEN_MINUTES = 60 * 24 * 8
 
