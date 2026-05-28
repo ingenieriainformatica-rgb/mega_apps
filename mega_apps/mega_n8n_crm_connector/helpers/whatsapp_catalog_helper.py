@@ -82,8 +82,11 @@ def find_battery_options_for_lead(env, lead, limit: int = 3):
 
     return options.sorted(
         key=lambda option: (
+            not bool(option.sale_price),
+            not bool(getattr(option, "whatsapp_recommended", False)),
+            0 if "gold" in (option.battery_line or "").lower() else 1,
             option.option_number or 99,
-            option.sale_price or option.min_sale_price or 0,
+            -(option.sale_price or 0),
         )
     )[:limit]
 
@@ -202,7 +205,7 @@ def build_more_battery_options_message_for_lead(env, lead) -> str:
         ]
 
         if price:
-            option_lines.append(f"• Precio sugerido: {format_money(price)}")
+            option_lines.append(f"• Precio: {format_money(price)}")
 
         if option.stock_qty:
             option_lines.append(f"• Existencias: {option.stock_qty:g}")
@@ -242,21 +245,10 @@ def build_recommended_battery_message_for_lead(env, lead) -> str:
     ]
 
     if price:
-        lines.append(f"💰 Precio sugerido: {format_money(price)}")
-
-    if option.stock_qty:
-        lines.append(f"📦 Disponibilidad: {option.stock_qty:g}")
-
-    if option.description:
-        lines.append(f"📝 {option.description}")
+        lines.append(f"💰 Precio: {format_money(price)}")
 
     lines.append("")
     lines.append("Este precio aplica entregando la batería usada.")
     lines.append("Si deseas quedarte con la batería usada, se adicionan $40.000.")
     lines.append("")
-    lines.append("Para continuar, puedes responder:")
-    lines.append("• Acepto esta opción")
-    lines.append("• Ver más opciones")
-    lines.append("• Quiero hablar con un asesor")
-
     return "\n".join(lines).strip()
