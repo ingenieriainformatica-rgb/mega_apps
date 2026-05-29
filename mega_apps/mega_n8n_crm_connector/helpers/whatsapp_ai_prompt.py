@@ -405,7 +405,36 @@ def get_ai_instruction(session, message: str) -> str:
         - vehículo
         - ubicación
 
-        Debes confirmar la información antes de avanzar.
+        Debes confirmar la información antes de avanzar, pero sin sonar rígido.
+
+        Si current_step es "confirm_data", interpreta la respuesta del cliente:
+        - Si confirma que todo está bien:
+          intent = "confirm_data_correct"
+          next_step = "catalog_sent"
+        - Si quiere corregir algún dato:
+          intent = "correct_data"
+          next_step = "ask_name"
+        - Si no es claro si confirma o corrige:
+          intent = "unknown"
+          next_step = "confirm_data"
+
+        Ejemplos de confirmación:
+        - "sí"
+        - "si"
+        - "correcto"
+        - "todo bien"
+        - "así está bien"
+        - "está perfecto"
+        - "dale"
+        - "continúa"
+        - "avancemos"
+
+        Ejemplos de corrección:
+        - "no, el carro es otro"
+        - "corrige la ubicación"
+        - "me equivoqué"
+        - "cambia el año"
+        - "no está bien"
 
         ----------------------------------------------------------------
 
@@ -542,6 +571,39 @@ def get_ai_instruction(session, message: str) -> str:
         - NO cambies opciones entregadas por el sistema
         - ayuda únicamente a interpretar o continuar la conversación
 
+        Si current_step es "catalog_sent", tu tarea es SOLO interpretar la intención del cliente.
+        No calcules precios, no sumes recargos y no generes links de pago.
+
+        Valores permitidos para intent cuando current_step es "catalog_sent":
+        - accept_recommended_battery
+        - ask_price_without_old_battery
+        - request_more_options
+        - request_advisor
+        - unknown
+
+        Reglas para batería usada:
+        - Si acepta y dice que entrega, deja o devuelve la batería usada:
+          customer_leaves_old_battery = true
+        - Si acepta y dice que se queda con la batería usada, no entrega la usada,
+          conserva la vieja o pregunta por precio sin entregar batería usada:
+          customer_leaves_old_battery = false
+        - Si no es claro, usa customer_leaves_old_battery = true
+
+        Ejemplos:
+        - "quiero esta y dejo la batería vieja":
+          intent = "accept_recommended_battery"
+          customer_leaves_old_battery = true
+        - "acepto pero me quedo con la batería vieja":
+          intent = "accept_recommended_battery"
+          customer_leaves_old_battery = false
+        - "cuánto vale si me quedo con la batería vieja":
+          intent = "ask_price_without_old_battery"
+          customer_leaves_old_battery = false
+        - "muéstrame más opciones":
+          intent = "request_more_options"
+        - "quiero hablar con un asesor":
+          intent = "request_advisor"
+
         ----------------------------------------------------------------
 
         # EXTRACCIÓN DE DATOS
@@ -605,7 +667,8 @@ def get_ai_instruction(session, message: str) -> str:
         "vehicle_year": "",
         "location": "",
         "conversation_summary": "",
-        "intent": "battery_quote",
+        "intent": "unknown",
+        "customer_leaves_old_battery": true,
         "confidence": 0,
         "lead_quality": "",
         "is_emergency": false,

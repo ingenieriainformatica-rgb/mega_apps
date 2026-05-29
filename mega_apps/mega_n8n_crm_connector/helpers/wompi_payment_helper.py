@@ -50,6 +50,8 @@ def create_wompi_payment_link(
         "Content-Type": "application/json",
     }
 
+    response = None
+
     try:
         response = requests.post(
             WOMPI_API_URL,
@@ -59,13 +61,22 @@ def create_wompi_payment_link(
         )
         response.raise_for_status()
         data = response.json()
-    except requests.exceptions.HTTPError as error:
+    except requests.exceptions.RequestException as error:
         _logger.exception("[WOMPI] Error creando link de pago")
         return {
             "success": False,
             "error": str(error),
-            "status_code": response.status_code,
-            "response": response.text,
+            "status_code": response.status_code if response else False,
+            "response": response.text if response else "",
+            "payment_url": "",
+        }
+    except ValueError as error:
+        _logger.exception("[WOMPI] Respuesta inválida creando link de pago")
+        return {
+            "success": False,
+            "error": str(error),
+            "status_code": response.status_code if response else False,
+            "response": response.text if response else "",
             "payment_url": "",
         }
 

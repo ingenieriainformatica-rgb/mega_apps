@@ -22,6 +22,8 @@ class MegaWhatsappSession(models.Model):
         ("battery_selected", "Batería seleccionada"),
         ("dispatch_requested", "Despacho solicitado"),
 
+        ("payment_link_sent", "Link de pago enviado"),
+
         ("advisor_handoff", "Pasado a asesor"),
         ("done", "Finalizado"),
     ], default="new", required=True, index=True)
@@ -39,6 +41,30 @@ class MegaWhatsappSession(models.Model):
     conversation_summary = fields.Text(
         string="Resumen conversación IA",
         help="Resumen corto del contexto conversacional enviado al modelo IA.",
+    )
+
+    selected_battery_option_id = fields.Many2one(
+        "mega.battery.application.option",
+        string="Batería seleccionada",
+    )
+
+    customer_leaves_old_battery = fields.Boolean(
+        string="Cliente entrega batería usada",
+        default=True,
+    )
+
+    selected_battery_price = fields.Float(
+        string="Precio batería seleccionado",
+    )
+
+    wompi_payment_link_id = fields.Char(
+        string="ID link Wompi",
+        readonly=True,
+    )
+
+    wompi_payment_url = fields.Char(
+        string="URL de pago Wompi",
+        readonly=True,
     )
 
     def init(self):

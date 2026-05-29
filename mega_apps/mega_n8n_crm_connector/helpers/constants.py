@@ -16,6 +16,7 @@ ALLOWED_STEPS = {
     "out_of_coverage",
     "catalog_sent",
     "more_options_sent",
+    "payment_link_sent",
     "battery_selected",
     "dispatch_requested",
     "advisor_handoff",
@@ -29,7 +30,8 @@ NO_ACTIVE_SESSION_REPLY = (
 )
 
 CONFIRMATION_RETRY_REPLY = (
-    "Por favor respóndeme únicamente con Sí o No para confirmar si los datos están correctos."
+    "No alcancé a entender si los datos están correctos o si quieres corregir algo. "
+    "Puedes decirme, por ejemplo: \"todo está bien\" o \"quiero corregir el vehículo\"."
 )
 
 RESET_SESSION_REPLY = (
@@ -109,3 +111,26 @@ OUT_OF_COVERAGE_LOCATIONS = [
 LEAD_BRAND_FIELD = "brand_id"
 LEAD_MODEL_FIELD = "modelo_id"
 LEAD_YEAR_FIELD = "year_vehicule_id"
+
+WOMPI_PRIVATE_KEY_PARAM = "mega_n8n_crm_connector.wompi_private_key"
+WOMPI_PRIVATE_KEY_PARAM_ALIASES = [
+    WOMPI_PRIVATE_KEY_PARAM,
+    "mega_n8n_crm_connector.wompi_private_key",
+    "mega_n8n_crm_connector.wompi_private_key_prod",
+    "mega_n8n_crm_connector.wompi_private_key_production",
+    "wompi.private_key_mega",
+    "wompi.private_key",
+    "wompi.private_key_mega_prod",
+    "wompi.private_key_mega_production",
+    "wompi.private_key_prod",
+    "wompi.private_key_production",
+    "wompi.private_key_mega_test",
+    "wompi.private_key_test",
+]
+WOMPI_PRIVATE_KEY_ENV_NAMES = [
+    "WOMPI_PRIVATE_KEY",
+    "WOMPI_PRIVATE_KEY_PROD",
+    "WOMPI_PRIVATE_KEY_PRODUCTION",
+    "WOMPI_PRV_KEY",
+]
+OLD_BATTERY_SURCHARGE = 40000

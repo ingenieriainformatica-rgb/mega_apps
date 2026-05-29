@@ -96,6 +96,28 @@ def format_money(value) -> str:
     return "${:,.0f}".format(value).replace(",", ".")
 
 
+def get_battery_option_price(option) -> float:
+    if not option:
+        return 0.0
+
+    return float(
+        option.sale_price
+        or option.min_sale_price
+        or option.max_sale_price
+        or 0.0
+    )
+
+
+def get_battery_line_label(option) -> str:
+    if not option:
+        return ""
+
+    if hasattr(option, "_get_battery_line_label"):
+        return option._get_battery_line_label()
+
+    return option.battery_line or ""
+
+
 def build_battery_catalog_message_for_lead(env, lead) -> str:
     options = find_battery_options_for_lead(env, lead, limit=3)
     customer = lead.contact_name or lead.partner_id.name or "señor/a"
@@ -225,15 +247,15 @@ def build_more_battery_options_message_for_lead(env, lead) -> str:
 
 
 def build_recommended_battery_message_for_lead(env, lead) -> str:
-    options = find_battery_options_for_lead(env, lead, limit=1)
+    options = get_recommended_battery_option_for_lead(env, lead)
     customer = lead.contact_name or lead.partner_id.name or "señor/a"
 
     if not options:
         return build_battery_catalog_message_for_lead(env, lead)
 
     option = options[0]
-    price = option.sale_price or option.min_sale_price or option.max_sale_price
-    line_label = option._get_battery_line_label() if hasattr(option, "_get_battery_line_label") else option.battery_line
+    price = get_battery_option_price(option)
+    line_label = get_battery_line_label(option)
 
     lines = [
         f"Perfecto {customer} 👍",
@@ -252,3 +274,9 @@ def build_recommended_battery_message_for_lead(env, lead) -> str:
     lines.append("Si deseas quedarte con la batería usada, se adicionan $40.000.")
     lines.append("")
     return "\n".join(lines).strip()
+
+
+def get_recommended_battery_option_for_lead(env, lead):
+    """Return the same first option used by the recommended catalog message."""
+    options = find_battery_options_for_lead(env, lead, limit=1)
+    return options[:1]

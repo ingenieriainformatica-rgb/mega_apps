@@ -1,4 +1,5 @@
 import logging
+import os
 from odoo.http import request  # type: ignore
 from ...helpers.n8n_payload_helper import get_n8n_payload
 from ...helpers.whatsapp_session_helper import (
@@ -17,13 +18,21 @@ from ...helpers.whatsapp_messages import (
     get_confirmation_message
 )
 from ...helpers.constants import NO_ACTIVE_SESSION_REPLY
+from ...helpers.constants import (
+    OLD_BATTERY_SURCHARGE,
+    WOMPI_PRIVATE_KEY_ENV_NAMES,
+    WOMPI_PRIVATE_KEY_PARAM_ALIASES,
+)
 from ...helpers.whatsapp_crm_helper import (
     create_or_update_lead_from_session
 )
 from ...helpers.whatsapp_catalog_helper import (
     build_recommended_battery_message_for_lead,
     build_more_battery_options_message_for_lead,
-    lead_has_battery_options,
+    get_recommended_battery_option_for_lead,
+    get_battery_option_price,
+    get_battery_line_label,
+    format_money,
 )
 from ...helpers.whatsapp_chatter_helper import (
     log_whatsapp_conversation_on_lead,
@@ -31,8 +40,168 @@ from ...helpers.whatsapp_chatter_helper import (
 from ...helpers.whatsapp_chatter_helper import (
     log_customer_message_on_lead_from_session,
 )
+from ...helpers.wompi_payment_helper import create_wompi_payment_link
 
 _logger = logging.getLogger(__name__)
+
+
+def _get_wompi_private_key(env) -> str:
+    Config = env["ir.config_parameter"].sudo()
+
+    for param_name in WOMPI_PRIVATE_KEY_PARAM_ALIASES:
+        private_key = (Config.get_param(param_name) or "").strip()
+        if private_key:
+            return private_key
+
+    for env_name in WOMPI_PRIVATE_KEY_ENV_NAMES:
+        private_key = (os.environ.get(env_name) or "").strip()
+        if private_key:
+            return private_key
+
+    return ""
+
+
+def _payment_fallback_reply(name: str | None) -> str:
+    customer = name or "señor/a"
+    return (
+        f"Perfecto {customer}. Ya registramos tu interés en la batería recomendada. "
+        "En este momento no fue posible generar el link de pago automáticamente, "
+        "pero en breve un asesor de Mega Baterías continuará contigo para finalizar la compra. 🔋🚗"
+    )
+
+
+def _store_recommended_battery_on_session(env, session, lead):
+    option = session.selected_battery_option_id
+
+    if not option and lead:
+        option = get_recommended_battery_option_for_lead(env, lead)
+        option = option[:1]
+
+    if not option:
+        return False, 0.0
+
+    price = get_battery_option_price(option)
+    values = {
+        "selected_battery_option_id": option.id,
+        "selected_battery_price": price,
+    }
+
+    session.write(values)
+    return option, price
+
+
+def _build_price_without_old_battery_reply(session, option, base_price: float) -> str:
+    customer = session.customer_name or "señor/a"
+    final_value = float(base_price or 0) + OLD_BATTERY_SURCHARGE
+    line_label = get_battery_line_label(option)
+
+    return (
+        f"Claro {customer} 👍\n\n"
+        "Si deseas conservar la batería usada, el valor final sería:\n\n"
+        f"🔋 Línea: {line_label}\n"
+        f"📌 Referencia: {option.reference}\n"
+        f"💰 Valor final: {format_money(final_value)} COP\n\n"
+        f"Incluye recargo de {format_money(OLD_BATTERY_SURCHARGE)} por conservar la batería usada.\n\n"
+        "Para continuar, respóndeme si aceptas esta opción o si prefieres hablar con un asesor."
+    )
+
+
+def _build_payment_success_reply(session, option, final_value: float, payment_url: str) -> str:
+    customer = session.customer_name or "señor/a"
+    line_label = get_battery_line_label(option)
+
+    if session.customer_leaves_old_battery:
+        used_battery_note = "El valor aplica entregando la batería usada."
+    else:
+        used_battery_note = (
+            f"Incluye recargo de {format_money(OLD_BATTERY_SURCHARGE)} "
+            "por conservar la batería usada."
+        )
+
+    return (
+        f"Perfecto {customer} 👍\n\n"
+        "Ya dejamos registrada tu solicitud:\n\n"
+        f"🔋 Línea: {line_label}\n"
+        f"📌 Referencia: {option.reference}\n"
+        f"💰 Valor final: {format_money(final_value)} COP\n\n"
+        f"{used_battery_note}\n\n"
+        "Puedes realizar el pago seguro aquí 👇\n\n"
+        f"{payment_url}\n\n"
+        "Una vez confirmado el pago, un asesor de Mega Baterías continuará contigo "
+        "para validar disponibilidad y coordinar el despacho. 🚗🔋"
+    )
+
+
+def _create_wompi_payment_response(env, session, lead):
+    option, base_price = _store_recommended_battery_on_session(env, session, lead)
+
+    if not option or base_price <= 0:
+        _logger.warning(
+            "Cannot create Wompi link: missing option or price session=%s option=%s price=%s",
+            session.id,
+            option.id if option else False,
+            base_price,
+        )
+        session.write({"step": "advisor_handoff"})
+        return "advisor_handoff", True, _payment_fallback_reply(session.customer_name)
+
+    final_value = base_price
+    if not session.customer_leaves_old_battery:
+        final_value += OLD_BATTERY_SURCHARGE
+
+    private_key = _get_wompi_private_key(env)
+    if not private_key:
+        _logger.warning(
+            "Cannot create Wompi link: private key is not configured. "
+            "Configure one ICP alias or env var. session=%s",
+            session.id,
+        )
+        session.write({"step": "advisor_handoff"})
+        return "advisor_handoff", True, _payment_fallback_reply(session.customer_name)
+
+    payment = create_wompi_payment_link(
+        private_key=private_key,
+        name=f"Mega Baterías - {option.reference}",
+        description=f"Batería {option.reference} para {session.vehicle_info or 'vehículo'}",
+        amount=final_value,
+        single_use=True,
+        collect_shipping=False,
+    )
+
+    if not payment.get("success") or not payment.get("payment_url"):
+        _logger.warning(
+            "Wompi payment link failed for session=%s error=%s",
+            session.id,
+            payment.get("error"),
+        )
+        session.write({"step": "advisor_handoff"})
+        return "advisor_handoff", True, _payment_fallback_reply(session.customer_name)
+
+    session.write(
+        {
+            "wompi_payment_link_id": payment.get("payment_link_id"),
+            "wompi_payment_url": payment.get("payment_url"),
+            "step": "dispatch_requested",
+        }
+    )
+
+    return (
+        "dispatch_requested",
+        True,
+        _build_payment_success_reply(session, option, final_value, payment["payment_url"]),
+    )
+
+
+def _ensure_non_empty_reply(phone: str, step: str, should_send: bool, reply: str):
+    if should_send and not (reply or "").strip():
+        _logger.warning(
+            "Avoiding empty WhatsApp reply phone=%s step=%s",
+            phone,
+            step,
+        )
+        return False, ""
+
+    return should_send, reply
 
 
 def build_ai_context_response(self, **post):
@@ -146,13 +315,28 @@ def apply_ai_to_whatsapp_session(self, **post):
     )
 
     if next_step == "catalog_sent" and lead:
-        has_options = lead_has_battery_options(request.env, lead)
+        option, base_price = _store_recommended_battery_on_session(
+            request.env,
+            session,
+            lead,
+        )
 
-        if has_options:
-            reply = build_recommended_battery_message_for_lead(request.env, lead)
+        if option and base_price > 0:
+            if ai_result.get("intent") == "ask_price_without_old_battery":
+                reply = _build_price_without_old_battery_reply(
+                    session,
+                    option,
+                    base_price,
+                )
+            else:
+                session.write({"customer_leaves_old_battery": True})
+                reply = build_recommended_battery_message_for_lead(request.env, lead)
             should_send = True
         else:
-            reply = build_more_battery_options_message_for_lead(request.env, lead)
+            if option:
+                reply = _payment_fallback_reply(session.customer_name)
+            else:
+                reply = build_more_battery_options_message_for_lead(request.env, lead)
             should_send = True
             session.write({"step": "advisor_handoff"})
 
@@ -164,6 +348,20 @@ def apply_ai_to_whatsapp_session(self, **post):
     if next_step == "more_options_sent" and lead:
         reply = build_more_battery_options_message_for_lead(request.env, lead)
         should_send = True
+
+    if next_step == "payment_link_sent":
+        next_step, should_send, reply = _create_wompi_payment_response(
+            request.env,
+            session,
+            lead,
+        )
+
+    should_send, reply = _ensure_non_empty_reply(
+        phone,
+        session.step,
+        should_send,
+        reply,
+    )
 
     if lead:
         log_whatsapp_conversation_on_lead(

@@ -93,6 +93,92 @@ def missing_phone_response(**extra: Any) -> dict[str, Any]:
 def normalize_answer(message: str | None) -> str:
     return (message or "").strip().lower()
 
+def parse_bool(value: Any, default: bool = True) -> bool:
+    if isinstance(value, bool):
+        return value
+
+    if isinstance(value, str):
+        normalized = normalize_text(value)
+        if normalized in {"false", "0", "no", "n"}:
+            return False
+        if normalized in {"true", "1", "si", "s", "yes", "y"}:
+            return True
+
+    if value is None:
+        return default
+
+    return bool(value)
+
+def message_confirms_data(normalized_message: str, intent: str = "") -> bool:
+    if intent == "confirm_data_correct":
+        return True
+
+    if normalized_message in CONFIRMATION_YES:
+        return True
+
+    confirmation_phrases = {
+        "todo bien",
+        "todo esta bien",
+        "todo está bien",
+        "esta bien",
+        "está bien",
+        "asi esta bien",
+        "así está bien",
+        "asi esta perfecto",
+        "así está perfecto",
+        "esta perfecto",
+        "está perfecto",
+        "perfecto",
+        "de una",
+        "dale",
+        "avancemos",
+        "continua",
+        "continúa",
+        "sigue",
+        "sigamos",
+        "correcto todo",
+        "los datos estan bien",
+        "los datos están bien",
+    }
+
+    return any(phrase in normalized_message for phrase in confirmation_phrases)
+
+def message_requests_data_correction(normalized_message: str, intent: str = "") -> bool:
+    if intent == "correct_data":
+        return True
+
+    if normalized_message in CONFIRMATION_NO:
+        return True
+
+    correction_phrases = {
+        "no esta bien",
+        "no está bien",
+        "no es correcto",
+        "esta mal",
+        "está mal",
+        "hay que corregir",
+        "quiero corregir",
+        "corregir",
+        "corrige",
+        "cambiar",
+        "cambia",
+        "me equivoque",
+        "me equivoqué",
+        "otro carro",
+        "otro vehiculo",
+        "otro vehículo",
+        "otra ubicacion",
+        "otra ubicación",
+        "la ubicacion es",
+        "la ubicación es",
+        "el carro es",
+        "el vehiculo es",
+        "el vehículo es",
+        "el año es",
+    }
+
+    return any(phrase in normalized_message for phrase in correction_phrases)
+
 def get_session_model(env):
     return env["mega.whatsapp.session"].sudo()
 
@@ -270,6 +356,11 @@ def build_ai_session_update(
     )
     location = (ai_result.get("location") or "").strip()
     conversation_summary = (ai_result.get("conversation_summary") or "").strip()
+    intent = (ai_result.get("intent") or "unknown").strip()
+    customer_leaves_old_battery = parse_bool(
+        ai_result.get("customer_leaves_old_battery"),
+        default=bool(session.customer_leaves_old_battery),
+    )
     next_step = (ai_result.get("next_step") or session.step).strip()
     reply = (ai_result.get("reply") or "").strip()
     should_send = bool(ai_result.get("should_send", True))
@@ -283,6 +374,44 @@ def build_ai_session_update(
     normalized_message = normalize_answer(session.last_message)
 
     if session.step == "catalog_sent":
+        if intent == "accept_recommended_battery":
+            return (
+                "payment_link_sent",
+                True,
+                "",
+                {
+                    "step": "payment_link_sent",
+                    "customer_leaves_old_battery": customer_leaves_old_battery,
+                },
+            )
+
+        if intent == "ask_price_without_old_battery":
+            return (
+                "catalog_sent",
+                True,
+                "",
+                {
+                    "step": "catalog_sent",
+                    "customer_leaves_old_battery": False,
+                },
+            )
+
+        if intent == "request_more_options":
+            return (
+                "more_options_sent",
+                True,
+                "",
+                {"step": "more_options_sent"},
+            )
+
+        if intent == "request_advisor":
+            return (
+                "advisor_handoff",
+                True,
+                "Claro que sí. En breve un asesor de Mega Baterías continuará contigo para ayudarte. 🔋🚗",
+                {"step": "advisor_handoff"},
+            )
+
         if any(word in normalized_message for word in [
             "acepto",
             "aceptar",
@@ -302,11 +431,25 @@ def build_ai_session_update(
             "comprar",
             "quiero comprar",
         ]):
+            leaves_old_battery = not any(word in normalized_message for word in [
+                "me quedo con la bateria",
+                "me quedo con la batería",
+                "me quedo con la vieja",
+                "conservar la bateria",
+                "conservar la batería",
+                "conservo la vieja",
+                "sin entregar",
+                "no entrego",
+                "no dejo",
+            ])
             return (
-                "battery_selected",
+                "payment_link_sent",
                 True,
-                get_battery_selected_message(current_name),
-                {"step": "battery_selected"},
+                "",
+                {
+                    "step": "payment_link_sent",
+                    "customer_leaves_old_battery": leaves_old_battery,
+                },
             )
 
         if any(word in normalized_message for word in [
@@ -430,6 +573,7 @@ def build_ai_session_update(
             current_name,
             current_vehicle,
             current_location,
+            intent,
         )
 
         if next_step == "catalog_sent":
@@ -481,17 +625,10 @@ def resolve_confirmation_from_ai(
     current_name: str,
     current_vehicle: str,
     current_location: str,
+    intent: str = "",
 ) -> tuple[str, bool, str, str, str, str]:
 
-    if normalized_message in CONFIRMATION_YES:
-        # return (
-        #     "advisor_handoff",
-        #     True,
-        #     advisor_handoff_reply(current_name),
-        #     current_name,
-        #     current_vehicle,
-        #     current_location,
-        # )
+    if message_confirms_data(normalized_message, intent):
         return (
             "catalog_sent",
             True,
@@ -501,7 +638,7 @@ def resolve_confirmation_from_ai(
             current_location,
         )
 
-    if normalized_message in CONFIRMATION_NO:
+    if message_requests_data_correction(normalized_message, intent):
         return (
             "ask_name",
             True,

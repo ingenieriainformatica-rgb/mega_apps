@@ -83,7 +83,7 @@ def get_confirmation_message(session) -> str:
         Vehículo: {vehicle}
         Ubicación: {location}
 
-        ¿Me confirmas por favor si estos datos están correctos? Responde Sí o No.
+        ¿Está todo correcto o quieres que ajustemos algún dato?
         """,
         f"""
         Gracias {name}. Con estos datos podemos revisar mejor la opción de batería:
@@ -92,7 +92,7 @@ def get_confirmation_message(session) -> str:
         Vehículo: {vehicle}
         Ubicación: {location}
 
-        ¿La información está correcta? Respóndeme Sí o No, por favor.
+        Si todo está bien, seguimos con las opciones de batería. Si algo cambió, cuéntame qué dato corregimos.
         """,
         f"""
         Muy bien {name}, ya registré estos datos para avanzar con la cotización:
@@ -101,7 +101,7 @@ def get_confirmation_message(session) -> str:
         Vehículo: {vehicle}
         Ubicación: {location}
 
-        ¿Me ayudas confirmando si todo está correcto? Responde Sí o No.
+        ¿Avanzamos con esta información o necesitas corregir algo?
         """,
     ]
     return dedent(random.choice(messages)).strip()
