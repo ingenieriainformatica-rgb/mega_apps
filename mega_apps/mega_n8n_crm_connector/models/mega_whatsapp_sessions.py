@@ -19,6 +19,7 @@ class MegaWhatsappSession(models.Model):
 
         ("catalog_sent", "Opción recomendada enviada"),
         ("more_options_sent", "Más opciones enviadas"),
+        ("more_catalog_sent", "Catálogo adicional enviado"),
         ("battery_selected", "Batería seleccionada"),
         ("dispatch_requested", "Despacho solicitado"),
 

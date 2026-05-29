@@ -1021,10 +1021,71 @@ Si esos modelos/campos no existen en una base, algunas partes pueden fallar o si
 - Agregar seguridad a los endpoints activos.
 - Declarar en `__manifest__.py` las dependencias reales si el addon requiere catalogo, fleet o campos personalizados.
 - Mantener monitoreado Wompi: ya esta integrado, pero cualquier llave nueva debe agregarse a los aliases o configurarse en el parametro recomendado.
+- El estado `more_catalog_sent` ya reutiliza la misma salida hacia Wompi que `catalog_sent`: si el cliente elige una opcion clara del catalogo adicional, se guarda la opcion seleccionada y se genera link de pago.
 - Revisar el paso posterior a `dispatch_requested`: falta definir confirmacion de pago, despacho y cierre final.
 - Revisar si `battery_selected` sigue siendo necesario o si debe eliminarse en una limpieza posterior.
 - Evitar duplicidad entre `whatsapp_session_helper.py`, `whatsapp_messages.py` y el controlador heredado.
 - Considerar tests para reapertura de sesiones, confirmacion, fuera de cobertura, creacion de lead y catalogo.
+
+## Mejora reciente: seleccion desde catalogo adicional
+
+Fecha de implementacion: 2026-05-29.
+
+Se agrego soporte funcional para el estado `more_catalog_sent`, usado cuando el cliente pide mas opciones despues de recibir la bateria recomendada.
+
+Comportamiento esperado:
+
+- Si la sesion esta en `catalog_sent` y el cliente pide mas opciones, el siguiente estado es `more_catalog_sent`.
+- Si la sesion esta en `more_options_sent` o `more_catalog_sent`, Odoo envia el catalogo adicional con `build_more_battery_options_message_for_lead()`.
+- Si el cliente responde con una opcion clara (`opcion 1`, `opcion 2`, `la 3`, `2`, etc.), la sesion pasa a `payment_link_sent`.
+- El servicio interpreta el indice elegido con `_parse_selected_catalog_option()`.
+- La opcion elegida se busca con `get_battery_option_for_catalog_index()`, usando el mismo orden de `find_battery_options_for_lead()` que construye el catalogo.
+- La seleccion se guarda en la sesion con `_store_catalog_battery_on_session()`:
+  - `selected_battery_option_id`
+  - `selected_battery_price`
+  - `customer_leaves_old_battery`
+- La creacion del link de pago se centraliza en `_create_wompi_payment_response()`, compartida por catalogo recomendado y catalogo adicional.
+- Si el cliente conserva la bateria usada, se suma `OLD_BATTERY_SURCHARGE` (`40000`) antes de crear el link Wompi.
+- Si el cliente solo pregunta el precio sin entregar la bateria usada, se responde el valor con recargo y no se genera link de pago hasta que elija comprar.
+- Si el cliente pide asesor, pasa a `advisor_handoff`.
+- Si el cliente pide mas opciones nuevamente, no genera link de pago.
+- Si el cliente responde algo ambiguo como `acepto` estando en `more_catalog_sent`, no se cobra por defecto; se pide confirmacion de la opcion.
+
+Campos de IA relacionados:
+
+```json
+{
+  "intent": "select_catalog_option",
+  "selected_catalog_option": 2,
+  "customer_leaves_old_battery": true
+}
+```
+
+Intenciones soportadas para `more_options_sent` y `more_catalog_sent`:
+
+- `select_catalog_option`
+- `ask_price_without_old_battery`
+- `request_more_options`
+- `request_advisor`
+- `unknown`
+
+Pruebas manuales realizadas con stubs:
+
+- `opcion 2 y dejo la usada` en `more_catalog_sent` devuelve `payment_link_sent`.
+- `2` en `more_catalog_sent` devuelve `payment_link_sent`.
+- `acepto` en `more_catalog_sent` permanece en `more_catalog_sent` y pide indicar opcion.
+- `muestrame mas opciones` en `more_catalog_sent` no genera Wompi.
+- `quiero asesor` en `more_catalog_sent` pasa a `advisor_handoff`.
+- `_parse_selected_catalog_option()` reconoce `selected_catalog_option`, `quiero la 2` y respuesta numerica exacta.
+- `_store_catalog_battery_on_session()` guarda el ID y precio de la opcion seleccionada por indice.
+
+Verificacion tecnica:
+
+```bash
+python3 -m compileall -q odoo18/mega_apps/mega_n8n_crm_connector
+```
+
+Resultado: sin errores de sintaxis.
 
 ## Mapa rapido de responsabilidades
 

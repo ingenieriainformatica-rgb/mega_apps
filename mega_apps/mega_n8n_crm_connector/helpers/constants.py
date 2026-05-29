@@ -16,6 +16,7 @@ ALLOWED_STEPS = {
     "out_of_coverage",
     "catalog_sent",
     "more_options_sent",
+    "more_catalog_sent",
     "payment_link_sent",
     "battery_selected",
     "dispatch_requested",

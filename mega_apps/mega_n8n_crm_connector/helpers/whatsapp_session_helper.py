@@ -9,7 +9,6 @@ import random
 from odoo import fields  # type: ignore
 from .whatsapp_messages import (
     get_out_of_coverage_message,
-    get_battery_selected_message,
 )
 from .constants import (
     CONFIRMATION_YES,
@@ -361,6 +360,10 @@ def build_ai_session_update(
         ai_result.get("customer_leaves_old_battery"),
         default=bool(session.customer_leaves_old_battery),
     )
+    try:
+        selected_catalog_option = int(ai_result.get("selected_catalog_option") or 0)
+    except (TypeError, ValueError):
+        selected_catalog_option = 0
     next_step = (ai_result.get("next_step") or session.step).strip()
     reply = (ai_result.get("reply") or "").strip()
     should_send = bool(ai_result.get("should_send", True))
@@ -398,10 +401,10 @@ def build_ai_session_update(
 
         if intent == "request_more_options":
             return (
-                "more_options_sent",
+                "more_catalog_sent",
                 True,
                 "",
-                {"step": "more_options_sent"},
+                {"step": "more_catalog_sent"},
             )
 
         if intent == "request_advisor":
@@ -464,10 +467,10 @@ def build_ai_session_update(
             "opciones",
         ]):
             return (
-                "more_options_sent",
+                "more_catalog_sent",
                 True,
                 "",
-                {"step": "more_options_sent"},
+                {"step": "more_catalog_sent"},
             )
 
         if any(word in normalized_message for word in [
@@ -495,29 +498,83 @@ def build_ai_session_update(
             {"step": "catalog_sent"},
         )
 
-    if session.step == "more_options_sent":
-        if any(word in normalized_message for word in [
-            "opcion 1",
-            "opción 1",
-            "1",
-            "opcion 2",
-            "opción 2",
-            "2",
-            "opcion 3",
-            "opción 3",
-            "3",
-            "mas economica",
-            "más económica",
-            "barata",
-            "mejor",
-            "acepto",
-            "me sirve",
-        ]):
+    if session.step in {"more_options_sent", "more_catalog_sent"}:
+        if intent == "request_more_options":
             return (
-                "battery_selected",
+                session.step,
                 True,
-                get_battery_selected_message(current_name),
-                {"step": "battery_selected"},
+                (
+                    "Claro. Te comparto nuevamente las opciones disponibles para que elijas "
+                    "la que prefieras o me digas si quieres hablar con un asesor. 🔋🚗"
+                ),
+                {"step": session.step},
+            )
+
+        if intent == "request_advisor":
+            return (
+                "advisor_handoff",
+                True,
+                "Claro que sí. En breve un asesor de Mega Baterías continuará contigo para ayudarte. 🔋🚗",
+                {"step": "advisor_handoff"},
+            )
+
+        clear_option_selected = (
+            1 <= selected_catalog_option <= 3
+            or normalized_message in {"1", "2", "3"}
+            or any(word in normalized_message for word in [
+                "opcion 1",
+                "opción 1",
+                "la 1",
+                "numero 1",
+                "número 1",
+                "opcion 2",
+                "opción 2",
+                "la 2",
+                "numero 2",
+                "número 2",
+                "opcion 3",
+                "opción 3",
+                "la 3",
+                "numero 3",
+                "número 3",
+            ])
+        )
+
+        if clear_option_selected:
+            leaves_old_battery = not any(word in normalized_message for word in [
+                "me quedo con la bateria",
+                "me quedo con la batería",
+                "me quedo con la vieja",
+                "conservar la bateria",
+                "conservar la batería",
+                "conservo la vieja",
+                "sin entregar",
+                "no entrego",
+                "no dejo",
+            ])
+            if intent == "ask_price_without_old_battery":
+                return (
+                    session.step,
+                    True,
+                    "",
+                    {
+                        "step": session.step,
+                        "customer_leaves_old_battery": False,
+                    },
+                )
+
+            return (
+                "payment_link_sent",
+                True,
+                "",
+                {
+                    "step": "payment_link_sent",
+                    "customer_leaves_old_battery": (
+                        customer_leaves_old_battery
+                        if intent in {"select_catalog_option", "accept_recommended_battery"}
+                        else leaves_old_battery
+                    ),
+                },
             )
 
         if any(word in normalized_message for word in [
@@ -534,13 +591,13 @@ def build_ai_session_update(
             )
 
         return (
-            "more_options_sent",
+            session.step,
             True,
             (
-                "Puedes responder con la opción que prefieres: opción 1, opción 2, "
-                "opción 3, la más económica o quiero hablar con un asesor. 🔋🚗"
+                "Para continuar, dime cuál opción prefieres: opción 1, opción 2, "
+                "opción 3, o si quieres hablar con un asesor. 🔋🚗"
             ),
-            {"step": "more_options_sent"},
+            {"step": session.step},
         )
 
     if current_location and is_out_of_coverage(current_location):

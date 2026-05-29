@@ -29,7 +29,7 @@ from ...helpers.whatsapp_crm_helper import (
 from ...helpers.whatsapp_catalog_helper import (
     build_recommended_battery_message_for_lead,
     build_more_battery_options_message_for_lead,
-    get_recommended_battery_option_for_lead,
+    get_battery_option_for_catalog_index,
     get_battery_option_price,
     get_battery_line_label,
     format_money,
@@ -70,12 +70,50 @@ def _payment_fallback_reply(name: str | None) -> str:
     )
 
 
-def _store_recommended_battery_on_session(env, session, lead):
-    option = session.selected_battery_option_id
+def _parse_selected_catalog_option(ai_result: dict, message: str | None) -> int:
+    option_index = ai_result.get("selected_catalog_option") or ai_result.get("selected_option")
 
-    if not option and lead:
-        option = get_recommended_battery_option_for_lead(env, lead)
+    try:
+        option_index = int(option_index or 0)
+    except (TypeError, ValueError):
+        option_index = 0
+
+    normalized_message = (message or "").lower()
+
+    if option_index <= 0:
+        stripped_message = normalized_message.strip()
+        if stripped_message in {"1", "2", "3"}:
+            option_index = int(stripped_message)
+
+    if option_index <= 0:
+        option_words = [
+            (1, ("opcion 1", "opción 1", "la 1", "numero 1", "número 1")),
+            (2, ("opcion 2", "opción 2", "la 2", "numero 2", "número 2")),
+            (3, ("opcion 3", "opción 3", "la 3", "numero 3", "número 3")),
+        ]
+        for index, words in option_words:
+            if any(word in normalized_message for word in words):
+                option_index = index
+                break
+
+    if option_index <= 0:
+        if "barata" in normalized_message or "economica" in normalized_message or "económica" in normalized_message:
+            option_index = 1
+        elif "mejor" in normalized_message:
+            option_index = 1
+
+    return max(1, min(option_index or 1, 3))
+
+
+def _store_catalog_battery_on_session(env, session, lead, option_index: int = 1):
+    option = False
+
+    if lead:
+        option = get_battery_option_for_catalog_index(env, lead, option_index)
         option = option[:1]
+
+    if not option and session.selected_battery_option_id:
+        option = session.selected_battery_option_id
 
     if not option:
         return False, 0.0
@@ -132,8 +170,13 @@ def _build_payment_success_reply(session, option, final_value: float, payment_ur
     )
 
 
-def _create_wompi_payment_response(env, session, lead):
-    option, base_price = _store_recommended_battery_on_session(env, session, lead)
+def _create_wompi_payment_response(env, session, lead, option_index: int = 1):
+    option, base_price = _store_catalog_battery_on_session(
+        env,
+        session,
+        lead,
+        option_index=option_index,
+    )
 
     if not option or base_price <= 0:
         _logger.warning(
@@ -159,9 +202,12 @@ def _create_wompi_payment_response(env, session, lead):
         session.write({"step": "advisor_handoff"})
         return "advisor_handoff", True, _payment_fallback_reply(session.customer_name)
 
+    customer = (session.customer_name or "").strip()
+    payment_name = f"Mega Baterías - {customer} - {option.reference}" if customer else f"Mega Baterías - {option.reference}"
+
     payment = create_wompi_payment_link(
         private_key=private_key,
-        name=f"Mega Baterías - {option.reference}",
+        name=payment_name,
         description=f"Batería {option.reference} para {session.vehicle_info or 'vehículo'}",
         amount=final_value,
         single_use=True,
@@ -315,10 +361,11 @@ def apply_ai_to_whatsapp_session(self, **post):
     )
 
     if next_step == "catalog_sent" and lead:
-        option, base_price = _store_recommended_battery_on_session(
+        option, base_price = _store_catalog_battery_on_session(
             request.env,
             session,
             lead,
+            option_index=1,
         )
 
         if option and base_price > 0:
@@ -345,15 +392,48 @@ def apply_ai_to_whatsapp_session(self, **post):
         reply = get_confirmation_message(session)
         should_send = True
 
-    if next_step == "more_options_sent" and lead:
-        reply = build_more_battery_options_message_for_lead(request.env, lead)
+    if next_step in {"more_options_sent", "more_catalog_sent"} and lead:
+        if ai_result.get("intent") == "ask_price_without_old_battery" and not reply:
+            option_index = _parse_selected_catalog_option(
+                ai_result,
+                session.last_message,
+            )
+            option, base_price = _store_catalog_battery_on_session(
+                request.env,
+                session,
+                lead,
+                option_index=option_index,
+            )
+            if option and base_price > 0:
+                reply = _build_price_without_old_battery_reply(
+                    session,
+                    option,
+                    base_price,
+                )
+            else:
+                reply = (
+                    "Para darte el valor exacto, dime cuál opción prefieres: "
+                    "opción 1, opción 2 u opción 3. 🔋🚗"
+                )
+        else:
+            reply = build_more_battery_options_message_for_lead(request.env, lead)
         should_send = True
+        if session.step != "more_catalog_sent":
+            session.write({"step": "more_catalog_sent"})
 
     if next_step == "payment_link_sent":
+        option_index = 1
+        if session.step in {"more_options_sent", "more_catalog_sent", "payment_link_sent"}:
+            option_index = _parse_selected_catalog_option(
+                ai_result,
+                session.last_message,
+            )
+
         next_step, should_send, reply = _create_wompi_payment_response(
             request.env,
             session,
             lead,
+            option_index=option_index,
         )
 
     should_send, reply = _ensure_non_empty_reply(

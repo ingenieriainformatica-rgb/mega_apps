@@ -335,7 +335,10 @@ def get_ai_instruction(session, message: str) -> str:
         - ask_location
         - confirm_data
         - catalog_sent
+        - more_catalog_sent
         - battery_selected
+        - payment_link_sent
+        - dispatch_requested
         - advisor_handoff
         - out_of_coverage
         - done
@@ -581,6 +584,34 @@ def get_ai_instruction(session, message: str) -> str:
         - request_advisor
         - unknown
 
+        Si current_step es "more_options_sent" o "more_catalog_sent", interpreta la
+        opcion que el cliente eligio del catalogo adicional.
+
+        Valores permitidos para intent en catalogo adicional:
+        - select_catalog_option
+        - ask_price_without_old_battery
+        - request_more_options
+        - request_advisor
+        - unknown
+
+        Si el cliente elige una opcion del catalogo adicional:
+        - intent = "select_catalog_option"
+        - selected_catalog_option debe ser 1, 2 o 3 segun la opcion elegida.
+
+        Ejemplos:
+        - "quiero la opción 2 y dejo la usada":
+          intent = "select_catalog_option"
+          selected_catalog_option = 2
+          customer_leaves_old_battery = true
+        - "me quedo con la 3 pero conservo la batería vieja":
+          intent = "select_catalog_option"
+          selected_catalog_option = 3
+          customer_leaves_old_battery = false
+        - "muéstrame más opciones":
+          intent = "request_more_options"
+        - "quiero asesor":
+          intent = "request_advisor"
+
         Reglas para batería usada:
         - Si acepta y dice que entrega, deja o devuelve la batería usada:
           customer_leaves_old_battery = true
@@ -668,6 +699,7 @@ def get_ai_instruction(session, message: str) -> str:
         "location": "",
         "conversation_summary": "",
         "intent": "unknown",
+        "selected_catalog_option": 0,
         "customer_leaves_old_battery": true,
         "confidence": 0,
         "lead_quality": "",

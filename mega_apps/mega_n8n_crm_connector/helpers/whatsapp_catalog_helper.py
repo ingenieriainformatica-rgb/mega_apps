@@ -176,9 +176,6 @@ def build_battery_catalog_message_for_lead(env, lead) -> str:
         if price:
             option_lines.append(f"• Precio sugerido: {format_money(price)}")
 
-        if option.stock_qty:
-            option_lines.append(f"• Existencias: {option.stock_qty:g}")
-
         if option.description:
             option_lines.append(f"• Descripción: {option.description}")
 
@@ -229,9 +226,6 @@ def build_more_battery_options_message_for_lead(env, lead) -> str:
         if price:
             option_lines.append(f"• Precio: {format_money(price)}")
 
-        if option.stock_qty:
-            option_lines.append(f"• Existencias: {option.stock_qty:g}")
-
         if option.description:
             option_lines.append(f"• Descripción: {option.description}")
 
@@ -280,3 +274,15 @@ def get_recommended_battery_option_for_lead(env, lead):
     """Return the same first option used by the recommended catalog message."""
     options = find_battery_options_for_lead(env, lead, limit=1)
     return options[:1]
+
+
+def get_battery_option_for_catalog_index(env, lead, option_index: int = 1):
+    """Return the option shown at option_index in the catalog message."""
+    try:
+        option_index = int(option_index or 1)
+    except (TypeError, ValueError):
+        option_index = 1
+
+    option_index = max(1, min(option_index, 3))
+    options = find_battery_options_for_lead(env, lead, limit=3)
+    return options[option_index - 1:option_index]
