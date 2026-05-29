@@ -8,6 +8,11 @@ class MegaWhatsappSession(models.Model):
 
     phone = fields.Char(required=True, index=True)
     phone_number_id = fields.Char(index=True)
+    welcome_sent = fields.Boolean(
+        string="Bienvenida enviada",
+        default=False,
+        help="Indica si ya se envió el mensaje completo de bienvenida al cliente.",
+    )
 
     step = fields.Selection([
         ("new", "Nuevo"),
@@ -30,8 +35,17 @@ class MegaWhatsappSession(models.Model):
     ], default="new", required=True, index=True)
 
     customer_name = fields.Char()
+    vehicle_brand = fields.Char()
+    vehicle_model = fields.Char()
+    vehicle_year = fields.Char()
+    vehicle_type = fields.Char()
     vehicle_info = fields.Text()
+    city = fields.Char()
+    neighborhood = fields.Char()
     location = fields.Char()
+    plate = fields.Char()
+    battery_request = fields.Boolean(default=False)
+    relevant_data = fields.Text()
     last_message = fields.Text()
 
     lead_id = fields.Many2one("crm.lead", string="Lead")

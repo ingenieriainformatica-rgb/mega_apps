@@ -108,6 +108,239 @@ def parse_bool(value: Any, default: bool = True) -> bool:
 
     return bool(value)
 
+def clean_text(value: Any) -> str:
+    return str(value or "").strip()
+
+def is_doubtful_customer_name(value: str | None) -> bool:
+    normalized = normalize_text(value or "")
+    return normalized in {
+        "",
+        "yo",
+        "cliente",
+        "hola",
+        "buenas",
+        "buenos dias",
+        "buenas tardes",
+        "buenas noches",
+        "senor",
+        "senora",
+        "sr",
+        "sra",
+    }
+
+def is_valid_customer_name(value: str | None) -> bool:
+    name = clean_text(value)
+
+    if is_doubtful_customer_name(name):
+        return False
+
+    parts = [part for part in name.replace("-", " ").split() if part]
+    if not 1 <= len(parts) <= 4:
+        return False
+
+    return all(any(char.isalpha() for char in part) for part in parts)
+
+def normalize_next_required_field(value: str | None) -> str:
+    normalized = normalize_text(value or "")
+    aliases = {
+        "name": "customer_name",
+        "nombre": "customer_name",
+        "marca": "vehicle_brand",
+        "modelo": "vehicle_model",
+        "linea": "vehicle_model",
+        "ano": "vehicle_year",
+        "anio": "vehicle_year",
+        "ciudad": "city",
+        "ubicacion": "location",
+        "barrio": "location",
+        "placa": "plate",
+    }
+    return aliases.get(normalized, normalized)
+
+def step_from_next_required_field(field_name: str | None) -> str:
+    field_name = normalize_next_required_field(field_name)
+
+    if field_name == "customer_name":
+        return "ask_name"
+
+    if field_name in {"vehicle_brand", "vehicle_model", "vehicle_year", "vehicle_type"}:
+        return "ask_vehicle"
+
+    if field_name in {"city", "location", "neighborhood", "plate"}:
+        return "ask_location"
+
+    return ""
+
+def normalize_vehicle_brand(value: str | None) -> str:
+    brand = clean_text(value)
+    normalized = normalize_text(brand)
+    corrections = {
+        "masda": "Mazda",
+        "masdaa": "Mazda",
+        "masd": "Mazda",
+        "madza": "Mazda",
+        "mazda": "Mazda",
+        "chebrolet": "Chevrolet",
+        "chevrolet": "Chevrolet",
+        "hiunday": "Hyundai",
+        "hyundai": "Hyundai",
+        "renol": "Renault",
+        "renaul": "Renault",
+        "renault": "Renault",
+        "toyta": "Toyota",
+        "toyota": "Toyota",
+        "wolsvagen": "Volkswagen",
+        "volkswagen": "Volkswagen",
+        "nisan": "Nissan",
+        "nissan": "Nissan",
+        "kia": "Kia",
+        "ford": "Ford",
+    }
+    return corrections.get(normalized, brand)
+
+def normalize_ai_result(ai_result: dict[str, Any]) -> dict[str, Any]:
+    normalized_result = dict(ai_result or {})
+    brand = normalize_vehicle_brand(normalized_result.get("vehicle_brand"))
+    if brand:
+        normalized_result["vehicle_brand"] = brand
+    return normalized_result
+
+def get_safe_reply(
+    ai_result: dict[str, Any],
+    reply: str,
+    session=None,
+) -> tuple[str, bool]:
+    safe_reply = clean_text(reply)
+    if safe_reply:
+        return safe_reply, False
+
+    safe_reply = clean_text(
+        ai_result.get("reply") or ai_result.get("assistant_message")
+    )
+    if safe_reply:
+        return safe_reply, False
+
+    _logger.warning(
+        "Using fallback WhatsApp reply session=%s step=%s ai_result=%s",
+        getattr(session, "id", False),
+        getattr(session, "step", False),
+        ai_result,
+    )
+    return "Con gusto te ayudamos. ¿Me compartes por favor tu nombre?", True
+
+def get_full_welcome_intro() -> str:
+    return dedent(
+        """
+        Hola 👋 Bienvenido a Mega Baterías.
+
+        📍 Atendemos Medellín y Área Metropolitana.
+        🕒 Horario: lunes a sábado de 7:00 a.m. a 6:00 p.m.
+        🔋 Solo manejamos baterías para carros, camionetas y camiones.
+
+        Gracias por contactarnos. Con gusto te ayudamos a cotizar la batería adecuada para tu vehículo. 🚗
+        """
+    ).strip()
+
+def build_detected_data_summary(
+    current_name: str = "",
+    current_brand: str = "",
+    current_model: str = "",
+    current_year: str = "",
+    current_location: str = "",
+    plate: str = "",
+) -> str:
+    lines = []
+
+    if current_name:
+        lines.append(f"👤 Nombre: {current_name}")
+    if current_brand:
+        lines.append(f"🚗 Marca: {current_brand}")
+    if current_model:
+        lines.append(f"🚗 Modelo: {current_model}")
+    if current_year:
+        lines.append(f"🚗 Año: {current_year}")
+    if current_location:
+        lines.append(f"📍 Ubicación: {current_location}")
+    if plate:
+        lines.append(f"🔢 Placa: {plate}")
+
+    if not lines:
+        return ""
+
+    return "Ya tengo registrado:\n" + "\n".join(lines)
+
+def default_question_for_step(next_step: str, current_name: str = "") -> str:
+    if next_step == "ask_name":
+        return "Para empezar, ¿me cuentas por favor tu nombre?"
+
+    if next_step == "ask_vehicle":
+        prefix = f"Perfecto {current_name} 👍\n\n" if current_name else ""
+        return f"{prefix}¿Me compartes por favor la marca, línea y año del vehículo?"
+
+    if next_step == "ask_location":
+        return "¿Me confirmas por favor en qué ciudad o barrio te encuentras?"
+
+    return "Con gusto te ayudamos. ¿Me compartes por favor los datos para continuar?"
+
+def ensure_single_welcome_reply(
+    session,
+    reply: str,
+    next_step: str,
+    current_name: str = "",
+    current_brand: str = "",
+    current_model: str = "",
+    current_year: str = "",
+    current_location: str = "",
+    plate: str = "",
+) -> str:
+    reply = clean_text(reply)
+
+    if bool(getattr(session, "welcome_sent", False)):
+        return reply
+
+    if reply_contains_full_welcome(reply):
+        return reply
+
+    summary = build_detected_data_summary(
+        current_name=current_name,
+        current_brand=current_brand,
+        current_model=current_model,
+        current_year=current_year,
+        current_location=current_location,
+        plate=plate,
+    )
+
+    question = reply or default_question_for_step(next_step, current_name)
+    parts = [get_full_welcome_intro()]
+
+    if summary:
+        parts.append(summary)
+    if question:
+        parts.append(question)
+
+    return "\n\n".join(parts).strip()
+
+def mark_welcome_sent_on_session(session, message_sent: bool) -> bool:
+    if not message_sent or bool(getattr(session, "welcome_sent", False)):
+        return False
+
+    if hasattr(session, "write"):
+        session.write({"welcome_sent": True})
+    else:
+        setattr(session, "welcome_sent", True)
+
+    return True
+
+def reply_contains_full_welcome(reply: str | None) -> bool:
+    normalized = normalize_text(reply or "")
+    required_fragments = (
+        "bienvenido a mega baterias",
+        "atendemos medellin",
+        "horario",
+        "carros, camionetas y camiones",
+    )
+    return all(fragment in normalized for fragment in required_fragments)
+
 def message_confirms_data(normalized_message: str, intent: str = "") -> bool:
     if intent == "confirm_data_correct":
         return True
@@ -261,9 +494,19 @@ def session_snapshot(session) -> dict[str, Any]:
     return {
         "id": session.id,
         "phone": session.phone,
+        "welcome_sent": bool(getattr(session, "welcome_sent", False)),
         "customer_name": session.customer_name or "",
+        "vehicle_brand": getattr(session, "vehicle_brand", "") or "",
+        "vehicle_model": getattr(session, "vehicle_model", "") or "",
+        "vehicle_year": getattr(session, "vehicle_year", "") or "",
+        "vehicle_type": getattr(session, "vehicle_type", "") or "",
         "vehicle_info": session.vehicle_info or "",
+        "city": getattr(session, "city", "") or "",
+        "neighborhood": getattr(session, "neighborhood", "") or "",
         "location": session.location or "",
+        "plate": getattr(session, "plate", "") or "",
+        "battery_request": bool(getattr(session, "battery_request", False)),
+        "relevant_data": getattr(session, "relevant_data", "") or "",
         "step": session.step,
     }
 
@@ -347,15 +590,17 @@ def build_ai_session_update(
     session,
     ai_result: dict[str, Any],
 ) -> tuple[str, bool, str, dict[str, Any]]:
+    ai_result = normalize_ai_result(ai_result)
 
-    customer_name = (ai_result.get("customer_name") or "").strip()
+    customer_name = clean_text(ai_result.get("customer_name"))
     vehicle_info = build_vehicle_info_from_ai(
         ai_result,
         fallback=session.vehicle_info or "",
     )
-    location = (ai_result.get("location") or "").strip()
-    conversation_summary = (ai_result.get("conversation_summary") or "").strip()
-    intent = (ai_result.get("intent") or "unknown").strip()
+    city = clean_text(ai_result.get("city"))
+    location = clean_text(ai_result.get("location")) or city
+    conversation_summary = clean_text(ai_result.get("conversation_summary"))
+    intent = clean_text(ai_result.get("intent") or "unknown")
     customer_leaves_old_battery = parse_bool(
         ai_result.get("customer_leaves_old_battery"),
         default=bool(session.customer_leaves_old_battery),
@@ -364,14 +609,28 @@ def build_ai_session_update(
         selected_catalog_option = int(ai_result.get("selected_catalog_option") or 0)
     except (TypeError, ValueError):
         selected_catalog_option = 0
-    next_step = (ai_result.get("next_step") or session.step).strip()
-    reply = (ai_result.get("reply") or "").strip()
+    next_step = clean_text(ai_result.get("next_step") or session.step)
+    next_required_step = step_from_next_required_field(ai_result.get("next_required_field"))
+    if next_required_step:
+        next_step = next_required_step
+
+    reply = clean_text(ai_result.get("reply") or ai_result.get("assistant_message"))
     should_send = bool(ai_result.get("should_send", True))
 
     if next_step not in ALLOWED_STEPS:
         next_step = session.step
 
+    if customer_name and not is_valid_customer_name(customer_name):
+        customer_name = ""
+        if not session.customer_name:
+            next_step = "ask_name"
+            should_send = True
+            reply = "¿Me confirmas por favor tu nombre para continuar?"
+
     current_name = customer_name or session.customer_name or ""
+    current_brand = clean_text(ai_result.get("vehicle_brand")) or getattr(session, "vehicle_brand", "") or ""
+    current_model = clean_text(ai_result.get("vehicle_model")) or getattr(session, "vehicle_model", "") or ""
+    current_year = clean_text(ai_result.get("vehicle_year")) or getattr(session, "vehicle_year", "") or ""
     current_vehicle = vehicle_info or session.vehicle_info or ""
     current_location = location or session.location or ""
     normalized_message = normalize_answer(session.last_message)
@@ -611,6 +870,7 @@ def build_ai_session_update(
             current_vehicle,
             current_location,
         )
+        vals.update(build_progressive_session_vals(session, ai_result))
 
         if conversation_summary and "conversation_summary" in session._fields:
             vals["conversation_summary"] = conversation_summary[:500]
@@ -647,10 +907,10 @@ def build_ai_session_update(
         should_send = True
         reply = reply or "Con gusto te ayudo. ¿Me regalas por favor tu nombre?"
 
-    elif not current_vehicle:
+    elif not (current_brand and current_model and current_year):
         next_step = "ask_vehicle"
         should_send = True
-        reply = reply or f"Gracias {current_name}. ¿Para qué vehículo necesitas la batería? 🔋🚗"
+        reply = reply or f"Gracias {current_name}. ¿Me compartes la marca, línea y año del vehículo? 🔋🚗"
 
     elif not current_location:
         next_step = "ask_location"
@@ -671,9 +931,24 @@ def build_ai_session_update(
         current_vehicle,
         current_location,
     )
+    vals.update(build_progressive_session_vals(session, ai_result))
 
     if conversation_summary and "conversation_summary" in session._fields:
         vals["conversation_summary"] = conversation_summary[:500]
+
+    if should_send:
+        reply, _used_fallback = get_safe_reply(ai_result, reply, session=session)
+        reply = ensure_single_welcome_reply(
+            session,
+            reply,
+            next_step,
+            current_name=current_name,
+            current_brand=current_brand,
+            current_model=current_model,
+            current_year=current_year,
+            current_location=current_location,
+            plate=clean_text(ai_result.get("plate")) or getattr(session, "plate", "") or "",
+        )
 
     return next_step, should_send, reply, vals
 
@@ -733,14 +1008,45 @@ def build_session_vals(
     if current_location:
         vals["location"] = current_location
 
-    if next_step == "ask_name":
-        vals.update(
-            {
-                "customer_name": False,
-                "vehicle_info": False,
-                "location": False,
-            }
+    return vals
+
+def build_progressive_session_vals(session, ai_result: dict[str, Any]) -> dict[str, Any]:
+    ai_result = normalize_ai_result(ai_result)
+    vals: dict[str, Any] = {}
+
+    field_map = {
+        "vehicle_brand": "vehicle_brand",
+        "vehicle_model": "vehicle_model",
+        "vehicle_year": "vehicle_year",
+        "vehicle_type": "vehicle_type",
+        "city": "city",
+        "neighborhood": "neighborhood",
+        "plate": "plate",
+        "relevant_data": "relevant_data",
+    }
+
+    for result_key, session_field in field_map.items():
+        if session_field not in session._fields:
+            continue
+        value = clean_text(ai_result.get(result_key))
+        if value:
+            vals[session_field] = value
+
+    if "battery_request" in session._fields:
+        vals["battery_request"] = parse_bool(
+            ai_result.get("battery_request"),
+            default=bool(session.battery_request),
         )
+
+    city = clean_text(ai_result.get("city"))
+    location = clean_text(ai_result.get("location"))
+    neighborhood = clean_text(ai_result.get("neighborhood") or ai_result.get("barrio"))
+
+    if not location:
+        location = " ".join(part for part in [neighborhood, city] if part).strip()
+
+    if location and "location" in session._fields:
+        vals["location"] = location
 
     return vals
 

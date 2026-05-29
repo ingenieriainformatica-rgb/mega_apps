@@ -1087,6 +1087,318 @@ python3 -m compileall -q odoo18/mega_apps/mega_n8n_crm_connector
 
 Resultado: sin errores de sintaxis.
 
+## Captura progresiva de datos en flujo inicial
+
+Fecha de implementacion: 2026-05-29.
+
+Objetivo del cambio:
+
+- El flujo inicial de WhatsApp ya no debe forzar el orden nombre -> vehiculo -> ubicacion.
+- Cada mensaje recibido se envia a IA para extraer todos los datos disponibles.
+- Si falta el nombre, la sesion no avanza, pero conserva vehiculo, ciudad, ubicacion y demas datos ya detectados.
+- El bot debe preguntar solo por el siguiente dato faltante y no repetir datos ya capturados.
+
+Archivos modificados:
+
+- `models/mega_whatsapp_sessions.py`
+- `helpers/services/whatsapp_flow_service.py`
+- `helpers/whatsapp_session_helper.py`
+- `helpers/whatsapp_ai_prompt.py`
+- `helpers/whatsapp_crm_helper.py`
+- `tests/__init__.py`
+- `tests/test_progressive_data_capture.py`
+
+Campos nuevos en `mega.whatsapp.session`:
+
+- `vehicle_brand`
+- `vehicle_model`
+- `vehicle_year`
+- `vehicle_type`
+- `city`
+- `neighborhood`
+- `plate`
+- `battery_request`
+- `relevant_data`
+
+Campos ya existentes reutilizados:
+
+- `customer_name`
+- `vehicle_info`
+- `location`
+- `conversation_summary`
+- `lead_id`
+- `step`
+- `last_message`
+
+Campos guardados o reflejados en el lead CRM:
+
+- El lead sigue usando `customer_name`, telefono y `vehicle_info`.
+- `build_vehicle_lead_values()` sigue resolviendo marca, modelo y ano contra campos estructurados del lead cuando existen.
+- La descripcion del lead ahora incluye marca, modelo, ano, tipo, ciudad, barrio, ubicacion, placa, solicitud de bateria y datos relevantes.
+
+Funciones nuevas:
+
+- `clean_text(value)`
+- `is_doubtful_customer_name(value)`
+- `is_valid_customer_name(value)`
+- `normalize_next_required_field(value)`
+- `step_from_next_required_field(field_name)`
+- `build_progressive_session_vals(session, ai_result)`
+
+Funciones reutilizadas:
+
+- `build_ai_session_update(session, ai_result)`
+- `build_vehicle_info_from_ai(ai_result, fallback)`
+- `parse_bool(value, default)`
+- `is_out_of_coverage(location)`
+- `resolve_confirmation_from_ai(...)`
+- `build_session_vals(...)`
+- `create_or_update_lead_from_session(env, session, ai_result)`
+- `build_vehicle_lead_values(env, Lead, ai_result)`
+
+Estados afectados:
+
+- `ask_name`: ahora solo significa que falta nombre. Ya no borra `vehicle_info` ni `location`.
+- `ask_vehicle`: se usa cuando ya existe nombre pero falta algun dato del vehiculo.
+- `ask_location`: se usa cuando ya existe nombre y vehiculo pero falta ciudad, barrio o ubicacion.
+- `confirm_data`: se alcanza cuando ya hay nombre, vehiculo y ubicacion suficientes.
+- `out_of_coverage`, `catalog_sent`, `more_catalog_sent`, `payment_link_sent`, `advisor_handoff` mantienen la logica previa.
+
+Cambio clave en `/n8n/whatsapp/session/ai-context`:
+
+- Antes, si la sesion era nueva, Odoo respondia directamente con bienvenida y no usaba IA.
+- Ahora, tambien en la primera interaccion, Odoo devuelve `should_use_ai=true` y entrega `ai_instruction`, para que n8n envie el primer mensaje a IA y capture datos desde el contacto inicial.
+
+Formato esperado de IA durante captura inicial:
+
+```json
+{
+  "intent": "progressive_data_capture",
+  "customer_name": null,
+  "vehicle_brand": null,
+  "vehicle_model": null,
+  "vehicle_year": null,
+  "vehicle_type": null,
+  "vehicle_info": null,
+  "city": null,
+  "neighborhood": null,
+  "location": null,
+  "plate": null,
+  "battery_request": false,
+  "relevant_data": null,
+  "detected_fields": [],
+  "missing_required_fields": [],
+  "next_required_field": null,
+  "can_advance": false,
+  "assistant_message": "",
+  "conversation_summary": "",
+  "selected_catalog_option": 0,
+  "customer_leaves_old_battery": true,
+  "confidence": 0,
+  "lead_quality": "",
+  "is_emergency": false,
+  "next_step": "",
+  "should_send": true,
+  "reply": ""
+}
+```
+
+Notas:
+
+- `assistant_message` y `reply` deben traer el mismo texto para compatibilidad.
+- `next_required_field` puede ser `customer_name`, `vehicle_brand`, `vehicle_model`, `vehicle_year`, `city`, `location` o `plate`.
+- Si `next_required_field` viene informado, Odoo lo traduce al estado correspondiente.
+- Si IA envia un nombre dudoso como `yo`, `cliente`, `hola` o `buenas`, Odoo no lo guarda como `customer_name`.
+
+Pruebas automaticas agregadas:
+
+Archivo:
+
+```text
+mega_apps/mega_n8n_crm_connector/tests/test_progressive_data_capture.py
+```
+
+Comando ejecutado:
+
+```bash
+python3 mega_apps/mega_n8n_crm_connector/tests/test_progressive_data_capture.py -v
+```
+
+Resultado:
+
+```text
+Ran 6 tests in 0.000s
+OK
+```
+
+Casos cubiertos:
+
+- Nombre + vehiculo + ano + ciudad:
+  - Guarda `customer_name`, `vehicle_brand`, `vehicle_model`, `vehicle_year`, `city`, `location`.
+  - Pasa a `confirm_data`.
+  - No vuelve a pedir nombre.
+- Vehiculo + ano sin nombre:
+  - Guarda `vehicle_info`, `vehicle_brand`, `vehicle_model`, `vehicle_year`.
+  - Permanece en `ask_name`.
+  - Pide solo nombre.
+  - No pregunta de nuevo el vehiculo.
+- Solo saludo:
+  - No inventa datos.
+  - Permanece en `ask_name`.
+  - Pide nombre.
+- Solo nombre:
+  - Guarda `customer_name`.
+  - Pasa a `ask_vehicle`.
+  - Pide datos del vehiculo.
+- Nombre dudoso:
+  - No guarda `yo` como nombre.
+  - Permanece en `ask_name`.
+  - Pide confirmacion del nombre.
+- Datos en mensajes separados:
+  - Mensaje 1 guarda vehiculo.
+  - Mensaje 2 guarda nombre y conserva vehiculo.
+  - Mensaje 3 guarda ciudad/ubicacion y conserva nombre + vehiculo.
+  - Pasa a `confirm_data`.
+
+Verificaciones adicionales:
+
+```bash
+python3 -m py_compile \
+  mega_apps/mega_n8n_crm_connector/tests/test_progressive_data_capture.py \
+  mega_apps/mega_n8n_crm_connector/helpers/whatsapp_session_helper.py \
+  mega_apps/mega_n8n_crm_connector/helpers/services/whatsapp_flow_service.py \
+  mega_apps/mega_n8n_crm_connector/helpers/whatsapp_ai_prompt.py \
+  mega_apps/mega_n8n_crm_connector/helpers/whatsapp_crm_helper.py \
+  mega_apps/mega_n8n_crm_connector/models/mega_whatsapp_sessions.py
+```
+
+Resultado: sin errores de sintaxis.
+
+Limitaciones y pendientes:
+
+- Las pruebas agregadas validan la logica central de fusion de datos y transicion de estados con sesiones simuladas; no levantan servidor Odoo ni ejecutan llamadas HTTP reales.
+- Falta una prueba de integracion con Odoo/n8n para validar el ciclo completo `ai-context` -> IA -> `apply-ai` -> lead CRM.
+- Falta validar con un modelo real que el prompt respete consistentemente el JSON obligatorio, especialmente en nombres con acentos, barrios ambiguos y placas colombianas.
+- Como se agregaron campos al modelo `mega.whatsapp.session`, se debe actualizar el modulo en Odoo para crear las columnas nuevas.
+
+## Refactor de prompt y bienvenida unica
+
+Fecha de implementacion: 2026-05-29.
+
+Objetivo:
+
+- Separar `get_ai_instruction(session, message)` en bloques mantenibles.
+- Eliminar reglas duplicadas y contradictorias del prompt.
+- Enviar la bienvenida completa solo una vez por conversacion.
+- Marcar `welcome_sent=True` solo despues de que n8n confirme envio exitoso por WhatsApp.
+- Evitar que n8n reciba `reply` vacio o `undefined`.
+
+Campo nuevo:
+
+- `welcome_sent`: booleano en `mega.whatsapp.session`.
+
+Prompt modular:
+
+- `get_business_context()`
+- `get_tone_rules()`
+- `get_welcome_rules()`
+- `get_capture_rules()`
+- `get_flow_rules()`
+- `get_catalog_rules()`
+- `get_json_schema()`
+- `get_session_context(session)`
+- `get_ai_instruction(session, message)`
+
+Regla de bienvenida:
+
+- Si `current_welcome_sent = False`, la IA debe incluir:
+  - `Hola 👋 Bienvenido a Mega Baterías.`
+  - cobertura Medellin y Area Metropolitana
+  - horario lunes a sabado de 7:00 a.m. a 6:00 p.m.
+  - `Solo manejamos baterías para carros, camionetas y camiones.`
+- Si `current_welcome_sent = True`, la IA no debe repetir bienvenida, cobertura, horario ni productos atendidos.
+
+Callback de confirmacion desde n8n:
+
+```text
+POST /n8n/whatsapp/session/mark-welcome-sent
+```
+
+Payload minimo:
+
+```json
+{
+  "phone": "573001112233",
+  "message_sent": true
+}
+```
+
+Este endpoint marca `welcome_sent=True` solo si:
+
+- existe sesion activa,
+- `message_sent=true`,
+- `welcome_sent` aun estaba en `False`.
+
+n8n debe llamar este endpoint unicamente despues de confirmar que WhatsApp envio correctamente el mensaje que incluia la bienvenida completa.
+
+Fallback de respuesta:
+
+- Si `reply` y `assistant_message` vienen vacios, Odoo usa:
+  `Con gusto te ayudamos. ¿Me compartes por favor tu nombre?`
+- Cuando se usa el fallback, se registra warning con telefono, sesion y estado.
+
+Normalizacion defensiva de marcas:
+
+- Ademas de instruir a la IA, Odoo normaliza `vehicle_brand` en backend:
+  - `masda`, `masdaa`, `masd`, `madza` -> `Mazda`
+  - `chebrolet` -> `Chevrolet`
+  - `hiunday` -> `Hyundai`
+  - `renol`, `renaul` -> `Renault`
+  - `toyta` -> `Toyota`
+  - `wolsvagen` -> `Volkswagen`
+  - `nisan` -> `Nissan`
+
+Pruebas automaticas actualizadas:
+
+```bash
+python3 mega_apps/mega_n8n_crm_connector/tests/test_progressive_data_capture.py -v
+```
+
+Resultado:
+
+```text
+Ran 12 tests in 0.001s
+OK
+```
+
+Casos nuevos cubiertos:
+
+- Prompt de primer contacto con `welcome_sent=False` incluye bienvenida, cobertura, horario y productos.
+- Prompt con `welcome_sent=True` contiene reglas para no repetir bienvenida, cobertura ni horario.
+- Marca mal escrita `masda` se guarda como `Mazda` en backend.
+- Año posterior conserva nombre, marca y modelo, y pide ubicacion.
+- Respuesta vacia de IA usa fallback seguro.
+- `mark_welcome_sent_on_session()` solo marca bienvenida cuando `message_sent=True` y aun no estaba marcada.
+
+Correccion posterior por repeticion de bienvenida:
+
+- Problema observado: si n8n no llamaba el callback antes del siguiente mensaje, `welcome_sent` seguia en `False` y la IA repetia la bienvenida completa.
+- Ajuste aplicado: Odoo ahora detecta si el `reply` generado contiene la bienvenida completa mediante `reply_contains_full_welcome(reply)`.
+- Si el reply contiene bienvenida completa y `should_send=True`, Odoo marca `welcome_sent=True` inmediatamente despues de generar la respuesta.
+- El callback `/n8n/whatsapp/session/mark-welcome-sent` se mantiene como confirmacion idempotente, pero ya no es el unico mecanismo para evitar duplicados.
+- Esto evita repetir cobertura, horario y productos cuando el cliente responde rapido o cuando n8n no llama el callback.
+
+Correccion posterior por primera respuesta incompleta:
+
+- Problema observado: si IA o fallback devolvian solo `Con gusto te ayudo. ¿Me regalas por favor tu nombre?`, el cliente recibia una primera respuesta sin bienvenida, cobertura ni horario.
+- Ajuste aplicado: `ensure_single_welcome_reply()` envuelve cualquier primera respuesta simple con la bienvenida completa cuando `welcome_sent=False`.
+- La primera respuesta queda compuesta por:
+  - bienvenida completa,
+  - resumen de datos detectados si existen,
+  - pregunta por el siguiente dato faltante.
+- Si `welcome_sent=True`, `ensure_single_welcome_reply()` no agrega bienvenida ni cobertura.
+- Esto garantiza que la bienvenida completa salga una sola vez y que nunca vuelva a aparecer en respuestas posteriores de la misma sesion activa.
+
 ## Mapa rapido de responsabilidades
 
 - `controllers/whatsapp_flow_controller.py`: publica las rutas activas para n8n.

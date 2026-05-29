@@ -101,7 +101,16 @@ def build_lead_description_from_session(session) -> str:
             f"Teléfono cliente: {session.phone or 'No registrado'}",
             f"Nombre: {session.customer_name or 'No registrado'}",
             f"Vehículo: {session.vehicle_info or 'No registrado'}",
+            f"Marca: {getattr(session, 'vehicle_brand', '') or 'No registrada'}",
+            f"Modelo/Línea: {getattr(session, 'vehicle_model', '') or 'No registrado'}",
+            f"Año: {getattr(session, 'vehicle_year', '') or 'No registrado'}",
+            f"Tipo de vehículo: {getattr(session, 'vehicle_type', '') or 'No registrado'}",
+            f"Ciudad: {getattr(session, 'city', '') or 'No registrada'}",
+            f"Barrio: {getattr(session, 'neighborhood', '') or 'No registrado'}",
             f"Ubicación: {session.location or 'No registrada'}",
+            f"Placa: {getattr(session, 'plate', '') or 'No registrada'}",
+            f"Solicitud de batería: {'Sí' if getattr(session, 'battery_request', False) else 'No'}",
+            f"Datos relevantes: {getattr(session, 'relevant_data', '') or 'No registrados'}",
         ]
     )
 

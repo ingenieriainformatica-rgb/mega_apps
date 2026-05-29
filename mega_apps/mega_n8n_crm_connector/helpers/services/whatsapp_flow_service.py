@@ -11,12 +11,12 @@ from ...helpers.whatsapp_session_helper import (
     get_active_session,
     whatsapp_response,
     build_ai_session_update,
+    get_safe_reply,
+    mark_welcome_sent_on_session,
+    reply_contains_full_welcome,
 )
 from ...helpers.whatsapp_ai_prompt import get_ai_instruction
-from ...helpers.whatsapp_messages import (
-    get_welcome_message,
-    get_confirmation_message
-)
+from ...helpers.whatsapp_messages import get_confirmation_message
 from ...helpers.constants import NO_ACTIVE_SESSION_REPLY
 from ...helpers.constants import (
     OLD_BATTERY_SURCHARGE,
@@ -238,8 +238,29 @@ def _create_wompi_payment_response(env, session, lead, option_index: int = 1):
     )
 
 
-def _ensure_non_empty_reply(phone: str, step: str, should_send: bool, reply: str):
+def _ensure_non_empty_reply(
+    phone: str,
+    step: str,
+    should_send: bool,
+    reply: str,
+    ai_result: dict | None = None,
+    session=None,
+):
     if should_send and not (reply or "").strip():
+        fallback_reply, used_fallback = get_safe_reply(
+            ai_result or {},
+            reply,
+            session=session,
+        )
+        if used_fallback:
+            _logger.warning(
+                "Using fallback WhatsApp reply phone=%s session=%s step=%s",
+                phone,
+                getattr(session, "id", False),
+                step,
+            )
+            return True, fallback_reply
+
         _logger.warning(
             "Avoiding empty WhatsApp reply phone=%s step=%s",
             phone,
@@ -248,6 +269,41 @@ def _ensure_non_empty_reply(phone: str, step: str, should_send: bool, reply: str
         return False, ""
 
     return should_send, reply
+
+
+def mark_welcome_sent_from_payload(env, payload: dict) -> dict:
+    phone = (payload.get("phone") or "").strip()
+    message_sent = bool(payload.get("message_sent"))
+
+    if not phone:
+        return missing_phone_response(
+            error="missing_phone",
+            should_use_ai=False,
+            should_send=False,
+        )
+
+    session = get_active_session(env, phone)
+
+    if not session:
+        return whatsapp_response(
+            False,
+            "error",
+            NO_ACTIVE_SESSION_REPLY,
+            should_send=False,
+            kind="no_active_session",
+        )
+
+    updated = mark_welcome_sent_on_session(session, message_sent)
+
+    return whatsapp_response(
+        True,
+        session.step,
+        "",
+        should_send=False,
+        kind="welcome_sent_marked" if updated else "welcome_sent_unchanged",
+        welcome_sent=bool(getattr(session, "welcome_sent", False)),
+        session=session_snapshot(session),
+    )
 
 
 def build_ai_context_response(self, **post):
@@ -277,16 +333,27 @@ def build_ai_context_response(self, **post):
         )
 
         if created:
-            _logger.info("\n\n\n Primer mensaje debe de ser mensaje de bienvenida \n\n\n")
+            _logger.info("\n\n\n Primer mensaje se enviara a IA para captura progresiva \n\n\n")
             return {
                 "success": True,
-                "should_use_ai": False,
-                "should_send": True,
-                "kind": "welcome",
+                "should_use_ai": True,
+                "should_send": False,
+                "kind": "ai_context",
                 "phone": session.phone,
                 "phone_number_id": session.phone_number_id,
                 "step": session.step,
-                "reply": get_welcome_message(),
+                "welcome_sent": bool(getattr(session, "welcome_sent", False)),
+                "customer_name": session.customer_name or "",
+                "vehicle_brand": getattr(session, "vehicle_brand", "") or "",
+                "vehicle_model": getattr(session, "vehicle_model", "") or "",
+                "vehicle_year": getattr(session, "vehicle_year", "") or "",
+                "vehicle_info": session.vehicle_info or "",
+                "city": getattr(session, "city", "") or "",
+                "neighborhood": getattr(session, "neighborhood", "") or "",
+                "location": session.location or "",
+                "plate": getattr(session, "plate", "") or "",
+                "last_message": message,
+                "ai_instruction": get_ai_instruction(session, message),
                 "session": session_snapshot(session),
             }
 
@@ -311,9 +378,16 @@ def build_ai_context_response(self, **post):
             "phone": session.phone,
             "phone_number_id": session.phone_number_id,
             "step": session.step,
+            "welcome_sent": bool(getattr(session, "welcome_sent", False)),
             "customer_name": session.customer_name or "",
+            "vehicle_brand": getattr(session, "vehicle_brand", "") or "",
+            "vehicle_model": getattr(session, "vehicle_model", "") or "",
+            "vehicle_year": getattr(session, "vehicle_year", "") or "",
             "vehicle_info": session.vehicle_info or "",
+            "city": getattr(session, "city", "") or "",
+            "neighborhood": getattr(session, "neighborhood", "") or "",
             "location": session.location or "",
+            "plate": getattr(session, "plate", "") or "",
             "last_message": message,
             "ai_instruction": get_ai_instruction(session, message),
             "session": session_snapshot(session),
@@ -353,11 +427,19 @@ def apply_ai_to_whatsapp_session(self, **post):
 
     session.write(vals)
 
+    ai_result_for_lead = {
+        **ai_result,
+        "vehicle_brand": getattr(session, "vehicle_brand", "") or ai_result.get("vehicle_brand") or "",
+        "vehicle_model": getattr(session, "vehicle_model", "") or ai_result.get("vehicle_model") or "",
+        "vehicle_year": getattr(session, "vehicle_year", "") or ai_result.get("vehicle_year") or "",
+        "location": session.location or ai_result.get("location") or "",
+    }
+
     # lead = create_or_update_lead_from_session(request.env, session)
     lead = create_or_update_lead_from_session(
         request.env,
         session,
-        ai_result=ai_result,
+        ai_result=ai_result_for_lead,
     )
 
     if next_step == "catalog_sent" and lead:
@@ -441,7 +523,18 @@ def apply_ai_to_whatsapp_session(self, **post):
         session.step,
         should_send,
         reply,
+        ai_result=ai_result,
+        session=session,
     )
+
+    if should_send and reply_contains_full_welcome(reply):
+        updated_welcome = mark_welcome_sent_on_session(session, True)
+        if updated_welcome:
+            _logger.info(
+                "Marked welcome_sent after generating welcome reply phone=%s session=%s",
+                phone,
+                session.id,
+            )
 
     if lead:
         log_whatsapp_conversation_on_lead(
@@ -458,6 +551,11 @@ def apply_ai_to_whatsapp_session(self, **post):
         session=session_snapshot(session),
         lead_id=lead.id if lead else False,
     )
+
+
+def mark_welcome_sent_after_send(self, **post):
+        payload = get_n8n_payload()
+        return mark_welcome_sent_from_payload(request.env, payload)
 
 def log_terminal_whatsapp_message(self):
         payload = get_n8n_payload()
