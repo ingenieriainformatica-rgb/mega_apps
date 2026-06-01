@@ -27,8 +27,10 @@ def _install_odoo_stub():
 
 
 def _load_helper_module(module_name):
-    sys.modules.setdefault(PACKAGE_ROOT, types.ModuleType(PACKAGE_ROOT))
-    sys.modules.setdefault(HELPERS_PACKAGE, types.ModuleType(HELPERS_PACKAGE))
+    package = sys.modules.setdefault(PACKAGE_ROOT, types.ModuleType(PACKAGE_ROOT))
+    package.__path__ = [str(HELPERS_DIR.parent)]
+    helpers_package = sys.modules.setdefault(HELPERS_PACKAGE, types.ModuleType(HELPERS_PACKAGE))
+    helpers_package.__path__ = [str(HELPERS_DIR)]
 
     full_name = f"{HELPERS_PACKAGE}.{module_name}"
     if full_name in sys.modules:
@@ -57,8 +59,19 @@ def _load_progressive_helper():
     return sys.modules[f"{HELPERS_PACKAGE}.whatsapp_session_helper"]
 
 
+def _load_catalog_helper():
+    _install_odoo_stub()
+    for module_name in (
+        "constants",
+        "whatsapp_catalog_helper",
+    ):
+        _load_helper_module(module_name)
+    return sys.modules[f"{HELPERS_PACKAGE}.whatsapp_catalog_helper"]
+
+
 helper = _load_progressive_helper()
 prompt = sys.modules[f"{HELPERS_PACKAGE}.whatsapp_ai_prompt"]
+catalog_helper = _load_catalog_helper()
 
 
 class FakeSession(types.SimpleNamespace):
@@ -78,6 +91,10 @@ class FakeSession(types.SimpleNamespace):
         "conversation_summary": True,
         "welcome_sent": True,
     }
+
+    def write(self, values):
+        for key, value in values.items():
+            setattr(self, key, value)
 
 
 def make_session(**overrides):
@@ -551,6 +568,101 @@ class TestProgressiveDataCapture(unittest.TestCase):
 
         updated = helper.mark_welcome_sent_on_session(session, True)
         self.assertFalse(updated)
+
+    def test_catalog_selection_uses_last_more_options_in_session(self):
+        class FakeOption(types.SimpleNamespace):
+            sale_price = 100000
+            min_sale_price = 0
+            max_sale_price = 0
+            battery_line = "Gold"
+            description = ""
+
+        class FakeRecordSet(list):
+            def __getitem__(self, item):
+                value = super().__getitem__(item)
+                if isinstance(item, slice):
+                    return FakeRecordSet(value)
+                return value
+
+        class FakeOptionModel:
+            def __init__(self, options_by_id):
+                self.options_by_id = options_by_id
+
+            def sudo(self):
+                return self
+
+            def browse(self, option_ids=None):
+                option_ids = option_ids or []
+                return FakeRecordSet(
+                    self.options_by_id[option_id]
+                    for option_id in option_ids
+                    if option_id in self.options_by_id
+                )
+
+        class FakeEnv:
+            def __init__(self, options_by_id):
+                self.options_by_id = options_by_id
+
+            def __getitem__(self, model_name):
+                if model_name != "mega.battery.application.option":
+                    raise AssertionError(model_name)
+                return FakeOptionModel(self.options_by_id)
+
+        option_a = FakeOption(id=101, reference="A")
+        option_b = FakeOption(id=202, reference="B")
+        option_c = FakeOption(id=203, reference="C")
+        option_d = FakeOption(id=204, reference="D")
+        options_by_id = {
+            option.id: option
+            for option in (option_a, option_b, option_c, option_d)
+        }
+
+        env = FakeEnv(options_by_id)
+        lead = types.SimpleNamespace(
+            contact_name="Jorge",
+            partner_id=types.SimpleNamespace(name="Jorge"),
+        )
+        session = make_session(step="catalog_sent")
+
+        original_find = catalog_helper.find_battery_options_for_lead
+        try:
+            def fake_find(_env, _lead, limit=3):
+                if limit == 1:
+                    return FakeRecordSet([option_a])
+                if limit == 20:
+                    return FakeRecordSet([option_a, option_b, option_c, option_d])
+                return FakeRecordSet([option_a])
+
+            catalog_helper.find_battery_options_for_lead = fake_find
+            catalog_helper.build_recommended_battery_message_for_lead(
+                env,
+                lead,
+                session=session,
+            )
+            self.assertEqual(session.last_catalog_option_ids, "101")
+
+            catalog_helper.build_more_battery_options_message_for_lead(
+                env,
+                lead,
+                session=session,
+            )
+            self.assertEqual(session.last_catalog_option_ids, "202,203,204")
+            self.assertEqual(session.last_catalog_type, "more_options")
+
+            def fail_if_recalculated(*_args, **_kwargs):
+                raise AssertionError("catalog should not be recalculated")
+
+            catalog_helper.find_battery_options_for_lead = fail_if_recalculated
+            selected = catalog_helper.get_battery_option_for_catalog_index(
+                env,
+                lead,
+                option_index=1,
+                session=session,
+            )
+        finally:
+            catalog_helper.find_battery_options_for_lead = original_find
+
+        self.assertEqual(selected[0].reference, "B")
 
 
 if __name__ == "__main__":

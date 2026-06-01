@@ -2,6 +2,8 @@ import logging
 from textwrap import dedent
 import random
 
+from odoo import fields  # type: ignore
+
 from .constants import (
     LEAD_YEAR_FIELD,
     LEAD_BRAND_FIELD,
@@ -70,7 +72,7 @@ def find_battery_options_for_lead(env, lead, limit: int = 3):
                 ("year_to", "=", False),
                 ("year_to", ">=", vehicle_year),
         ],
-        limit=3,
+        limit=10,
     )
 
     options = applications.mapped("option_ids").filtered(
@@ -118,7 +120,56 @@ def get_battery_line_label(option) -> str:
     return option.battery_line or ""
 
 
-def build_battery_catalog_message_for_lead(env, lead) -> str:
+def _store_last_catalog_options_on_session(session, options, catalog_type: str) -> None:
+    if not session:
+        return
+
+    option_ids = [str(option.id) for option in options if getattr(option, "id", False)]
+    values = {
+        "last_catalog_option_ids": ",".join(option_ids),
+        "last_catalog_type": catalog_type,
+        "last_catalog_sent_at": fields.Datetime.now(),
+    }
+
+    if hasattr(session, "write"):
+        session.write(values)
+    else:
+        for key, value in values.items():
+            setattr(session, key, value)
+
+
+def _get_session_catalog_options(env, session, option_index: int):
+    if not session:
+        return None
+
+    raw_option_ids = (getattr(session, "last_catalog_option_ids", "") or "").strip()
+    if not raw_option_ids:
+        return None
+
+    Option = env["mega.battery.application.option"].sudo()
+
+    option_ids = []
+    for raw_option_id in raw_option_ids.split(","):
+        raw_option_id = raw_option_id.strip()
+        if not raw_option_id:
+            continue
+        try:
+            option_ids.append(int(raw_option_id))
+        except ValueError:
+            _logger.warning(
+                "Ignoring invalid saved catalog option id=%s session=%s",
+                raw_option_id,
+                getattr(session, "id", False),
+            )
+
+    if not option_ids or option_index > len(option_ids):
+        return Option.browse()
+
+    selected_option_id = option_ids[option_index - 1]
+    return Option.browse([selected_option_id])
+
+
+def build_battery_catalog_message_for_lead(env, lead, session=None) -> str:
     options = find_battery_options_for_lead(env, lead, limit=3)
     customer = lead.contact_name or lead.partner_id.name or "señor/a"
     vehicle = lead.vehicle_info if "vehicle_info" in lead._fields else False
@@ -154,6 +205,8 @@ def build_battery_catalog_message_for_lead(env, lead) -> str:
         ]
 
         return dedent(random.choice(messages)).strip()
+
+    _store_last_catalog_options_on_session(session, options, "recommended")
 
     lines = [
         f"Perfecto {customer} 👍",
@@ -199,12 +252,44 @@ def lead_has_battery_options(env, lead) -> bool:
     return bool(find_battery_options_for_lead(env, lead, limit=1))
 
 
-def build_more_battery_options_message_for_lead(env, lead) -> str:
-    options = find_battery_options_for_lead(env, lead, limit=3)
+def build_more_battery_options_message_for_lead(env, lead, session=None) -> str:
+    all_options = find_battery_options_for_lead(env, lead, limit=20)
+    recommended_options = get_recommended_battery_option_for_lead(env, lead)
+    recommended_reference = recommended_options[0].reference if recommended_options else False
+
     customer = lead.contact_name or lead.partner_id.name or "señor/a"
 
+    unique_options = []
+    seen_references = set()
+
+    for option in all_options:
+        reference = (option.reference or "").strip()
+
+        if not reference:
+            continue
+
+        if recommended_reference and reference == recommended_reference:
+            continue
+
+        if reference in seen_references:
+            continue
+
+        seen_references.add(reference)
+        unique_options.append(option)
+
+        if len(unique_options) == 3:
+            break
+
+    options = unique_options
+
     if not options:
-        return build_battery_catalog_message_for_lead(env, lead)
+        return (
+            f"Claro {customer} 👍\n\n"
+            "En este momento no encontré más opciones diferentes para tu vehículo. "
+            "Podemos continuar con la opción recomendada o, si prefieres, un asesor de Mega Baterías puede revisarlo manualmente contigo. 🔋🚗"
+        )
+
+    _store_last_catalog_options_on_session(session, options, "more_options")
 
     lines = [
         f"Claro {customer} 👍",
@@ -239,15 +324,16 @@ def build_more_battery_options_message_for_lead(env, lead) -> str:
 
     return "\n".join(lines).strip()
 
-
-def build_recommended_battery_message_for_lead(env, lead) -> str:
+def build_recommended_battery_message_for_lead(env, lead, session=None) -> str:
     options = get_recommended_battery_option_for_lead(env, lead)
     customer = lead.contact_name or lead.partner_id.name or "señor/a"
 
     if not options:
-        return build_battery_catalog_message_for_lead(env, lead)
+        return build_battery_catalog_message_for_lead(env, lead, session=session)
 
     option = options[0]
+    _store_last_catalog_options_on_session(session, options, "recommended")
+
     price = get_battery_option_price(option)
     line_label = get_battery_line_label(option)
 
@@ -276,7 +362,7 @@ def get_recommended_battery_option_for_lead(env, lead):
     return options[:1]
 
 
-def get_battery_option_for_catalog_index(env, lead, option_index: int = 1):
+def get_battery_option_for_catalog_index(env, lead, option_index: int = 1, session=None):
     """Return the option shown at option_index in the catalog message."""
     try:
         option_index = int(option_index or 1)
@@ -284,5 +370,9 @@ def get_battery_option_for_catalog_index(env, lead, option_index: int = 1):
         option_index = 1
 
     option_index = max(1, min(option_index, 3))
+    session_option = _get_session_catalog_options(env, session, option_index)
+    if session_option is not None:
+        return session_option
+
     options = find_battery_options_for_lead(env, lead, limit=3)
     return options[option_index - 1:option_index]

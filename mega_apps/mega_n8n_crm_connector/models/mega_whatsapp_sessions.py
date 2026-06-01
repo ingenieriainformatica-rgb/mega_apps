@@ -72,6 +72,20 @@ class MegaWhatsappSession(models.Model):
         string="Precio batería seleccionado",
     )
 
+    last_catalog_option_ids = fields.Char(
+        string="Últimas opciones mostradas",
+        help="IDs de las últimas opciones de batería mostradas al cliente, separados por coma.",
+    )
+
+    last_catalog_type = fields.Selection([
+        ("recommended", "Recomendada"),
+        ("more_options", "Más opciones"),
+    ], default=False)
+
+    last_catalog_sent_at = fields.Datetime(
+        string="Último catálogo enviado",
+    )
+
     wompi_payment_link_id = fields.Char(
         string="ID link Wompi",
         readonly=True,

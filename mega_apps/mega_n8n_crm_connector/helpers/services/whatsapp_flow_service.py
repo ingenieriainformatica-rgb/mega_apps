@@ -109,7 +109,12 @@ def _store_catalog_battery_on_session(env, session, lead, option_index: int = 1)
     option = False
 
     if lead:
-        option = get_battery_option_for_catalog_index(env, lead, option_index)
+        option = get_battery_option_for_catalog_index(
+            env,
+            lead,
+            option_index,
+            session=session,
+        )
         option = option[:1]
 
     if not option and session.selected_battery_option_id:
@@ -126,6 +131,17 @@ def _store_catalog_battery_on_session(env, session, lead, option_index: int = 1)
 
     session.write(values)
     return option, price
+
+
+def _session_has_saved_catalog_options(session) -> bool:
+    return bool((getattr(session, "last_catalog_option_ids", "") or "").strip())
+
+
+def _missing_saved_catalog_reply() -> str:
+    return (
+        "Para confirmar bien la batería, necesito enviarte nuevamente las opciones "
+        "disponibles. Respóndeme si quieres ver la opción recomendada o más opciones. 🔋🚗"
+    )
 
 
 def _build_price_without_old_battery_reply(session, option, base_price: float) -> str:
@@ -171,6 +187,15 @@ def _build_payment_success_reply(session, option, final_value: float, payment_ur
 
 
 def _create_wompi_payment_response(env, session, lead, option_index: int = 1):
+    if not _session_has_saved_catalog_options(session):
+        fallback_step = (
+            "more_catalog_sent"
+            if session.step in {"more_options_sent", "more_catalog_sent", "payment_link_sent"}
+            else "catalog_sent"
+        )
+        session.write({"step": fallback_step})
+        return fallback_step, True, _missing_saved_catalog_reply()
+
     option, base_price = _store_catalog_battery_on_session(
         env,
         session,
@@ -459,13 +484,13 @@ def apply_ai_to_whatsapp_session(self, **post):
                 )
             else:
                 session.write({"customer_leaves_old_battery": True})
-                reply = build_recommended_battery_message_for_lead(request.env, lead)
+                reply = build_recommended_battery_message_for_lead(request.env, lead, session=session)
             should_send = True
         else:
             if option:
                 reply = _payment_fallback_reply(session.customer_name)
             else:
-                reply = build_more_battery_options_message_for_lead(request.env, lead)
+                reply = build_more_battery_options_message_for_lead(request.env, lead, session=session)
             should_send = True
             session.write({"step": "advisor_handoff"})
 
@@ -480,25 +505,28 @@ def apply_ai_to_whatsapp_session(self, **post):
                 ai_result,
                 session.last_message,
             )
-            option, base_price = _store_catalog_battery_on_session(
-                request.env,
-                session,
-                lead,
-                option_index=option_index,
-            )
-            if option and base_price > 0:
-                reply = _build_price_without_old_battery_reply(
-                    session,
-                    option,
-                    base_price,
-                )
+            if not _session_has_saved_catalog_options(session):
+                reply = _missing_saved_catalog_reply()
             else:
-                reply = (
-                    "Para darte el valor exacto, dime cuál opción prefieres: "
-                    "opción 1, opción 2 u opción 3. 🔋🚗"
+                option, base_price = _store_catalog_battery_on_session(
+                    request.env,
+                    session,
+                    lead,
+                    option_index=option_index,
                 )
+                if option and base_price > 0:
+                    reply = _build_price_without_old_battery_reply(
+                        session,
+                        option,
+                        base_price,
+                    )
+                else:
+                    reply = (
+                        "Para darte el valor exacto, dime cuál opción prefieres: "
+                        "opción 1, opción 2 u opción 3. 🔋🚗"
+                    )
         else:
-            reply = build_more_battery_options_message_for_lead(request.env, lead)
+            reply = build_more_battery_options_message_for_lead(request.env, lead, session=session)
         should_send = True
         if session.step != "more_catalog_sent":
             session.write({"step": "more_catalog_sent"})
