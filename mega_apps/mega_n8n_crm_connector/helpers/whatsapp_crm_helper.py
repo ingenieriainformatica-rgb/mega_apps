@@ -4,6 +4,8 @@ from .constants import (
     WHATSAPP_LINE_CONFIGS,
     DEFAULT_WHATSAPP_LINE_CONFIG,
 )
+from .whatsapp_business_hours_helper import get_business_hours_text
+from .whatsapp_session_helper import is_out_of_coverage
 
 from .whatsapp_vehicle_helper import (
     build_vehicle_lead_values,
@@ -91,6 +93,15 @@ def get_or_create_partner_from_session(env, session):
 
 def build_lead_description_from_session(session) -> str:
     line_label = get_whatsapp_line_label(session.phone_number_id)
+    after_hours_lines = []
+
+    if bool(getattr(session, "is_after_hours", False)):
+        after_hours_lines = [
+            "",
+            "Lead fuera de horario: Sí",
+            "Lead urgente: Sí",
+            f"Horario de atención: {get_business_hours_text()}",
+        ]
 
     return "\n".join(
         [
@@ -112,7 +123,44 @@ def build_lead_description_from_session(session) -> str:
             f"Solicitud de batería: {'Sí' if getattr(session, 'battery_request', False) else 'No'}",
             f"Datos relevantes: {getattr(session, 'relevant_data', '') or 'No registrados'}",
         ]
+        + after_hours_lines
     )
+
+
+def session_has_qualified_lead_data(session) -> bool:
+    has_name = bool((session.customer_name or "").strip())
+    location = (session.location or "").strip()
+    has_location = bool(location)
+    has_vehicle = bool(
+        (getattr(session, "vehicle_brand", "") or "").strip()
+        and (getattr(session, "vehicle_model", "") or "").strip()
+        and (getattr(session, "vehicle_year", "") or "").strip()
+    )
+    has_valid_location = has_location and not is_out_of_coverage(location)
+
+    return has_name and has_valid_location and has_vehicle
+
+
+def apply_qualified_lead_priority(Lead, lead_values: dict, session) -> dict:
+    if session_has_qualified_lead_data(session) and "priority" in Lead._fields:
+        lead_values["priority"] = "3"
+
+    return lead_values
+
+
+def apply_default_team_values(env, Lead, lead_values: dict, session) -> dict:
+    if "team_id" not in Lead._fields:
+        return lead_values
+
+    team = get_crm_team_by_name(
+        env,
+        get_default_team_name(session),
+    )
+
+    if team:
+        lead_values["team_id"] = team.id
+
+    return lead_values
 
 
 def get_whatsapp_line_label(phone_number_id: str | None) -> str:
@@ -139,7 +187,8 @@ def create_or_update_lead_from_session(env, session, ai_result=None):
     - Si no existe lead en la sesión, lo crea.
     - Si ya existe lead_id, actualiza datos variables pero NO cambia el título.
     - crm_fecha_instalacion solo se asigna al crear el lead.
-    - team_id, user_id y website solo se asignan al crear el lead.
+    - team_id se mantiene según la línea de WhatsApp para evitar que reglas externas lo muevan.
+    - user_id y website solo se asignan al crear el lead.
     """
     ai_result = ai_result or {}
     customer_name = (session.customer_name or "").strip()
@@ -166,12 +215,13 @@ def create_or_update_lead_from_session(env, session, ai_result=None):
 
     vehicle_values = build_vehicle_lead_values(env, Lead, ai_result)
     common_values.update(vehicle_values)
+    apply_qualified_lead_priority(Lead, common_values, session)
+    apply_default_team_values(env, Lead, common_values, session)
 
     # Si ya existe lead, solo actualizamos datos variables.
     # No tocamos:
     # - name
     # - crm_fecha_instalacion
-    # - team_id
     # - user_id
     # - website
     if session.lead_id:
@@ -183,20 +233,12 @@ def create_or_update_lead_from_session(env, session, ai_result=None):
         **common_values,
         "name": f"{line_label} - WhatsApp - {customer_name}",
     }
+    apply_qualified_lead_priority(Lead, lead_values, session)
 
     # Fecha de instalación / creación del servicio.
     # Solo se asigna una vez al crear el lead.
     if "crm_fecha_instalacion" in Lead._fields:
         lead_values["crm_fecha_instalacion"] = fields.Datetime.now()
-
-    # Equipo de ventas según la línea de WhatsApp.
-    if "team_id" in Lead._fields:
-        team = get_crm_team_by_name(
-            env,
-            get_default_team_name(session),
-        )
-        if team:
-            lead_values["team_id"] = team.id
 
     # Vendedor según la línea de WhatsApp.
     if "user_id" in Lead._fields:

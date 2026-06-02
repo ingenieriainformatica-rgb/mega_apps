@@ -51,6 +51,7 @@ def _load_progressive_helper():
     for module_name in (
         "constants",
         "whatsapp_messages",
+        "whatsapp_business_hours_helper",
         "whatsapp_vehicle_helper",
         "whatsapp_session_helper",
         "whatsapp_ai_prompt",
@@ -69,9 +70,23 @@ def _load_catalog_helper():
     return sys.modules[f"{HELPERS_PACKAGE}.whatsapp_catalog_helper"]
 
 
+def _load_crm_helper():
+    _install_odoo_stub()
+    for module_name in (
+        "constants",
+        "whatsapp_business_hours_helper",
+        "whatsapp_vehicle_helper",
+        "whatsapp_crm_helper",
+    ):
+        _load_helper_module(module_name)
+    return sys.modules[f"{HELPERS_PACKAGE}.whatsapp_crm_helper"]
+
+
 helper = _load_progressive_helper()
 prompt = sys.modules[f"{HELPERS_PACKAGE}.whatsapp_ai_prompt"]
+business_hours_helper = sys.modules[f"{HELPERS_PACKAGE}.whatsapp_business_hours_helper"]
 catalog_helper = _load_catalog_helper()
+crm_helper = _load_crm_helper()
 
 
 class FakeSession(types.SimpleNamespace):
@@ -90,6 +105,8 @@ class FakeSession(types.SimpleNamespace):
         "relevant_data": True,
         "conversation_summary": True,
         "welcome_sent": True,
+        "is_after_hours": True,
+        "after_hours_accepted": True,
     }
 
     def write(self, values):
@@ -114,6 +131,8 @@ def make_session(**overrides):
         "relevant_data": "",
         "conversation_summary": "",
         "welcome_sent": False,
+        "is_after_hours": False,
+        "after_hours_accepted": False,
         "customer_leaves_old_battery": True,
         "last_message": "",
     }
@@ -141,7 +160,190 @@ def apply_simple_ai(session, ai_result):
     return next_step, should_send, reply, vals
 
 
+def apply_after_hours_ai(session, ai_result):
+    next_step, should_send, reply, vals = helper.build_after_hours_ai_session_update(
+        session,
+        ai_result,
+    )
+    for key, value in vals.items():
+        setattr(session, key, value)
+    return next_step, should_send, reply, vals
+
+
 class TestProgressiveDataCapture(unittest.TestCase):
+    def test_business_hours_sunday_is_always_closed(self):
+        from datetime import datetime
+
+        now = datetime(2026, 6, 7, 12, 0, tzinfo=helper.COLOMBIA_TZ)
+
+        self.assertFalse(business_hours_helper.is_business_hours(now))
+
+    def test_business_hours_before_6_is_closed(self):
+        from datetime import datetime
+
+        now = datetime(2026, 6, 1, 5, 59, tzinfo=helper.COLOMBIA_TZ)
+
+        self.assertFalse(business_hours_helper.is_business_hours(now))
+
+    def test_business_hours_at_6_is_open(self):
+        from datetime import datetime
+
+        now = datetime(2026, 6, 1, 6, 0, tzinfo=helper.COLOMBIA_TZ)
+
+        self.assertTrue(business_hours_helper.is_business_hours(now))
+
+    def test_business_hours_before_19_is_open(self):
+        from datetime import datetime
+
+        now = datetime(2026, 6, 1, 18, 59, tzinfo=helper.COLOMBIA_TZ)
+
+        self.assertTrue(business_hours_helper.is_business_hours(now))
+
+    def test_business_hours_at_19_is_closed(self):
+        from datetime import datetime
+
+        now = datetime(2026, 6, 1, 19, 0, tzinfo=helper.COLOMBIA_TZ)
+
+        self.assertFalse(business_hours_helper.is_business_hours(now))
+
+    def test_after_hours_with_complete_data_goes_to_handoff(self):
+        session = make_session(
+            is_after_hours=True,
+            last_message="Sí, soy Laura, estoy en Envigado y tengo un Mazda 3 2020",
+        )
+
+        next_step, should_send, reply, vals = apply_after_hours_ai(
+            session,
+            {
+                "intent": "after_hours_data_capture",
+                "after_hours_accepted": True,
+                "customer_name": "Laura",
+                "location": "Envigado",
+                "vehicle_brand": "Mazda",
+                "vehicle_model": "3",
+                "vehicle_year": "2020",
+            },
+        )
+
+        self.assertEqual(next_step, "after_hours_handoff")
+        self.assertTrue(should_send)
+        self.assertTrue(vals["is_after_hours"])
+        self.assertTrue(vals["after_hours_accepted"])
+        self.assertEqual(vals["vehicle_brand"], "Mazda")
+        self.assertEqual(vals["vehicle_model"], "3")
+        self.assertEqual(vals["vehicle_year"], "2020")
+        self.assertIn("retome el horario", reply.lower())
+
+    def test_after_hours_decline_closes_without_repeating_schedule(self):
+        session = make_session(
+            is_after_hours=True,
+            last_message="no",
+        )
+
+        next_step, should_send, reply, vals = apply_after_hours_ai(
+            session,
+            {
+                "intent": "after_hours_data_capture",
+                "after_hours_accepted": False,
+            },
+        )
+
+        self.assertEqual(next_step, "advisor_handoff")
+        self.assertTrue(should_send)
+        self.assertTrue(vals["is_after_hours"])
+        self.assertFalse(vals["after_hours_accepted"])
+        self.assertIn("gracias por escribirnos", reply.lower())
+        self.assertNotIn("deseas dejarlos", reply.lower())
+
+    def test_after_hours_out_of_coverage_does_not_ask_vehicle(self):
+        session = make_session(
+            is_after_hours=True,
+            customer_name="Jorge",
+            last_message="bogota",
+        )
+
+        next_step, should_send, reply, vals = apply_after_hours_ai(
+            session,
+            {
+                "intent": "after_hours_data_capture",
+                "after_hours_accepted": True,
+                "location": "bogota",
+            },
+        )
+
+        self.assertEqual(next_step, "out_of_coverage")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["location"], "bogota")
+        self.assertIn("medellín", reply.lower())
+        self.assertIn("área metropolitana", reply.lower())
+        self.assertNotIn("qué vehículo", reply.lower())
+
+    def test_after_hours_corrects_msda_to_mazda(self):
+        session = make_session(
+            is_after_hours=True,
+            customer_name="Jorge",
+            location="Envigado",
+            last_message="msda 3 2023",
+        )
+
+        next_step, should_send, reply, vals = apply_after_hours_ai(
+            session,
+            {
+                "intent": "after_hours_data_capture",
+                "after_hours_accepted": True,
+            },
+        )
+
+        self.assertEqual(next_step, "after_hours_handoff")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["vehicle_brand"], "Mazda")
+        self.assertEqual(vals["vehicle_model"], "3")
+        self.assertEqual(vals["vehicle_year"], "2023")
+        self.assertIn("Mazda 3 2023", reply)
+
+    def test_complete_qualified_session_sets_priority_three(self):
+        session = make_session(
+            customer_name="Laura",
+            location="Envigado",
+            vehicle_brand="Mazda",
+            vehicle_model="3",
+            vehicle_year="2020",
+        )
+        Lead = types.SimpleNamespace(_fields={"priority": True})
+        values = {}
+
+        crm_helper.apply_qualified_lead_priority(Lead, values, session)
+
+        self.assertEqual(values["priority"], "3")
+
+    def test_incomplete_session_does_not_set_priority(self):
+        session = make_session(
+            customer_name="Laura",
+            location="Envigado",
+            vehicle_brand="Mazda",
+        )
+        Lead = types.SimpleNamespace(_fields={"priority": True})
+        values = {}
+
+        crm_helper.apply_qualified_lead_priority(Lead, values, session)
+
+        self.assertNotIn("priority", values)
+
+    def test_out_of_coverage_session_does_not_set_priority(self):
+        session = make_session(
+            customer_name="Laura",
+            location="Bogota",
+            vehicle_brand="Mazda",
+            vehicle_model="3",
+            vehicle_year="2020",
+        )
+        Lead = types.SimpleNamespace(_fields={"priority": True})
+        values = {}
+
+        crm_helper.apply_qualified_lead_priority(Lead, values, session)
+
+        self.assertNotIn("priority", values)
+
     def test_first_contact_prompt_includes_full_welcome_rules(self):
         session = make_session(
             welcome_sent=False,

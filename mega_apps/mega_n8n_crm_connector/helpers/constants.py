@@ -21,6 +21,7 @@ ALLOWED_STEPS = {
     "battery_selected",
     "dispatch_requested",
     "advisor_handoff",
+    "after_hours_handoff",
     "done",
 }
 
@@ -42,6 +43,7 @@ RESET_SESSION_REPLY = (
 TERMINAL_STEPS = {
     "out_of_coverage",
     "advisor_handoff",
+    "after_hours_handoff",
     "dispatch_requested",
     "done",
 }

@@ -12,12 +12,14 @@ from ...helpers.whatsapp_session_helper import (
     whatsapp_response,
     build_ai_session_update,
     build_simple_ai_session_update,
+    build_after_hours_ai_session_update,
     get_safe_reply,
     mark_welcome_sent_on_session,
     reply_contains_full_welcome,
 )
 from ...helpers.whatsapp_ai_prompt import get_ai_instruction
 from ...helpers.whatsapp_ai_prompt_simple import get_simple_ai_instruction
+from ...helpers.whatsapp_ai_prompt_after_hours import get_after_hours_ai_instruction
 from ...helpers.whatsapp_messages import get_confirmation_message
 from ...helpers.constants import NO_ACTIVE_SESSION_REPLY
 from ...helpers.constants import (
@@ -44,6 +46,7 @@ from ...helpers.whatsapp_chatter_helper import (
 )
 from ...helpers.wompi_payment_helper import create_wompi_payment_link
 from ...helpers.whatsapp_flow_mode_helper import is_simple_whatsapp_flow
+from ...helpers.whatsapp_business_hours_helper import is_business_hours
 
 _logger = logging.getLogger(__name__)
 
@@ -360,11 +363,23 @@ def build_ai_context_response(self, **post):
             phone_number_id,
         )
 
-        ai_instruction = (
-            get_simple_ai_instruction(session, message)
-            if is_simple_whatsapp_flow(request.env)
-            else get_ai_instruction(session, message)
-        )
+        outside_business_hours = not is_business_hours()
+        use_after_hours_flow = outside_business_hours or bool(getattr(session, "is_after_hours", False))
+
+        if use_after_hours_flow and "is_after_hours" in session._fields:
+            after_hours_vals = {"is_after_hours": True}
+            if session.step not in {"ask_name", "ask_location", "ask_vehicle", "after_hours_handoff"}:
+                after_hours_vals["step"] = "ask_name"
+            session.write(after_hours_vals)
+
+        if use_after_hours_flow:
+            ai_instruction = get_after_hours_ai_instruction(session, message)
+        else:
+            ai_instruction = (
+                get_simple_ai_instruction(session, message)
+                if is_simple_whatsapp_flow(request.env)
+                else get_ai_instruction(session, message)
+            )
 
         if created:
             _logger.info("\n\n\n Primer mensaje se enviara a IA para captura progresiva \n\n\n")
@@ -386,6 +401,8 @@ def build_ai_context_response(self, **post):
                 "neighborhood": getattr(session, "neighborhood", "") or "",
                 "location": session.location or "",
                 "plate": getattr(session, "plate", "") or "",
+                "is_after_hours": bool(getattr(session, "is_after_hours", False)),
+                "after_hours_accepted": bool(getattr(session, "after_hours_accepted", False)),
                 "last_message": message,
                 "ai_instruction": ai_instruction,
                 "session": session_snapshot(session),
@@ -422,6 +439,8 @@ def build_ai_context_response(self, **post):
             "neighborhood": getattr(session, "neighborhood", "") or "",
             "location": session.location or "",
             "plate": getattr(session, "plate", "") or "",
+            "is_after_hours": bool(getattr(session, "is_after_hours", False)),
+            "after_hours_accepted": bool(getattr(session, "after_hours_accepted", False)),
             "last_message": message,
             "ai_instruction": ai_instruction,
             "session": session_snapshot(session),
@@ -447,14 +466,19 @@ def apply_ai_to_whatsapp_session(self, **post):
             NO_ACTIVE_SESSION_REPLY,
         )
 
-    if session.step == "advisor_handoff":
+    if session.step in {"advisor_handoff", "after_hours_handoff"}:
         return whatsapp_response(
             True,
             session.step,
             should_send=False,
         )
 
-    if is_simple_whatsapp_flow(request.env):
+    if bool(getattr(session, "is_after_hours", False)) or ai_result.get("intent") == "after_hours_data_capture":
+        next_step, should_send, reply, vals = build_after_hours_ai_session_update(
+            session,
+            ai_result,
+        )
+    elif is_simple_whatsapp_flow(request.env):
         next_step, should_send, reply, vals = build_simple_ai_session_update(
             session,
             ai_result,

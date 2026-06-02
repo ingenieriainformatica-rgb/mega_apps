@@ -31,6 +31,7 @@ class MegaWhatsappSession(models.Model):
         ("payment_link_sent", "Link de pago enviado"),
 
         ("advisor_handoff", "Pasado a asesor"),
+        ("after_hours_handoff", "Fuera de horario - datos tomados"),
         ("done", "Finalizado"),
     ], default="new", required=True, index=True)
 
@@ -47,6 +48,14 @@ class MegaWhatsappSession(models.Model):
     battery_request = fields.Boolean(default=False)
     relevant_data = fields.Text()
     last_message = fields.Text()
+    is_after_hours = fields.Boolean(
+        string="Fuera de horario",
+        default=False,
+    )
+    after_hours_accepted = fields.Boolean(
+        string="Aceptó dejar datos fuera de horario",
+        default=False,
+    )
 
     lead_id = fields.Many2one("crm.lead", string="Lead")
     active = fields.Boolean(default=True)

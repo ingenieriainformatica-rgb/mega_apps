@@ -11,6 +11,9 @@ from odoo import fields  # type: ignore
 from .whatsapp_messages import (
     get_out_of_coverage_message,
 )
+from .whatsapp_business_hours_helper import (
+    get_after_hours_message,
+)
 from .constants import (
     CONFIRMATION_YES,
     CONFIRMATION_NO,
@@ -36,6 +39,7 @@ _logger = logging.getLogger(__name__)
 VEHICLE_BRAND_CORRECTIONS = {
     "masda": "Mazda",
     "masdaa": "Mazda",
+    "msda": "Mazda",
     "masd": "Mazda",
     "madza": "Mazda",
     "mazda": "Mazda",
@@ -631,6 +635,8 @@ def session_snapshot(session) -> dict[str, Any]:
         "plate": getattr(session, "plate", "") or "",
         "battery_request": bool(getattr(session, "battery_request", False)),
         "relevant_data": getattr(session, "relevant_data", "") or "",
+        "is_after_hours": bool(getattr(session, "is_after_hours", False)),
+        "after_hours_accepted": bool(getattr(session, "after_hours_accepted", False)),
         "step": session.step,
     }
 
@@ -1199,6 +1205,185 @@ def build_simple_ai_session_update(
 
     if not bool(getattr(session, "welcome_sent", False)) and "welcome_sent" in session._fields:
         vals["welcome_sent"] = True
+
+    if conversation_summary and "conversation_summary" in session._fields:
+        vals["conversation_summary"] = conversation_summary[:500]
+
+    return next_step, True, reply, vals
+
+def build_after_hours_ai_session_update(
+    session,
+    ai_result: dict[str, Any],
+) -> tuple[str, bool, str, dict[str, Any]]:
+    ai_result = normalize_ai_result(ai_result)
+    normalized_message = normalize_answer(getattr(session, "last_message", ""))
+
+    declined = normalized_message in CONFIRMATION_NO or any(
+        phrase in normalized_message
+        for phrase in {
+            "no gracias",
+            "no quiero",
+            "no deseo",
+            "despues",
+            "después",
+            "luego",
+            "mas tarde",
+            "más tarde",
+        }
+    )
+
+    if declined:
+        return (
+            "advisor_handoff",
+            True,
+            (
+                "Entendido, muchas gracias por escribirnos. "
+                "Cuando desees, puedes volver a contactarnos en nuestro horario de atención "
+                "y con gusto te ayudamos. 🔋🚗"
+            ),
+            {
+                "step": "advisor_handoff",
+                "is_after_hours": True,
+                "after_hours_accepted": False,
+            },
+        )
+
+    customer_name = clean_text(ai_result.get("customer_name"))
+    if customer_name and not is_valid_customer_name(customer_name):
+        customer_name = ""
+
+    message_vehicle = extract_vehicle_fields_from_message(
+        getattr(session, "last_message", "")
+    )
+    current_name = customer_name or session.customer_name or ""
+    current_brand = (
+        clean_text(ai_result.get("vehicle_brand"))
+        or getattr(session, "vehicle_brand", "")
+        or message_vehicle.get("vehicle_brand", "")
+    )
+    current_brand = normalize_vehicle_brand(current_brand)
+    current_model = (
+        clean_text(ai_result.get("vehicle_model"))
+        or getattr(session, "vehicle_model", "")
+        or message_vehicle.get("vehicle_model", "")
+    )
+    if is_doubtful_vehicle_model(current_model, current_name):
+        current_model = ""
+    current_year = (
+        clean_text(ai_result.get("vehicle_year"))
+        or getattr(session, "vehicle_year", "")
+        or message_vehicle.get("vehicle_year", "")
+    )
+    city = clean_text(ai_result.get("city"))
+    location = clean_text(ai_result.get("location")) or city
+    if not location:
+        location = extract_known_location_from_message(getattr(session, "last_message", ""))
+    current_location = location or session.location or ""
+    current_vehicle = build_vehicle_info_from_ai(
+        {
+            **ai_result,
+            "vehicle_brand": current_brand,
+            "vehicle_model": current_model,
+            "vehicle_year": current_year,
+        },
+        fallback=session.vehicle_info or "",
+    )
+    conversation_summary = clean_text(ai_result.get("conversation_summary"))
+
+    accepted = bool(getattr(session, "after_hours_accepted", False))
+    accepted = accepted or parse_bool(ai_result.get("after_hours_accepted"), default=False)
+    accepted = accepted or normalized_message in CONFIRMATION_YES
+    accepted = accepted or any(
+        phrase in normalized_message
+        for phrase in {
+            "dejar datos",
+            "dejarlos",
+            "si quiero",
+            "sí quiero",
+            "claro",
+            "dale",
+            "listo",
+            "perfecto",
+        }
+    )
+    accepted = accepted or bool(current_name or current_location or current_brand or current_model or current_year)
+
+    missing_name = not current_name
+    missing_location = not current_location
+    missing_vehicle = not (current_brand and current_model and current_year)
+
+    if current_location and is_out_of_coverage(current_location):
+        next_step = "out_of_coverage"
+        vals = build_session_vals(
+            next_step,
+            current_name,
+            current_vehicle,
+            current_location,
+        )
+        progressive_ai_result = {
+            **ai_result,
+            "vehicle_brand": current_brand,
+            "vehicle_model": current_model,
+            "vehicle_year": current_year,
+        }
+        vals.update(build_progressive_session_vals(session, progressive_ai_result))
+        vals.update(
+            {
+                "step": next_step,
+                "is_after_hours": True,
+                "after_hours_accepted": accepted,
+            }
+        )
+
+        if conversation_summary and "conversation_summary" in session._fields:
+            vals["conversation_summary"] = conversation_summary[:500]
+
+        return next_step, True, get_out_of_coverage_message(), vals
+
+    if not accepted:
+        next_step = "ask_name"
+        reply = get_after_hours_message(current_name or None)
+    elif missing_name:
+        next_step = "ask_name"
+        reply = "Perfecto. Para dejar tu solicitud registrada, ¿me compartes por favor tu nombre?"
+    elif missing_location:
+        next_step = "ask_location"
+        reply = f"Gracias {current_name}. ¿En qué barrio o municipio te encuentras?"
+    elif missing_vehicle:
+        next_step = "ask_vehicle"
+        reply = f"Listo {current_name}. ¿Qué vehículo tienes? Indícame marca, línea/modelo y año."
+    else:
+        next_step = "after_hours_handoff"
+        vehicle_label = " ".join(
+            part for part in [current_brand, current_model, current_year] if part
+        ).strip() or current_vehicle
+        reply = (
+            f"Perfecto {current_name}, ya dejamos tus datos registrados.\n\n"
+            f"🚗 Vehículo: {vehicle_label}\n"
+            f"📍 Ubicación: {current_location}\n\n"
+            "Un asesor de Mega Baterías continuará contigo cuando se retome el horario de atención. 🔋🚗"
+        )
+
+    vals = build_session_vals(
+        next_step,
+        current_name,
+        current_vehicle,
+        current_location,
+    )
+    progressive_ai_result = {
+        **ai_result,
+        "vehicle_brand": current_brand,
+        "vehicle_model": current_model,
+        "vehicle_year": current_year,
+    }
+    vals.update(build_progressive_session_vals(session, progressive_ai_result))
+    vals.update(
+        {
+            "step": next_step,
+            "is_after_hours": True,
+            "after_hours_accepted": accepted,
+        }
+    )
 
     if conversation_summary and "conversation_summary" in session._fields:
         vals["conversation_summary"] = conversation_summary[:500]
