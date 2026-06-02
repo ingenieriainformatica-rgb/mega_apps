@@ -2,6 +2,7 @@
 
 import json
 import logging
+import re
 from datetime import datetime
 from textwrap import dedent
 from typing import Any
@@ -30,6 +31,30 @@ from ..helpers.whatsapp_vehicle_helper import (
 
 
 _logger = logging.getLogger(__name__)
+
+
+VEHICLE_BRAND_CORRECTIONS = {
+    "masda": "Mazda",
+    "masdaa": "Mazda",
+    "masd": "Mazda",
+    "madza": "Mazda",
+    "mazda": "Mazda",
+    "chebrolet": "Chevrolet",
+    "chevrolet": "Chevrolet",
+    "hiunday": "Hyundai",
+    "hyundai": "Hyundai",
+    "renol": "Renault",
+    "renaul": "Renault",
+    "renault": "Renault",
+    "toyta": "Toyota",
+    "toyota": "Toyota",
+    "wolsvagen": "Volkswagen",
+    "volkswagen": "Volkswagen",
+    "nisan": "Nissan",
+    "nissan": "Nissan",
+    "kia": "Kia",
+    "ford": "Ford",
+}
 
 
 def normalize_text(value: str) -> str:
@@ -63,6 +88,19 @@ def is_out_of_coverage(location: str) -> bool:
         return True
 
     return False
+
+def extract_known_location_from_message(message: str | None) -> str:
+    normalized = normalize_text(message or "")
+
+    if not normalized:
+        return ""
+
+    known_locations = list(COVERAGE_LOCATIONS) + list(OUT_OF_COVERAGE_LOCATIONS)
+    for location in known_locations:
+        if normalize_text(location) in normalized:
+            return location
+
+    return ""
 
 def whatsapp_response(
     success: bool,
@@ -174,29 +212,115 @@ def step_from_next_required_field(field_name: str | None) -> str:
 def normalize_vehicle_brand(value: str | None) -> str:
     brand = clean_text(value)
     normalized = normalize_text(brand)
-    corrections = {
-        "masda": "Mazda",
-        "masdaa": "Mazda",
-        "masd": "Mazda",
-        "madza": "Mazda",
-        "mazda": "Mazda",
-        "chebrolet": "Chevrolet",
-        "chevrolet": "Chevrolet",
-        "hiunday": "Hyundai",
-        "hyundai": "Hyundai",
-        "renol": "Renault",
-        "renaul": "Renault",
-        "renault": "Renault",
-        "toyta": "Toyota",
-        "toyota": "Toyota",
-        "wolsvagen": "Volkswagen",
-        "volkswagen": "Volkswagen",
-        "nisan": "Nissan",
-        "nissan": "Nissan",
-        "kia": "Kia",
-        "ford": "Ford",
+    return VEHICLE_BRAND_CORRECTIONS.get(normalized, brand)
+
+def is_doubtful_vehicle_model(value: str | None, customer_name: str | None = "") -> bool:
+    model = clean_text(value)
+    normalized = normalize_text(model)
+    normalized_name = normalize_text(customer_name or "")
+
+    if not normalized:
+        return True
+
+    if normalized_name and normalized_name in normalized:
+        return True
+
+    doubtful_values = {
+        "y",
+        "yo",
+        "tengo",
+        "tengo un",
+        "tengo una",
+        "carro",
+        "vehiculo",
+        "vehículo",
+        "modelo",
+        "linea",
+        "línea",
     }
-    return corrections.get(normalized, brand)
+    return normalized in doubtful_values
+
+def extract_vehicle_fields_from_message(message: str | None) -> dict[str, str]:
+    normalized = normalize_text(message or "")
+
+    if not normalized:
+        return {}
+
+    brand_match = None
+    brand = ""
+    for alias, corrected_brand in VEHICLE_BRAND_CORRECTIONS.items():
+        match = re.search(rf"\b{re.escape(alias)}\b", normalized)
+        if match:
+            brand_match = match
+            brand = corrected_brand
+            break
+
+    if not brand or not brand_match:
+        return {}
+
+    year_match = re.search(r"\b(?:19|20)\d{2}\b", normalized)
+    year = year_match.group(0) if year_match else ""
+
+    model_text = normalized[brand_match.end():]
+    if year:
+        model_text = re.sub(rf"\b{re.escape(year)}\b", " ", model_text)
+    model_text = re.sub(r"[^a-z0-9\s-]", " ", model_text)
+
+    stopwords = {
+        "tengo",
+        "un",
+        "una",
+        "carro",
+        "vehiculo",
+        "vehículo",
+        "modelo",
+        "linea",
+        "línea",
+        "es",
+        "el",
+        "la",
+        "mi",
+        "para",
+        "bateria",
+        "batería",
+        "y",
+        "quiero",
+        "necesito",
+    }
+    model_parts = [
+        part
+        for part in model_text.split()
+        if part and part not in stopwords
+    ]
+
+    result = {"vehicle_brand": brand}
+    if model_parts:
+        result["vehicle_model"] = " ".join(model_parts[:2])
+    if year:
+        result["vehicle_year"] = year
+
+    return result
+
+def get_time_based_greeting() -> str:
+    current_hour = datetime.now(COLOMBIA_TZ).hour
+
+    if current_hour < 12:
+        return "buen día"
+    if current_hour < 18:
+        return "buena tarde"
+    return "buena noche"
+
+def get_simple_full_welcome() -> str:
+    greeting = get_time_based_greeting()
+    return (
+        f"Hola {greeting}, te habla Moisés Castrillón, asesor experto en baterías MAC.\n\n"
+        "Te puedo asesorar en la aplicación correcta de baterías para tu automóvil, "
+        "buses, maquinaria amarilla y plantas eléctricas.\n\n"
+        "Te prestamos rápido servicio a domicilio e instalación técnica de la batería "
+        "en Medellín y su área metropolitana.\n\n"
+        "Atendemos automóvil, camioneta, camión, bus, maquinaria amarilla y plantas eléctricas.\n\n"
+        "¿Cuál es tu nombre y para qué vehículo requieres la batería?"
+    )
 
 def normalize_ai_result(ai_result: dict[str, Any]) -> dict[str, Any]:
     normalized_result = dict(ai_result or {})
@@ -337,7 +461,7 @@ def reply_contains_full_welcome(reply: str | None) -> bool:
         "bienvenido a mega baterias",
         "atendemos medellin",
         "horario",
-        "carros, camionetas y camiones",
+        "carros",
     )
     return all(fragment in normalized for fragment in required_fragments)
 
@@ -951,6 +1075,135 @@ def build_ai_session_update(
         )
 
     return next_step, should_send, reply, vals
+
+def build_simple_ai_session_update(
+    session,
+    ai_result: dict[str, Any],
+) -> tuple[str, bool, str, dict[str, Any]]:
+    ai_result = normalize_ai_result(ai_result)
+
+    customer_name = clean_text(ai_result.get("customer_name"))
+    if customer_name and not is_valid_customer_name(customer_name):
+        customer_name = ""
+
+    message_vehicle = extract_vehicle_fields_from_message(
+        getattr(session, "last_message", "")
+    )
+    current_name = customer_name or session.customer_name or ""
+    current_brand = (
+        clean_text(ai_result.get("vehicle_brand"))
+        or getattr(session, "vehicle_brand", "")
+        or message_vehicle.get("vehicle_brand", "")
+    )
+    current_brand = normalize_vehicle_brand(current_brand)
+    current_model = (
+        clean_text(ai_result.get("vehicle_model"))
+        or getattr(session, "vehicle_model", "")
+        or message_vehicle.get("vehicle_model", "")
+    )
+    if is_doubtful_vehicle_model(current_model, current_name):
+        current_model = ""
+    current_year = (
+        clean_text(ai_result.get("vehicle_year"))
+        or getattr(session, "vehicle_year", "")
+        or message_vehicle.get("vehicle_year", "")
+    )
+    city = clean_text(ai_result.get("city"))
+    location = clean_text(ai_result.get("location")) or city
+    if not location:
+        location = extract_known_location_from_message(getattr(session, "last_message", ""))
+    current_location = location or session.location or ""
+    current_vehicle = build_vehicle_info_from_ai(
+        {
+            **ai_result,
+            "vehicle_brand": current_brand,
+            "vehicle_model": current_model,
+            "vehicle_year": current_year,
+        },
+        fallback=session.vehicle_info or "",
+    )
+    conversation_summary = clean_text(ai_result.get("conversation_summary"))
+
+    missing_name = not current_name
+    missing_location = not current_location
+    missing_vehicle = not (current_brand and current_model and current_year)
+    welcome_reply = get_simple_full_welcome()
+
+    vehicle_parts = [part for part in [current_brand, current_model, current_year] if part]
+    vehicle_label = " ".join(vehicle_parts).strip()
+    has_vehicle_data = bool(vehicle_parts)
+
+    def with_vehicle_context(question: str) -> str:
+        if not has_vehicle_data:
+            return question
+
+        intro = f"Listo, tengo tu {vehicle_label}." if vehicle_label else "Listo, ya tengo los datos del vehículo."
+        return f"{intro}\n\n{question}"
+
+    def final_handoff_reply() -> str:
+        vehicle_text = f" tu {vehicle_label}" if vehicle_label else " los datos de tu vehículo"
+        location_text = f" en {current_location}" if current_location else ""
+        return (
+            f"Listo, {current_name}. Ya tengo{vehicle_text}{location_text}. "
+            "En breve un asesor de Mega Baterías continuará contigo para indicarte la batería adecuada para tu carro."
+        )
+
+    if current_location and is_out_of_coverage(current_location):
+        next_step = "out_of_coverage"
+        reply = get_out_of_coverage_message()
+    elif missing_name:
+        next_step = "ask_name"
+        reply = with_vehicle_context("Indícame tu nombre, por favor.") if has_vehicle_data else welcome_reply
+    elif missing_location:
+        next_step = "ask_location"
+        reply = f"{current_name}, gracias. Cuéntame, ¿te encuentras en Medellín o en algún municipio cercano?"
+    elif missing_vehicle:
+        next_step = "ask_vehicle"
+        missing_vehicle_fields = []
+        if not current_brand:
+            missing_vehicle_fields.append("marca")
+        if not current_model:
+            missing_vehicle_fields.append("línea/modelo")
+        if not current_year:
+            missing_vehicle_fields.append("año")
+
+        if len(missing_vehicle_fields) == 3:
+            reply = (
+                "Muchas gracias por tu información. ¿Qué carro manejas? "
+                "Indícame la marca, línea/modelo y año para indicarte la batería adecuada para tu carro."
+            )
+        else:
+            missing_text = ", ".join(missing_vehicle_fields)
+            reply = with_vehicle_context(
+                "Muchas gracias por tu información. "
+                f"Para continuar, indícame por favor {missing_text} del vehículo."
+            )
+    else:
+        next_step = "advisor_handoff"
+        reply = final_handoff_reply()
+
+    vals = build_session_vals(
+        next_step,
+        current_name,
+        current_vehicle,
+        current_location,
+    )
+    progressive_ai_result = {
+        **ai_result,
+        "vehicle_brand": current_brand,
+        "vehicle_model": current_model,
+        "vehicle_year": current_year,
+    }
+    vals.update(build_progressive_session_vals(session, progressive_ai_result))
+    vals["step"] = next_step
+
+    if not bool(getattr(session, "welcome_sent", False)) and "welcome_sent" in session._fields:
+        vals["welcome_sent"] = True
+
+    if conversation_summary and "conversation_summary" in session._fields:
+        vals["conversation_summary"] = conversation_summary[:500]
+
+    return next_step, True, reply, vals
 
 def resolve_confirmation_from_ai(
     normalized_message: str,

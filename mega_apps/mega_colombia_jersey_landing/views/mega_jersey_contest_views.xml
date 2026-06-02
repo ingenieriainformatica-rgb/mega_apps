@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Participantes -->
+    <record id="view_mega_jersey_contest_participant_tree" model="ir.ui.view">
+        <field name="name">mega.jersey.contest.participant.tree</field>
+        <field name="model">mega.jersey.contest.participant</field>
+        <field name="arch" type="xml">
+            <list string="Participantes Concurso Camiseta Selección">
+                <field name="name"/>
+                <field name="vat"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="license_plate"/>
+                <field name="vehicle_info"/>
+                <field name="service_acquired"/>
+                <field name="website_id"/>
+                <field name="create_date"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_mega_jersey_contest_participant_form" model="ir.ui.view">
+        <field name="name">mega.jersey.contest.participant.form</field>
+        <field name="model">mega.jersey.contest.participant</field>
+        <field name="arch" type="xml">
+            <form string="Participante Concurso Camiseta Selección">
+                <sheet>
+                    <group>
+                        <group string="Datos personales">
+                            <field name="name"/>
+                            <field name="vat"/>
+                            <field name="phone"/>
+                            <field name="email"/>
+                            <field name="street"/>
+                        </group>
+                        <group string="Vehículo y estado">
+                            <field name="license_plate"/>
+                            <field name="vehicle_info"/>
+                            <field name="service_acquired"/>
+                            <field name="website_id"/>
+                            <field name="state"/>
+                        </group>
+                    </group>
+                    <group string="Autorizaciones">
+                        <field name="accept_data_policy"/>
+                        <field name="accept_commercial_info"/>
+                    </group>
+                    <group string="Datos técnicos">
+                        <field name="ip_address"/>
+                        <field name="user_agent"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_mega_jersey_contest_participant_search" model="ir.ui.view">
+        <field name="name">mega.jersey.contest.participant.search</field>
+        <field name="model">mega.jersey.contest.participant</field>
+        <field name="arch" type="xml">
+            <search string="Buscar participantes">
+                <field name="name"/>
+                <field name="vat"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="license_plate"/>
+                <field name="vehicle_info"/>
+                <field name="service_acquired"/>
+                <filter string="Nuevos" name="state_new" domain="[('state', '=', 'new')]"/>
+                <filter string="Procesados" name="state_processed" domain="[('state', '=', 'processed')]"/>
+                <filter string="Válidos para sorteo" name="valid_for_draw" domain="[('accept_data_policy', '=', True), ('accept_commercial_info', '=', True)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Sitio web" name="group_website" context="{'group_by': 'website_id'}"/>
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Servicio adquirido" name="group_service_acquired" context="{'group_by': 'service_acquired'}"/>
+                    <filter string="Fecha de creación" name="group_create_date" context="{'group_by': 'create_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_mega_jersey_contest_participant" model="ir.actions.act_window">
+        <field name="name">Participantes</field>
+        <field name="res_model">mega.jersey.contest.participant</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_mega_jersey_contest_participant_search"/>
+    </record>
+
+    <!-- Sorteos -->
+    <record id="view_mega_jersey_contest_draw_tree" model="ir.ui.view">
+        <field name="name">mega.jersey.contest.draw.tree</field>
+        <field name="model">mega.jersey.contest.draw</field>
+        <field name="arch" type="xml">
+            <list string="Sorteos Concurso Camiseta Selección">
+                <field name="name"/>
+                <field name="draw_date"/>
+                <field name="participant_count"/>
+                <field name="eligible_participant_count"/>
+                <field name="winner_id"/>
+                <field name="winner_selection_datetime"/>
+                <field name="winner_selection_user_id"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_mega_jersey_contest_draw_form" model="ir.ui.view">
+        <field name="name">mega.jersey.contest.draw.form</field>
+        <field name="model">mega.jersey.contest.draw</field>
+        <field name="arch" type="xml">
+            <form string="Sorteo Concurso Camiseta Selección">
+                <header>
+                    <button
+                        name="action_select_winner"
+                        type="object"
+                        string="Seleccionar ganador"
+                        class="btn-primary"
+                        invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Sorteo">
+                            <field name="name"/>
+                            <field name="draw_date"/>
+                            <field name="participant_count"/>
+                            <field name="eligible_participant_count"/>
+                            <field name="state"/>
+                        </group>
+                        <group string="Auditoría">
+                            <field name="winner_selection_datetime"/>
+                            <field name="winner_selection_user_id"/>
+                        </group>
+                    </group>
+                    <group string="Ganador">
+                        <field name="winner_id"/>
+                        <field name="winner_vat"/>
+                        <field name="winner_phone"/>
+                        <field name="winner_email"/>
+                        <field name="winner_license_plate"/>
+                        <field name="winner_vehicle_info"/>
+                        <field name="winner_service_acquired"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_mega_jersey_contest_draw_search" model="ir.ui.view">
+        <field name="name">mega.jersey.contest.draw.search</field>
+        <field name="model">mega.jersey.contest.draw</field>
+        <field name="arch" type="xml">
+            <search string="Buscar sorteos">
+                <field name="name"/>
+                <field name="winner_id"/>
+                <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Realizado" name="done" domain="[('state', '=', 'done')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Fecha del sorteo" name="group_draw_date" context="{'group_by': 'draw_date'}"/>
+                    <filter string="Seleccionado por" name="group_user" context="{'group_by': 'winner_selection_user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_mega_jersey_contest_draw" model="ir.actions.act_window">
+        <field name="name">Sorteo</field>
+        <field name="res_model">mega.jersey.contest.draw</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_mega_jersey_contest_draw_search"/>
+    </record>
+
+    <!-- Menús -->
+    <menuitem
+        id="menu_mega_jersey_contest_root"
+        name="Concurso Camiseta Selección"
+        sequence="80"/>
+
+    <menuitem
+        id="menu_mega_jersey_contest_participants"
+        name="Participantes"
+        parent="menu_mega_jersey_contest_root"
+        action="action_mega_jersey_contest_participant"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_mega_jersey_contest_draw"
+        name="Sorteo"
+        parent="menu_mega_jersey_contest_root"
+        action="action_mega_jersey_contest_draw"
+        sequence="20"/>
+</odoo>

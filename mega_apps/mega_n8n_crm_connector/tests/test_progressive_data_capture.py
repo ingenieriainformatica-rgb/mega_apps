@@ -131,6 +131,16 @@ def apply_ai(session, ai_result):
     return next_step, should_send, reply, vals
 
 
+def apply_simple_ai(session, ai_result):
+    next_step, should_send, reply, vals = helper.build_simple_ai_session_update(
+        session,
+        ai_result,
+    )
+    for key, value in vals.items():
+        setattr(session, key, value)
+    return next_step, should_send, reply, vals
+
+
 class TestProgressiveDataCapture(unittest.TestCase):
     def test_first_contact_prompt_includes_full_welcome_rules(self):
         session = make_session(
@@ -244,6 +254,231 @@ class TestProgressiveDataCapture(unittest.TestCase):
         self.assertNotIn("vehicle_info", vals)
         self.assertNotIn("location", vals)
         self.assertIn("nombre", reply.lower())
+
+    def test_simple_flow_initial_message_asks_only_name(self):
+        session = make_session(last_message="Hola")
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "assistant_message": "¿En qué barrio estás?",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_name")
+        self.assertTrue(should_send)
+        self.assertNotIn("customer_name", vals)
+        self.assertIn("nombre", reply.lower())
+        self.assertIn("moisés castrillón", reply.lower())
+        self.assertNotIn("presupuesto", reply.lower())
+        self.assertNotIn("marca", reply.lower())
+        self.assertNotIn("placa", reply.lower())
+        self.assertNotIn("barrio", reply.lower())
+
+    def test_simple_flow_with_vehicle_but_no_name_summarizes_and_asks_name(self):
+        session = make_session(last_message="Tengo un Mazda 3 2020")
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "vehicle_brand": "Mazda",
+                "vehicle_model": "3",
+                "vehicle_year": "2020",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_name")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["vehicle_brand"], "Mazda")
+        self.assertEqual(vals["vehicle_model"], "3")
+        self.assertEqual(vals["vehicle_year"], "2020")
+        self.assertIn("tengo tu mazda 3 2020", reply.lower())
+        self.assertIn("mazda", reply.lower())
+        self.assertIn("nombre", reply.lower())
+        self.assertNotIn("medellín", reply.lower())
+
+    def test_simple_flow_asks_location_after_name(self):
+        session = make_session(last_message="Soy Laura")
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "customer_name": "Laura",
+                "assistant_message": "Dame la placa.",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_location")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["customer_name"], "Laura")
+        self.assertIn("medellín", reply.lower())
+        self.assertIn("municipio cercano", reply.lower())
+        self.assertNotIn("placa", reply.lower())
+
+    def test_simple_flow_with_name_and_vehicle_summarizes_and_asks_location(self):
+        session = make_session(last_message="Soy Jorge, tengo un Mazda 3 2020")
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "customer_name": "Jorge",
+                "vehicle_brand": "Mazda",
+                "vehicle_model": "3",
+                "vehicle_year": "2020",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_location")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["customer_name"], "Jorge")
+        self.assertEqual(vals["vehicle_brand"], "Mazda")
+        self.assertEqual(vals["vehicle_model"], "3")
+        self.assertEqual(vals["vehicle_year"], "2020")
+        self.assertNotIn("hasta ahora tengo", reply.lower())
+        self.assertNotIn("mazda", reply.lower())
+        self.assertIn("medellín", reply.lower())
+
+    def test_simple_flow_extracts_out_of_coverage_location_from_message(self):
+        session = make_session(
+            customer_name="Jorge",
+            step="ask_location",
+            last_message="en bogota",
+        )
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "assistant_message": "¿Estás en Medellín?",
+            },
+        )
+
+        self.assertEqual(next_step, "out_of_coverage")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["location"], "bogota")
+        self.assertNotIn("municipio cercano", reply.lower())
+
+    def test_simple_flow_asks_vehicle_after_location(self):
+        session = make_session(
+            customer_name="Laura",
+            last_message="Estoy en Medellin",
+        )
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "location": "Medellin",
+                "assistant_message": "¿Qué precio buscas?",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_vehicle")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["location"], "Medellin")
+        self.assertIn("qué carro manejas", reply.lower())
+        self.assertIn("marca", reply.lower())
+        self.assertIn("línea/modelo", reply.lower())
+
+    def test_simple_flow_asks_only_missing_vehicle_field(self):
+        session = make_session(
+            customer_name="Laura",
+            location="Medellin",
+            vehicle_brand="Mazda",
+            vehicle_model="3",
+            last_message="Mazda 3",
+        )
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "assistant_message": "Listo, ya casi.",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_vehicle")
+        self.assertTrue(should_send)
+        self.assertIn("año", reply.lower())
+        self.assertNotIn("marca, línea/modelo y año", reply.lower())
+
+    def test_simple_flow_corrects_misspelled_vehicle_from_message(self):
+        session = make_session(
+            customer_name="Jorge",
+            location="Envigado",
+            last_message="masda 3 2023",
+        )
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "assistant_message": "¿Qué carro manejas?",
+            },
+        )
+
+        self.assertEqual(next_step, "advisor_handoff")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["vehicle_brand"], "Mazda")
+        self.assertEqual(vals["vehicle_model"], "3")
+        self.assertEqual(vals["vehicle_year"], "2023")
+        self.assertIn("Mazda", reply)
+        self.assertIn("asesor", reply.lower())
+
+    def test_simple_flow_does_not_use_name_as_vehicle_model(self):
+        session = make_session(last_message="Jorge y tengo un chebrolet")
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "customer_name": "Jorge",
+                "vehicle_brand": "chebrolet",
+                "vehicle_model": "jorge y",
+                "assistant_message": "¿Dónde estás?",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_location")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["customer_name"], "Jorge")
+        self.assertEqual(vals["vehicle_brand"], "Chevrolet")
+        self.assertNotIn("vehicle_model", vals)
+        self.assertNotIn("hasta ahora tengo", reply.lower())
+        self.assertIn("medellín", reply.lower())
+        self.assertNotIn("jorge y", reply.lower())
+
+    def test_simple_flow_hands_off_to_advisor_with_minimum_data(self):
+        session = make_session(last_message="Soy Laura, Mazda 3 2020 placa ABC123")
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "customer_name": "Laura",
+                "location": "Medellin",
+                "vehicle_brand": "Mazda",
+                "vehicle_model": "3",
+                "vehicle_year": "2020",
+                "plate": "ABC123",
+                "assistant_message": "Confirma tus datos.",
+            },
+        )
+
+        self.assertEqual(next_step, "advisor_handoff")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["customer_name"], "Laura")
+        self.assertEqual(vals["location"], "Medellin")
+        self.assertEqual(vals["vehicle_brand"], "Mazda")
+        self.assertEqual(vals["vehicle_model"], "3")
+        self.assertEqual(vals["vehicle_year"], "2020")
+        self.assertEqual(vals["plate"], "ABC123")
+        self.assertIn("asesor", reply.lower())
+        self.assertNotIn("confirma", reply.lower())
 
     def test_name_only_then_asks_for_vehicle(self):
         session = make_session(last_message="Soy Andres.")

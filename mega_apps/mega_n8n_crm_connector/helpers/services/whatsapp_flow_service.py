@@ -11,11 +11,13 @@ from ...helpers.whatsapp_session_helper import (
     get_active_session,
     whatsapp_response,
     build_ai_session_update,
+    build_simple_ai_session_update,
     get_safe_reply,
     mark_welcome_sent_on_session,
     reply_contains_full_welcome,
 )
 from ...helpers.whatsapp_ai_prompt import get_ai_instruction
+from ...helpers.whatsapp_ai_prompt_simple import get_simple_ai_instruction
 from ...helpers.whatsapp_messages import get_confirmation_message
 from ...helpers.constants import NO_ACTIVE_SESSION_REPLY
 from ...helpers.constants import (
@@ -41,6 +43,7 @@ from ...helpers.whatsapp_chatter_helper import (
     log_customer_message_on_lead_from_session,
 )
 from ...helpers.wompi_payment_helper import create_wompi_payment_link
+from ...helpers.whatsapp_flow_mode_helper import is_simple_whatsapp_flow
 
 _logger = logging.getLogger(__name__)
 
@@ -357,6 +360,12 @@ def build_ai_context_response(self, **post):
             phone_number_id,
         )
 
+        ai_instruction = (
+            get_simple_ai_instruction(session, message)
+            if is_simple_whatsapp_flow(request.env)
+            else get_ai_instruction(session, message)
+        )
+
         if created:
             _logger.info("\n\n\n Primer mensaje se enviara a IA para captura progresiva \n\n\n")
             return {
@@ -378,7 +387,7 @@ def build_ai_context_response(self, **post):
                 "location": session.location or "",
                 "plate": getattr(session, "plate", "") or "",
                 "last_message": message,
-                "ai_instruction": get_ai_instruction(session, message),
+                "ai_instruction": ai_instruction,
                 "session": session_snapshot(session),
             }
 
@@ -414,7 +423,7 @@ def build_ai_context_response(self, **post):
             "location": session.location or "",
             "plate": getattr(session, "plate", "") or "",
             "last_message": message,
-            "ai_instruction": get_ai_instruction(session, message),
+            "ai_instruction": ai_instruction,
             "session": session_snapshot(session),
         }
 
@@ -445,10 +454,16 @@ def apply_ai_to_whatsapp_session(self, **post):
             should_send=False,
         )
 
-    next_step, should_send, reply, vals = build_ai_session_update(
-        session,
-        ai_result,
-    )
+    if is_simple_whatsapp_flow(request.env):
+        next_step, should_send, reply, vals = build_simple_ai_session_update(
+            session,
+            ai_result,
+        )
+    else:
+        next_step, should_send, reply, vals = build_ai_session_update(
+            session,
+            ai_result,
+        )
 
     session.write(vals)
 

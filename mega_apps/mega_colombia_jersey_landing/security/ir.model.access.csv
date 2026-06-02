@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mega_jersey_contest_participant_user,access_mega_jersey_contest_participant_user,model_mega_jersey_contest_participant,base.group_user,1,1,1,1
+access_mega_jersey_contest_draw_user,access_mega_jersey_contest_draw_user,model_mega_jersey_contest_draw,base.group_user,1,1,1,1

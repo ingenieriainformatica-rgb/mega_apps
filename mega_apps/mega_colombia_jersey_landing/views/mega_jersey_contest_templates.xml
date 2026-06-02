@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="template_mega_jersey_landing" name="Mega Fiesta del Fútbol">
+        <html lang="es">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <title>MEGA fiesta del fútbol</title>
+                <style>
+                    * { box-sizing: border-box; }
+                    :root {
+                        --mega-blue: #063a78;
+                        --mega-blue-dark: #061b35;
+                        --mega-yellow: #ffc400;
+                        --mega-green: #36a853;
+                        --mega-ink: #071426;
+                        --mega-muted: #647084;
+                    }
+                    body {
+                        margin: 0;
+                        min-height: 100vh;
+                        font-family: Arial, Helvetica, sans-serif;
+                        background:
+                            radial-gradient(circle at top left, rgba(255, 196, 0, 0.18), transparent 34%),
+                            linear-gradient(135deg, #071426 0%, #063a78 55%, #071426 100%);
+                        color: var(--mega-ink);
+                        display: flex;
+                        align-items: flex-start;
+                        justify-content: center;
+                        padding: 44px 18px 28px;
+                    }
+                    .mega-shell {
+                        width: 100%;
+                        max-width: 1040px;
+                    }
+                    .mega-card {
+                        width: 100%;
+                        background: #ffffff;
+                        border: 1px solid rgba(255, 255, 255, 0.18);
+                        border-radius: 8px;
+                        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+                        overflow: hidden;
+                    }
+                    .mega-hero {
+                        position: relative;
+                        padding: 24px 34px 18px;
+                        background:
+                            linear-gradient(90deg, rgba(6, 58, 120, 0.98), rgba(7, 20, 38, 0.94)),
+                            linear-gradient(135deg, var(--mega-blue), var(--mega-blue-dark));
+                        color: #ffffff;
+                    }
+                    .mega-hero:before {
+                        content: "";
+                        position: absolute;
+                        inset: 0 0 auto 0;
+                        height: 7px;
+                        background: var(--mega-yellow);
+                    }
+                    .mega-form-wrap {
+                        padding: 28px 34px 34px;
+                    }
+                    .mega-hero-inner {
+                        display: grid;
+                        grid-template-columns: minmax(0, 1fr) 220px;
+                        gap: 28px;
+                        align-items: center;
+                    }
+                    .mega-hero-copy {
+                        min-width: 0;
+                    }
+                    .mega-logo-panel {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 190px;
+                        padding: 20px;
+                    }
+                    .mega-logo-frame {
+                        display: grid;
+                        place-items: center;
+                        width: 132px;
+                        height: 132px;
+                        padding: 16px;
+                        border: 3px solid var(--mega-yellow);
+                        border-radius: 8px;
+                        background: #ffffff;
+                    }
+                    .mega-logo {
+                        display: block;
+                        width: 100%;
+                        height: 100%;
+                        object-fit: contain;
+                    }
+                    .mega-logo-caption {
+                        margin-top: 12px;
+                        color: #ffffff;
+                        font-size: 14px;
+                        font-weight: 900;
+                        letter-spacing: 0.4px;
+                        text-transform: uppercase;
+                    }
+                    .mega-title {
+                        margin: 0 0 10px;
+                        max-width: 820px;
+                        font-size: clamp(26px, 3.6vw, 38px);
+                        line-height: 1.07;
+                        color: #ffffff;
+                    }
+                    .mega-subtitle {
+                        margin: 0 0 10px;
+                        color: #dce8f7;
+                        font-size: 17px;
+                    }
+                    .mega-draw-date {
+                        display: inline-flex;
+                        align-items: center;
+                        margin: 0;
+                        padding: 7px 10px;
+                        border-radius: 6px;
+                        background: rgba(255, 196, 0, 0.14);
+                        border: 1px solid rgba(255, 196, 0, 0.55);
+                        color: #ffffff;
+                        font-size: 14px;
+                        font-weight: 800;
+                    }
+                    .mega-pills {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        margin-top: 12px;
+                    }
+                    .mega-pill {
+                        border: 1px solid rgba(255, 255, 255, 0.22);
+                        border-radius: 999px;
+                        padding: 6px 10px;
+                        color: #ffffff;
+                        background: rgba(255, 255, 255, 0.08);
+                        font-size: 12px;
+                        font-weight: 700;
+                    }
+                    .mega-pill.is-yellow {
+                        border-color: var(--mega-yellow);
+                        background: var(--mega-yellow);
+                        color: var(--mega-blue-dark);
+                    }
+                    .mega-errors {
+                        margin: 0 0 18px;
+                        padding: 12px 14px;
+                        border: 1px solid #f0b8b8;
+                        background: #fff3f3;
+                        color: #9b1c1c;
+                        border-radius: 6px;
+                    }
+                    .mega-grid {
+                        display: grid;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 16px;
+                    }
+                    .mega-field label {
+                        display: block;
+                        margin: 0 0 6px;
+                        font-weight: 700;
+                        font-size: 14px;
+                        color: var(--mega-ink);
+                    }
+                    .mega-field input,
+                    .mega-field select {
+                        width: 100%;
+                        min-height: 46px;
+                        border: 1px solid #cbd6e4;
+                        border-radius: 6px;
+                        padding: 10px 12px;
+                        font-size: 15px;
+                        background: #fbfdff;
+                        color: var(--mega-ink);
+                        outline: none;
+                    }
+                    .mega-field input:focus,
+                    .mega-field select:focus {
+                        border-color: var(--mega-blue);
+                        box-shadow: 0 0 0 3px rgba(6, 58, 120, 0.12);
+                    }
+                    .mega-wide { grid-column: 1 / -1; }
+                    .mega-checks {
+                        display: grid;
+                        gap: 12px;
+                        margin: 20px 0;
+                    }
+                    .mega-check {
+                        display: flex;
+                        gap: 10px;
+                        align-items: flex-start;
+                        padding: 12px;
+                        border: 1px solid #dfe6f0;
+                        border-radius: 6px;
+                        background: #f7faff;
+                        font-size: 14px;
+                        line-height: 1.35;
+                    }
+                    .mega-check input {
+                        margin-top: 2px;
+                        width: 18px;
+                        height: 18px;
+                        flex: 0 0 auto;
+                    }
+                    .mega-check a {
+                        color: var(--mega-blue);
+                        font-weight: 800;
+                        text-decoration: underline;
+                    }
+                    .mega-button {
+                        width: 100%;
+                        min-height: 48px;
+                        border: 0;
+                        border-radius: 6px;
+                        background: var(--mega-yellow);
+                        color: var(--mega-blue-dark);
+                        font-size: 17px;
+                        font-weight: 800;
+                        cursor: pointer;
+                        box-shadow: 0 10px 20px rgba(255, 196, 0, 0.25);
+                    }
+                    .mega-button:hover { background: #eebd00; }
+                    @media (max-width: 640px) {
+                        body { padding: 14px; align-items: flex-start; }
+                        body { padding-top: 20px; }
+                        .mega-hero,
+                        .mega-form-wrap { padding-left: 22px; padding-right: 22px; }
+                        .mega-hero-inner {
+                            grid-template-columns: 1fr;
+                            gap: 18px;
+                        }
+                        .mega-logo-panel {
+                            min-height: auto;
+                            flex-direction: row;
+                            justify-content: flex-start;
+                            padding: 14px;
+                        }
+                        .mega-logo-frame {
+                            width: 72px;
+                            height: 72px;
+                            padding: 8px;
+                            border-width: 2px;
+                        }
+                        .mega-logo-caption {
+                            margin: 0 0 0 12px;
+                            font-size: 13px;
+                        }
+                        .mega-grid { grid-template-columns: 1fr; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="mega-shell">
+                    <main class="mega-card">
+                        <section class="mega-hero">
+                            <div class="mega-hero-inner">
+                                <div class="mega-hero-copy">
+                                    <h1 class="mega-title">Gánate la camiseta original de la Selección Colombia para que vivas la MEGA fiesta del fútbol ⚽🇨🇴</h1>
+                                    <p class="mega-subtitle">Deja tus datos para participar.</p>
+                                    <div class="mega-draw-date">El sorteo se realizará el 13 de junio.</div>
+                                </div>
+                                <div class="mega-logo-panel">
+                                    <div class="mega-logo-frame">
+                                        <img class="mega-logo" src="/mega_colombia_jersey_landing/static/description/icon.png" alt="Mega Baterías"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <div class="mega-form-wrap">
+                            <t t-if="errors">
+                                <div class="mega-errors">
+                                    <t t-foreach="errors" t-as="error">
+                                        <div t-esc="error"/>
+                                    </t>
+                                </div>
+                            </t>
+
+                            <form action="/mega-fiesta-futbol/submit" method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <div class="mega-grid">
+                                    <div class="mega-field">
+                                        <label for="name">Nombre completo</label>
+                                        <input id="name" name="name" type="text" required="required" t-att-value="form.get('name', '')"/>
+                                    </div>
+                                    <div class="mega-field">
+                                        <label for="vat">Cédula</label>
+                                        <input id="vat" name="vat" type="text" required="required" t-att-value="form.get('vat', '')"/>
+                                    </div>
+                                    <div class="mega-field">
+                                        <label for="phone">Número de celular</label>
+                                        <input id="phone" name="phone" type="tel" required="required" t-att-value="form.get('phone', '')"/>
+                                    </div>
+                                    <div class="mega-field">
+                                        <label for="email">Correo electrónico</label>
+                                        <input id="email" name="email" type="email" required="required" t-att-value="form.get('email', '')"/>
+                                    </div>
+                                    <div class="mega-field mega-wide">
+                                        <label for="street">Dirección</label>
+                                        <input id="street" name="street" type="text" required="required" t-att-value="form.get('street', '')"/>
+                                    </div>
+                                    <div class="mega-field">
+                                        <label for="license_plate">Placa</label>
+                                        <input id="license_plate" name="license_plate" type="text" required="required" t-att-value="form.get('license_plate', '')"/>
+                                    </div>
+                                    <div class="mega-field">
+                                        <label for="vehicle_info">Marca y modelo</label>
+                                        <input id="vehicle_info" name="vehicle_info" type="text" required="required" t-att-value="form.get('vehicle_info', '')"/>
+                                    </div>
+                                    <div class="mega-field mega-wide">
+                                        <label for="service_acquired">Servicio adquirido</label>
+                                        <select id="service_acquired" name="service_acquired" required="required">
+                                            <option value="">Selecciona un servicio</option>
+                                            <option value="baterias" t-att-selected="'selected' if form.get('service_acquired') == 'baterias' else None">Baterías</option>
+                                            <option value="llantas" t-att-selected="'selected' if form.get('service_acquired') == 'llantas' else None">Llantas</option>
+                                            <option value="mega_combo" t-att-selected="'selected' if form.get('service_acquired') == 'mega_combo' else None">MegaCombo</option>
+                                            <option value="mecanica_especializada" t-att-selected="'selected' if form.get('service_acquired') == 'mecanica_especializada' else None">Mecánica especializada</option>
+                                            <option value="cambio_aceite" t-att-selected="'selected' if form.get('service_acquired') == 'cambio_aceite' else None">Cambio de aceite</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mega-checks">
+                                    <label class="mega-check">
+                                        <input name="accept_data_policy" type="checkbox" required="required" t-att-checked="'checked' if form.get('accept_data_policy') else None"/>
+                                        <span>
+                                            Autorizo el tratamiento de mis datos personales y uso de imagen por parte de CENTRO DE SERVICIO AUTOMOTRIZ MEGA S.A.S.
+                                            Conforme a la Política HABEAS DATA y acepto los
+                                            <a href="/teminos-condiciones-sorteo" target="_blank" rel="noopener noreferrer">términos y condiciones del sorteo</a>.
+                                        </span>
+                                    </label>
+                                    <label class="mega-check">
+                                        <input name="accept_commercial_info" type="checkbox" required="required" t-att-checked="'checked' if form.get('accept_commercial_info') else None"/>
+                                        <span>Autorizo el envío de información comercial, promociones y novedades a través de los canales de contacto suministrados.</span>
+                                    </label>
+                                </div>
+
+                                <button class="mega-button" type="submit">Participar</button>
+                            </form>
+                        </div>
+                    </main>
+                </div>
+            </body>
+        </html>
+    </template>
+
+    <template id="template_mega_jersey_thank_you" name="Gracias MEGA Fiesta del Fútbol">
+        <html lang="es">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <title>Gracias por participar</title>
+                <style>
+                    * { box-sizing: border-box; }
+                    :root {
+                        --mega-blue: #063a78;
+                        --mega-blue-dark: #061b35;
+                        --mega-yellow: #ffc400;
+                        --mega-ink: #071426;
+                    }
+                    body {
+                        margin: 0;
+                        min-height: 100vh;
+                        font-family: Arial, Helvetica, sans-serif;
+                        background:
+                            radial-gradient(circle at top left, rgba(255, 196, 0, 0.18), transparent 34%),
+                            linear-gradient(135deg, #071426 0%, #063a78 55%, #071426 100%);
+                        color: var(--mega-ink);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 24px;
+                    }
+                    .mega-card {
+                        width: 100%;
+                        max-width: 640px;
+                        background: #ffffff;
+                        border-radius: 8px;
+                        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+                        padding: 34px;
+                        text-align: center;
+                    }
+                    .mega-mark {
+                        display: inline-grid;
+                        place-items: center;
+                        width: 58px;
+                        height: 58px;
+                        margin-bottom: 16px;
+                        border-radius: 8px;
+                        background: var(--mega-yellow);
+                        color: var(--mega-blue-dark);
+                        font-weight: 900;
+                    }
+                    h1 {
+                        margin: 0 0 16px;
+                        color: var(--mega-blue);
+                        font-size: clamp(28px, 5vw, 40px);
+                    }
+                    p {
+                        margin: 0;
+                        color: #354157;
+                        font-size: 18px;
+                        line-height: 1.45;
+                    }
+                </style>
+            </head>
+            <body>
+                <main class="mega-card">
+                    <div class="mega-mark">MEGA</div>
+                    <h1>¡Gracias por participar!</h1>
+                    <p>¡Gracias por participar! Tus datos fueron registrados correctamente. Te deseamos mucha suerte en la MEGA fiesta del fútbol ⚽🇨🇴</p>
+                </main>
+            </body>
+        </html>
+    </template>
+</odoo>
