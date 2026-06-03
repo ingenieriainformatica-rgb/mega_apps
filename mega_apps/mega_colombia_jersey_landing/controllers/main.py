@@ -1,9 +1,14 @@
 import logging
 import re
 
+from psycopg2 import IntegrityError  # type: ignore
+
 from odoo import http  # type: ignore
+from odoo.exceptions import ValidationError  # type: ignore
 from odoo.http import request  # type: ignore
 from werkzeug.exceptions import NotFound  # type: ignore
+
+from ..models.mega_jersey_contest_participant import DUPLICATE_VAT_MESSAGE
 
 _logger = logging.getLogger(__name__)
 
@@ -46,6 +51,12 @@ class MegaJerseyContestController(http.Controller):
             "errors": errors or [],
             "form": form or {},
         }
+
+    def _render_landing_with_errors(self, errors, form):
+        return request.render(
+            "mega_colombia_jersey_landing.template_mega_jersey_landing",
+            self._landing_values(errors=errors, form=form),
+        )
 
     @http.route("/mega-fiesta-futbol", type="http", auth="public", website=True)
     def mega_jersey_landing(self, **kwargs):
@@ -97,21 +108,36 @@ class MegaJerseyContestController(http.Controller):
                     "accept_commercial_info": accept_commercial_info,
                 }
             )
-            return request.render(
-                "mega_colombia_jersey_landing.template_mega_jersey_landing",
-                self._landing_values(errors=errors, form=form),
-            )
+            return self._render_landing_with_errors(errors, form)
 
-        request.env["mega.jersey.contest.participant"].sudo().create(
+        Participant = request.env["mega.jersey.contest.participant"].sudo()
+        vat_normalized = Participant._normalize_vat(form.get("vat"))
+        form.update(
             {
-                **form,
                 "accept_data_policy": accept_data_policy,
                 "accept_commercial_info": accept_commercial_info,
-                "website_id": request.website.id,
-                "ip_address": self._get_client_ip(),
-                "user_agent": request.httprequest.headers.get("User-Agent", ""),
             }
         )
+
+        if Participant.search_count([("vat_normalized", "=", vat_normalized)]):
+            return self._render_landing_with_errors([DUPLICATE_VAT_MESSAGE], form)
+
+        try:
+            Participant.create(
+                {
+                    **form,
+                    "website_id": request.website.id,
+                    "ip_address": self._get_client_ip(),
+                    "user_agent": request.httprequest.headers.get("User-Agent", ""),
+                }
+            )
+        except IntegrityError:
+            request.env.cr.rollback()
+            return self._render_landing_with_errors([DUPLICATE_VAT_MESSAGE], form)
+        except ValidationError as error:
+            request.env.cr.rollback()
+            message = error.args[0] if error.args else DUPLICATE_VAT_MESSAGE
+            return self._render_landing_with_errors([message], form)
 
         return request.render(
             "mega_colombia_jersey_landing.template_mega_jersey_thank_you"

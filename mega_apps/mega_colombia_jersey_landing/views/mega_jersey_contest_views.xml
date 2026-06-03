@@ -8,6 +8,7 @@
             <list string="Participantes Concurso Camiseta Selección">
                 <field name="name"/>
                 <field name="vat"/>
+                <field name="vat_normalized" optional="hide"/>
                 <field name="phone"/>
                 <field name="email"/>
                 <field name="license_plate"/>
@@ -30,6 +31,7 @@
                         <group string="Datos personales">
                             <field name="name"/>
                             <field name="vat"/>
+                            <field name="vat_normalized" readonly="1"/>
                             <field name="phone"/>
                             <field name="email"/>
                             <field name="street"/>
@@ -62,6 +64,7 @@
             <search string="Buscar participantes">
                 <field name="name"/>
                 <field name="vat"/>
+                <field name="vat_normalized"/>
                 <field name="phone"/>
                 <field name="email"/>
                 <field name="license_plate"/>
