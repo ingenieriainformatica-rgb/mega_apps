@@ -1,0 +1,506 @@
+import logging
+import time
+
+from markupsafe import Markup, escape
+
+from odoo.tools import html2plaintext, plaintext2html  # type: ignore
+
+
+_logger = logging.getLogger(__name__)
+
+HUMAN_HANDOFF_STEPS = {"advisor_handoff", "after_hours_handoff"}
+
+
+def ensure_discuss_channel_for_session(env, session, lead=None):
+    """Create or reuse the Discuss/WhatsApp channel linked to a WhatsApp session."""
+    if not session:
+        return False
+
+    session = session.sudo()
+    lead = (lead or session.lead_id).sudo()
+    if _is_public_env_user(env):
+        _logger.info("[WHATSAPP DISCUSS] Public user detected, using sudo fallback")
+
+    _logger.info(
+        "[WHATSAPP DISCUSS] Ensuring channel session=%s lead=%s",
+        session.id,
+        lead.id if lead else False,
+    )
+
+    if session.discuss_channel_id:
+        channel = session.discuss_channel_id.sudo()
+        _ensure_channel_members(channel, _get_internal_partners(env, lead, channel=channel))
+        _post_summary_once(env, session, channel, lead)
+        _notify_internal_members(channel)
+        _logger.info(
+            "[WHATSAPP DISCUSS] Channel reused session=%s channel=%s",
+            session.id,
+            channel.id,
+        )
+        return channel
+
+    channel = _get_or_create_whatsapp_channel(env, session, lead)
+    if not channel:
+        channel = _create_internal_discuss_channel(env, session, lead)
+
+    if not channel:
+        return False
+
+    session.write({"discuss_channel_id": channel.id})
+    _ensure_channel_members(channel, _get_internal_partners(env, lead, channel=channel))
+    _post_summary_once(env, session, channel, lead)
+    _notify_internal_members(channel)
+    _logger.info(
+        "[WHATSAPP DISCUSS] Channel created session=%s channel=%s",
+        session.id,
+        channel.id,
+    )
+    return channel
+
+
+def ensure_discuss_channel_for_handoff(env, session, lead=None):
+    """Backward-compatible wrapper used by the existing handoff flow."""
+    if not session or session.step not in HUMAN_HANDOFF_STEPS:
+        return False
+    return ensure_discuss_channel_for_session(env, session, lead=lead)
+
+
+def post_inbound_whatsapp_message_to_discuss(env, session, message_text, wa_message_id=None):
+    """Post an inbound customer WhatsApp message on the session Discuss channel."""
+    if not session:
+        return False
+
+    session = session.sudo()
+    message_text = (message_text or "").strip()
+    wa_message_id = (wa_message_id or "").strip()
+
+    if not message_text:
+        _logger.info(
+            "[WHATSAPP DISCUSS] No message text, skipping post session=%s",
+            session.id,
+        )
+        return False
+
+    if (
+        wa_message_id
+        and "last_inbound_message_id" in session._fields
+        and session.last_inbound_message_id == wa_message_id
+    ):
+        _logger.info(
+            "[WHATSAPP DISCUSS] Duplicate inbound ignored session=%s message_id=%s",
+            session.id,
+            wa_message_id,
+        )
+        return False
+
+    channel = ensure_discuss_channel_for_session(env, session, lead=session.lead_id)
+    if not channel:
+        return False
+
+    if wa_message_id and _whatsapp_message_exists(env, wa_message_id):
+        _logger.info(
+            "[WHATSAPP DISCUSS] Duplicate inbound ignored session=%s message_id=%s",
+            session.id,
+            wa_message_id,
+        )
+        _notify_internal_members(channel)
+        return False
+
+    author_id = (
+        channel.whatsapp_partner_id.id
+        if channel.channel_type == "whatsapp" and channel.whatsapp_partner_id
+        else _get_author_partner_id(env)
+    )
+    message_kwargs = {
+        "body": plaintext2html(message_text),
+        "subtype_xmlid": "mail.mt_comment",
+        "author_id": author_id or None,
+    }
+
+    if channel.channel_type == "whatsapp" and wa_message_id:
+        message_kwargs["message_type"] = "whatsapp_message"
+        message_kwargs["whatsapp_inbound_msg_uid"] = wa_message_id
+    else:
+        # Without Meta's message id, never use whatsapp_message: Odoo would treat it
+        # as outbound and could send it back to the customer.
+        message_kwargs["message_type"] = "comment"
+
+    channel.sudo().message_post(**message_kwargs)
+    _notify_internal_members(channel)
+    _logger.info(
+        "[WHATSAPP DISCUSS] Inbound posted session=%s message_id=%s",
+        session.id,
+        wa_message_id or False,
+    )
+    return True
+
+
+def post_outbound_whatsapp_message_to_discuss(env, session, message_text):
+    """Post an outbound bot/advisor message on Discuss without sending it to Meta."""
+    if not session:
+        return False
+
+    session = session.sudo()
+    message_text = (message_text or "").strip()
+    if not message_text:
+        _logger.info(
+            "[WHATSAPP DISCUSS] No message text, skipping post session=%s",
+            session.id,
+        )
+        return False
+
+    channel = ensure_discuss_channel_for_session(env, session, lead=session.lead_id)
+    if not channel:
+        return False
+
+    channel.sudo().message_post(
+        body=plaintext2html(message_text),
+        message_type="comment",
+        subtype_xmlid="mail.mt_comment",
+        author_id=_get_author_partner_id(env) or None,
+    )
+    _notify_internal_members(channel)
+    _logger.info("[WHATSAPP DISCUSS] Outbound posted session=%s", session.id)
+    return True
+
+
+def log_inbound_message_on_discuss_channel(session, message, message_id=None):
+    """Backward-compatible wrapper for previous callers."""
+    if not session:
+        return False
+    return post_inbound_whatsapp_message_to_discuss(
+        session.env,
+        session,
+        message,
+        wa_message_id=message_id,
+    )
+
+
+def _get_or_create_whatsapp_channel(env, session, lead):
+    account = _get_whatsapp_account(env, session)
+    if not account:
+        return False
+
+    phone = _normalize_whatsapp_phone(session.phone)
+    if not phone:
+        return False
+
+    related_message = _get_related_message_for_whatsapp_channel(env, lead)
+    return env["discuss.channel"].sudo()._get_whatsapp_channel(
+        whatsapp_number=phone,
+        wa_account_id=account.sudo(),
+        sender_name=(session.customer_name or "").strip() or False,
+        create_if_not_found=True,
+        related_message=related_message,
+    )
+
+
+def _create_internal_discuss_channel(env, session, lead):
+    partner_ids = _get_internal_partners(env, lead).ids
+    if not partner_ids:
+        _logger.warning(
+            "[WHATSAPP DISCUSS] No internal users found, creating channel without members session=%s",
+            session.id,
+        )
+
+    return env["discuss.channel"].sudo().create(
+        {
+            "name": _build_channel_name(session, lead),
+            "channel_type": "group",
+            "channel_member_ids": [
+                (0, 0, {"partner_id": partner_id}) for partner_id in partner_ids
+            ],
+        }
+    )
+
+
+def _get_related_message_for_whatsapp_channel(env, lead):
+    if lead:
+        return lead.sudo().message_post(
+            body=Markup("<p>Conversacion WhatsApp entregada a asesor humano.</p>"),
+            message_type="comment",
+            subtype_xmlid="mail.mt_comment",
+        )
+    return env["mail.message"].sudo().browse()
+
+
+def _post_summary_once(env, session, channel, lead):
+    if not channel or not session or "discuss_summary_posted" not in session._fields:
+        return False
+
+    if session.discuss_summary_posted:
+        return False
+
+    lead_link = Markup("Sin lead vinculado")
+    if lead:
+        lead_url = _get_lead_url(env, lead)
+        lead_link = Markup('<a target="_blank" href="%s">%s</a>') % (
+            escape(lead_url),
+            escape(lead.display_name),
+        )
+
+    body = Markup(
+        """
+        <div>
+            <p><strong>💬 Nuevo lead de WhatsApp</strong></p>
+            <p>
+                <strong>Cliente:</strong> %s<br/>
+                <strong>Teléfono:</strong> %s<br/>
+                <strong>Ubicación:</strong> %s<br/>
+                <strong>Vehículo:</strong> %s<br/>
+                <strong>Lead CRM:</strong> %s<br/>
+                <strong>Estado:</strong> %s
+            </p>
+            <p><strong>Resumen:</strong><br/>%s</p>
+        </div>
+        """
+    ) % (
+        escape(session.customer_name or "Sin nombre"),
+        escape(session.phone or ""),
+        escape(session.location or session.neighborhood or session.city or "Sin ubicación"),
+        escape(_get_vehicle_label(session)),
+        lead_link,
+        escape(session.step or ""),
+        escape(
+            session.conversation_summary
+            or session.relevant_data
+            or _get_recent_lead_history(lead)
+            or session.last_message
+            or "Sin resumen disponible."
+        ).replace("\n", Markup("<br/>")),
+    )
+
+    channel.sudo().message_post(
+        body=body,
+        message_type="comment",
+        subtype_xmlid="mail.mt_comment",
+        author_id=_get_author_partner_id(env) or None,
+    )
+    session.write({"discuss_summary_posted": True})
+    _logger.info(
+        "[WHATSAPP DISCUSS] Summary posted session=%s channel=%s",
+        session.id,
+        channel.id,
+    )
+    return True
+
+
+def _whatsapp_message_exists(env, wa_message_id):
+    return bool(
+        wa_message_id
+        and env["whatsapp.message"].sudo().search_count([("msg_uid", "=", wa_message_id)])
+    )
+
+
+def _get_whatsapp_account(env, session):
+    Account = env["whatsapp.account"].sudo()
+    phone_number_id = (session.phone_number_id or "").strip()
+    account = Account.search([("phone_uid", "=", phone_number_id)], limit=1) if phone_number_id else Account
+    return account or Account.search([], limit=1)
+
+
+def _normalize_whatsapp_phone(phone):
+    return "".join(char for char in (phone or "") if char.isdigit())
+
+
+def _get_internal_partners(env, lead, channel=False):
+    Partner = env["res.partner"].sudo()
+    partners = Partner
+
+    if lead:
+        lead_user = lead.sudo().user_id.sudo()
+        if _is_internal_user(lead_user):
+            partners |= lead_user.partner_id.sudo()
+
+    if channel and channel.channel_type == "whatsapp" and channel.wa_account_id:
+        notify_users = _filter_internal_users(channel.sudo().wa_account_id.sudo().notify_user_ids.sudo())
+        partners |= notify_users.partner_id.sudo()
+
+    if not partners:
+        configured_users = _get_configured_internal_users(env)
+        partners |= configured_users.partner_id.sudo()
+
+    if not partners:
+        admin_partner = _get_admin_partner(env)
+        if admin_partner:
+            partners |= admin_partner
+
+    partners = partners.sudo().filtered(_partner_has_internal_user)
+    _logger.info(
+        "[WHATSAPP DISCUSS] Internal users selected: %s",
+        ", ".join(partners.mapped("name")) if partners else "none",
+    )
+    return partners
+
+
+def _ensure_channel_members(channel, partners):
+    if not channel or not partners:
+        return
+
+    channel = channel.sudo()
+    partners = partners.sudo().filtered(_partner_has_internal_user)
+    if not partners:
+        _logger.warning(
+            "[WHATSAPP DISCUSS] No valid internal partners to add channel=%s",
+            channel.id,
+        )
+        return
+
+    missing_partners = partners - channel.channel_member_ids.sudo().partner_id.sudo()
+    if missing_partners:
+        channel.sudo().add_members(
+            partner_ids=missing_partners.ids,
+            open_chat_window=True,
+            post_joined_message=False,
+        )
+
+
+def _notify_internal_members(channel):
+    channel = channel.sudo()
+    internal_members = channel.channel_member_ids.sudo().filtered(
+        lambda member: _partner_has_internal_user(member.sudo().partner_id.sudo())
+    )
+    for member in internal_members:
+        _force_open_chat_window(member)
+
+    internal_partner_ids = internal_members.sudo().partner_id.sudo().ids
+    if internal_partner_ids:
+        channel.sudo()._broadcast(internal_partner_ids)
+
+
+def _force_open_chat_window(member):
+    member = member.sudo()
+    if member.unpin_dt:
+        member.unpin_dt = False
+    member.fold_state = "open"
+    member._bus_send(
+        "discuss.Thread/fold_state",
+        {
+            "fold_state": "open",
+            "foldStateCount": int(time.time()),
+            "id": member.channel_id.id,
+            "model": "discuss.channel",
+        },
+    )
+
+
+def _get_author_partner_id(env):
+    user = env.user.sudo()
+    if _is_internal_user(user):
+        return user.partner_id.sudo().id
+
+    if _is_public_env_user(env):
+        _logger.info("[WHATSAPP DISCUSS] Public user detected, using sudo fallback")
+
+    admin_partner = _get_admin_partner(env)
+    return admin_partner.id if admin_partner else False
+
+
+def _is_public_env_user(env):
+    user = env.user.sudo()
+    return bool(user and user._is_public())
+
+
+def _is_internal_user(user):
+    user = user.sudo()
+    return bool(
+        user
+        and user.exists()
+        and user.active
+        and not user.share
+        and not user._is_public()
+        and user.partner_id
+        and user.partner_id.active
+    )
+
+
+def _filter_internal_users(users):
+    return users.sudo().filtered(_is_internal_user)
+
+
+def _partner_has_internal_user(partner):
+    partner = partner.sudo()
+    return bool(
+        partner
+        and partner.exists()
+        and partner.active
+        and _filter_internal_users(partner.user_ids.sudo())
+    )
+
+
+def _get_configured_internal_users(env):
+    config = env["ir.config_parameter"].sudo()
+    group_xmlid = (
+        config.get_param("mega_n8n_crm_connector.whatsapp_discuss_internal_group_xmlid")
+        or config.get_param("mega_whatsapp_discuss_internal_group_xmlid")
+        or ""
+    ).strip()
+    if not group_xmlid:
+        return env["res.users"].sudo().browse()
+
+    group = env.ref(group_xmlid, raise_if_not_found=False)
+    if not group:
+        _logger.warning("[WHATSAPP DISCUSS] Configured group not found: %s", group_xmlid)
+        return env["res.users"].sudo().browse()
+
+    return _filter_internal_users(group.sudo().users.sudo())
+
+
+def _get_admin_partner(env):
+    admin = env.ref("base.user_admin", raise_if_not_found=False)
+    admin = admin.sudo() if admin else admin
+    if _is_internal_user(admin):
+        return admin.partner_id.sudo()
+    return env["res.partner"].sudo().browse()
+
+
+def _build_channel_name(session, lead):
+    label = (session.customer_name or session.phone or f"Sesión {session.id}").strip()
+    return f"WhatsApp - {label} - {lead.name}" if lead else f"WhatsApp - {label}"
+
+
+def _get_vehicle_label(session):
+    parts = [
+        session.vehicle_brand or "",
+        session.vehicle_model or "",
+        session.vehicle_year or "",
+    ]
+    vehicle = " ".join(part for part in parts if part).strip()
+    return vehicle or session.vehicle_info or "Sin vehículo"
+
+
+def _get_recent_lead_history(lead, limit=8):
+    if not lead:
+        return ""
+
+    messages = lead.env["mail.message"].sudo().search(
+        [
+            ("model", "=", "crm.lead"),
+            ("res_id", "=", lead.id),
+            "|",
+            "|",
+            ("body", "ilike", "WhatsApp"),
+            ("body", "ilike", "Cliente por WhatsApp"),
+            ("body", "ilike", "Respuesta automática"),
+        ],
+        order="id desc",
+        limit=limit,
+    )
+    lines = []
+    for message in reversed(messages):
+        text = html2plaintext(message.body or "").strip()
+        if text:
+            lines.append(text)
+    return "\n\n".join(lines)
+
+
+def _get_lead_url(env, lead):
+    if not lead:
+        return ""
+
+    base_url = (
+        env["ir.config_parameter"].sudo().get_param("web.base.url")
+        or ""
+    ).rstrip("/")
+    path = f"/odoo/crm.lead/{lead.id}"
+    return f"{base_url}{path}" if base_url else path
