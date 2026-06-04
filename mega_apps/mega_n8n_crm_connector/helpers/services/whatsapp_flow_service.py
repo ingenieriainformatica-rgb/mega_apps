@@ -1,5 +1,7 @@
 import logging
 import os
+import hashlib
+import json
 from odoo.http import request  # type: ignore
 from ...helpers.n8n_payload_helper import get_n8n_payload
 from ...helpers.whatsapp_session_helper import (
@@ -44,11 +46,33 @@ from ...helpers.whatsapp_chatter_helper import (
 from ...helpers.whatsapp_chatter_helper import (
     log_customer_message_on_lead_from_session,
 )
+from ...helpers.whatsapp_discuss_helper import (
+    HUMAN_HANDOFF_STEPS,
+    ensure_discuss_channel_for_handoff,
+    post_inbound_whatsapp_message_to_discuss,
+    post_outbound_whatsapp_message_to_discuss,
+)
 from ...helpers.wompi_payment_helper import create_wompi_payment_link
 from ...helpers.whatsapp_flow_mode_helper import is_simple_whatsapp_flow
 from ...helpers.whatsapp_business_hours_helper import is_business_hours
 
 _logger = logging.getLogger(__name__)
+
+
+def _normalize_wa_message_id(payload: dict) -> str:
+    for key in ("wa_message_id", "message_id", "wamid", "external_message_id"):
+        value = (payload.get(key) or "").strip()
+        if value:
+            return value
+    return ""
+
+
+def _payload_hash(payload: dict) -> str:
+    try:
+        payload_text = json.dumps(payload, sort_keys=True, default=str)
+    except Exception:
+        payload_text = str(payload)
+    return hashlib.sha256(payload_text.encode("utf-8")).hexdigest()[:16]
 
 
 def _get_wompi_private_key(env) -> str:
@@ -337,11 +361,34 @@ def mark_welcome_sent_from_payload(env, payload: dict) -> dict:
     )
 
 
+def _log_terminal_customer_message(env, session, message, message_id=None):
+    if not session or not (message or "").strip():
+        return False, False
+
+    logged_on_discuss = False
+    if session.step in HUMAN_HANDOFF_STEPS:
+        logged_on_discuss = post_inbound_whatsapp_message_to_discuss(
+            env,
+            session,
+            message,
+            wa_message_id=message_id,
+        )
+
+    logged = log_customer_message_on_lead_from_session(
+        session,
+        message=message,
+        message_id=message_id,
+    )
+
+    return logged, logged_on_discuss
+
+
 def build_ai_context_response(self, **post):
         payload = get_n8n_payload()
 
         phone = (payload.get("phone") or "").strip()
         message = (payload.get("message") or "").strip()
+        message_id = _normalize_wa_message_id(payload)
         phone_number_id = (payload.get("phone_number_id") or "").strip()
 
         _logger.info(
@@ -369,7 +416,7 @@ def build_ai_context_response(self, **post):
         if use_after_hours_flow and "is_after_hours" in session._fields:
             after_hours_vals = {"is_after_hours": True}
             if session.step not in {"ask_name", "ask_location", "ask_vehicle", "after_hours_handoff"}:
-                after_hours_vals["step"] = "ask_name"
+                after_hours_vals["step"] = "ask_name"  #type: ignore
             session.write(after_hours_vals)
 
         if use_after_hours_flow:
@@ -409,6 +456,32 @@ def build_ai_context_response(self, **post):
             }
 
         if is_terminal_step(session.step):
+            if not message_id:
+                _logger.info(
+                    "[WHATSAPP FLOW] terminal ai-context without wa_message_id phone=%s session=%s; discuss logging skipped",
+                    phone,
+                    session.id,
+                )
+                return {
+                    "success": True,
+                    "should_use_ai": False,
+                    "should_send": False,
+                    "kind": "terminal_session",
+                    "phone": session.phone,
+                    "phone_number_id": session.phone_number_id,
+                    "step": session.step,
+                    "reply": "",
+                    "logged": False,
+                    "logged_on_discuss": False,
+                    "session": session_snapshot(session),
+                }
+
+            logged, logged_on_discuss = _log_terminal_customer_message(
+                request.env,
+                session,
+                message,
+                message_id=message_id,
+            )
             return {
                 "success": True,
                 "should_use_ai": False,
@@ -418,6 +491,8 @@ def build_ai_context_response(self, **post):
                 "phone_number_id": session.phone_number_id,
                 "step": session.step,
                 "reply": "",
+                "logged": logged,
+                "logged_on_discuss": logged_on_discuss,
                 "session": session_snapshot(session),
             }
 
@@ -450,9 +525,8 @@ def apply_ai_to_whatsapp_session(self, **post):
     payload = get_n8n_payload()
 
     phone = (payload.get("phone") or "").strip()
+    wa_message_id = _normalize_wa_message_id(payload)
     ai_result = parse_ai_result(payload.get("ai_result"))
-
-    _logger.info("N8N WhatsApp apply AI phone=%s", phone)
 
     if not phone:
         return missing_phone_response()
@@ -466,11 +540,53 @@ def apply_ai_to_whatsapp_session(self, **post):
             NO_ACTIVE_SESSION_REPLY,
         )
 
+    _logger.info(
+        "[WHATSAPP FLOW] apply-ai called phone=%s wa_message_id=%s step=%s",
+        phone,
+        wa_message_id or False,
+        session.step,
+    )
+
+    if wa_message_id:
+        message_log, reserved = request.env["mega.whatsapp.message.log"].sudo().reserve_once(
+            wa_message_id,
+            "outbound",
+            phone=phone,
+            payload_hash=_payload_hash(payload),
+            message_body=session.last_message or "",
+            session_id=session.id,
+        )
+        if not reserved:
+            _logger.info(
+                "[WHATSAPP FLOW] duplicate ignored wa_message_id=%s log=%s",
+                wa_message_id,
+                message_log.id,
+            )
+            return whatsapp_response(
+                True,
+                session.step,
+                "",
+                should_send=False,
+                kind="duplicate_ignored",
+                session=session_snapshot(session),
+            )
+
+    previous_step = session.step
+
     if session.step in {"advisor_handoff", "after_hours_handoff"}:
+        ensure_discuss_channel_for_handoff(request.env, session, session.lead_id)
+        _logger.info(
+            "[WHATSAPP FLOW] should_send=%s reply_len=%s next_step=%s",
+            False,
+            0,
+            session.step,
+        )
         return whatsapp_response(
             True,
             session.step,
             should_send=False,
+            session=session_snapshot(session),
+            lead_id=session.lead_id.id if session.lead_id else False,
         )
 
     if bool(getattr(session, "is_after_hours", False)) or ai_result.get("intent") == "after_hours_data_capture":
@@ -610,6 +726,21 @@ def apply_ai_to_whatsapp_session(self, **post):
             bot_reply=reply if should_send else "",
         )
 
+    if session.step in HUMAN_HANDOFF_STEPS and (
+        previous_step not in HUMAN_HANDOFF_STEPS or not session.discuss_channel_id
+    ):
+        ensure_discuss_channel_for_handoff(request.env, session, lead)
+
+    if should_send and reply and session.step in HUMAN_HANDOFF_STEPS:
+        post_outbound_whatsapp_message_to_discuss(request.env, session, reply)
+
+    _logger.info(
+        "[WHATSAPP FLOW] should_send=%s reply_len=%s next_step=%s",
+        should_send,
+        len(reply or ""),
+        session.step,
+    )
+
     return whatsapp_response(
         True,
         session.step,
@@ -629,7 +760,7 @@ def log_terminal_whatsapp_message(self):
 
         phone = (payload.get("phone") or "").strip()
         message = (payload.get("message") or "").strip()
-        message_id = (payload.get("message_id") or "").strip()
+        message_id = _normalize_wa_message_id(payload)
 
         _logger.info(
             "N8N WhatsApp log message phone=%s message_id=%s",
@@ -682,9 +813,10 @@ def log_terminal_whatsapp_message(self):
                 session=session_snapshot(session),
             )
 
-        logged = log_customer_message_on_lead_from_session(
+        logged, logged_on_discuss = _log_terminal_customer_message(
+            request.env,
             session,
-            message=message,
+            message,
             message_id=message_id,
         )
 
@@ -694,8 +826,9 @@ def log_terminal_whatsapp_message(self):
             "",
             should_send=False,
             should_use_ai=False,
-            kind="message_logged" if logged else "message_not_logged",
+            kind="message_logged" if logged or logged_on_discuss else "message_not_logged",
             logged=logged,
+            logged_on_discuss=logged_on_discuss,
             lead_id=session.lead_id.id,
             session=session_snapshot(session),
         )

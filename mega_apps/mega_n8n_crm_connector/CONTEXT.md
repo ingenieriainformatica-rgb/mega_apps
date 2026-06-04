@@ -1426,3 +1426,86 @@ Este addon debe entenderse como un coordinador de conversacion comercial:
 - El asesor humano entra cuando la conversacion ya tiene datos utiles o cuando el flujo no puede resolver automaticamente.
 
 El siguiente trabajo sobre este proyecto deberia partir de esa separacion: n8n no deberia decidir reglas comerciales profundas, la IA no deberia inventar datos ni precios, y Odoo deberia seguir siendo la fuente de estado, CRM y catalogo.
+
+## Correccion Discuss/WhatsApp handoff - 2026-06-03
+
+Problemas observados en produccion/pruebas:
+
+- Al pasar a `advisor_handoff`, la conversacion aparecia en la seccion WhatsApp de Discuss, pero no siempre abria el popup/chat flotante para el asesor.
+- Cuando el cliente escribia despues del handoff, por ejemplo `cuales`, el mensaje podia quedar registrado en el chatter del CRM pero no aparecer en la conversacion WhatsApp de Odoo. Esto cortaba la continuidad para el asesor.
+- Odoo reutiliza conversaciones WhatsApp por numero y cuenta (`whatsapp_number` + `wa_account_id`). Por eso el canal podia mostrar un link de CRM viejo aunque la sesion actual tuviera un lead nuevo.
+
+Causas:
+
+- `build_ai_context_response()` devolvia `terminal_session` sin registrar el mensaje terminal en Discuss. Si n8n no llamaba luego `/n8n/whatsapp/session/log-message`, el canal WhatsApp no recibia el nuevo mensaje.
+- `ensure_discuss_channel_for_handoff()` retornaba el canal existente sin reforzar el link del lead actual.
+- `_get_whatsapp_channel()` de Odoo reutiliza el ultimo canal del numero; si ya existia, no publica de nuevo el documento relacionado.
+- `_channel_fold("open")` no emite evento si el miembro ya estaba en estado `open`, por lo que el popup podia no reabrirse.
+
+Soluciones aplicadas:
+
+- `helpers/whatsapp_discuss_helper.py`
+  - Crea o reutiliza el canal nativo `discuss.channel` de tipo `whatsapp`.
+  - Guarda el canal en `mega.whatsapp.session.discuss_channel_id`.
+  - Publica siempre un mensaje `Lead CRM actual` con URL `/odoo/crm.lead/<id>` y marcador `mega_whatsapp_session:<session_id>:lead:<lead_id>`.
+  - Abre el chat flotante para miembros internos con un bus event `discuss.Thread/fold_state`, incluso si el miembro ya estaba en `open`.
+  - Cuando llega un mensaje entrante posterior al handoff, lo publica tambien en el canal WhatsApp y vuelve a abrir/notificar el chat.
+
+- `helpers/services/whatsapp_flow_service.py`
+  - Agrego `_log_terminal_customer_message()` para centralizar el registro de mensajes terminales.
+  - `ai-context` ahora registra mensajes en lead y Discuss cuando la sesion ya esta terminal.
+  - `log-message` usa la misma funcion para evitar diferencias entre rutas.
+  - La deduplicacion sigue dependiendo de `message_id` y `last_inbound_message_id`.
+
+- `models/mega_whatsapp_sessions.py`
+  - Agrego `discuss_channel_id` para asociar cada sesion WhatsApp con el canal Discuss/WhatsApp usado en handoff.
+
+- `__manifest__.py`
+  - El modulo depende de `whatsapp`, no solo de `mail`, porque responder desde Discuss requiere el canal nativo de WhatsApp.
+
+Notas importantes:
+
+- Dentro de `/odoo/discuss`, Odoo normalmente muestra la conversacion como vista principal, no como popup inferior. El popup flotante aparece principalmente en otras pantallas del backend.
+- Si el asesor responde desde el canal nativo WhatsApp de Odoo, Odoo enviara por WhatsApp usando `message_type="whatsapp_message"` y la `whatsapp.account` vinculada. Esto requiere que la cuenta WhatsApp tenga token/configuracion valida.
+- n8n no debe seguir generando respuestas automaticas despues de `advisor_handoff`; desde ese punto, la conversacion debe quedar en manos del canal WhatsApp de Odoo y del asesor.
+
+Pruebas realizadas:
+
+```bash
+python3 -m compileall -q mega_apps/mega_n8n_crm_connector
+python3 mega_apps/mega_n8n_crm_connector/tests/test_progressive_data_capture.py -v
+```
+
+Resultado:
+
+- Compilacion sin errores de sintaxis/import basico.
+- `Ran 41 tests ... OK`.
+
+### Ajuste posterior por duplicados y refresco manual
+
+Problema observado:
+
+- Algunos mensajes entrantes se veian duplicados en el canal WhatsApp de Discuss.
+- En otros casos habia que refrescar la pantalla para ver el mensaje del cliente.
+
+Causa probable:
+
+- n8n puede llamar mas de una ruta para el mismo mensaje (`ai-context` y luego `log-message`).
+- Si el payload trae `message_id`, Odoo puede deduplicar por `last_inbound_message_id` o por `whatsapp.message.msg_uid`.
+- Si `message_id` llega vacio o no llega, antes no habia deduplicacion por contenido reciente.
+- Cuando el mensaje ya existia por `msg_uid`, el helper retornaba sin reforzar bus/open, por lo que la UI podia quedarse atrasada hasta refrescar.
+
+Solucion aplicada:
+
+- `helpers/whatsapp_discuss_helper.py`
+  - Si hay `msg_uid` existente, no publica duplicado, pero si notifica/abre el canal para miembros internos.
+  - Si no hay `message_id`, evita duplicar mensajes iguales del mismo autor en los ultimos 2 minutos.
+  - Despues de publicar o detectar duplicado, ejecuta `_broadcast()` a los miembros internos y fuerza `fold_state=open`.
+
+- `helpers/whatsapp_chatter_helper.py`
+  - Si no hay `message_id`, evita duplicar en el chatter CRM mensajes iguales recientes con titulo `Cliente por WhatsApp`.
+
+Recomendacion n8n:
+
+- Enviar siempre `message_id` (`wamid...`) tanto a `/n8n/whatsapp/session/ai-context` como a `/n8n/whatsapp/session/log-message`.
+- Para sesiones en `advisor_handoff`, preferir una sola ruta de logging terminal. Odoo ya soporta ambas por seguridad, pero `message_id` hace la deduplicacion exacta.

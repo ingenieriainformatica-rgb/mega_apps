@@ -58,6 +58,18 @@ class MegaWhatsappSession(models.Model):
     )
 
     lead_id = fields.Many2one("crm.lead", string="Lead")
+    discuss_channel_id = fields.Many2one(
+        "discuss.channel",
+        string="Conversación Discuss",
+        readonly=True,
+        copy=False,
+        help="Canal de Discuss/WhatsApp creado cuando la sesión pasa a atención humana.",
+    )
+    discuss_summary_posted = fields.Boolean(
+        string="Resumen publicado en Discuss",
+        default=False,
+        copy=False,
+    )
     active = fields.Boolean(default=True)
 
     last_inbound_message_id = fields.Char(index=True)

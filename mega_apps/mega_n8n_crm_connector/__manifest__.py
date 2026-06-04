@@ -9,6 +9,7 @@
     "depends": [
         "base",
         "crm",
+        "whatsapp",
     ],
     "data": [],
     "license": "LGPL-3",
