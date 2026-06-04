@@ -3,6 +3,7 @@
 import hashlib
 import json
 import logging
+import requests
 
 from odoo import http  #type: ignore
 from odoo.http import request, Response  #type: ignore
@@ -40,6 +41,11 @@ class MetaWhatsAppWebhookController(http.Controller):
             content_type="application/json",
         )
 
+    def _get_n8n_webhook_url(self):
+        return request.env["ir.config_parameter"].sudo().get_param(
+            "mega_n8n_crm_connector.n8n_inbound_webhook_url"
+        )
+
     @http.route(
         "/webhook/meta/whatsapp",
         type="http",
@@ -60,7 +66,7 @@ class MetaWhatsAppWebhookController(http.Controller):
         expected_token = self._get_verify_token()
 
         _logger.info(
-            "[META WHATSAPP VERIFY] mode=%s token_ok=%s challenge_present=%s",
+            "\n\n\n[META WHATSAPP VERIFY] mode=%s token_ok=%s challenge_present=%s\n\n\n",
             mode,
             token == expected_token,
             bool(challenge),
@@ -104,6 +110,8 @@ class MetaWhatsAppWebhookController(http.Controller):
         raw_body = request.httprequest.get_data(as_text=True) or "{}"
         payload_hash = hashlib.sha256(raw_body.encode("utf-8")).hexdigest()[:16]
 
+        _logger.info("\n\n raw_body -->> %s \n\n", raw_body)
+
         try:
             payload = json.loads(raw_body)
         except Exception:
@@ -117,40 +125,64 @@ class MetaWhatsAppWebhookController(http.Controller):
 
         if not messages:
             _logger.info(
-                "[META WHATSAPP WEBHOOK] Evento recibido sin mensajes entrantes. hash=%s",
+                "[META WHATSAPP WEBHOOK] Evento ignorado sin mensajes entrantes hash=%s",
                 payload_hash,
             )
-            return self._json_response({"success": True, "ignored": True})
-
-        for msg in messages:
-            _logger.info(
-                "[META WHATSAPP WEBHOOK] Mensaje entrante recibido phone=%s wamid=%s type=%s text=%s hash=%s",
-                msg.get("phone"),
-                msg.get("external_message_id"),
-                msg.get("message_type"),
-                msg.get("text"),
-                payload_hash,
-            )
-
-            # IMPORTANTE:
-            # Aquí NO creamos todavía el mensaje dos veces.
-            # Aquí después conectas tu lógica existente del módulo:
-            #
-            # request.env["TU.MODELO"].sudo()._process_inbound_meta_message(
-            #     phone=msg["phone"],
-            #     message=msg["text"],
-            #     external_message_id=msg["external_message_id"],
-            #     payload=payload,
-            # )
-            #
-            # Pero primero prueba que Meta ya entra correctamente a Odoo.
-
-        return self._json_response(
-            {
+            return self._json_response({
                 "success": True,
+                "ignored": True,
+                "reason": "no_inbound_messages",
+                "hash": payload_hash,
+            })
+
+        n8n_url = self._get_n8n_webhook_url()
+
+        if not n8n_url:
+            _logger.warning(
+                "[META WHATSAPP WEBHOOK] URL n8n no configurada hash=%s",
+                payload_hash,
+            )
+            return self._json_response({
+                "success": True,
+                "forwarded_to_n8n": False,
+                "reason": "missing_n8n_url",
                 "processed_messages": len(messages),
-            }
-        )
+                "hash": payload_hash,
+            })
+
+        try:
+            response = requests.post(
+                n8n_url,
+                data=raw_body.encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "X-Odoo-Webhook-Source": "meta-whatsapp",
+                    "X-Odoo-Payload-Hash": payload_hash,
+                },
+                timeout=10,
+            )
+
+            _logger.info(
+                "[META WHATSAPP WEBHOOK] Forwarded to n8n status=%s hash=%s messages=%s",
+                response.status_code,
+                payload_hash,
+                len(messages),
+            )
+
+        except Exception:
+            _logger.exception(
+                "[META WHATSAPP WEBHOOK] Error forwarding to n8n hash=%s messages=%s",
+                payload_hash,
+                len(messages),
+            )
+
+        return self._json_response({
+            "success": True,
+            "forwarded_to_n8n": True,
+            "processed_messages": len(messages),
+            "hash": payload_hash,
+        })
+
 
     def _extract_inbound_messages(self, payload):
         """
