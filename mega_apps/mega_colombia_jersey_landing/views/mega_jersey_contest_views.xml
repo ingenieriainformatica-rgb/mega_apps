@@ -12,6 +12,7 @@
                 <field name="phone"/>
                 <field name="email"/>
                 <field name="license_plate"/>
+                <field name="license_plate_normalized" optional="hide"/>
                 <field name="vehicle_info"/>
                 <field name="service_acquired"/>
                 <field name="website_id"/>
@@ -38,6 +39,7 @@
                         </group>
                         <group string="Vehículo y estado">
                             <field name="license_plate"/>
+                            <field name="license_plate_normalized" readonly="1"/>
                             <field name="vehicle_info"/>
                             <field name="service_acquired"/>
                             <field name="website_id"/>
@@ -68,6 +70,7 @@
                 <field name="phone"/>
                 <field name="email"/>
                 <field name="license_plate"/>
+                <field name="license_plate_normalized"/>
                 <field name="vehicle_info"/>
                 <field name="service_acquired"/>
                 <filter string="Nuevos" name="state_new" domain="[('state', '=', 'new')]"/>

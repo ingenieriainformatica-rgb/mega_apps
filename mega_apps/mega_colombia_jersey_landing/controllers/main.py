@@ -8,7 +8,7 @@ from odoo.exceptions import ValidationError  # type: ignore
 from odoo.http import request  # type: ignore
 from werkzeug.exceptions import NotFound  # type: ignore
 
-from ..models.mega_jersey_contest_participant import DUPLICATE_VAT_MESSAGE
+from ..models.mega_jersey_contest_participant import DUPLICATE_PARTICIPANT_MESSAGE
 
 _logger = logging.getLogger(__name__)
 
@@ -112,6 +112,9 @@ class MegaJerseyContestController(http.Controller):
 
         Participant = request.env["mega.jersey.contest.participant"].sudo()
         vat_normalized = Participant._normalize_vat(form.get("vat"))
+        license_plate_normalized = Participant._normalize_license_plate(
+            form.get("license_plate")
+        )
         form.update(
             {
                 "accept_data_policy": accept_data_policy,
@@ -119,8 +122,13 @@ class MegaJerseyContestController(http.Controller):
             }
         )
 
-        if Participant.search_count([("vat_normalized", "=", vat_normalized)]):
-            return self._render_landing_with_errors([DUPLICATE_VAT_MESSAGE], form)
+        if Participant.search_count(
+            [
+                ("vat_normalized", "=", vat_normalized),
+                ("license_plate_normalized", "=", license_plate_normalized),
+            ]
+        ):
+            return self._render_landing_with_errors([DUPLICATE_PARTICIPANT_MESSAGE], form)
 
         try:
             Participant.create(
@@ -133,10 +141,10 @@ class MegaJerseyContestController(http.Controller):
             )
         except IntegrityError:
             request.env.cr.rollback()
-            return self._render_landing_with_errors([DUPLICATE_VAT_MESSAGE], form)
+            return self._render_landing_with_errors([DUPLICATE_PARTICIPANT_MESSAGE], form)
         except ValidationError as error:
             request.env.cr.rollback()
-            message = error.args[0] if error.args else DUPLICATE_VAT_MESSAGE
+            message = error.args[0] if error.args else DUPLICATE_PARTICIPANT_MESSAGE
             return self._render_landing_with_errors([message], form)
 
         return request.render(
