@@ -3,6 +3,7 @@ import time
 
 from markupsafe import Markup, escape
 
+from odoo.addons.mail.tools.discuss import Store  # type: ignore
 from odoo.tools import html2plaintext, plaintext2html  # type: ignore
 
 
@@ -81,6 +82,10 @@ def post_inbound_whatsapp_message_to_discuss(env, session, message_text, wa_mess
         )
         return False
 
+    channel = ensure_discuss_channel_for_session(env, session, lead=session.lead_id)
+    if not channel:
+        return False
+
     if (
         wa_message_id
         and "last_inbound_message_id" in session._fields
@@ -91,10 +96,7 @@ def post_inbound_whatsapp_message_to_discuss(env, session, message_text, wa_mess
             session.id,
             wa_message_id,
         )
-        return False
-
-    channel = ensure_discuss_channel_for_session(env, session, lead=session.lead_id)
-    if not channel:
+        _notify_internal_members(channel)
         return False
 
     if wa_message_id and _whatsapp_message_exists(env, wa_message_id):
@@ -105,6 +107,26 @@ def post_inbound_whatsapp_message_to_discuss(env, session, message_text, wa_mess
         )
         _notify_internal_members(channel)
         return False
+
+    message_log = False
+    if wa_message_id:
+        message_log, reserved = env["mega.whatsapp.message.log"].sudo().reserve_once(
+            wa_message_id,
+            "inbound",
+            phone=session.phone,
+            message_body=message_text,
+            session_id=session.id,
+            channel_id=channel.id,
+        )
+        if not reserved:
+            _logger.info(
+                "[WHATSAPP DISCUSS] Duplicate inbound ignored session=%s message_id=%s log=%s",
+                session.id,
+                wa_message_id,
+                message_log.id,
+            )
+            _notify_internal_members(channel)
+            return False
 
     author_id = (
         channel.whatsapp_partner_id.id
@@ -125,14 +147,30 @@ def post_inbound_whatsapp_message_to_discuss(env, session, message_text, wa_mess
         # as outbound and could send it back to the customer.
         message_kwargs["message_type"] = "comment"
 
-    channel.sudo().message_post(**message_kwargs)
-    _notify_internal_members(channel)
-    _logger.info(
-        "[WHATSAPP DISCUSS] Inbound posted session=%s message_id=%s",
-        session.id,
-        wa_message_id or False,
-    )
-    return True
+    try:
+        with env.cr.savepoint():
+            mail_message = channel.sudo().message_post(**message_kwargs)
+        if message_log:
+            message_log.sudo().write({"mail_message_id": mail_message.id})
+        _notify_internal_members(channel)
+        _sync_internal_members_fetched(channel, mail_message)
+        _notify_open_thread_new_message(channel, mail_message)
+        _logger.info(
+            "[WHATSAPP DISCUSS] Inbound posted session=%s channel=%s mail_message=%s message_id=%s",
+            session.id,
+            channel.id,
+            mail_message.id,
+            wa_message_id or False,
+        )
+        return True
+    except Exception:
+        _logger.exception(
+            "[WHATSAPP DISCUSS] Failed to post inbound session=%s channel=%s message_id=%s",
+            session.id,
+            channel.id,
+            wa_message_id or False,
+        )
+        return False
 
 
 def post_outbound_whatsapp_message_to_discuss(env, session, message_text):
@@ -354,34 +392,105 @@ def _ensure_channel_members(channel, partners):
             post_joined_message=False,
         )
 
+    target_partner_ids = set(partners.ids)
+    target_members = channel.channel_member_ids.sudo().filtered(
+        lambda member: member.sudo().partner_id.sudo().id in target_partner_ids
+    )
+    _open_internal_channel_members(target_members)
+
 
 def _notify_internal_members(channel):
     channel = channel.sudo()
     internal_members = channel.channel_member_ids.sudo().filtered(
         lambda member: _partner_has_internal_user(member.sudo().partner_id.sudo())
     )
-    for member in internal_members:
-        _force_open_chat_window(member)
+    _open_internal_channel_members(internal_members)
 
     internal_partner_ids = internal_members.sudo().partner_id.sudo().ids
     if internal_partner_ids:
         channel.sudo()._broadcast(internal_partner_ids)
 
 
+def _notify_open_thread_new_message(channel, mail_message):
+    """Re-emit the native Discuss event consumed by an already-open thread."""
+    if not channel or not mail_message:
+        return
+
+    try:
+        channel = channel.sudo()
+        mail_message = mail_message.sudo()
+        channel._bus_send(
+            "discuss.channel/new_message",
+            {"data": Store(mail_message).get_result(), "id": channel.id},
+        )
+        _logger.info(
+            "[WHATSAPP DISCUSS] Open thread notified channel=%s mail_message=%s",
+            channel.id,
+            mail_message.id,
+        )
+    except Exception:
+        _logger.warning(
+            "[WHATSAPP DISCUSS] Failed to notify open thread channel=%s mail_message=%s",
+            channel.id if channel else False,
+            mail_message.id if mail_message else False,
+            exc_info=True,
+        )
+
+
+def _sync_internal_members_fetched(channel, mail_message):
+    """Keep internal member cursors current without marking the message as read."""
+    if not channel or not mail_message:
+        return
+
+    channel = channel.sudo()
+    mail_message = mail_message.sudo()
+    internal_members = channel.channel_member_ids.sudo().filtered(
+        lambda member: _partner_has_internal_user(member.sudo().partner_id.sudo())
+    )
+    for member in internal_members:
+        try:
+            if member.sudo().fetched_message_id.id < mail_message.id:
+                member.sudo().write({"fetched_message_id": mail_message.id})
+            channel._bus_send(
+                "discuss.channel.member/fetched",
+                {
+                    "channel_id": channel.id,
+                    "id": member.id,
+                    "last_message_id": mail_message.id,
+                    "partner_id": member.partner_id.id,
+                },
+            )
+        except Exception:
+            _logger.warning(
+                "[WHATSAPP DISCUSS] Failed to sync fetched member=%s channel=%s mail_message=%s",
+                member.id,
+                channel.id,
+                mail_message.id,
+                exc_info=True,
+            )
+
+
+def _open_internal_channel_members(members):
+    members = members.sudo().filtered(
+        lambda member: _partner_has_internal_user(member.sudo().partner_id.sudo())
+    )
+    if not members:
+        return
+
+    _logger.info(
+        "[WHATSAPP DISCUSS] Opening internal members channel=%s partners=%s",
+        members[:1].channel_id.id,
+        ", ".join(members.sudo().partner_id.sudo().mapped("name")),
+    )
+    for member in members:
+        _force_open_chat_window(member)
+
+
 def _force_open_chat_window(member):
     member = member.sudo()
     if member.unpin_dt:
-        member.unpin_dt = False
-    member.fold_state = "open"
-    member._bus_send(
-        "discuss.Thread/fold_state",
-        {
-            "fold_state": "open",
-            "foldStateCount": int(time.time()),
-            "id": member.channel_id.id,
-            "model": "discuss.channel",
-        },
-    )
+        member.sudo().write({"unpin_dt": False})
+    member.sudo()._channel_fold("open", int(time.time()))
 
 
 def _get_author_partner_id(env):
