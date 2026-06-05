@@ -9,9 +9,13 @@
     "depends": [
         "base",
         "crm",
+        "queue_job",
         "whatsapp",
     ],
-    "data": [],
+    "data": [
+        "security/ir.model.access.csv",
+        "data/queue_job_data.xml",
+    ],
     "license": "LGPL-3",
     "installable": True,
     "application": False,

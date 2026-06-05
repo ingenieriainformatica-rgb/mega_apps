@@ -46,6 +46,13 @@ class MetaWhatsAppWebhookController(http.Controller):
             "mega_n8n_crm_connector.n8n_inbound_webhook_url"
         )
 
+    def _is_debounce_enabled(self):
+        value = request.env["ir.config_parameter"].sudo().get_param(
+            "mega_n8n_crm_connector.whatsapp_debounce_enabled",
+            "false",
+        )
+        return str(value).strip().lower() in {"1", "true", "yes", "y", "si", "sí"}
+
     @http.route(
         "/webhook/meta/whatsapp",
         type="http",
@@ -135,8 +142,25 @@ class MetaWhatsAppWebhookController(http.Controller):
                 "hash": payload_hash,
             })
 
-        n8n_url = self._get_n8n_webhook_url()
+        if self._is_debounce_enabled() and self._messages_can_be_debounced(messages):
+            return self._enqueue_debounced_messages(payload, payload_hash, messages)
 
+        return self._forward_raw_payload_to_n8n(raw_body, payload_hash, messages)
+
+    def _messages_can_be_debounced(self, messages):
+        debounceable_types = {"text", "button", "interactive"}
+        for message in messages:
+            if message.get("message_type") not in debounceable_types:
+                _logger.info(
+                    "[META WHATSAPP WEBHOOK] Debounce omitido por tipo no-texto wamid=%s type=%s",
+                    message.get("external_message_id"),
+                    message.get("message_type"),
+                )
+                return False
+        return True
+
+    def _forward_raw_payload_to_n8n(self, raw_body, payload_hash, messages):
+        n8n_url = self._get_n8n_webhook_url()
         if not n8n_url:
             _logger.warning(
                 "[META WHATSAPP WEBHOOK] URL n8n no configurada hash=%s",
@@ -183,6 +207,55 @@ class MetaWhatsAppWebhookController(http.Controller):
             "hash": payload_hash,
         })
 
+    def _enqueue_debounced_messages(self, payload, payload_hash, messages):
+        queue_model = request.env["mega.whatsapp.debounce.queue"].sudo()
+        queued = 0
+        duplicates = 0
+        skipped = 0
+        queue_ids = set()
+
+        for message in messages:
+            queue, created, reason = queue_model.enqueue_meta_message(
+                phone=message.get("phone"),
+                phone_number_id=message.get("phone_number_id"),
+                wamid=message.get("external_message_id"),
+                text=message.get("text"),
+                payload=payload,
+                raw_message=message.get("raw_message"),
+                contact_name=message.get("contact_name"),
+                payload_hash=payload_hash,
+            )
+            if queue:
+                queue_ids.add(queue.id)
+            if created:
+                queued += 1
+            elif reason == "duplicate_wamid":
+                duplicates += 1
+            else:
+                skipped += 1
+
+        _logger.info(
+            "[META WHATSAPP WEBHOOK] Debounced enqueue hash=%s messages=%s queued=%s duplicates=%s skipped=%s queues=%s",
+            payload_hash,
+            len(messages),
+            queued,
+            duplicates,
+            skipped,
+            sorted(queue_ids),
+        )
+
+        return self._json_response({
+            "success": True,
+            "debounced": True,
+            "forwarded_to_n8n": False,
+            "processed_messages": len(messages),
+            "queued_messages": queued,
+            "duplicate_messages": duplicates,
+            "skipped_messages": skipped,
+            "queue_ids": sorted(queue_ids),
+            "hash": payload_hash,
+        })
+
 
     def _extract_inbound_messages(self, payload):
         """
@@ -203,6 +276,8 @@ class MetaWhatsAppWebhookController(http.Controller):
 
             for change in changes:
                 value = change.get("value") or {}
+                metadata = value.get("metadata") or {}
+                phone_number_id = metadata.get("phone_number_id") or ""
 
                 messages = value.get("messages") or []
                 if not messages:
@@ -236,6 +311,7 @@ class MetaWhatsAppWebhookController(http.Controller):
                     result.append(
                         {
                             "phone": phone,
+                            "phone_number_id": phone_number_id,
                             "contact_name": contact_name,
                             "external_message_id": external_message_id,
                             "message_type": message_type,
