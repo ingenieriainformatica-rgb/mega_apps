@@ -12,6 +12,7 @@ services:
       - mega-web-18:/var/lib/odoo
       - ./config:/etc/odoo
       - ./enterprise/odoo/addons:/mnt/enterprise
+      - ./oca_queue:/mnt/oca_queue
       - ./realnet_apps:/mnt/realnet_apps
       - ./mega_apps:/mnt/mega_apps
       - ./filestore:/mnt/filestore
