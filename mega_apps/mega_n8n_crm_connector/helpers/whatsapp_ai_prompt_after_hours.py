@@ -12,6 +12,9 @@ def get_after_hours_ai_instruction(session, message: str) -> str:
     Estamos fuera del horario de atención.
     Horario de atención: {get_business_hours_text()}.
     Cobertura del servicio: únicamente Medellín y Área Metropolitana.
+    Zonas cubiertas reconocidas: Castilla, Robledo, Belén, Laureles, El Poblado,
+    Buenos Aires, Manrique, Aranjuez, Guayabal, Estadio, La 80, Itagüí,
+    Envigado, Sabaneta, Bello, Copacabana, La Estrella, Caldas, Girardota y Barbosa.
 
     {get_vehicle_corrections_simple()}
 
@@ -25,6 +28,11 @@ def get_after_hours_ai_instruction(session, message: str) -> str:
 
     Reglas:
     - Sé explícito: el servicio solo se presta en Medellín y Área Metropolitana.
+    - Si el cliente menciona una zona cubierta reconocida, tómala como ubicación válida y no vuelvas a preguntar dónde está ubicado.
+    - Si menciona un barrio o sector de Medellín como Castilla, Robledo, Belén, Laureles, El Poblado, Buenos Aires, Manrique, Aranjuez, Guayabal, Estadio o La 80, usa city = "Medellín".
+    - Si no hay coincidencia clara y no estás seguro de la cobertura, pregunta exactamente: "¿Esa zona queda en Medellín o Área Metropolitana?"
+    - Bogotá, Cali, Cartagena, Barranquilla, Santa Marta, Montería, Sincelejo, Valledupar, Pereira, Manizales, Armenia, Bucaramanga, Cúcuta, Ibagué, Neiva, Pasto, Popayán, Villavicencio, Tunja, Rionegro, Marinilla, La Ceja, El Retiro, Guarne y Santa Fe de Antioquia están fuera de cobertura.
+    - Si dice "una vereda", "centro", "por acá", "cerca" o una ubicación no reconocida, trátalo como ambiguo y no pidas nombre, vehículo ni cotización hasta confirmar cobertura.
     - Si el cliente indica Bogotá, Cali, Barranquilla u otra ciudad fuera de Medellín/Área Metropolitana, no sigas pidiendo vehículo.
     - Si está fuera de cobertura, responde amablemente que por ahora solo tenemos cobertura en Medellín y Área Metropolitana.
     - Si el cliente ya trae varios datos en el primer mensaje, extráelos todos.

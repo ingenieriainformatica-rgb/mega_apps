@@ -35,6 +35,21 @@ from ..helpers.whatsapp_vehicle_helper import (
 
 _logger = logging.getLogger(__name__)
 
+AMBIGUOUS_COVERAGE_REPLY = "¿Esa zona queda en Medellín o Área Metropolitana?"
+MEDELLIN_SECTOR_LOCATIONS = {
+    "castilla",
+    "robledo",
+    "belen",
+    "laureles",
+    "el poblado",
+    "buenos aires",
+    "manrique",
+    "aranjuez",
+    "guayabal",
+    "estadio",
+    "la 80",
+}
+
 
 VEHICLE_BRAND_CORRECTIONS = {
     "masda": "Mazda",
@@ -93,6 +108,122 @@ def is_out_of_coverage(location: str) -> bool:
 
     return False
 
+def is_covered_location(location: str) -> bool:
+    normalized = normalize_text(location)
+
+    if not normalized:
+        return False
+
+    allowed = [normalize_text(x) for x in COVERAGE_LOCATIONS]
+    return any(place in normalized for place in allowed)
+
+def get_coverage_status(location: str | None, message: str | None) -> str:
+    current_location = clean_text(location)
+
+    if current_location:
+        if is_covered_location(current_location):
+            return "covered"
+        if is_out_of_coverage(current_location):
+            return "out_of_coverage"
+        return "ambiguous"
+
+    known_location = extract_known_location_from_message(message)
+    if known_location:
+        if is_covered_location(known_location):
+            return "covered"
+        if is_out_of_coverage(known_location):
+            return "out_of_coverage"
+
+    if extract_ambiguous_location_from_message(message) or should_confirm_unclear_location(message):
+        return "ambiguous"
+
+    return "not_provided"
+
+def confirms_pending_coverage(message: str | None) -> bool:
+    normalized = normalize_text(message or "")
+
+    if normalized in {"si", "s", "medellin", "area metropolitana"}:
+        return True
+
+    return "medellin" in normalized or "area metropolitana" in normalized
+
+def is_pending_ambiguous_location(location: str | None) -> bool:
+    current_location = clean_text(location)
+
+    return bool(current_location) and get_coverage_status(current_location, "") == "ambiguous"
+
+def extract_ambiguous_location_from_message(message: str | None) -> str:
+    normalized = normalize_text(message or "")
+    original = clean_text(message)
+
+    if not normalized or extract_known_location_from_message(message):
+        return ""
+
+    ambiguous_locations = (
+        "la colinita",
+        "colinita",
+        "centro",
+        "vereda",
+        "cerca",
+        "por aca",
+        "por aqui",
+        "por ahi",
+    )
+    if any(location in normalized for location in ambiguous_locations):
+        return original
+
+    return ""
+
+def apply_pending_coverage_confirmation(session, message: str | None, city: str, location: str, ai_result: dict[str, Any]) -> tuple[str, str, str | None]:
+    pending_location = clean_text(getattr(session, "location", ""))
+    if (
+        getattr(session, "step", "") == "ask_location"
+        and is_pending_ambiguous_location(pending_location)
+        and confirms_pending_coverage(message)
+    ):
+        city = "Medellín"
+        location = pending_location
+        ai_result["city"] = city
+        ai_result["location"] = location
+        return city, location, "covered"
+
+    return city, location, None
+
+def build_coverage_gate_response(
+    session,
+    coverage_status: str,
+    current_name: str,
+    current_vehicle: str,
+    current_location: str,
+    ai_result: dict[str, Any],
+    conversation_summary: str = "",
+    extra_vals: dict[str, Any] | None = None,
+) -> tuple[str, bool, str, dict[str, Any]] | None:
+    if coverage_status in {"covered", "not_provided"}:
+        return None
+
+    if not current_location and coverage_status == "ambiguous":
+        current_location = extract_ambiguous_location_from_message(getattr(session, "last_message", ""))
+
+    next_step = "out_of_coverage" if coverage_status == "out_of_coverage" else "ask_location"
+    reply = get_out_of_coverage_message() if coverage_status == "out_of_coverage" else AMBIGUOUS_COVERAGE_REPLY
+    vals = build_session_vals(
+        next_step,
+        current_name,
+        current_vehicle,
+        current_location,
+    )
+    vals.update(build_progressive_session_vals(session, ai_result))
+    vals["step"] = next_step
+
+    if extra_vals:
+        vals.update(extra_vals)
+
+    if conversation_summary and "conversation_summary" in session._fields:
+        vals["conversation_summary"] = conversation_summary[:500]
+
+    return next_step, True, reply, vals
+
 def extract_known_location_from_message(message: str | None) -> str:
     normalized = normalize_text(message or "")
 
@@ -105,6 +236,42 @@ def extract_known_location_from_message(message: str | None) -> str:
             return location
 
     return ""
+
+def extract_covered_location_from_message(message: str | None) -> str:
+    normalized = normalize_text(message or "")
+
+    if not normalized:
+        return ""
+
+    for location in COVERAGE_LOCATIONS:
+        if normalize_text(location) in normalized:
+            return location
+
+    return ""
+
+def should_confirm_unclear_location(message: str | None) -> bool:
+    normalized = normalize_text(message or "")
+
+    if not normalized or extract_known_location_from_message(message):
+        return False
+
+    location_hints = (
+        "estoy en ",
+        "estoy por ",
+        "estoy cerca",
+        "vivo en ",
+        "soy de ",
+        "por aca",
+        "por aqui",
+        "por ahí",
+        "por ahi",
+        "cerca",
+        "cerca al ",
+        "cerca de ",
+        "ubicado en ",
+        "ubicada en ",
+    )
+    return any(hint in normalized for hint in location_hints)
 
 def whatsapp_response(
     success: bool,
@@ -729,6 +896,20 @@ def build_ai_session_update(
     )
     city = clean_text(ai_result.get("city"))
     location = clean_text(ai_result.get("location")) or city
+    if not location:
+        location = extract_covered_location_from_message(getattr(session, "last_message", ""))
+        if location:
+            ai_result["location"] = location
+            if not city and normalize_text(location) in MEDELLIN_SECTOR_LOCATIONS:
+                city = "Medellín"
+                ai_result["city"] = city
+    city, location, coverage_status_override = apply_pending_coverage_confirmation(
+        session,
+        getattr(session, "last_message", ""),
+        city,
+        location,
+        ai_result,
+    )
     conversation_summary = clean_text(ai_result.get("conversation_summary"))
     intent = clean_text(ai_result.get("intent") or "unknown")
     customer_leaves_old_battery = parse_bool(
@@ -764,6 +945,18 @@ def build_ai_session_update(
     current_vehicle = vehicle_info or session.vehicle_info or ""
     current_location = location or session.location or ""
     normalized_message = normalize_answer(session.last_message)
+
+    coverage_gate = build_coverage_gate_response(
+        session,
+        coverage_status_override or get_coverage_status(current_location, getattr(session, "last_message", "")),
+        current_name,
+        current_vehicle,
+        current_location,
+        ai_result,
+        conversation_summary,
+    )
+    if coverage_gate:
+        return coverage_gate
 
     if session.step == "catalog_sent":
         if intent == "accept_recommended_battery":
@@ -1045,10 +1238,13 @@ def build_ai_session_update(
     elif not current_location:
         next_step = "ask_location"
         should_send = True
-        reply = reply or (
-            f"Perfecto {current_name}. ¿En qué barrio o ubicación te encuentras "
-            "para validar cobertura y disponibilidad?"
-        )
+        if should_confirm_unclear_location(getattr(session, "last_message", "")):
+            reply = "¿Esa zona queda en Medellín o Área Metropolitana?"
+        else:
+            reply = reply or (
+                f"Perfecto {current_name}. ¿En qué barrio o ubicación te encuentras "
+                "para validar cobertura y disponibilidad?"
+            )
 
     elif next_step not in {"confirm_data", "catalog_sent", "advisor_handoff"}:
         next_step = "confirm_data"
@@ -1117,7 +1313,21 @@ def build_simple_ai_session_update(
     city = clean_text(ai_result.get("city"))
     location = clean_text(ai_result.get("location")) or city
     if not location:
-        location = extract_known_location_from_message(getattr(session, "last_message", ""))
+        location = extract_covered_location_from_message(getattr(session, "last_message", ""))
+        if location:
+            ai_result["location"] = location
+            if normalize_text(location) in MEDELLIN_SECTOR_LOCATIONS:
+                city = "Medellín"
+                ai_result["city"] = city
+        else:
+            location = extract_known_location_from_message(getattr(session, "last_message", ""))
+    city, location, coverage_status_override = apply_pending_coverage_confirmation(
+        session,
+        getattr(session, "last_message", ""),
+        city,
+        location,
+        ai_result,
+    )
     current_location = location or session.location or ""
     current_vehicle = build_vehicle_info_from_ai(
         {
@@ -1154,15 +1364,33 @@ def build_simple_ai_session_update(
             "En breve un asesor de Mega Baterías continuará contigo para indicarte la batería adecuada para tu carro."
         )
 
-    if current_location and is_out_of_coverage(current_location):
-        next_step = "out_of_coverage"
-        reply = get_out_of_coverage_message()
-    elif missing_name:
+    progressive_ai_result = {
+        **ai_result,
+        "vehicle_brand": current_brand,
+        "vehicle_model": current_model,
+        "vehicle_year": current_year,
+    }
+    coverage_gate = build_coverage_gate_response(
+        session,
+        coverage_status_override or get_coverage_status(current_location, getattr(session, "last_message", "")),
+        current_name,
+        current_vehicle,
+        current_location,
+        progressive_ai_result,
+        conversation_summary,
+    )
+    if coverage_gate:
+        return coverage_gate
+
+    if missing_name:
         next_step = "ask_name"
         reply = with_vehicle_context("Indícame tu nombre, por favor.") if has_vehicle_data else welcome_reply
     elif missing_location:
         next_step = "ask_location"
-        reply = f"{current_name}, gracias. Cuéntame, ¿te encuentras en Medellín o en algún municipio cercano?"
+        if should_confirm_unclear_location(getattr(session, "last_message", "")):
+            reply = "¿Esa zona queda en Medellín o Área Metropolitana?"
+        else:
+            reply = f"{current_name}, gracias. Cuéntame, ¿te encuentras en Medellín o en algún municipio cercano?"
     elif missing_vehicle:
         next_step = "ask_vehicle"
         missing_vehicle_fields = []
@@ -1194,12 +1422,6 @@ def build_simple_ai_session_update(
         current_vehicle,
         current_location,
     )
-    progressive_ai_result = {
-        **ai_result,
-        "vehicle_brand": current_brand,
-        "vehicle_model": current_model,
-        "vehicle_year": current_year,
-    }
     vals.update(build_progressive_session_vals(session, progressive_ai_result))
     vals["step"] = next_step
 
@@ -1277,7 +1499,21 @@ def build_after_hours_ai_session_update(
     city = clean_text(ai_result.get("city"))
     location = clean_text(ai_result.get("location")) or city
     if not location:
-        location = extract_known_location_from_message(getattr(session, "last_message", ""))
+        location = extract_covered_location_from_message(getattr(session, "last_message", ""))
+        if location:
+            ai_result["location"] = location
+            if normalize_text(location) in MEDELLIN_SECTOR_LOCATIONS:
+                city = "Medellín"
+                ai_result["city"] = city
+        else:
+            location = extract_known_location_from_message(getattr(session, "last_message", ""))
+    city, location, coverage_status_override = apply_pending_coverage_confirmation(
+        session,
+        getattr(session, "last_message", ""),
+        city,
+        location,
+        ai_result,
+    )
     current_location = location or session.location or ""
     current_vehicle = build_vehicle_info_from_ai(
         {
@@ -1312,33 +1548,27 @@ def build_after_hours_ai_session_update(
     missing_location = not current_location
     missing_vehicle = not (current_brand and current_model and current_year)
 
-    if current_location and is_out_of_coverage(current_location):
-        next_step = "out_of_coverage"
-        vals = build_session_vals(
-            next_step,
-            current_name,
-            current_vehicle,
-            current_location,
-        )
-        progressive_ai_result = {
-            **ai_result,
-            "vehicle_brand": current_brand,
-            "vehicle_model": current_model,
-            "vehicle_year": current_year,
-        }
-        vals.update(build_progressive_session_vals(session, progressive_ai_result))
-        vals.update(
-            {
-                "step": next_step,
-                "is_after_hours": True,
-                "after_hours_accepted": accepted,
-            }
-        )
-
-        if conversation_summary and "conversation_summary" in session._fields:
-            vals["conversation_summary"] = conversation_summary[:500]
-
-        return next_step, True, get_out_of_coverage_message(), vals
+    progressive_ai_result = {
+        **ai_result,
+        "vehicle_brand": current_brand,
+        "vehicle_model": current_model,
+        "vehicle_year": current_year,
+    }
+    coverage_gate = build_coverage_gate_response(
+        session,
+        coverage_status_override or get_coverage_status(current_location, getattr(session, "last_message", "")),
+        current_name,
+        current_vehicle,
+        current_location,
+        progressive_ai_result,
+        conversation_summary,
+        {
+            "is_after_hours": True,
+            "after_hours_accepted": accepted,
+        },
+    )
+    if coverage_gate:
+        return coverage_gate
 
     if not accepted:
         next_step = "ask_name"
@@ -1348,7 +1578,10 @@ def build_after_hours_ai_session_update(
         reply = "Perfecto. Para dejar tu solicitud registrada, ¿me compartes por favor tu nombre?"
     elif missing_location:
         next_step = "ask_location"
-        reply = f"Gracias {current_name}. ¿En qué barrio o municipio te encuentras?"
+        if should_confirm_unclear_location(getattr(session, "last_message", "")):
+            reply = "¿Esa zona queda en Medellín o Área Metropolitana?"
+        else:
+            reply = f"Gracias {current_name}. ¿En qué barrio o municipio te encuentras?"
     elif missing_vehicle:
         next_step = "ask_vehicle"
         reply = f"Listo {current_name}. ¿Qué vehículo tienes? Indícame marca, línea/modelo y año."
@@ -1370,12 +1603,6 @@ def build_after_hours_ai_session_update(
         current_vehicle,
         current_location,
     )
-    progressive_ai_result = {
-        **ai_result,
-        "vehicle_brand": current_brand,
-        "vehicle_model": current_model,
-        "vehicle_year": current_year,
-    }
     vals.update(build_progressive_session_vals(session, progressive_ai_result))
     vals.update(
         {

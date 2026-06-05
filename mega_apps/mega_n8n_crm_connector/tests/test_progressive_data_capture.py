@@ -564,6 +564,128 @@ class TestProgressiveDataCapture(unittest.TestCase):
         self.assertEqual(vals["location"], "bogota")
         self.assertNotIn("municipio cercano", reply.lower())
 
+    def test_simple_flow_blocks_known_out_of_coverage_cities(self):
+        cases = [
+            "Estoy en Cartagena",
+            "Estoy en Cali",
+            "Estoy en Barranquilla",
+            "Estoy en Pereira",
+            "Estoy en Rionegro",
+        ]
+
+        for message in cases:
+            with self.subTest(message=message):
+                session = make_session(
+                    customer_name="Jorge",
+                    step="ask_location",
+                    last_message=message,
+                )
+
+                next_step, should_send, reply, vals = apply_simple_ai(
+                    session,
+                    {
+                        "intent": "simple_data_capture",
+                        "assistant_message": "¿Estás en Medellín?",
+                    },
+                )
+
+                self.assertEqual(next_step, "out_of_coverage")
+                self.assertTrue(should_send)
+                self.assertTrue(vals["location"])
+                self.assertNotIn("nombre", reply.lower())
+                self.assertNotIn("marca", reply.lower())
+                self.assertNotIn("modelo", reply.lower())
+                self.assertNotIn("año", reply.lower())
+
+    def test_simple_flow_allows_confirmed_covered_locations(self):
+        cases = [
+            ("Estoy en Castilla", "Castilla"),
+            ("Estoy en Itagüí", "Itagüí"),
+        ]
+
+        for message, expected_location in cases:
+            with self.subTest(message=message):
+                session = make_session(last_message=message)
+
+                next_step, should_send, reply, vals = apply_simple_ai(
+                    session,
+                    {
+                        "intent": "simple_data_capture",
+                        "assistant_message": "",
+                    },
+                )
+
+                self.assertEqual(next_step, "ask_name")
+                self.assertTrue(should_send)
+                self.assertEqual(vals["location"], expected_location)
+                self.assertIn("baterías", reply.lower())
+
+    def test_simple_flow_confirms_pending_ambiguous_location_with_medellin(self):
+        session = make_session(last_message="la colinita")
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "assistant_message": "",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_location")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["location"], "la colinita")
+        self.assertEqual(reply, helper.AMBIGUOUS_COVERAGE_REPLY)
+
+        session.write(vals)
+        session.last_message = "en medellin"
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "assistant_message": "",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_name")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["city"], "Medellín")
+        self.assertEqual(vals["location"], "la colinita")
+        self.assertNotEqual(reply, helper.AMBIGUOUS_COVERAGE_REPLY)
+
+    def test_simple_flow_confirms_pending_centro_with_yes_in_medellin(self):
+        session = make_session(last_message="centro")
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "assistant_message": "",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_location")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["location"], "centro")
+        self.assertEqual(reply, helper.AMBIGUOUS_COVERAGE_REPLY)
+
+        session.write(vals)
+        session.last_message = "sí, en Medellín"
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "assistant_message": "",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_name")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["city"], "Medellín")
+        self.assertEqual(vals["location"], "centro")
+        self.assertNotEqual(reply, helper.AMBIGUOUS_COVERAGE_REPLY)
+
     def test_simple_flow_asks_vehicle_after_location(self):
         session = make_session(
             customer_name="Laura",
