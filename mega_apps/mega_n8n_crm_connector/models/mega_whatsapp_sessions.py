@@ -44,6 +44,16 @@ class MegaWhatsappSession(models.Model):
     city = fields.Char()
     neighborhood = fields.Char()
     location = fields.Char()
+    coverage_status = fields.Selection(
+        [
+            ("covered", "Cubierta"),
+            ("out_of_coverage", "Fuera de cobertura"),
+            ("ambiguous", "Ambigua"),
+            ("not_provided", "No proporcionada"),
+        ],
+        default="not_provided",
+        index=True,
+    )
     plate = fields.Char()
     battery_request = fields.Boolean(default=False)
     relevant_data = fields.Text()

@@ -139,6 +139,28 @@ def get_coverage_status(location: str | None, message: str | None) -> str:
 
     return "not_provided"
 
+def session_has_confirmed_covered_location(session) -> bool:
+    return (
+        clean_text(getattr(session, "location", ""))
+        and getattr(session, "coverage_status", "") == "covered"
+    )
+
+def preserve_confirmed_covered_location(session, city: str, location: str) -> tuple[str, str, str | None]:
+    if not session_has_confirmed_covered_location(session):
+        return city, location, None
+
+    return (
+        clean_text(getattr(session, "city", "")) or city or "Medellín",
+        clean_text(getattr(session, "location", "")),
+        "covered",
+    )
+
+def apply_coverage_status_to_vals(session, vals: dict[str, Any], coverage_status: str | None) -> dict[str, Any]:
+    if coverage_status and coverage_status in {"covered", "out_of_coverage", "ambiguous", "not_provided"}:
+        if "coverage_status" in session._fields:
+            vals["coverage_status"] = coverage_status
+    return vals
+
 def confirms_pending_coverage(message: str | None) -> bool:
     normalized = normalize_text(message or "")
 
@@ -178,13 +200,17 @@ def apply_pending_coverage_confirmation(session, message: str | None, city: str,
     pending_location = clean_text(getattr(session, "location", ""))
     if (
         getattr(session, "step", "") == "ask_location"
-        and is_pending_ambiguous_location(pending_location)
+        and (
+            is_pending_ambiguous_location(pending_location)
+            or getattr(session, "coverage_status", "") == "ambiguous"
+        )
         and confirms_pending_coverage(message)
     ):
         city = "Medellín"
         location = pending_location
         ai_result["city"] = city
         ai_result["location"] = location
+        ai_result["coverage_status"] = "covered"
         return city, location, "covered"
 
     return city, location, None
@@ -215,6 +241,8 @@ def build_coverage_gate_response(
     )
     vals.update(build_progressive_session_vals(session, ai_result))
     vals["step"] = next_step
+    if "coverage_status" in session._fields:
+        vals["coverage_status"] = coverage_status
 
     if extra_vals:
         vals.update(extra_vals)
@@ -799,6 +827,7 @@ def session_snapshot(session) -> dict[str, Any]:
         "city": getattr(session, "city", "") or "",
         "neighborhood": getattr(session, "neighborhood", "") or "",
         "location": session.location or "",
+        "coverage_status": getattr(session, "coverage_status", "") or "",
         "plate": getattr(session, "plate", "") or "",
         "battery_request": bool(getattr(session, "battery_request", False)),
         "relevant_data": getattr(session, "relevant_data", "") or "",
@@ -910,6 +939,12 @@ def build_ai_session_update(
         location,
         ai_result,
     )
+    city, location, preserved_coverage_status = preserve_confirmed_covered_location(
+        session,
+        city,
+        location,
+    )
+    coverage_status_override = coverage_status_override or preserved_coverage_status
     conversation_summary = clean_text(ai_result.get("conversation_summary"))
     intent = clean_text(ai_result.get("intent") or "unknown")
     customer_leaves_old_battery = parse_bool(
@@ -946,9 +981,13 @@ def build_ai_session_update(
     current_location = location or session.location or ""
     normalized_message = normalize_answer(session.last_message)
 
+    effective_coverage_status = coverage_status_override or get_coverage_status(
+        current_location,
+        getattr(session, "last_message", ""),
+    )
     coverage_gate = build_coverage_gate_response(
         session,
-        coverage_status_override or get_coverage_status(current_location, getattr(session, "last_message", "")),
+        effective_coverage_status,
         current_name,
         current_vehicle,
         current_location,
@@ -1194,6 +1233,7 @@ def build_ai_session_update(
             current_location,
         )
         vals.update(build_progressive_session_vals(session, ai_result))
+        apply_coverage_status_to_vals(session, vals, "out_of_coverage")
 
         if conversation_summary and "conversation_summary" in session._fields:
             vals["conversation_summary"] = conversation_summary[:500]
@@ -1258,6 +1298,7 @@ def build_ai_session_update(
         current_location,
     )
     vals.update(build_progressive_session_vals(session, ai_result))
+    apply_coverage_status_to_vals(session, vals, effective_coverage_status)
 
     if conversation_summary and "conversation_summary" in session._fields:
         vals["conversation_summary"] = conversation_summary[:500]
@@ -1328,6 +1369,12 @@ def build_simple_ai_session_update(
         location,
         ai_result,
     )
+    city, location, preserved_coverage_status = preserve_confirmed_covered_location(
+        session,
+        city,
+        location,
+    )
+    coverage_status_override = coverage_status_override or preserved_coverage_status
     current_location = location or session.location or ""
     current_vehicle = build_vehicle_info_from_ai(
         {
@@ -1370,9 +1417,13 @@ def build_simple_ai_session_update(
         "vehicle_model": current_model,
         "vehicle_year": current_year,
     }
+    effective_coverage_status = coverage_status_override or get_coverage_status(
+        current_location,
+        getattr(session, "last_message", ""),
+    )
     coverage_gate = build_coverage_gate_response(
         session,
-        coverage_status_override or get_coverage_status(current_location, getattr(session, "last_message", "")),
+        effective_coverage_status,
         current_name,
         current_vehicle,
         current_location,
@@ -1424,6 +1475,7 @@ def build_simple_ai_session_update(
     )
     vals.update(build_progressive_session_vals(session, progressive_ai_result))
     vals["step"] = next_step
+    apply_coverage_status_to_vals(session, vals, effective_coverage_status)
 
     if not bool(getattr(session, "welcome_sent", False)) and "welcome_sent" in session._fields:
         vals["welcome_sent"] = True
@@ -1514,6 +1566,12 @@ def build_after_hours_ai_session_update(
         location,
         ai_result,
     )
+    city, location, preserved_coverage_status = preserve_confirmed_covered_location(
+        session,
+        city,
+        location,
+    )
+    coverage_status_override = coverage_status_override or preserved_coverage_status
     current_location = location or session.location or ""
     current_vehicle = build_vehicle_info_from_ai(
         {
@@ -1554,9 +1612,13 @@ def build_after_hours_ai_session_update(
         "vehicle_model": current_model,
         "vehicle_year": current_year,
     }
+    effective_coverage_status = coverage_status_override or get_coverage_status(
+        current_location,
+        getattr(session, "last_message", ""),
+    )
     coverage_gate = build_coverage_gate_response(
         session,
-        coverage_status_override or get_coverage_status(current_location, getattr(session, "last_message", "")),
+        effective_coverage_status,
         current_name,
         current_vehicle,
         current_location,
@@ -1611,6 +1673,7 @@ def build_after_hours_ai_session_update(
             "after_hours_accepted": accepted,
         }
     )
+    apply_coverage_status_to_vals(session, vals, effective_coverage_status)
 
     if conversation_summary and "conversation_summary" in session._fields:
         vals["conversation_summary"] = conversation_summary[:500]
@@ -1678,6 +1741,7 @@ def build_session_vals(
 def build_progressive_session_vals(session, ai_result: dict[str, Any]) -> dict[str, Any]:
     ai_result = normalize_ai_result(ai_result)
     vals: dict[str, Any] = {}
+    preserve_covered_location = session_has_confirmed_covered_location(session)
 
     field_map = {
         "vehicle_brand": "vehicle_brand",
@@ -1692,6 +1756,8 @@ def build_progressive_session_vals(session, ai_result: dict[str, Any]) -> dict[s
 
     for result_key, session_field in field_map.items():
         if session_field not in session._fields:
+            continue
+        if preserve_covered_location and session_field in {"city", "neighborhood"}:
             continue
         value = clean_text(ai_result.get(result_key))
         if value:
@@ -1710,7 +1776,7 @@ def build_progressive_session_vals(session, ai_result: dict[str, Any]) -> dict[s
     if not location:
         location = " ".join(part for part in [neighborhood, city] if part).strip()
 
-    if location and "location" in session._fields:
+    if location and "location" in session._fields and not preserve_covered_location:
         vals["location"] = location
 
     return vals

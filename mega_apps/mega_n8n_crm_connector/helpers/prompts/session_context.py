@@ -37,6 +37,12 @@ def get_session_context(session) -> str:
         current_location:
         {_clean(getattr(session, "location", None))}
 
+        current_coverage_status:
+        {_clean(getattr(session, "coverage_status", None))}
+
+        coverage_guard:
+        {"La ubicación ya está confirmada como cubierta; no vuelvas a preguntar si queda en Medellín o Área Metropolitana." if getattr(session, "coverage_status", "") == "covered" and getattr(session, "location", None) else "Sin cobertura confirmada"}
+
         current_plate:
         {_clean(getattr(session, "plate", None))}
 

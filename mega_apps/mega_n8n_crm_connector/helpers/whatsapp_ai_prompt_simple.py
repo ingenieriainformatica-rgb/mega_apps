@@ -77,6 +77,8 @@ def get_simple_ai_instruction(session, message: str) -> str:
     Estado actual: {session.step}
     Nombre actual: {session.customer_name or ""}
     Ubicación actual: {session.location or ""}
+    Cobertura actual: {getattr(session, "coverage_status", "") or ""}
+    Regla ubicación confirmada: {"La ubicación ya está confirmada como cubierta; no preguntes de nuevo si queda en Medellín o Área Metropolitana." if getattr(session, "coverage_status", "") == "covered" and session.location else ""}
     Marca actual: {getattr(session, "vehicle_brand", "") or ""}
     Línea actual: {getattr(session, "vehicle_model", "") or ""}
     Año actual: {getattr(session, "vehicle_year", "") or ""}

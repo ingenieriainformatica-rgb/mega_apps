@@ -100,6 +100,7 @@ class FakeSession(types.SimpleNamespace):
         "city": True,
         "neighborhood": True,
         "location": True,
+        "coverage_status": True,
         "plate": True,
         "battery_request": True,
         "relevant_data": True,
@@ -126,6 +127,7 @@ def make_session(**overrides):
         "city": "",
         "neighborhood": "",
         "location": "",
+        "coverage_status": "not_provided",
         "plate": "",
         "battery_request": False,
         "relevant_data": "",
@@ -684,6 +686,50 @@ class TestProgressiveDataCapture(unittest.TestCase):
         self.assertTrue(should_send)
         self.assertEqual(vals["city"], "Medellín")
         self.assertEqual(vals["location"], "centro")
+        self.assertNotEqual(reply, helper.AMBIGUOUS_COVERAGE_REPLY)
+
+    def test_simple_flow_preserves_confirmed_coverage_after_vehicle_message(self):
+        session = make_session(
+            customer_name="Jorge",
+            step="ask_location",
+            location="itagui",
+            coverage_status="ambiguous",
+            last_message="si queda en medellin",
+        )
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "assistant_message": "",
+            },
+        )
+
+        self.assertEqual(next_step, "ask_vehicle")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["city"], "Medellín")
+        self.assertEqual(vals["location"], "itagui")
+        self.assertEqual(vals["coverage_status"], "covered")
+        self.assertNotEqual(reply, helper.AMBIGUOUS_COVERAGE_REPLY)
+
+        session.write(vals)
+        session.last_message = "mazda 3 2017"
+
+        next_step, should_send, reply, vals = apply_simple_ai(
+            session,
+            {
+                "intent": "simple_data_capture",
+                "vehicle_brand": "Mazda",
+                "vehicle_model": "3",
+                "vehicle_year": "2017",
+                "assistant_message": "",
+            },
+        )
+
+        self.assertNotEqual(next_step, "ask_location")
+        self.assertTrue(should_send)
+        self.assertEqual(vals["location"], "itagui")
+        self.assertEqual(vals["coverage_status"], "covered")
         self.assertNotEqual(reply, helper.AMBIGUOUS_COVERAGE_REPLY)
 
     def test_simple_flow_asks_vehicle_after_location(self):
