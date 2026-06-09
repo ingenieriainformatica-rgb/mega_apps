@@ -142,10 +142,13 @@ class MetaWhatsAppWebhookController(http.Controller):
                 "hash": payload_hash,
             })
 
-        if self._is_debounce_enabled() and self._messages_can_be_debounced(messages):
-            return self._enqueue_debounced_messages(payload, payload_hash, messages)
+        enriched_payload = self._with_normalized_messages(payload, messages)
+        enriched_raw_body = json.dumps(enriched_payload, ensure_ascii=False)
 
-        return self._forward_raw_payload_to_n8n(raw_body, payload_hash, messages)
+        if self._is_debounce_enabled() and self._messages_can_be_debounced(messages):
+            return self._enqueue_debounced_messages(enriched_payload, payload_hash, messages)
+
+        return self._forward_raw_payload_to_n8n(enriched_raw_body, payload_hash, messages)
 
     def _messages_can_be_debounced(self, messages):
         debounceable_types = {"text", "button", "interactive"}
@@ -293,8 +296,9 @@ class MetaWhatsAppWebhookController(http.Controller):
                 for message in messages:
                     phone = message.get("from")
                     external_message_id = message.get("id")
-                    message_type = message.get("type")
-                    text = self._extract_message_text(message)
+                    metadata = self._extract_message_metadata(message)
+                    message_type = metadata.get("message_type")
+                    text = metadata.get("text")
 
                     contact = contact_by_wa_id.get(phone) or {}
                     profile = contact.get("profile") or {}
@@ -316,44 +320,132 @@ class MetaWhatsAppWebhookController(http.Controller):
                             "external_message_id": external_message_id,
                             "message_type": message_type,
                             "text": text,
+                            **metadata,
                             "raw_message": message,
                         }
                     )
 
         return result
 
-    def _extract_message_text(self, message):
-        """
-        Obtiene texto visible según el tipo de mensaje.
-        """
-        message_type = message.get("type")
+    def _with_normalized_messages(self, payload, messages):
+        enriched_payload = json.loads(json.dumps(payload))
+        normalized_messages = [
+            self._normalized_message_for_payload(message)
+            for message in messages
+        ]
+        enriched_payload["normalized_messages"] = normalized_messages
+        return enriched_payload
+
+    def _normalized_message_for_payload(self, message):
+        return {
+            "phone": message.get("phone") or "",
+            "phone_number_id": message.get("phone_number_id") or "",
+            "contact_name": message.get("contact_name") or "",
+            "external_message_id": message.get("external_message_id") or "",
+            "wamid": message.get("external_message_id") or "",
+            "message_type": message.get("message_type") or "",
+            "text": message.get("text") or "",
+            "media_id": message.get("media_id") or "",
+            "mime_type": message.get("mime_type") or "",
+            "caption": message.get("caption") or "",
+            "latitude": message.get("latitude"),
+            "longitude": message.get("longitude"),
+            "location_name": message.get("location_name") or "",
+            "location_address": message.get("location_address") or "",
+            "voice": bool(message.get("voice")),
+        }
+
+    def _extract_message_metadata(self, message):
+        message_type = message.get("type") or "unknown"
+        metadata = {
+            "message_type": message_type,
+            "text": "",
+            "media_id": "",
+            "mime_type": "",
+            "caption": "",
+            "latitude": None,
+            "longitude": None,
+            "location_name": "",
+            "location_address": "",
+            "voice": False,
+        }
 
         if message_type == "text":
-            return (message.get("text") or {}).get("body") or ""
+            metadata["text"] = (message.get("text") or {}).get("body") or ""
+            _logger.info(f"\n\n text -> {metadata['text']} \n\n")
+            return metadata
 
         if message_type == "button":
-            return (message.get("button") or {}).get("text") or ""
+            metadata["text"] = (message.get("button") or {}).get("text") or ""
+            _logger.info(f"\n\n button -> {metadata['text']} \n\n")
+            return metadata
 
         if message_type == "interactive":
             interactive = message.get("interactive") or {}
 
             button_reply = interactive.get("button_reply") or {}
             if button_reply:
-                return button_reply.get("title") or button_reply.get("id") or ""
+                metadata["text"] = button_reply.get("title") or button_reply.get("id") or ""
+                return metadata
 
             list_reply = interactive.get("list_reply") or {}
             if list_reply:
-                return list_reply.get("title") or list_reply.get("id") or ""
+                metadata["text"] = list_reply.get("title") or list_reply.get("id") or ""
+                return metadata
+
+            return metadata
+
+        if message_type == "location":
+            location = message.get("location") or {}
+            metadata.update(
+                {
+                    "latitude": location.get("latitude"),
+                    "longitude": location.get("longitude"),
+                    "location_name": location.get("name") or "",
+                    "location_address": location.get("address") or "",
+                }
+            )
+            return metadata
 
         if message_type == "image":
-            return (message.get("image") or {}).get("caption") or "[Imagen recibida]"
+            image = message.get("image") or {}
+            caption = image.get("caption") or ""
+            metadata.update(
+                {
+                    "text": caption,
+                    "media_id": image.get("id") or "",
+                    "mime_type": image.get("mime_type") or "",
+                    "caption": caption,
+                }
+            )
+            return metadata
 
         if message_type == "audio":
-            return "[Audio recibido]"
+            audio = message.get("audio") or {}
+            _logger.info(f"\n\n audio -> {metadata['text']} \n\n")
+            metadata.update(
+                {
+                    "media_id": audio.get("id") or "",
+                    "mime_type": audio.get("mime_type") or "",
+                    "voice": bool(audio.get("voice")),
+                }
+            )
+            return metadata
 
+        return metadata
+
+    def _extract_message_text(self, message):
+        """
+        Obtiene texto visible según el tipo de mensaje.
+        """
+        metadata = self._extract_message_metadata(message)
+        if metadata["text"]:
+            return metadata["text"]
+
+        message_type = metadata["message_type"]
         if message_type == "document":
             document = message.get("document") or {}
             filename = document.get("filename") or "documento"
             return "[Documento recibido: %s]" % filename
 
-        return "[Mensaje WhatsApp tipo %s]" % (message_type or "desconocido")
+        return ""
