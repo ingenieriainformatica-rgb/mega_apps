@@ -18,7 +18,8 @@ def get_after_hours_ai_instruction(session, message: str) -> str:
     Robledo, Manrique, Castilla, Aranjuez, Buenos Aires, La Candelaria, Guayabal,
     Doce de Octubre, San Javier, Villa Hermosa, Popular, Santa Cruz, La América,
     Estadio, Calasanz, Floresta, Los Colores, La Mota, Loma de los Bernal,
-    Ciudad del Río, Provenza, Manila, Patio Bonito, Aguacatala y Los Balsos.
+    Ciudad del Río, Ciudad del Rio, Provenza, Manila, Patio Bonito, Aguacatala,
+    Los Balsos, Santa Mónica, Santa Monica, La Castellana, Conquistadores y Castropol.
     Fuera de cobertura: Rionegro, Marinilla, Guarne, La Ceja, El Retiro,
     Santa Fe de Antioquia, Bogotá, Cartagena, Oriente Antioqueño y cualquier
     ciudad o municipio fuera del Área Metropolitana del Valle de Aburrá.

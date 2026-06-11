@@ -180,33 +180,103 @@ class TestProgressiveDataCapture(unittest.TestCase):
 
         self.assertFalse(business_hours_helper.is_business_hours(now))
 
-    def test_business_hours_before_6_is_closed(self):
+    def test_business_hours_before_7_is_closed(self):
         from datetime import datetime
 
-        now = datetime(2026, 6, 1, 5, 59, tzinfo=helper.COLOMBIA_TZ)
+        now = datetime(2026, 6, 1, 6, 59, tzinfo=helper.COLOMBIA_TZ)
 
         self.assertFalse(business_hours_helper.is_business_hours(now))
 
-    def test_business_hours_at_6_is_open(self):
+    def test_business_hours_at_7_is_open(self):
         from datetime import datetime
 
-        now = datetime(2026, 6, 1, 6, 0, tzinfo=helper.COLOMBIA_TZ)
+        now = datetime(2026, 6, 1, 7, 0, tzinfo=helper.COLOMBIA_TZ)
 
         self.assertTrue(business_hours_helper.is_business_hours(now))
 
-    def test_business_hours_before_19_is_open(self):
+    def test_business_hours_monday_8_is_open(self):
         from datetime import datetime
 
-        now = datetime(2026, 6, 1, 18, 59, tzinfo=helper.COLOMBIA_TZ)
+        now = datetime(2026, 6, 1, 8, 0, tzinfo=helper.COLOMBIA_TZ)
 
         self.assertTrue(business_hours_helper.is_business_hours(now))
 
-    def test_business_hours_at_19_is_closed(self):
+    def test_business_hours_saturday_1730_is_open(self):
         from datetime import datetime
 
-        now = datetime(2026, 6, 1, 19, 0, tzinfo=helper.COLOMBIA_TZ)
+        now = datetime(2026, 6, 6, 17, 30, tzinfo=helper.COLOMBIA_TZ)
+
+        self.assertTrue(business_hours_helper.is_business_hours(now))
+
+    def test_business_hours_saturday_1830_is_closed(self):
+        from datetime import datetime
+
+        now = datetime(2026, 6, 6, 18, 30, tzinfo=helper.COLOMBIA_TZ)
 
         self.assertFalse(business_hours_helper.is_business_hours(now))
+
+    def test_business_hours_at_18_is_closed(self):
+        from datetime import datetime
+
+        now = datetime(2026, 6, 1, 18, 0, tzinfo=helper.COLOMBIA_TZ)
+
+        self.assertFalse(business_hours_helper.is_business_hours(now))
+
+    def test_coverage_status_for_official_locations(self):
+        covered_cases = [
+            ("Estoy en Medellín", "covered"),
+            ("Estoy en Bello", "covered"),
+            ("Estoy en Itagui", "covered"),
+            ("Estoy en Envigado", "covered"),
+            ("Estoy en Laureles", "covered"),
+            ("Estoy en El Poblado", "covered"),
+            ("Estoy en Belén", "covered"),
+            ("Estoy en La Candelaria", "covered"),
+            ("Estoy en Doce de Octubre", "covered"),
+            ("Estoy en San Javier", "covered"),
+        ]
+        out_cases = [
+            ("Estoy en Rionegro", "out_of_coverage"),
+            ("Estoy en Guarne", "out_of_coverage"),
+            ("Estoy en Bogotá", "out_of_coverage"),
+            ("Estoy en Cartagena", "out_of_coverage"),
+        ]
+        ambiguous_cases = [
+            ("Estoy por la 80", "ambiguous"),
+            ("Estoy en centro", "ambiguous"),
+            ("Estoy por la regional", "ambiguous"),
+        ]
+
+        for message, expected in covered_cases + out_cases + ambiguous_cases:
+            with self.subTest(message=message):
+                self.assertEqual(helper.get_coverage_status("", message), expected)
+
+    def test_medellin_neighborhood_sets_city_in_simple_flow(self):
+        cases = [
+            ("Estoy en Laureles", "Laureles"),
+            ("Estoy en El Poblado", "El Poblado"),
+            ("Estoy en Belén", "Belén"),
+            ("Estoy en La Candelaria", "La Candelaria"),
+            ("Estoy en Doce de Octubre", "Doce de Octubre"),
+            ("Estoy en San Javier", "San Javier"),
+        ]
+
+        for message, expected_location in cases:
+            with self.subTest(message=message):
+                session = make_session(last_message=message)
+                next_step, should_send, reply, vals = apply_simple_ai(
+                    session,
+                    {
+                        "intent": "simple_data_capture",
+                        "assistant_message": "",
+                    },
+                )
+
+                self.assertEqual(next_step, "ask_name")
+                self.assertTrue(should_send)
+                self.assertEqual(vals["city"], "Medellín")
+                self.assertEqual(vals["location"], expected_location)
+                self.assertEqual(vals["coverage_status"], "covered")
 
     def test_after_hours_with_complete_data_goes_to_handoff(self):
         session = make_session(

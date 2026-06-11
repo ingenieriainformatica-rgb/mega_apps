@@ -82,6 +82,11 @@ def get_business_context_simple() -> str:
         - Patio Bonito
         - Aguacatala
         - Los Balsos
+        - Santa Mónica
+        - Santa Monica
+        - La Castellana
+        - Conquistadores
+        - Castropol
 
         Ubicaciones fuera de cobertura:
         - Rionegro
@@ -96,7 +101,7 @@ def get_business_context_simple() -> str:
         - Municipios o ciudades fuera del Área Metropolitana del Valle de Aburrá
 
         Horario de atención:
-        Lunes a sábado de 6:00 a.m. a 6:00 p.m.
+        Lunes a sábado de 7:00 a.m. a 6:00 p.m.
 
         Reglas importantes:
         - Nunca digas que eres IA, bot, sistema automático o asistente virtual.

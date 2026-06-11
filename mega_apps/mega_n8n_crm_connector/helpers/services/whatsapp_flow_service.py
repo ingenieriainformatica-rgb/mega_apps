@@ -75,6 +75,36 @@ def _payload_hash(payload: dict) -> str:
     return hashlib.sha256(payload_text.encode("utf-8")).hexdigest()[:16]
 
 
+def _control_reply_for_empty_message_payload(payload: dict, message: str) -> str:
+    if (message or "").strip():
+        return ""
+
+    control_reply = (payload.get("control_reply") or payload.get("reply") or "").strip()
+    if payload.get("unsupported_message") and control_reply:
+        return control_reply
+
+    message_type = (payload.get("message_type") or payload.get("type") or "").strip().lower()
+    if message_type == "image":
+        return (
+            "Recibimos tu imagen. Para ayudarte con la batería, por favor "
+            "escríbenos el vehículo, la ubicación y qué necesitas revisar."
+        )
+
+    if message_type == "audio":
+        return (
+            "Recibimos tu audio, pero para atenderte más rápido por este canal "
+            "por favor envíanos la información por texto: vehículo, ubicación y solicitud."
+        )
+
+    if message_type in {"document", "sticker", "location", "unknown"}:
+        return (
+            "Recibimos tu mensaje, pero necesitamos que nos escribas por texto el "
+            "vehículo, la ubicación y qué necesitas para poder ayudarte."
+        )
+
+    return ""
+
+
 def _get_wompi_private_key(env) -> str:
     Config = env["ir.config_parameter"].sudo()
 
@@ -402,6 +432,24 @@ def build_ai_context_response(self, **post):
                 error="missing_phone",
                 should_use_ai=False,
             )
+
+        control_reply = _control_reply_for_empty_message_payload(payload, message)
+        if control_reply:
+            _logger.info(
+                "N8N AI context controlled non-text reply phone=%s type=%s",
+                phone,
+                payload.get("message_type") or payload.get("type"),
+            )
+            return {
+                "success": True,
+                "should_use_ai": False,
+                "should_send": True,
+                "kind": "unsupported_message",
+                "phone": phone,
+                "phone_number_id": phone_number_id,
+                "step": "unsupported_message",
+                "reply": control_reply,
+            }
 
         session, created = get_or_create_session(
             request.env,

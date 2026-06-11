@@ -73,6 +73,8 @@ class TestMetaWhatsAppMessageMetadata(unittest.TestCase):
         self.assertEqual(metadata["message_type"], "text")
         self.assertEqual(metadata["text"], "hola")
         self.assertEqual(metadata["media_id"], "")
+        self.assertFalse(metadata["unsupported_message"])
+        self.assertTrue(metadata["should_use_ai"])
 
     def test_image_with_caption_metadata(self):
         metadata = self.controller._extract_message_metadata(
@@ -108,6 +110,10 @@ class TestMetaWhatsAppMessageMetadata(unittest.TestCase):
         self.assertEqual(metadata["caption"], "")
         self.assertEqual(metadata["media_id"], "media-image-2")
         self.assertEqual(metadata["mime_type"], "image/png")
+        self.assertTrue(metadata["unsupported_message"])
+        self.assertFalse(metadata["should_use_ai"])
+        self.assertTrue(metadata["should_send"])
+        self.assertIn("Recibimos tu imagen", metadata["control_reply"])
 
     def test_audio_metadata(self):
         metadata = self.controller._extract_message_metadata(
@@ -126,6 +132,9 @@ class TestMetaWhatsAppMessageMetadata(unittest.TestCase):
         self.assertEqual(metadata["media_id"], "media-audio-1")
         self.assertEqual(metadata["mime_type"], "audio/ogg")
         self.assertTrue(metadata["voice"])
+        self.assertTrue(metadata["unsupported_message"])
+        self.assertFalse(metadata["should_use_ai"])
+        self.assertIn("Recibimos tu audio", metadata["control_reply"])
 
     def test_location_metadata(self):
         metadata = self.controller._extract_message_metadata(
@@ -146,6 +155,8 @@ class TestMetaWhatsAppMessageMetadata(unittest.TestCase):
         self.assertEqual(metadata["longitude"], -75.5812)
         self.assertEqual(metadata["location_name"], "Centro")
         self.assertEqual(metadata["location_address"], "Medellin, Antioquia")
+        self.assertTrue(metadata["unsupported_message"])
+        self.assertFalse(metadata["should_use_ai"])
 
     def test_unknown_metadata(self):
         metadata = self.controller._extract_message_metadata({"type": "sticker"})
@@ -153,6 +164,25 @@ class TestMetaWhatsAppMessageMetadata(unittest.TestCase):
         self.assertEqual(metadata["message_type"], "sticker")
         self.assertEqual(metadata["text"], "")
         self.assertEqual(metadata["media_id"], "")
+        self.assertTrue(metadata["unsupported_message"])
+        self.assertFalse(metadata["should_use_ai"])
+        self.assertIn("necesitamos que nos escribas por texto", metadata["control_reply"])
+
+    def test_document_without_text_metadata(self):
+        metadata = self.controller._extract_message_metadata(
+            {
+                "type": "document",
+                "document": {
+                    "id": "media-document-1",
+                    "mime_type": "application/pdf",
+                },
+            }
+        )
+
+        self.assertEqual(metadata["message_type"], "document")
+        self.assertEqual(metadata["media_id"], "media-document-1")
+        self.assertTrue(metadata["unsupported_message"])
+        self.assertFalse(metadata["should_use_ai"])
 
     def test_payload_includes_normalized_messages(self):
         payload = {"entry": [{"changes": [{"value": {"messages": []}}]}]}
@@ -172,6 +202,10 @@ class TestMetaWhatsAppMessageMetadata(unittest.TestCase):
                 "location_name": "",
                 "location_address": "",
                 "voice": True,
+                "unsupported_message": True,
+                "control_reply": "Recibimos tu audio",
+                "should_use_ai": False,
+                "should_send": True,
             }
         ]
 
@@ -180,6 +214,9 @@ class TestMetaWhatsAppMessageMetadata(unittest.TestCase):
         self.assertEqual(enriched["normalized_messages"][0]["message_type"], "audio")
         self.assertEqual(enriched["normalized_messages"][0]["media_id"], "media-audio-1")
         self.assertTrue(enriched["normalized_messages"][0]["voice"])
+        self.assertTrue(enriched["normalized_messages"][0]["unsupported_message"])
+        self.assertFalse(enriched["normalized_messages"][0]["should_use_ai"])
+        self.assertTrue(enriched["normalized_messages"][0]["should_send"])
 
 
 if __name__ == "__main__":

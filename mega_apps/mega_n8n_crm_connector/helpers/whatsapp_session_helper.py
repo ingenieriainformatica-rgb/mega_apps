@@ -45,9 +45,30 @@ MEDELLIN_SECTOR_LOCATIONS = {
     "buenos aires",
     "manrique",
     "aranjuez",
+    "la candelaria",
     "guayabal",
+    "doce de octubre",
+    "san javier",
+    "villa hermosa",
+    "popular",
+    "santa cruz",
+    "la america",
     "estadio",
-    "la 80",
+    "calasanz",
+    "floresta",
+    "los colores",
+    "la mota",
+    "loma de los bernal",
+    "ciudad del rio",
+    "provenza",
+    "manila",
+    "patio bonito",
+    "aguacatala",
+    "los balsos",
+    "santa monica",
+    "la castellana",
+    "conquistadores",
+    "castropol",
 }
 
 
@@ -74,6 +95,39 @@ VEHICLE_BRAND_CORRECTIONS = {
     "kia": "Kia",
     "ford": "Ford",
 }
+
+SIMPLE_FULL_WELCOME_MESSAGES = (
+    (
+        "Hola {greeting}, te habla Moisés Castrillón de Megabaterías, "
+        "experto en baterías MAC. 👋\n\n"
+        "Te ayudo a encontrar la batería adecuada para tu vehículo. "
+        "Tenemos domicilio e instalación en Medellín y Área Metropolitana.\n\n"
+        "¿Me indicas tu nombre y qué vehículo tienes?"
+    ),
+    (
+        "Hola {greeting}, soy Moisés Castrillón, experto en baterías MAC de Megabaterías. 👋\n\n"
+        "Con gusto reviso la batería correcta para tu carro, camioneta, camión. "
+        "Atendemos Medellín y Área Metropolitana.\n\n"
+        "¿Cuál es tu nombre y para qué vehículo la necesitas?"
+    ),
+    (
+        "Hola {greeting}, gracias por escribir a Megabaterías. "
+        "Te habla Moisés Castrillón, experto en baterías MAC. 👋\n\n"
+        "Te asesoro con la batería ideal y servicio a domicilio en Medellín y Área Metropolitana.\n\n"
+        "¿Me confirmas tu nombre y qué vehículo tienes?"
+    ),
+    (
+        "Hola {greeting}, te habla Moisés Castrillón de Megabaterías, "
+        "experto en baterías MAC. 👋\n\n"
+        "Revisemos la batería adecuada para tu vehículo. "
+        "Prestamos instalación a domicilio en Medellín y Área Metropolitana.\n\n"
+        "¿Con quién tengo el gusto y qué vehículo manejas?"
+    ),
+)
+
+def get_simple_full_welcome() -> str:
+    greeting = get_time_based_greeting()
+    return random.choice(SIMPLE_FULL_WELCOME_MESSAGES).format(greeting=greeting)
 
 
 def normalize_text(value: str) -> str:
@@ -139,11 +193,11 @@ def get_coverage_status(location: str | None, message: str | None) -> str:
 
     return "not_provided"
 
-def session_has_confirmed_covered_location(session) -> bool:
-    return (
-        clean_text(getattr(session, "location", ""))
-        and getattr(session, "coverage_status", "") == "covered"
-    )
+def session_has_confirmed_covered_location(session: Any) -> bool:
+    location = clean_text(str(getattr(session, "location", "") or ""))
+    coverage_status = str(getattr(session, "coverage_status", "") or "")
+
+    return bool(location) and coverage_status == "covered"
 
 def preserve_confirmed_covered_location(session, city: str, location: str) -> tuple[str, str, str | None]:
     if not session_has_confirmed_covered_location(session):
@@ -185,11 +239,21 @@ def extract_ambiguous_location_from_message(message: str | None) -> str:
         "la colinita",
         "colinita",
         "centro",
+        "sur",
+        "norte",
         "vereda",
         "cerca",
         "por aca",
         "por aqui",
         "por ahi",
+        "por la 80",
+        "la 80",
+        "por la regional",
+        "regional",
+        "cerca al exito",
+        "cerca al éxito",
+        "por el parque",
+        "en el barrio",
     )
     if any(location in normalized for location in ambiguous_locations):
         return original
@@ -509,17 +573,17 @@ def get_time_based_greeting() -> str:
         return "buena tarde"
     return "buena noche"
 
-def get_simple_full_welcome() -> str:
-    greeting = get_time_based_greeting()
-    return (
-        f"Hola {greeting}, te habla Moisés Castrillón, asesor experto en baterías MAC.\n\n"
-        "Te puedo asesorar en la aplicación correcta de baterías para tu automóvil, "
-        "buses, maquinaria amarilla y plantas eléctricas.\n\n"
-        "Te prestamos rápido servicio a domicilio e instalación técnica de la batería "
-        "en Medellín y su área metropolitana.\n\n"
-        "Atendemos automóvil, camioneta, camión, bus, maquinaria amarilla y plantas eléctricas.\n\n"
-        "¿Cuál es tu nombre y para qué vehículo requieres la batería?"
-    )
+# def get_simple_full_welcome() -> str:
+#     greeting = get_time_based_greeting()
+#     return (
+#         f"Hola {greeting}, te habla Moisés Castrillón, asesor experto en baterías MAC.\n\n"
+#         "Te puedo asesorar en la aplicación correcta de baterías para tu automóvil, "
+#         "buses, maquinaria amarilla y plantas eléctricas.\n\n"
+#         "Te prestamos rápido servicio a domicilio e instalación técnica de la batería "
+#         "en Medellín y su área metropolitana.\n\n"
+#         "Atendemos automóvil, camioneta, camión, bus, maquinaria amarilla y plantas eléctricas.\n\n"
+#         "¿Cuál es tu nombre y para qué vehículo requieres la batería?"
+#     )
 
 def normalize_ai_result(ai_result: dict[str, Any]) -> dict[str, Any]:
     normalized_result = dict(ai_result or {})
@@ -860,7 +924,7 @@ def get_welcome_message() -> str:
         Te ayudamos a encontrar la batería adecuada para tu carro o camión, según tu vehículo y ubicación.
 
         • 📍 Cobertura: Medellín y área metropolitana
-        • ⏰ Horario: 7am - 7pm (Lun a Sáb)
+        • ⏰ Horario: 7am - 6pm (Lun a Sáb)
         • 🚗 Servicio para carros y camiones
 
         Para iniciar, ¿me regalas por favor tu nombre?
@@ -875,7 +939,7 @@ def get_welcome_message() -> str:
         Cotizamos baterías para carros y camiones, validando la mejor opción según referencia, disponibilidad y ubicación.
 
         • 📍 Medellín y área metropolitana
-        • ⏰ 7am - 7pm (Lun a Sáb)
+        • ⏰ 7am - 6pm (Lun a Sáb)
 
         ¿Me compartes tu nombre para comenzar?
         """,
@@ -888,7 +952,7 @@ def get_welcome_message() -> str:
         Estamos listos para asesorarte con la batería adecuada para tu vehículo.
 
         • 📍 Cobertura: Medellín y área metropolitana
-        • ⏰ Horario: 7am - 7pm (Lun a Sáb)
+        • ⏰ Horario: 7am - 6pm (Lun a Sáb)
         • 🚗 Carros y camiones
 
         ¿Cuál es tu nombre?
@@ -1389,7 +1453,7 @@ def build_simple_ai_session_update(
 
     missing_name = not current_name
     missing_location = not current_location
-    missing_vehicle = not (current_brand and current_model and current_year)
+    missing_vehicle = not (current_brand and current_model)
     welcome_reply = get_simple_full_welcome()
 
     vehicle_parts = [part for part in [current_brand, current_model, current_year] if part]
@@ -1404,12 +1468,44 @@ def build_simple_ai_session_update(
         return f"{intro}\n\n{question}"
 
     def final_handoff_reply() -> str:
-        vehicle_text = f" tu {vehicle_label}" if vehicle_label else " los datos de tu vehículo"
+        name_text = f"{current_name}, " if current_name else ""
+        vehicle_text = f"para tu {vehicle_label}" if vehicle_label else "para tu vehículo"
         location_text = f" en {current_location}" if current_location else ""
-        return (
-            f"Listo, {current_name}. Ya tengo{vehicle_text}{location_text}. "
-            "En breve un asesor de Mega Baterías continuará contigo para indicarte la batería adecuada para tu carro."
+
+        messages = (
+            (
+                f"Gracias por la información, {name_text}ya tengo una buena base "
+                f"para revisar la batería adecuada {vehicle_text}{location_text}. "
+                "Voy a validar la aplicación correcta para darte una recomendación precisa."
+            ),
+            (
+                f"Con estos datos, {name_text}puedo revisar mejor qué batería aplica "
+                f"{vehicle_text}. "
+                "Voy a confirmar la referencia correcta y las opciones disponibles."
+            ),
+            (
+                f"Gracias, {name_text}con la información del vehículo y la zona{location_text}, "
+                "puedo validar mejor la batería recomendada. "
+                "Ahora reviso la aplicación para evitar ofrecerte una referencia incorrecta."
+            ),
+            (
+                f"Con esa información, {name_text}ya puedo avanzar con la revisión "
+                f"{vehicle_text}. "
+                "Voy a validar capacidad, referencia y disponibilidad para darte una opción segura."
+            ),
+            (
+                f"Gracias por compartir los datos, {name_text}voy a revisar la batería indicada "
+                f"{vehicle_text}. "
+                "La idea es confirmarte una opción que realmente aplique para tu vehículo."
+            ),
+            (
+                f"{name_text}voy a verificar la batería "
+                f"correcta {vehicle_text}{location_text}. "
+                "Te confirmo una recomendación con base en el vehículo y la disponibilidad."
+            ),
         )
+
+        return random.choice(messages)
 
     progressive_ai_result = {
         **ai_result,
@@ -1441,7 +1537,11 @@ def build_simple_ai_session_update(
         if should_confirm_unclear_location(getattr(session, "last_message", "")):
             reply = "¿Esa zona queda en Medellín o Área Metropolitana?"
         else:
-            reply = f"{current_name}, gracias. Cuéntame, ¿te encuentras en Medellín o en algún municipio cercano?"
+            name_text = f"{current_name}, " if current_name else ""
+            reply = (
+                f"{name_text}gracias. Para validar el domicilio, "
+                "indícame tu barrio o municipio. Cubrimos Medellín y Área Metropolitana."
+            )
     elif missing_vehicle:
         next_step = "ask_vehicle"
         missing_vehicle_fields = []
@@ -1449,16 +1549,28 @@ def build_simple_ai_session_update(
             missing_vehicle_fields.append("marca")
         if not current_model:
             missing_vehicle_fields.append("línea/modelo")
-        if not current_year:
-            missing_vehicle_fields.append("año")
+        # if not current_year:
+        #     missing_vehicle_fields.append("año")
 
-        if len(missing_vehicle_fields) == 3:
+        # if len(missing_vehicle_fields) == 3:
+        #     reply = (
+        #         "Muchas gracias por tu información. ¿Qué carro manejas? "
+        #         "Indícame la marca, línea/modelo y año para indicarte la batería adecuada para tu carro."
+        #     )
+        # else:
+        #     missing_text = ", ".join(missing_vehicle_fields)
+        #     reply = with_vehicle_context(
+        #         "Muchas gracias por tu información. "
+        #         f"Para continuar, indícame por favor {missing_text} del vehículo."
+        #     )
+
+        if len(missing_vehicle_fields) == 2:
             reply = (
-                "Muchas gracias por tu información. ¿Qué carro manejas? "
-                "Indícame la marca, línea/modelo y año para indicarte la batería adecuada para tu carro."
+                "Muchas gracias por tu información. ¿Qué vehículo tienes? "
+                "Indícame la marca y línea/modelo para revisar la batería adecuada."
             )
         else:
-            missing_text = ", ".join(missing_vehicle_fields)
+            missing_text = " y ".join(missing_vehicle_fields)
             reply = with_vehicle_context(
                 "Muchas gracias por tu información. "
                 f"Para continuar, indícame por favor {missing_text} del vehículo."
@@ -1604,7 +1716,7 @@ def build_after_hours_ai_session_update(
 
     missing_name = not current_name
     missing_location = not current_location
-    missing_vehicle = not (current_brand and current_model and current_year)
+    missing_vehicle = not (current_brand and current_model)
 
     progressive_ai_result = {
         **ai_result,
@@ -1646,7 +1758,11 @@ def build_after_hours_ai_session_update(
             reply = f"Gracias {current_name}. ¿En qué barrio o municipio te encuentras?"
     elif missing_vehicle:
         next_step = "ask_vehicle"
-        reply = f"Listo {current_name}. ¿Qué vehículo tienes? Indícame marca, línea/modelo y año."
+        # reply = f"Listo {current_name}. ¿Qué vehículo tienes? Indícame marca, línea/modelo y año."
+        reply = (
+            f"{current_name}, ¿qué vehículo tienes? "
+            "Indícame marca y línea/modelo para dejar tu solicitud registrada."
+        )
     else:
         next_step = "after_hours_handoff"
         vehicle_label = " ".join(

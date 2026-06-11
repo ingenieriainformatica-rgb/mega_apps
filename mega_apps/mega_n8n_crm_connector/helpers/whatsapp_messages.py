@@ -32,7 +32,7 @@ def get_welcome_message() -> str:
         Te ayudamos a encontrar la batería adecuada para tu carro o camión, según tu vehículo y ubicación.
 
         • 📍 Cobertura: Medellín y área metropolitana
-        • ⏰ Horario: 7am - 7pm (Lun a Sáb)
+        • ⏰ Horario: 7am - 6pm (Lun a Sáb)
         • 🚗 Servicio para carros y camiones
 
         Para iniciar, ¿me regalas por favor tu nombre?
@@ -47,7 +47,7 @@ def get_welcome_message() -> str:
         Cotizamos baterías para carros y camiones, validando la mejor opción según referencia, disponibilidad y ubicación.
 
         • 📍 Medellín y área metropolitana
-        • ⏰ 7am - 7pm (Lun a Sáb)
+        • ⏰ 7am - 6pm (Lun a Sáb)
 
         ¿Me compartes tu nombre para comenzar?
         """,
@@ -60,7 +60,7 @@ def get_welcome_message() -> str:
         Estamos listos para asesorarte con la batería adecuada para tu vehículo.
 
         • 📍 Cobertura: Medellín y área metropolitana
-        • ⏰ Horario: 7am - 7pm (Lun a Sáb)
+        • ⏰ Horario: 7am - 6pm (Lun a Sáb)
         • 🚗 Carros y camiones
 
         ¿Cuál es tu nombre?

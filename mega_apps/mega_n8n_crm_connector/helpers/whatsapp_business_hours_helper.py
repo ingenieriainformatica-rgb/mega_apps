@@ -4,9 +4,9 @@ from datetime import datetime, time
 
 from .constants import COLOMBIA_TZ
 
-BUSINESS_HOUR_START = time(6, 0)
-BUSINESS_HOUR_END = time(19, 0)
-BUSINESS_HOURS_TEXT = "lunes a sábado de 6:00 a.m. a 7:00 p.m."
+BUSINESS_HOUR_START = time(7, 0)
+BUSINESS_HOUR_END = time(18, 0)
+BUSINESS_HOURS_TEXT = "lunes a sábado de 7:00 a.m. a 6:00 p.m."
 
 
 def _as_colombia_datetime(now=None) -> datetime:

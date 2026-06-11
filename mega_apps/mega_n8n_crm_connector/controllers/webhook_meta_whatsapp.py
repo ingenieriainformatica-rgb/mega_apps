@@ -353,7 +353,42 @@ class MetaWhatsAppWebhookController(http.Controller):
             "location_name": message.get("location_name") or "",
             "location_address": message.get("location_address") or "",
             "voice": bool(message.get("voice")),
+            "unsupported_message": bool(message.get("unsupported_message")),
+            "control_reply": message.get("control_reply") or "",
+            "should_use_ai": bool(message.get("should_use_ai", True)),
+            "should_send": bool(message.get("should_send", False)),
         }
+
+    def _control_reply_for_message_type(self, message_type):
+        if message_type == "image":
+            return (
+                "Recibimos tu imagen. Para ayudarte con la batería, por favor "
+                "escríbenos el vehículo, la ubicación y qué necesitas revisar."
+            )
+
+        if message_type == "audio":
+            return (
+                "Recibimos tu audio, pero para atenderte más rápido por este canal "
+                "por favor envíanos la información por texto: vehículo, ubicación y solicitud."
+            )
+
+        return (
+            "Recibimos tu mensaje, pero necesitamos que nos escribas por texto el "
+            "vehículo, la ubicación y qué necesitas para poder ayudarte."
+        )
+
+    def _mark_unsupported_without_text(self, metadata):
+        metadata.update(
+            {
+                "unsupported_message": True,
+                "control_reply": self._control_reply_for_message_type(
+                    metadata.get("message_type")
+                ),
+                "should_use_ai": False,
+                "should_send": True,
+            }
+        )
+        return metadata
 
     def _extract_message_metadata(self, message):
         message_type = message.get("type") or "unknown"
@@ -368,17 +403,21 @@ class MetaWhatsAppWebhookController(http.Controller):
             "location_name": "",
             "location_address": "",
             "voice": False,
+            "unsupported_message": False,
+            "control_reply": "",
+            "should_use_ai": True,
+            "should_send": False,
         }
 
         if message_type == "text":
             metadata["text"] = (message.get("text") or {}).get("body") or ""
             _logger.info(f"\n\n text -> {metadata['text']} \n\n")
-            return metadata
+            return metadata if metadata["text"] else self._mark_unsupported_without_text(metadata)
 
         if message_type == "button":
             metadata["text"] = (message.get("button") or {}).get("text") or ""
             _logger.info(f"\n\n button -> {metadata['text']} \n\n")
-            return metadata
+            return metadata if metadata["text"] else self._mark_unsupported_without_text(metadata)
 
         if message_type == "interactive":
             interactive = message.get("interactive") or {}
@@ -393,7 +432,7 @@ class MetaWhatsAppWebhookController(http.Controller):
                 metadata["text"] = list_reply.get("title") or list_reply.get("id") or ""
                 return metadata
 
-            return metadata
+            return self._mark_unsupported_without_text(metadata)
 
         if message_type == "location":
             location = message.get("location") or {}
@@ -405,7 +444,7 @@ class MetaWhatsAppWebhookController(http.Controller):
                     "location_address": location.get("address") or "",
                 }
             )
-            return metadata
+            return self._mark_unsupported_without_text(metadata)
 
         if message_type == "image":
             image = message.get("image") or {}
@@ -418,6 +457,8 @@ class MetaWhatsAppWebhookController(http.Controller):
                     "caption": caption,
                 }
             )
+            if not caption:
+                self._mark_unsupported_without_text(metadata)
             return metadata
 
         if message_type == "audio":
@@ -430,9 +471,19 @@ class MetaWhatsAppWebhookController(http.Controller):
                     "voice": bool(audio.get("voice")),
                 }
             )
-            return metadata
+            return self._mark_unsupported_without_text(metadata)
 
-        return metadata
+        if message_type == "document":
+            document = message.get("document") or {}
+            metadata.update(
+                {
+                    "media_id": document.get("id") or "",
+                    "mime_type": document.get("mime_type") or "",
+                }
+            )
+            return self._mark_unsupported_without_text(metadata)
+
+        return self._mark_unsupported_without_text(metadata)
 
     def _extract_message_text(self, message):
         """
