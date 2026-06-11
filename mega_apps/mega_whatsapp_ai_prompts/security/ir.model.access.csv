@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mega_whatsapp_ai_prompt_manager,mega.whatsapp.ai.prompt.manager,model_mega_whatsapp_ai_prompt,mega_whatsapp_ai_prompts.group_ai_prompt_manager,1,1,1,1

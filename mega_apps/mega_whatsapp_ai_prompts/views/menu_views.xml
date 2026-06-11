@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+        id="menu_mega_whatsapp_ai_root"
+        name="WhatsApp IA"
+        parent="crm.crm_menu_root"
+        sequence="80"
+        groups="mega_whatsapp_ai_prompts.group_ai_prompt_manager"/>
+
+    <menuitem
+        id="menu_mega_whatsapp_ai_prompts"
+        name="Prompts IA"
+        parent="menu_mega_whatsapp_ai_root"
+        action="action_mega_whatsapp_ai_prompt"
+        sequence="10"
+        groups="mega_whatsapp_ai_prompts.group_ai_prompt_manager"/>
+</odoo>

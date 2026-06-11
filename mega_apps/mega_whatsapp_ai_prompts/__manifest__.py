@@ -1,0 +1,25 @@
+{
+    "name": "Mega WhatsApp AI Prompts",
+    "version": "18.0.1.0.0",
+    "category": "MegaTecnicentro/CrmN8n",
+    "sequence": -409,
+    "summary": "Administracion visual de prompts IA para WhatsApp",
+    "author": "Jorge Alberto Quiroz Sierra",
+    "website": "https://mega.realnet.com.co/",
+    "depends": [
+        "base",
+        "crm",
+        "mail",
+        "mega_n8n_crm_connector",
+    ],
+    "data": [
+        "security/security.xml",
+        "security/ir.model.access.csv",
+        "views/whatsapp_ai_prompt_views.xml",
+        "views/menu_views.xml",
+        "data/whatsapp_ai_prompt_data.xml",
+    ],
+    "license": "LGPL-3",
+    "installable": True,
+    "application": False,
+}  #type: ignore
