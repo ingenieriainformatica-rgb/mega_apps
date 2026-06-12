@@ -128,6 +128,11 @@ class MetaWhatsAppWebhookController(http.Controller):
             )
             return self._json_response({"success": False, "error": "invalid_json"}, status=400)
 
+        _logger.info(
+            "[WHATSAPP META] inbound webhook received keys=%s",
+            list(payload.keys()) if isinstance(payload, dict) else type(payload),
+        )
+
         messages = self._extract_inbound_messages(payload)
 
         if not messages:
@@ -312,6 +317,16 @@ class MetaWhatsAppWebhookController(http.Controller):
                         )
                         continue
 
+                    media_id = metadata.get("media_id") or ""
+                    _logger.info(
+                        "[WHATSAPP META] normalized type=%s phone=%s phone_number_id=%s media_id=%s message_id=%s",
+                        message_type,
+                        phone,
+                        phone_number_id,
+                        media_id,
+                        external_message_id,
+                    )
+
                     result.append(
                         {
                             "phone": phone,
@@ -457,8 +472,6 @@ class MetaWhatsAppWebhookController(http.Controller):
                     "caption": caption,
                 }
             )
-            if not caption:
-                self._mark_unsupported_without_text(metadata)
             return metadata
 
         if message_type == "audio":
@@ -471,7 +484,7 @@ class MetaWhatsAppWebhookController(http.Controller):
                     "voice": bool(audio.get("voice")),
                 }
             )
-            return self._mark_unsupported_without_text(metadata)
+            return metadata
 
         if message_type == "document":
             document = message.get("document") or {}

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from odoo import http  # type: ignore
 from odoo.http import request  # type: ignore
 
@@ -8,6 +10,9 @@ from ..helpers.services.whatsapp_flow_service import (
     log_terminal_whatsapp_message,
     mark_welcome_sent_after_send,
 )
+
+_logger = logging.getLogger(__name__)
+
 
 class N8nWhatsappSessionController(http.Controller):
 
@@ -20,6 +25,7 @@ class N8nWhatsappSessionController(http.Controller):
         website=False,
     )
     def n8n_whatsapp_session_ai_context(self, **post):
+        _logger.info("[WHATSAPP AI-CONTEXT] request received")
         return build_ai_context_response(request.env)
 
     @http.route(

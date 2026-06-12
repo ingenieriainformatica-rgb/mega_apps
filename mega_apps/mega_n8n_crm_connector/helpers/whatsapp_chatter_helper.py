@@ -25,6 +25,7 @@ def log_whatsapp_conversation_on_lead(
     lead,
     customer_message: str | None,
     bot_reply: str | None,
+    attachment_ids=None,
 ) -> None:
     if not lead:
         return
@@ -51,6 +52,7 @@ def log_whatsapp_conversation_on_lead(
     lead.message_post(
         body=body,
         subtype_xmlid="mail.mt_note",
+        attachment_ids=attachment_ids or None,
     )
 
 def log_customer_message_on_lead_from_session(

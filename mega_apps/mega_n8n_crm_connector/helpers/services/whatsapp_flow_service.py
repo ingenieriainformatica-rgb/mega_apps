@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 import hashlib
@@ -50,6 +51,7 @@ from ...helpers.whatsapp_chatter_helper import (
 from ...helpers.whatsapp_discuss_helper import (
     HUMAN_HANDOFF_STEPS,
     ensure_discuss_channel_for_handoff,
+    post_inbound_whatsapp_media_to_discuss,
     post_inbound_whatsapp_message_to_discuss,
     post_outbound_whatsapp_message_to_discuss,
 )
@@ -126,29 +128,145 @@ def _media_last_message(message_type: str, caption: str = "") -> str:
 
 
 def _media_control_reply(message_type: str, caption: str = "") -> str:
+    if message_type == "image":
+        return "Imagen recibida."
+
+    if message_type == "audio":
+        return "Audio recibido."
+
+    return "Mensaje recibido."
+
+
+def _media_discuss_message(message_type: str, caption: str = "") -> str:
     caption = clean_text(caption)
 
     if message_type == "image":
         if caption:
-            return (
-                "Recibimos tu imagen y tu comentario. Te vamos a comunicar con un "
-                "asesor para revisar la información."
-            )
-        return (
-            "Recibimos tu imagen. Te vamos a comunicar con un asesor para revisar la "
-            "información."
-        )
+            return f"[Imagen recibida del cliente] {caption}"
+        return "[Imagen recibida del cliente]"
 
     if message_type == "audio":
-        return (
-            "Recibimos tu nota de voz. Te vamos a comunicar con un asesor para "
-            "revisar la información."
+        return "[Audio recibido del cliente]"
+
+    return f"[{message_type or 'Media'} recibido del cliente]"
+
+
+def _get_whatsapp_account_for_media(env, phone_number_id: str):
+    Account = env["whatsapp.account"].sudo()
+    phone_number_id = clean_text(phone_number_id)
+    _logger.info("[WHATSAPP MEDIA] searching whatsapp.account phone_number_id=%s", phone_number_id)
+    account = Account.search([("phone_uid", "=", phone_number_id)], limit=1) if phone_number_id else Account
+    account = account or Account.search([], limit=1)
+    _logger.info(
+        "[WHATSAPP MEDIA] account found id=%s phone_uid=%s",
+        account.id if account else False,
+        account.phone_uid if account else False,
+    )
+    return account
+
+
+def _download_whatsapp_media(env, *, media_id: str, phone_number_id: str):
+    media_id = clean_text(media_id)
+    if not media_id:
+        return b""
+
+    try:
+        from odoo.addons.whatsapp.tools.whatsapp_api import WhatsAppApi  # type: ignore
+
+        account = _get_whatsapp_account_for_media(env, phone_number_id)
+        if not account:
+            _logger.warning(
+                "[WHATSAPP MEDIA] No whatsapp.account found for phone_number_id=%s media_id=%s",
+                phone_number_id or False,
+                media_id,
+            )
+            return b""
+
+        _logger.info("[WHATSAPP MEDIA] downloading media_id=%s", media_id)
+        media_content = WhatsAppApi(account)._get_whatsapp_document(media_id) or b""
+        _logger.info("[WHATSAPP MEDIA] downloaded bytes=%s", len(media_content or b""))
+        return media_content
+    except Exception:
+        _logger.warning(
+            "[WHATSAPP MEDIA] Failed to download media_id=%s phone_number_id=%s",
+            media_id,
+            phone_number_id or False,
+            exc_info=True,
+        )
+        return b""
+
+
+def _media_attachment_name(message_type: str, message_id: str, media_id: str) -> str:
+    safe_id = clean_text(message_id or media_id or "sin_id").replace("/", "_").replace("\\", "_")
+    if message_type == "image":
+        return f"whatsapp_image_{safe_id}.jpg"
+    if message_type == "audio":
+        return f"whatsapp_audio_{safe_id}.ogg"
+    return f"whatsapp_media_{safe_id}"
+
+
+def _media_mimetype(message_type: str, mime_type: str) -> str:
+    mime_type = clean_text(mime_type)
+    if mime_type:
+        return mime_type
+    if message_type == "image":
+        return "image/jpeg"
+    if message_type == "audio":
+        return "audio/ogg"
+    return "application/octet-stream"
+
+
+def _create_whatsapp_media_attachment(
+    env,
+    *,
+    media_content: bytes,
+    message_type: str,
+    message_id: str,
+    media_id: str,
+    mime_type: str,
+    target_record,
+):
+    if not media_content:
+        return False
+
+    target_record = target_record.sudo() if target_record else False
+    name = _media_attachment_name(message_type, message_id, media_id)
+    mimetype = _media_mimetype(message_type, mime_type)
+    res_model = target_record._name if target_record else False
+    res_id = target_record.id if target_record else False
+    values = {
+        "name": name,
+        "datas": base64.b64encode(media_content),
+        "mimetype": mimetype,
+    }
+
+    if target_record:
+        values.update(
+            {
+                "res_model": res_model,
+                "res_id": res_id,
+            }
         )
 
-    return (
-        "Recibimos tu mensaje. Te vamos a comunicar con un asesor para revisar la "
-        "información."
-    )
+    try:
+        _logger.info(
+            "[WHATSAPP MEDIA] creating attachment name=%s mimetype=%s target=%s,%s",
+            name,
+            mimetype,
+            res_model,
+            res_id,
+        )
+        attachment = env["ir.attachment"].sudo().create(values)
+        _logger.info("[WHATSAPP MEDIA] attachment created id=%s", attachment.id)
+        return attachment
+    except Exception:
+        _logger.warning(
+            "[WHATSAPP MEDIA] Failed to create attachment media_id=%s message_id=%s",
+            media_id or False,
+            message_id or False,
+            exc_info=True,
+        )
+        return False
 
 
 def _build_media_handoff_response(
@@ -168,6 +286,15 @@ def _build_media_handoff_response(
     message_type = clean_text(message_type).lower()
     message_id = clean_text(message_id)
 
+    _logger.info(
+        "[WHATSAPP MEDIA] handoff start session=%s type=%s media_id=%s phone_number_id=%s message_id=%s",
+        session.id if session else False,
+        message_type,
+        media_id,
+        phone_number_id,
+        message_id,
+    )
+
     if message_id and "last_inbound_message_id" in session._fields:
         if (getattr(session, "last_inbound_message_id", "") or "").strip() == message_id:
             return whatsapp_response(
@@ -180,8 +307,9 @@ def _build_media_handoff_response(
                 session=session_snapshot(session),
             )
 
-    reply = _media_control_reply(message_type, caption=caption)
+    fallback_reply = _media_control_reply(message_type, caption=caption)
     last_message = _media_last_message(message_type, caption=caption)
+    discuss_message = _media_discuss_message(message_type, caption=caption)
 
     values: dict[str, Any] = {
         "step": "advisor_handoff",
@@ -207,27 +335,96 @@ def _build_media_handoff_response(
     session.write(values)
 
     lead = session.lead_id
+    channel = False
+    if lead:
+        if session.step in HUMAN_HANDOFF_STEPS and not session.discuss_channel_id:
+            channel = ensure_discuss_channel_for_handoff(env, session, lead)
+        elif session.discuss_channel_id:
+            channel = session.discuss_channel_id
+
+    if not channel and session.step in HUMAN_HANDOFF_STEPS:
+        channel = ensure_discuss_channel_for_handoff(env, session, lead)
+
+    attachment = False
+    media_content = b""
+    posted_on_discuss = False
+    discuss_mail_message = False
+    if media_id:
+        media_content = _download_whatsapp_media(
+            env,
+            media_id=media_id,
+            phone_number_id=phone_number_id or getattr(session, "phone_number_id", "") or "",
+        )
+
+    if media_content and session.step in HUMAN_HANDOFF_STEPS:
+        discuss_mail_message = post_inbound_whatsapp_media_to_discuss(
+            env,
+            session,
+            discuss_message,
+            filename=_media_attachment_name(message_type, message_id, media_id),
+            media_content=media_content,
+            wa_message_id=message_id,
+            voice=voice,
+        )
+        posted_on_discuss = bool(discuss_mail_message and discuss_mail_message.attachment_ids)
+        attachment = discuss_mail_message.attachment_ids[:1] if discuss_mail_message else False
+
+    if media_content and not attachment:
+        target_record = lead or channel or session
+        attachment = _create_whatsapp_media_attachment(
+            env,
+            media_content=media_content,
+            message_type=message_type,
+            message_id=message_id,
+            media_id=media_id,
+            mime_type=mime_type,
+            target_record=target_record,
+        )
+
+    attachment_ids = attachment.ids if attachment else []
+
+    posted_on_chatter = False
     if lead:
         log_whatsapp_conversation_on_lead(
             lead,
             customer_message=last_message,
-            bot_reply=reply,
+            bot_reply="",
+            attachment_ids=attachment_ids,
         )
-        if session.step in HUMAN_HANDOFF_STEPS and not session.discuss_channel_id:
-            ensure_discuss_channel_for_handoff(env, session, lead)
-        if session.step in HUMAN_HANDOFF_STEPS:
-            post_outbound_whatsapp_message_to_discuss(env, session, reply)
+        posted_on_chatter = True
+
+    if not posted_on_discuss and session.step in HUMAN_HANDOFF_STEPS:
+        posted_on_discuss = bool(post_outbound_whatsapp_message_to_discuss(
+            env,
+            session,
+            discuss_message,
+            attachment_ids=attachment_ids,
+        ))
+
+    media_published_to_advisor = bool(attachment_ids and (posted_on_discuss or lead))
+    should_send = not media_published_to_advisor
+    reply = "" if not should_send else fallback_reply
+    _logger.info(
+        "[WHATSAPP MEDIA] posted_on_discuss=%s posted_on_chatter=%s attachment_ids=%s should_send=%s",
+        posted_on_discuss,
+        posted_on_chatter,
+        attachment_ids,
+        should_send,
+    )
 
     return whatsapp_response(
         True,
         "advisor_handoff",
         reply,
-        should_send=True,
+        should_send=should_send,
         should_use_ai=False,
         kind="media_handoff",
         control_reply=reply,
         phone=phone,
         phone_number_id=phone_number_id or getattr(session, "phone_number_id", "") or "",
+        attachment_ids=attachment_ids,
+        logged_on_discuss=posted_on_discuss,
+        discuss_mail_message_id=discuss_mail_message.id if discuss_mail_message else False,
         session=session_snapshot(session),
     )
 
@@ -554,6 +751,16 @@ def build_ai_context_response(self, **post):
         profile_name = clean_text(payload.get("profile_name") or payload.get("contact_name") or "")
         voice = parse_bool(payload.get("voice"), default=False)
 
+        _logger.info("[WHATSAPP AI-CONTEXT] payload=%s", payload)
+        _logger.info(
+            "[WHATSAPP AI-CONTEXT] parsed phone=%s type=%s media_id=%s phone_number_id=%s message_id=%s",
+            phone,
+            message_type,
+            media_id,
+            phone_number_id,
+            message_id,
+        )
+
         if message_type == "image":
             message = caption or "[Imagen recibida]"
         elif message_type == "audio":
@@ -571,11 +778,18 @@ def build_ai_context_response(self, **post):
                 should_use_ai=False,
             )
 
+        _logger.info("[WHATSAPP AI-CONTEXT] creating/reusing session phone=%s", phone)
         session, created = get_or_create_session(
             request.env,
             phone,
             message,
             phone_number_id,
+        )
+        _logger.info(
+            "[WHATSAPP AI-CONTEXT] session id=%s created=%s step=%s",
+            session.id,
+            created,
+            session.step,
         )
 
         if message_type in {"image", "audio"}:

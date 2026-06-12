@@ -200,14 +200,109 @@ def post_inbound_whatsapp_message_to_discuss(env, session, message_text, wa_mess
         return False
 
 
-def post_outbound_whatsapp_message_to_discuss(env, session, message_text):
+def post_inbound_whatsapp_media_to_discuss(
+    env,
+    session,
+    message_text,
+    *,
+    filename,
+    media_content,
+    wa_message_id=None,
+    voice=False,
+):
+    """Post inbound WhatsApp media using Odoo's native WhatsApp message path."""
+    if not session:
+        return False
+
+    session = session.sudo()
+    message_text = (message_text or "").strip()
+    wa_message_id = (wa_message_id or "").strip()
+    filename = (filename or "whatsapp_media").strip()
+    media_content = media_content or b""
+
+    if not media_content:
+        _logger.warning(
+            "[WHATSAPP DISCUSS] No media content, skipping media post session=%s message_id=%s",
+            session.id,
+            wa_message_id or False,
+        )
+        return False
+
+    channel = ensure_discuss_channel_for_session(env, session, lead=session.lead_id)
+    if not channel:
+        return False
+
+    if wa_message_id and _whatsapp_message_exists(env, wa_message_id):
+        _logger.info(
+            "[WHATSAPP DISCUSS] Duplicate media inbound ignored session=%s message_id=%s",
+            session.id,
+            wa_message_id,
+        )
+        _notify_internal_members(channel)
+        return False
+
+    author_id = (
+        channel.whatsapp_partner_id.id
+        if channel.channel_type == "whatsapp" and channel.whatsapp_partner_id
+        else _get_author_partner_id(env)
+    )
+    message_kwargs = {
+        "body": plaintext2html(message_text) if message_text else "",
+        "subtype_xmlid": "mail.mt_comment",
+        "author_id": author_id or None,
+        "attachments": [(filename, media_content, {"voice": bool(voice)})],
+    }
+
+    if channel.channel_type == "whatsapp" and wa_message_id:
+        message_kwargs["message_type"] = "whatsapp_message"
+        message_kwargs["whatsapp_inbound_msg_uid"] = wa_message_id
+    else:
+        message_kwargs["message_type"] = "comment"
+
+    try:
+        _logger.info(
+            "[WHATSAPP DISCUSS] Posting inbound media channel=%s type=%s filename=%s message_id=%s",
+            channel.id,
+            channel.channel_type,
+            filename,
+            wa_message_id or False,
+        )
+        with env.cr.savepoint():
+            mail_message = channel.sudo().message_post(**message_kwargs)
+        _notify_internal_members(channel)
+        _logger.info(
+            "[WHATSAPP MEDIA] message posted id=%s attachment_ids=%s",
+            mail_message.id if mail_message else False,
+            mail_message.attachment_ids.ids if mail_message else [],
+        )
+        for attachment in mail_message.attachment_ids:
+            _logger.info(
+                "[WHATSAPP MEDIA] attachment created id=%s name=%s res_model=%s res_id=%s",
+                attachment.id,
+                attachment.name,
+                attachment.res_model,
+                attachment.res_id,
+            )
+        return mail_message
+    except Exception:
+        _logger.exception(
+            "[WHATSAPP DISCUSS] Failed to post inbound media session=%s channel=%s message_id=%s",
+            session.id,
+            channel.id,
+            wa_message_id or False,
+        )
+        return False
+
+
+def post_outbound_whatsapp_message_to_discuss(env, session, message_text, attachment_ids=None):
     """Post an outbound bot/advisor message on Discuss without sending it to Meta."""
     if not session:
         return False
 
     session = session.sudo()
     message_text = (message_text or "").strip()
-    if not message_text:
+    attachment_ids = attachment_ids or []
+    if not message_text and not attachment_ids:
         _logger.info(
             "[WHATSAPP DISCUSS] No message text, skipping post session=%s",
             session.id,
@@ -223,6 +318,7 @@ def post_outbound_whatsapp_message_to_discuss(env, session, message_text):
         message_type="comment",
         subtype_xmlid="mail.mt_comment",
         author_id=_get_author_partner_id(env) or None,
+        attachment_ids=attachment_ids or None,
     )
     _notify_internal_members(channel)
     _logger.info("[WHATSAPP DISCUSS] Outbound posted session=%s", session.id)
