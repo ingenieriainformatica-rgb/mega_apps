@@ -105,6 +105,127 @@ def _control_reply_for_empty_message_payload(payload: dict, message: str) -> str
     return ""
 
 
+def _media_last_message(message_type: str, caption: str = "") -> str:
+    caption = clean_text(caption)
+
+    if message_type == "image":
+        if caption:
+            return f"[Imagen recibida] {caption}"
+        return "[Imagen recibida]"
+
+    if message_type == "audio":
+        return "[Audio recibido]"
+
+    return f"[{message_type or 'Media'} recibido]"
+
+
+def _media_control_reply(message_type: str, caption: str = "") -> str:
+    caption = clean_text(caption)
+
+    if message_type == "image":
+        if caption:
+            return (
+                "Recibimos tu imagen y tu comentario. Te vamos a comunicar con un "
+                "asesor para revisar la información."
+            )
+        return (
+            "Recibimos tu imagen. Te vamos a comunicar con un asesor para revisar la "
+            "información."
+        )
+
+    if message_type == "audio":
+        return (
+            "Recibimos tu nota de voz. Te vamos a comunicar con un asesor para "
+            "revisar la información."
+        )
+
+    return (
+        "Recibimos tu mensaje. Te vamos a comunicar con un asesor para revisar la "
+        "información."
+    )
+
+
+def _build_media_handoff_response(
+    env,
+    session,
+    *,
+    phone: str,
+    phone_number_id: str,
+    message_type: str,
+    message_id: str,
+    caption: str = "",
+    media_id: str = "",
+    mime_type: str = "",
+    voice: bool = False,
+    profile_name: str = "",
+) -> dict[str, Any]:
+    message_type = clean_text(message_type).lower()
+    message_id = clean_text(message_id)
+
+    if message_id and "last_inbound_message_id" in session._fields:
+        if (getattr(session, "last_inbound_message_id", "") or "").strip() == message_id:
+            return whatsapp_response(
+                True,
+                session.step,
+                "",
+                should_send=False,
+                should_use_ai=False,
+                kind="duplicate_ignored",
+                session=session_snapshot(session),
+            )
+
+    reply = _media_control_reply(message_type, caption=caption)
+    last_message = _media_last_message(message_type, caption=caption)
+
+    values: dict[str, Any] = {
+        "step": "advisor_handoff",
+        "active": True,
+        "last_message": last_message,
+        "phone_number_id": phone_number_id or getattr(session, "phone_number_id", "") or "",
+    }
+
+    if message_id and "last_inbound_message_id" in session._fields:
+        values["last_inbound_message_id"] = message_id
+
+    if "relevant_data" in session._fields:
+        media_context = {
+            "message_type": message_type,
+            "media_id": media_id,
+            "mime_type": mime_type,
+            "caption": caption,
+            "voice": bool(voice),
+            "profile_name": profile_name,
+        }
+        values["relevant_data"] = json.dumps(media_context, ensure_ascii=False)
+
+    session.write(values)
+
+    lead = session.lead_id
+    if lead:
+        log_whatsapp_conversation_on_lead(
+            lead,
+            customer_message=last_message,
+            bot_reply=reply,
+        )
+        if session.step in HUMAN_HANDOFF_STEPS and not session.discuss_channel_id:
+            ensure_discuss_channel_for_handoff(env, session, lead)
+        if session.step in HUMAN_HANDOFF_STEPS:
+            post_outbound_whatsapp_message_to_discuss(env, session, reply)
+
+    return whatsapp_response(
+        True,
+        "advisor_handoff",
+        reply,
+        should_send=True,
+        should_use_ai=False,
+        kind="media_handoff",
+        control_reply=reply,
+        phone=phone,
+        phone_number_id=phone_number_id or getattr(session, "phone_number_id", "") or "",
+        session=session_snapshot(session),
+    )
+
+
 def _get_wompi_private_key(env) -> str:
     Config = env["ir.config_parameter"].sudo()
 
@@ -420,6 +541,17 @@ def build_ai_context_response(self, **post):
         message = (payload.get("message") or "").strip()
         message_id = _normalize_wa_message_id(payload)
         phone_number_id = (payload.get("phone_number_id") or "").strip()
+        message_type = clean_text(payload.get("message_type") or payload.get("type")).lower()
+        caption = clean_text(payload.get("caption") or "")
+        media_id = clean_text(payload.get("media_id") or "")
+        mime_type = clean_text(payload.get("mime_type") or "")
+        profile_name = clean_text(payload.get("profile_name") or payload.get("contact_name") or "")
+        voice = parse_bool(payload.get("voice"), default=False)
+
+        if message_type == "image":
+            message = caption or "[Imagen recibida]"
+        elif message_type == "audio":
+            message = "[Audio recibido]"
 
         _logger.info(
             "N8N AI context phone=%s step_payload=%s",
@@ -431,6 +563,28 @@ def build_ai_context_response(self, **post):
             return missing_phone_response(
                 error="missing_phone",
                 should_use_ai=False,
+            )
+
+        session, created = get_or_create_session(
+            request.env,
+            phone,
+            message,
+            phone_number_id,
+        )
+
+        if message_type in {"image", "audio"}:
+            return _build_media_handoff_response(
+                request.env,
+                session,
+                phone=phone,
+                phone_number_id=phone_number_id,
+                message_type=message_type,
+                message_id=message_id,
+                caption=caption,
+                media_id=media_id,
+                mime_type=mime_type,
+                voice=voice,
+                profile_name=profile_name,
             )
 
         control_reply = _control_reply_for_empty_message_payload(payload, message)
@@ -450,13 +604,6 @@ def build_ai_context_response(self, **post):
                 "step": "unsupported_message",
                 "reply": control_reply,
             }
-
-        session, created = get_or_create_session(
-            request.env,
-            phone,
-            message,
-            phone_number_id,
-        )
 
         outside_business_hours = not is_business_hours()
         use_after_hours_flow = outside_business_hours or bool(getattr(session, "is_after_hours", False))
