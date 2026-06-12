@@ -1,6 +1,7 @@
 import logging
 import os
 import hashlib
+from typing import Any
 import json
 from odoo.http import request  # type: ignore
 from ...helpers.n8n_payload_helper import get_n8n_payload
@@ -55,6 +56,11 @@ from ...helpers.whatsapp_discuss_helper import (
 from ...helpers.wompi_payment_helper import create_wompi_payment_link
 from ...helpers.whatsapp_flow_mode_helper import is_simple_whatsapp_flow
 from ...helpers.whatsapp_business_hours_helper import is_business_hours
+
+from ...helpers.whatsapp_session_helper import (
+    clean_text,
+    parse_bool
+)
 
 _logger = logging.getLogger(__name__)
 
