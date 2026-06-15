@@ -459,7 +459,7 @@ class MetaWhatsAppWebhookController(http.Controller):
                     "location_address": location.get("address") or "",
                 }
             )
-            return self._mark_unsupported_without_text(metadata)
+            return metadata
 
         if message_type == "image":
             image = message.get("image") or {}

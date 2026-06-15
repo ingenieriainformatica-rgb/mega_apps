@@ -151,6 +151,162 @@ def _media_discuss_message(message_type: str, caption: str = "") -> str:
     return f"[{message_type or 'Media'} recibido del cliente]"
 
 
+def _location_maps_url(latitude: Any, longitude: Any) -> str:
+    latitude = clean_text(latitude)
+    longitude = clean_text(longitude)
+    if not latitude or not longitude:
+        return ""
+    return f"https://www.google.com/maps?q={latitude},{longitude}"
+
+
+def _location_message(
+    *,
+    latitude: Any,
+    longitude: Any,
+    location_name: str = "",
+    location_address: str = "",
+) -> str:
+    latitude = clean_text(latitude)
+    longitude = clean_text(longitude)
+    location_name = clean_text(location_name)
+    location_address = clean_text(location_address)
+    maps_url = _location_maps_url(latitude, longitude)
+
+    lines = ["[Ubicación recibida del cliente]"]
+    if location_name:
+        lines.append(f"Nombre: {location_name}")
+    if location_address:
+        lines.append(f"Dirección: {location_address}")
+    if latitude and longitude:
+        lines.append(f"Coordenadas: {latitude}, {longitude}")
+    if maps_url:
+        lines.append(f"Google Maps: {maps_url}")
+    return "\n".join(lines)
+
+
+def _build_location_handoff_response(
+    env,
+    session,
+    *,
+    phone: str,
+    phone_number_id: str,
+    message_id: str,
+    latitude: Any = "",
+    longitude: Any = "",
+    location_name: str = "",
+    location_address: str = "",
+    profile_name: str = "",
+) -> dict[str, Any]:
+    message_id = clean_text(message_id)
+    latitude = clean_text(latitude)
+    longitude = clean_text(longitude)
+    location_name = clean_text(location_name)
+    location_address = clean_text(location_address)
+    maps_url = _location_maps_url(latitude, longitude)
+    location_text = _location_message(
+        latitude=latitude,
+        longitude=longitude,
+        location_name=location_name,
+        location_address=location_address,
+    )
+
+    _logger.info(
+        "[WHATSAPP LOCATION] ai-context received phone=%s lat=%s lon=%s message_id=%s",
+        phone,
+        latitude,
+        longitude,
+        message_id,
+    )
+    _logger.info("[WHATSAPP LOCATION] maps_url=%s", maps_url)
+
+    if message_id and "last_inbound_message_id" in session._fields:
+        if (getattr(session, "last_inbound_message_id", "") or "").strip() == message_id:
+            return whatsapp_response(
+                True,
+                session.step,
+                "",
+                should_send=False,
+                should_use_ai=False,
+                kind="duplicate_ignored",
+                session=session_snapshot(session),
+            )
+
+    values: dict[str, Any] = {
+        "step": "advisor_handoff",
+        "active": True,
+        "last_message": "[Ubicación recibida]",
+        "phone_number_id": phone_number_id or getattr(session, "phone_number_id", "") or "",
+    }
+    if message_id and "last_inbound_message_id" in session._fields:
+        values["last_inbound_message_id"] = message_id
+    if "relevant_data" in session._fields:
+        values["relevant_data"] = json.dumps(
+            {
+                "message_type": "location",
+                "latitude": latitude,
+                "longitude": longitude,
+                "location_name": location_name,
+                "location_address": location_address,
+                "profile_name": profile_name,
+                "maps_url": maps_url,
+            },
+            ensure_ascii=False,
+        )
+    if "location" in session._fields:
+        values["location"] = location_address or location_name or maps_url or ""
+    if latitude and "latitude" in session._fields:
+        values["latitude"] = latitude
+    if longitude and "longitude" in session._fields:
+        values["longitude"] = longitude
+
+    lead = session.lead_id
+    if session.step in HUMAN_HANDOFF_STEPS and not session.discuss_channel_id:
+        ensure_discuss_channel_for_handoff(env, session, lead)
+
+    posted_on_discuss = False
+    if session.step in HUMAN_HANDOFF_STEPS or values["step"] in HUMAN_HANDOFF_STEPS:
+        posted_on_discuss = post_inbound_whatsapp_message_to_discuss(
+            env,
+            session,
+            location_text,
+            wa_message_id=message_id,
+        )
+
+    posted_on_chatter = False
+    if lead:
+        log_whatsapp_conversation_on_lead(
+            lead,
+            customer_message=location_text,
+            bot_reply="",
+        )
+        posted_on_chatter = True
+
+    session.write(values)
+
+    should_send = not bool(posted_on_discuss or posted_on_chatter)
+    reply = "Ubicación recibida." if should_send else ""
+
+    _logger.info(
+        "[WHATSAPP LOCATION] posted_on_discuss=%s posted_on_chatter=%s should_send=%s",
+        posted_on_discuss,
+        posted_on_chatter,
+        should_send,
+    )
+
+    return whatsapp_response(
+        True,
+        "advisor_handoff",
+        reply,
+        should_send=should_send,
+        should_use_ai=False,
+        kind="location_handoff",
+        control_reply=reply,
+        phone=phone,
+        phone_number_id=phone_number_id or getattr(session, "phone_number_id", "") or "",
+        session=session_snapshot(session),
+    )
+
+
 def _get_whatsapp_account_for_media(env, phone_number_id: str):
     Account = env["whatsapp.account"].sudo()
     phone_number_id = clean_text(phone_number_id)
@@ -750,6 +906,10 @@ def build_ai_context_response(self, **post):
         mime_type = clean_text(payload.get("mime_type") or "")
         profile_name = clean_text(payload.get("profile_name") or payload.get("contact_name") or "")
         voice = parse_bool(payload.get("voice"), default=False)
+        latitude = clean_text(payload.get("latitude") or "")
+        longitude = clean_text(payload.get("longitude") or "")
+        location_name = clean_text(payload.get("location_name") or "")
+        location_address = clean_text(payload.get("location_address") or "")
 
         _logger.info("[WHATSAPP AI-CONTEXT] payload=%s", payload)
         _logger.info(
@@ -765,6 +925,8 @@ def build_ai_context_response(self, **post):
             message = caption or "[Imagen recibida]"
         elif message_type == "audio":
             message = "[Audio recibido]"
+        elif message_type == "location":
+            message = "[Ubicación recibida]"
 
         _logger.info(
             "N8N AI context phone=%s step_payload=%s",
@@ -804,6 +966,20 @@ def build_ai_context_response(self, **post):
                 media_id=media_id,
                 mime_type=mime_type,
                 voice=voice,
+                profile_name=profile_name,
+            )
+
+        if message_type == "location":
+            return _build_location_handoff_response(
+                request.env,
+                session,
+                phone=phone,
+                phone_number_id=phone_number_id,
+                message_id=message_id,
+                latitude=latitude,
+                longitude=longitude,
+                location_name=location_name,
+                location_address=location_address,
                 profile_name=profile_name,
             )
 
