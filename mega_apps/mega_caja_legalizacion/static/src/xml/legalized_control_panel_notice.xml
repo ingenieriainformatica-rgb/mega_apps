@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mega_caja_legalizacion.LegalizedControlPanelNotice"
+       t-inherit="web.ControlPanel"
+       t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class, 'o_control_panel_breadcrumbs')]/div[contains(@class, 'me-auto')]" position="before">
+            <div t-if="env.config.actionName === 'Legalizados'"
+                 class="ms-2 px-3 py-2 rounded bg-warning-subtle border border-warning border-start border-4 text-dark shadow-sm d-inline-flex align-items-center gap-2 text-nowrap d-print-none">
+                <i class="fa fa-exclamation-triangle text-warning"/>
+                <span>
+                    <strong>Importante:</strong>
+                    Todos los documentos legalizados deben tener documento Odoo.
+                </span>
+            </div>
+        </xpath>
+    </t>
+</templates>

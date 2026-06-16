@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Herencia de la lista de movimientos del control de efectivo.
+        Agrega las etiquetas de legalizacion directamente donde se registran
+        ingresos y egresos.
+    -->
+    <record id="view_petty_cash_box_line_tree_legalization" model="ir.ui.view">
+        <field name="name">petty.cash.box.line.tree.legalization</field>
+        <field name="model">petty.cash.box.line</field>
+        <field name="inherit_id" ref="account_petty_cash.view_petty_cash_box_line_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-danger">legalization_state == 'pending'</attribute>
+                <attribute name="decoration-success">legalization_state == 'legalized'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='move_type']" position="after">
+                <field name="legalization_state" optional="show"/>
+                <field name="pending_legalization_at" optional="show"/>
+                <field name="legalized_at" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Herencia del formulario de caja: saldos y seguimiento de pendientes. -->
+    <record id="view_petty_cash_box_form_legalization" model="ir.ui.view">
+        <field name="name">petty.cash.box.form.legalization</field>
+        <field name="model">petty.cash.box</field>
+        <field name="inherit_id" ref="account_petty_cash.view_petty_cash_box_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='state']" position="after">
+                <div class="ms-3 px-3 py-2 rounded bg-warning-subtle border border-warning border-start border-4 text-dark shadow-sm d-inline-flex align-items-center gap-2"
+                     invisible="not legalization_effective">
+                    <i class="fa fa-exclamation-triangle text-warning"/>
+                    <span>
+                        <strong>Importante:</strong>
+                        registre en <strong>Contacto</strong> a quien se le entrega el dinero.
+                    </span>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='amount_available']" position="after">
+                <field name="legalization_tracking_enabled" invisible="1"/>
+                <field name="legalization_started_at" invisible="1"/>
+                <field name="legalization_effective" invisible="1"/>
+                <field name="pending_legalization_amount" readonly="1" invisible="not legalization_effective"/>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']" position="replace">
+                <field name="daily_movement_line_ids" string="" invisible="state == 'closed'">
+                    <list string="Movimientos" editable="bottom" delete="false">
+                        <field name="partner_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                        <field name="move_type" column_invisible="not parent.legalization_effective"/>
+                        <field name="legalization_state" optional="show" column_invisible="not parent.legalization_effective"/>
+                        <field name="pending_legalization_at" optional="show" column_invisible="not parent.legalization_effective"/>
+                        <field name="legalized_at" optional="show" column_invisible="not parent.legalization_effective"/>
+                        <field name="amount"/>
+                        <field name="description"/>
+                        <field name="odoo_document" column_invisible="not parent.legalization_effective"/>
+                    </list>
+                </field>
+                <field name="daily_movement_line_ids" string="" invisible="state != 'closed'">
+                    <list string="Movimientos" editable="bottom" create="false" delete="false">
+                        <field name="partner_id" readonly="1" options="{'no_create': True, 'no_create_edit': True}"/>
+                        <field name="move_type" readonly="1" column_invisible="not parent.legalization_effective"/>
+                        <field name="legalization_state" readonly="1" optional="show" column_invisible="not parent.legalization_effective"/>
+                        <field name="pending_legalization_at" readonly="1" optional="show" column_invisible="not parent.legalization_effective"/>
+                        <field name="legalized_at" readonly="1" optional="show" column_invisible="not parent.legalization_effective"/>
+                        <field name="amount" readonly="1"/>
+                        <field name="description" readonly="1"/>
+                        <field name="odoo_document" column_invisible="not parent.legalization_effective"/>
+                    </list>
+                </field>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_petty_cash_box_line_pending_legalization_search" model="ir.ui.view">
+        <field name="name">petty.cash.box.line.pending.legalization.search</field>
+        <field name="model">petty.cash.box.line</field>
+        <field name="arch" type="xml">
+            <search string="Pendientes por legalizar">
+                <field name="control_cash_label" string="Control de efectivo"/>
+                <field name="legalization_origin_box_id" string="Número de caja"/>
+                <field name="pending_legalization_at" string="Día no legalizado"/>
+                <field name="legalized_at" string="Fecha de legalización"/>
+                <field name="partner_id" string="Contacto"/>
+                <field name="legalization_state" string="Estado de legalización"/>
+                <field name="amount" string="Monto"/>
+                <field name="description" string="Descripción"/>
+                <field name="odoo_document" string="Documento de Odoo"/>
+                <field name="company_id" string="Compañía"/>
+                <filter name="box_megatecnicentro" string="MegaTecnicentro" domain="[('petty_cash_opening_type_id.name', '=', 'control_efectivo')]"/>
+                <filter name="box_1a1" string="1a1" domain="[('petty_cash_opening_type_id.name', '=', 'control_efectivo_1a1')]"/>
+                <filter name="box_megasur" string="MEGASUR" domain="[('petty_cash_opening_type_id.name', '=', 'control_efectivo_megasur')]"/>
+                <group expand="0" string="Agrupar por">
+                    <!-- <filter name="group_origin_box" string="Número de caja" context="{'group_by': 'legalization_origin_box_id'}"/> -->
+                    <filter name="group_opening_type" string="Control de efectivo" context="{'group_by': 'control_cash_label'}"/>
+                    <filter name="group_company" string="Compañía" context="{'group_by': 'company_id'}"/>
+                    <filter name="group_pending_date" string="Día no legalizado" context="{'group_by': 'pending_legalization_at'}"/>
+                    <filter name="group_legalized_date" string="Fecha de legalización" context="{'group_by': 'legalized_at'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_petty_cash_box_line_pending_legalization_tree" model="ir.ui.view">
+        <field name="name">petty.cash.box.line.pending.legalization.tree</field>
+        <field name="model">petty.cash.box.line</field>
+        <field name="arch" type="xml">
+            <list string="Pendientes por legalizar" editable="bottom" create="false" delete="false"
+                  decoration-danger="legalization_state == 'pending'"
+                  decoration-success="legalization_state == 'legalized'">
+                <field name="control_cash_label" string="Control de efectivo" readonly="1"/>
+                <field name="legalization_origin_box_id" string="Número de caja" readonly="1"/>
+                <field name="pending_legalization_at" string="Día no legalizado" readonly="1"/>
+                <field name="partner_id" string="Contacto" readonly="1"/>
+                <field name="legalization_state" string="Estado de legalización" readonly="1"/>
+                <field name="amount" readonly="1"/>
+                <field name="description" readonly="1"/>
+                <field name="odoo_document" readonly="1"/>
+                <button name="action_mark_as_legalized"
+                        type="object"
+                        string="Legalizar"
+                        class="btn-primary"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_petty_cash_box_line_legalized_tree" model="ir.ui.view">
+        <field name="name">petty.cash.box.line.legalized.tree</field>
+        <field name="model">petty.cash.box.line</field>
+        <field name="arch" type="xml">
+            <list string="Legalizados" create="false" delete="false"
+                  decoration-success="legalization_state == 'legalized'">
+                <field name="control_cash_label" string="Control de efectivo" readonly="1"/>
+                <field name="legalization_origin_box_id" string="Número de caja" readonly="1"/>
+                <field name="pending_legalization_at" string="Día no legalizado" readonly="1"/>
+                <field name="legalized_at" string="Fecha de legalización" readonly="1"/>
+                <field name="partner_id" string="Contacto" readonly="1"/>
+                <field name="legalization_state" string="Estado de legalización" readonly="1"/>
+                <field name="amount" readonly="1"/>
+                <field name="description" readonly="1"/>
+                <field name="odoo_document" readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_pending_legalization_lines" model="ir.actions.act_window">
+        <field name="name">Pendientes por legalizar</field>
+        <field name="res_model">petty.cash.box.line</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_petty_cash_box_line_pending_legalization_tree"/>
+        <field name="search_view_id" ref="view_petty_cash_box_line_pending_legalization_search"/>
+        <field name="domain">[('petty_cash_id.legalization_effective', '=', True), ('move_type', '=', 'out'), ('legalization_state', '=', 'pending')]</field>
+        <field name="groups_id" eval="[(4, ref('mega_caja_legalizacion.group_caja_legalizacion_user'))]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No hay movimientos pendientes por legalizar.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_legalized_lines" model="ir.actions.act_window">
+        <field name="name">Legalizados</field>
+        <field name="res_model">petty.cash.box.line</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_petty_cash_box_line_legalized_tree"/>
+        <field name="search_view_id" ref="view_petty_cash_box_line_pending_legalization_search"/>
+        <field name="domain">[('petty_cash_id.legalization_effective', '=', True), ('move_type', '=', 'out'), ('legalization_state', '=', 'legalized')]</field>
+        <field name="groups_id" eval="[(4, ref('mega_caja_legalizacion.group_caja_legalizacion_user'))]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No hay movimientos legalizados.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_cash_legalization_root"
+              name="Legalización"
+              parent="account_petty_cash.menu_account_realnet_tools_firts_level"
+              groups="mega_caja_legalizacion.group_caja_legalizacion_user"
+              sequence="40"/>
+
+    <menuitem id="menu_pending_legalization_lines"
+              name="Pendientes por legalizar"
+              parent="menu_cash_legalization_root"
+              action="action_pending_legalization_lines"
+              groups="mega_caja_legalizacion.group_caja_legalizacion_user"
+              sequence="10"/>
+
+    <menuitem id="menu_legalized_lines"
+              name="Legalizados"
+              parent="menu_cash_legalization_root"
+              action="action_legalized_lines"
+              groups="mega_caja_legalizacion.group_caja_legalizacion_user"
+              sequence="20"/>
+</odoo>

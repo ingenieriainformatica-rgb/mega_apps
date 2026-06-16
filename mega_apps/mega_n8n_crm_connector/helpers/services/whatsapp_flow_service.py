@@ -83,6 +83,54 @@ def _payload_hash(payload: dict) -> str:
     return hashlib.sha256(payload_text.encode("utf-8")).hexdigest()[:16]
 
 
+def _first_normalized_message(payload: dict) -> dict:
+    normalized_messages = payload.get("normalized_messages") or []
+    if isinstance(normalized_messages, list) and normalized_messages:
+        first_message = normalized_messages[0]
+        if isinstance(first_message, dict):
+            return first_message
+    return {}
+
+
+def _payload_or_normalized(payload: dict, normalized_message: dict, *keys, default=""):
+    for key in keys:
+        value = payload.get(key)
+        if value not in (None, ""):
+            return value
+    for key in keys:
+        value = normalized_message.get(key)
+        if value not in (None, ""):
+            return value
+    return default
+
+
+def _ensure_lead_for_special_inbound(env, session, profile_name: str = ""):
+    if not session:
+        return False
+
+    if session.lead_id:
+        return session.lead_id
+
+    profile_name = clean_text(profile_name)
+    if profile_name and not clean_text(session.customer_name):
+        session.write({"customer_name": profile_name})
+
+    lead = create_or_update_lead_from_session(env, session)
+    if lead:
+        _logger.info(
+            "[WHATSAPP SPECIAL] lead ensured session=%s lead=%s",
+            session.id,
+            lead.id,
+        )
+    else:
+        _logger.info(
+            "[WHATSAPP SPECIAL] lead not available session=%s has_customer_name=%s",
+            session.id,
+            bool(clean_text(session.customer_name)),
+        )
+    return lead
+
+
 def _control_reply_for_empty_message_payload(payload: dict, message: str) -> str:
     if (message or "").strip():
         return ""
@@ -149,6 +197,35 @@ def _media_discuss_message(message_type: str, caption: str = "") -> str:
         return "[Audio recibido del cliente]"
 
     return f"[{message_type or 'Media'} recibido del cliente]"
+
+
+def _media_chatter_message(
+    *,
+    message_type: str,
+    caption: str = "",
+    media_id: str = "",
+    mime_type: str = "",
+    attached: bool = False,
+) -> str:
+    if message_type == "image":
+        lines = ["Imagen recibida por WhatsApp"]
+    elif message_type == "audio":
+        lines = ["Audio recibido por WhatsApp"]
+    else:
+        lines = ["Archivo recibido por WhatsApp"]
+
+    caption = clean_text(caption)
+    media_id = clean_text(media_id)
+    mime_type = clean_text(mime_type)
+
+    if caption:
+        lines.append(f"Caption: {caption}")
+    if not attached:
+        if media_id:
+            lines.append(f"Media ID: {media_id}")
+        if mime_type:
+            lines.append(f"Mimetype: {mime_type}")
+    return "\n".join(lines)
 
 
 def _location_maps_url(latitude: Any, longitude: Any) -> str:
@@ -259,7 +336,7 @@ def _build_location_handoff_response(
     if longitude and "longitude" in session._fields:
         values["longitude"] = longitude
 
-    lead = session.lead_id
+    lead = _ensure_lead_for_special_inbound(env, session, profile_name=profile_name)
     if session.step in HUMAN_HANDOFF_STEPS and not session.discuss_channel_id:
         ensure_discuss_channel_for_handoff(env, session, lead)
 
@@ -280,6 +357,11 @@ def _build_location_handoff_response(
             bot_reply="",
         )
         posted_on_chatter = True
+        _logger.info(
+            "[WHATSAPP LOCATION] chatter logged lead=%s message_id=%s",
+            lead.id,
+            message_id or False,
+        )
 
     session.write(values)
 
@@ -490,7 +572,7 @@ def _build_media_handoff_response(
 
     session.write(values)
 
-    lead = session.lead_id
+    lead = _ensure_lead_for_special_inbound(env, session, profile_name=profile_name)
     channel = False
     if lead:
         if session.step in HUMAN_HANDOFF_STEPS and not session.discuss_channel_id:
@@ -541,13 +623,27 @@ def _build_media_handoff_response(
 
     posted_on_chatter = False
     if lead:
+        chatter_message = _media_chatter_message(
+            message_type=message_type,
+            caption=caption,
+            media_id=media_id,
+            mime_type=mime_type,
+            attached=bool(attachment_ids),
+        )
         log_whatsapp_conversation_on_lead(
             lead,
-            customer_message=last_message,
+            customer_message=chatter_message,
             bot_reply="",
             attachment_ids=attachment_ids,
         )
         posted_on_chatter = True
+        _logger.info(
+            "[WHATSAPP MEDIA] chatter logged lead=%s type=%s attached=%s message_id=%s",
+            lead.id,
+            message_type,
+            bool(attachment_ids),
+            message_id or False,
+        )
 
     if not posted_on_discuss and session.step in HUMAN_HANDOFF_STEPS:
         posted_on_discuss = bool(post_outbound_whatsapp_message_to_discuss(
@@ -895,21 +991,43 @@ def _log_terminal_customer_message(env, session, message, message_id=None):
 
 def build_ai_context_response(self, **post):
         payload = get_n8n_payload()
+        normalized_message = _first_normalized_message(payload)
 
         phone = (payload.get("phone") or "").strip()
         message = (payload.get("message") or "").strip()
-        message_id = _normalize_wa_message_id(payload)
-        phone_number_id = (payload.get("phone_number_id") or "").strip()
-        message_type = clean_text(payload.get("message_type") or payload.get("type")).lower()
-        caption = clean_text(payload.get("caption") or "")
-        media_id = clean_text(payload.get("media_id") or "")
-        mime_type = clean_text(payload.get("mime_type") or "")
-        profile_name = clean_text(payload.get("profile_name") or payload.get("contact_name") or "")
-        voice = parse_bool(payload.get("voice"), default=False)
-        latitude = clean_text(payload.get("latitude") or "")
-        longitude = clean_text(payload.get("longitude") or "")
-        location_name = clean_text(payload.get("location_name") or "")
-        location_address = clean_text(payload.get("location_address") or "")
+        if not phone:
+            phone = clean_text(normalized_message.get("phone") or "")
+        message_id = _normalize_wa_message_id(payload) or clean_text(
+            normalized_message.get("wa_message_id")
+            or normalized_message.get("message_id")
+            or normalized_message.get("wamid")
+            or normalized_message.get("external_message_id")
+            or ""
+        )
+        phone_number_id = clean_text(
+            _payload_or_normalized(payload, normalized_message, "phone_number_id")
+        )
+        message_type = clean_text(
+            _payload_or_normalized(payload, normalized_message, "message_type", "type")
+        ).lower()
+        caption = clean_text(_payload_or_normalized(payload, normalized_message, "caption"))
+        media_id = clean_text(_payload_or_normalized(payload, normalized_message, "media_id"))
+        mime_type = clean_text(_payload_or_normalized(payload, normalized_message, "mime_type"))
+        profile_name = clean_text(
+            _payload_or_normalized(payload, normalized_message, "profile_name", "contact_name")
+        )
+        voice = parse_bool(
+            _payload_or_normalized(payload, normalized_message, "voice", default=False),
+            default=False,
+        )
+        latitude = clean_text(_payload_or_normalized(payload, normalized_message, "latitude"))
+        longitude = clean_text(_payload_or_normalized(payload, normalized_message, "longitude"))
+        location_name = clean_text(
+            _payload_or_normalized(payload, normalized_message, "location_name", "name")
+        )
+        location_address = clean_text(
+            _payload_or_normalized(payload, normalized_message, "location_address", "address")
+        )
 
         _logger.info("[WHATSAPP AI-CONTEXT] payload=%s", payload)
         _logger.info(
