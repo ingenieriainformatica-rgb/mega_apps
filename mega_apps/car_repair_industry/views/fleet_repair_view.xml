@@ -18,9 +18,6 @@
                         <button name="action_test_google_drive_connection" string="Probar Google Drive"
                                 type="object" style="float:left;"
                                 groups="car_repair_industry.group_fleet_repair_service_manager,base.group_system" invisible="1"/>
-                        <button name="action_open_drive_upload_wizard" string="Subir fotos a Drive"
-                                type="object" style="float:left;"
-                                groups="base.group_user"/>
                         <field name="state" widget="statusbar"
                                statusbar_visible="draft,diagnosis,quote,saleorder,workorder,done"/>
                     </header>
@@ -110,6 +107,9 @@
                                 <field name="fleet_repair_line" readonly="state != 'draft'" widget="one2many_list"/>
                             </page>
                             <page name="external_evidences" string="Evidencias externas">
+                                <button name="action_open_drive_upload_wizard" string="Subir fotos a Drive"
+                                        type="object" class="btn-primary mb-2"
+                                        groups="base.group_user"/>
                                 <field name="external_evidence_ids" mode="kanban" readonly="1">
                                     <kanban>
                                         <field name="name"/>

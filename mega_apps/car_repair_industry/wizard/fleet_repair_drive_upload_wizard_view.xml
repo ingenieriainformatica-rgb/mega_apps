@@ -8,7 +8,8 @@
                 <form string="Subir fotos a Drive">
                     <sheet>
                         <group>
-                            <field name="repair_id"/>
+                            <field name="repair_id" invisible="1"/>
+                            <field name="repair_sequence"/>
                             <field name="evidence_type"/>
                             <field name="description"/>
                         </group>

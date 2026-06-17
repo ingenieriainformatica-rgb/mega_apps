@@ -22,6 +22,11 @@ class FleetRepairDriveUploadWizard(models.TransientModel):
         required=True,
         readonly=True,
     )
+    repair_sequence = fields.Char(
+        string="Recepción",
+        related='repair_id.sequence',
+        readonly=True,
+    )
     evidence_type = fields.Selection(
         [
             ('recepcion', 'Recepción'),
