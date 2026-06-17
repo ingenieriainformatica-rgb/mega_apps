@@ -15,6 +15,9 @@
                                 type="object" style="float:left;"/>
                         <button name="action_print_label" string="Print Label" invisible="state != 'draft'"
                                 type="object" style="float:left;"/>
+                        <button name="action_test_google_drive_connection" string="Probar Google Drive"
+                                type="object" style="float:left;"
+                                groups="car_repair_industry.group_fleet_repair_service_manager,base.group_system"/>
                         <field name="state" widget="statusbar"
                                statusbar_visible="draft,diagnosis,quote,saleorder,workorder,done"/>
                     </header>

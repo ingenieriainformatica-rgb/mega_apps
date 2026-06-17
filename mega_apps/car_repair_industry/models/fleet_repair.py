@@ -1,12 +1,25 @@
 # -*- coding: utf-8 -*-
 # Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
 import logging
+import os
 from odoo import fields, models, api, _  # type: ignore
 from odoo import tools  # type: ignore
 from odoo.exceptions import UserError, ValidationError  # type: ignore
 from markupsafe import Markup
+from pathlib import Path
 
 _logger = logging.getLogger(__name__)
+
+
+MODULE_DIR = Path(__file__).resolve().parents[1]
+
+GOOGLE_DRIVE_CREDENTIALS_PATH = (
+    MODULE_DIR
+    / "credentials_google_drive/"
+    / "odoo-taller-drive-9cd3c29a0d22.json"
+)
+GOOGLE_DRIVE_ROOT_FOLDER_ID = "1QqWEL3QyM7acouvlb-MmBhBD-rCdY6i6"
+GOOGLE_DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 
 class FleetRepair(models.Model):
@@ -129,7 +142,7 @@ class FleetRepair(models.Model):
                 'template_id': template.id,
                 'template_line_id': item.id,
                 'name': item.name,
-            }))
+            })) #type: ignore
         self.reception_checklist_line_ids = lines
 
     def button_view_diagnosis(self):
@@ -365,6 +378,92 @@ class FleetRepair(models.Model):
         result['views'] = [(res and res[1] or False, 'form')]
         result['res_id'] = diagnose_id.id or False
         return result
+
+    def action_test_google_drive_connection(self):
+        _logger.info("\n\n\n Module directory: %s \n\n\n", MODULE_DIR)
+        self.ensure_one()
+        if not (
+            self.env.user.has_group('car_repair_industry.group_fleet_repair_service_manager')
+            or self.env.user.has_group('base.group_system')
+        ):
+            raise UserError(_("No tiene permisos para ejecutar esta prueba."))
+
+        try:
+            from google.oauth2 import service_account  # type: ignore
+            from googleapiclient.discovery import build  # type: ignore
+            from googleapiclient.errors import HttpError  # type: ignore
+        except ImportError as error:
+            raise UserError(_(
+                "Faltan dependencias de Google Drive en Python.\n"
+                "Instale:\n"
+                "pip install google-api-python-client google-auth google-auth-httplib2\n\n"
+                "Detalle: %s"
+            ) % error)
+
+        if not os.path.exists(GOOGLE_DRIVE_CREDENTIALS_PATH):
+            raise UserError(_(
+                "No se encontró el archivo de credenciales de Google Drive en:\n%s"
+            ) % GOOGLE_DRIVE_CREDENTIALS_PATH)
+
+        folder_name = "TEST ODOO DRIVE - %s" % (self.sequence or self.name or self.display_name)
+
+        try:
+            credentials = service_account.Credentials.from_service_account_file(
+                GOOGLE_DRIVE_CREDENTIALS_PATH,
+                scopes=GOOGLE_DRIVE_SCOPES,
+            )
+            drive_service = build(
+                'drive',
+                'v3',
+                credentials=credentials,
+                cache_discovery=False,
+            )
+
+            drive_service.files().get(
+                fileId=GOOGLE_DRIVE_ROOT_FOLDER_ID,
+                fields='id, name, webViewLink',
+                supportsAllDrives=True,
+            ).execute()
+
+            folder = drive_service.files().create(
+                body={
+                    'name': folder_name,
+                    'mimeType': 'application/vnd.google-apps.folder',
+                    'parents': [GOOGLE_DRIVE_ROOT_FOLDER_ID],
+                },
+                fields='id, webViewLink',
+                supportsAllDrives=True,
+            ).execute()
+
+            self.env['fleet.repair.evidence'].create({
+                'repair_id': self.id,
+                'name': folder_name,
+                'evidence_type': 'otro',
+                'external_url': folder.get('webViewLink'),
+                'description': _("Prueba técnica de conexión con Google Drive."),
+            })
+        except HttpError as error:
+            raise UserError(_(
+                "No se pudo completar la prueba de Google Drive.\n"
+                "Verifique que la carpeta raíz esté compartida con la Service Account.\n\n"
+                "Detalle: %s"
+            ) % error)
+        except Exception as error:
+            raise UserError(_(
+                "No se pudo completar la prueba de Google Drive.\n\n"
+                "Detalle: %s"
+            ) % error)
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Google Drive"),
+                'message': _("Prueba completada. Se creó la carpeta de prueba."),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
 
     def action_print_receipt(self):
         assert len(self._ids) == 1, 'This option should only be used for a single id at a time'
