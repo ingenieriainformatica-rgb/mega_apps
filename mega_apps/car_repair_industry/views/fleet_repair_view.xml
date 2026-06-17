@@ -103,6 +103,25 @@
                                 <separator string="Car Info"/>
                                 <field name="fleet_repair_line" readonly="state != 'draft'" widget="one2many_list"/>
                             </page>
+                            <page name="reception_checklist" string="Checklist de recepción">
+                                <group>
+                                    <field name="reception_checklist_template_id"
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </group>
+                                <field name="reception_checklist_line_ids">
+                                    <list editable="bottom"
+                                          decoration-danger="state == 'bad'"
+                                          decoration-warning="state == 'regular'">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="name" readonly="1" force_save="1"/>
+                                        <field name="state"/>
+                                        <field name="observation"/>
+                                        <field name="repaired"/>
+                                        <field name="template_id" column_invisible="1" force_save="1"/>
+                                        <field name="template_line_id" column_invisible="1" force_save="1"/>
+                                    </list>
+                                </field>
+                            </page>
                             <page name="checklist" string="Service Repair Checklist">
                                 <group>
                                     <field name="repair_checklist_ids" colspan="2" nolabel="1"
@@ -155,10 +174,10 @@
                     <field name="state"
                         optional="show"
                         widget="badge"
-                        decoration-info="state in ('draft', 'diagnosis')"              
-                        decoration-warning="state in ('quote', 'saleorder', 'workorder')"  
-                        decoration-success="state in ('work_completed', 'invoiced', 'done')" 
-                        decoration-danger="state == 'cancel'"/> 
+                        decoration-info="state in ('draft', 'diagnosis')"
+                        decoration-warning="state in ('quote', 'saleorder', 'workorder')"
+                        decoration-success="state in ('work_completed', 'invoiced', 'done')"
+                        decoration-danger="state == 'cancel'"/>
                     <field name="priority" optional="show" widget="badge" decoration-info="priority == '1'" decoration-danger="priority == '2'" />
                     <field name="user_id"/>
                 </list>
@@ -318,10 +337,10 @@
                                         <field name="service_detail" readonly="state != 'draft'" string=""/>
                                     </group>
                                     <group>
-                                        <separator string="List of Damage"/> 
+                                        <separator string="List of Damage"/>
                                         <field name="list_of_damage" readonly="state != 'draft'" string=""/>
                                     </group>
-                                </group>                                
+                                </group>
                             </page>
                             <page string="Diagnosis Report" invisible="(diagnose_id == False) or (state != 'done')">
                                 <group>

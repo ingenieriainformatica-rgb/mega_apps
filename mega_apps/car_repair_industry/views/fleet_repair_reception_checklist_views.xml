@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_reception_checklist_template_list" model="ir.ui.view">
+            <field name="name">fleet.repair.reception.checklist.template.list</field>
+            <field name="model">fleet.repair.reception.checklist.template</field>
+            <field name="arch" type="xml">
+                <list string="Plantillas de checklist de recepción">
+                    <field name="name"/>
+                    <field name="active"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_reception_checklist_template_form" model="ir.ui.view">
+            <field name="name">fleet.repair.reception.checklist.template.form</field>
+            <field name="model">fleet.repair.reception.checklist.template</field>
+            <field name="arch" type="xml">
+                <form string="Plantilla de checklist de recepción">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <field name="active"/>
+                            <field name="description"/>
+                        </group>
+                        <notebook>
+                            <page string="Ítems">
+                                <field name="line_ids">
+                                    <list editable="bottom">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="name"/>
+                                        <field name="active"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_reception_checklist_template" model="ir.actions.act_window">
+            <field name="name">Plantillas checklist recepción</field>
+            <field name="res_model">fleet.repair.reception.checklist.template</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <menuitem
+                id="menu_reception_checklist_template"
+                name="Plantillas checklist recepción"
+                parent="car_repair_industry.menu_main_car_repair"
+                action="action_reception_checklist_template"
+                groups="car_repair_industry.group_fleet_repair_service_manager"
+                sequence="76"/>
+    </data>
+</odoo>

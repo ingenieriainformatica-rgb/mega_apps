@@ -34,6 +34,8 @@
         'wizard/fleet_diagnose_assign_to_technician_view.xml',
         'views/fleet_repair_view.xml',
         'views/fleet_repair_service_checklist_view.xml',
+        'views/fleet_repair_reception_checklist_views.xml',
+        'views/fleet_repair_reception_checklist_data.xml',
         'views/fleet_repair_sequence.xml',
         'views/fleet_diagnose_view.xml',
         'views/fleet_workorder_sequence.xml',

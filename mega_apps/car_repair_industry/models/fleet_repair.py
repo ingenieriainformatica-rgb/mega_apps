@@ -79,6 +79,17 @@ class FleetRepair(models.Model):
     repair_checklist_ids = fields.Many2many('fleet.repair.checklist', 'checkbox_checklist_rel',
                                             'id', 'checklist_id',
                                             string='Repair Checklist')
+    reception_checklist_template_id = fields.Many2one(
+        'fleet.repair.reception.checklist.template',
+        string="Plantilla de checklist de recepción",
+        tracking=True,
+    )
+    reception_checklist_line_ids = fields.One2many(
+        'fleet.repair.reception.checklist.line',
+        'repair_id',
+        string="Checklist de recepción",
+        copy=True,
+    )
     feedback_description = fields.Char(string="Feedback")
     rating = fields.Selection([('0', 'Low'), ('1', 'Normal'), ('2', 'High')], string="Rating")
     timesheet_ids = fields.One2many('account.analytic.line', 'repair_id', string="Timesheet")
@@ -98,6 +109,23 @@ class FleetRepair(models.Model):
         for task in self:
             task.subtask_planned_hours = sum(
                 child_task.planned_hours + child_task.subtask_planned_hours for child_task in task.child_ids)
+
+    @api.onchange('reception_checklist_template_id')
+    def _onchange_reception_checklist_template_id(self):
+        template = self.reception_checklist_template_id
+        if not template:
+            self.reception_checklist_line_ids = [(5, 0, 0)]
+            return
+
+        lines = [(5, 0, 0)]
+        for item in template.line_ids.filtered('active'):
+            lines.append((0, 0, {
+                'sequence': item.sequence,
+                'template_id': template.id,
+                'template_line_id': item.id,
+                'name': item.name,
+            }))
+        self.reception_checklist_line_ids = lines
 
     def button_view_diagnosis(self):
         list = []
