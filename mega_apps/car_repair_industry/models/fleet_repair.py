@@ -72,6 +72,11 @@ class FleetRepair(models.Model):
     inv_count = fields.Integer(string="Invoice")
     confirm_sale_order = fields.Boolean('is confirm')
     images_ids = fields.One2many('ir.attachment', 'car_repair_id', 'Images')
+    external_evidence_ids = fields.One2many(
+        'fleet.repair.evidence',
+        'repair_id',
+        string="Evidencias externas",
+    )
     parent_id = fields.Many2one('fleet.repair', string='Parent Repair', index=True)
 
     child_ids = fields.One2many('fleet.repair', 'parent_id', string="Sub-Repair")

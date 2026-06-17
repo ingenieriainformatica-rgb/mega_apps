@@ -79,7 +79,7 @@
                             <group>
                                 <field name="priority" widget="priority" readonly="state != 'draft'"/>
                                 <field name="receipt_date" readonly="state != 'draft'"/>
-                                <field name="images_ids" widget='many2many_binary'/>
+                                <field name="images_ids" widget='many2many_binary' invisible="1"/>
                                 <field name="sale_order_id" invisible="True"/>
                                 <field name="workorder_id" invisible="True"/>
                                 <field name="diagnose_id" readonly="True" invisible="True"/>
@@ -102,6 +102,19 @@
                                 </group>
                                 <separator string="Car Info"/>
                                 <field name="fleet_repair_line" readonly="state != 'draft'" widget="one2many_list"/>
+                            </page>
+                            <page name="external_evidences" string="Evidencias externas">
+                                <field name="external_evidence_ids">
+                                    <list editable="bottom">
+                                        <field name="name"/>
+                                        <field name="evidence_type"/>
+                                        <field name="external_url" widget="url"/>
+                                        <field name="description"/>
+                                        <field name="uploaded_by" readonly="1"/>
+                                        <field name="uploaded_at" readonly="1"/>
+                                        <field name="active" column_invisible="1"/>
+                                    </list>
+                                </field>
                             </page>
                             <page name="reception_checklist" string="Checklist de recepción">
                                 <group>
