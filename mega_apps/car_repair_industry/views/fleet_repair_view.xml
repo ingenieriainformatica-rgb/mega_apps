@@ -17,7 +17,7 @@
                                 type="object" style="float:left;"/>
                         <button name="action_test_google_drive_connection" string="Probar Google Drive"
                                 type="object" style="float:left;"
-                                groups="car_repair_industry.group_fleet_repair_service_manager,base.group_system"/>
+                                groups="car_repair_industry.group_fleet_repair_service_manager,base.group_system" invisible="1"/>
                         <button name="action_open_drive_upload_wizard" string="Subir fotos a Drive"
                                 type="object" style="float:left;"
                                 groups="base.group_user"/>
@@ -110,11 +110,60 @@
                                 <field name="fleet_repair_line" readonly="state != 'draft'" widget="one2many_list"/>
                             </page>
                             <page name="external_evidences" string="Evidencias externas">
+                                <field name="external_evidence_ids" mode="kanban" readonly="1">
+                                    <kanban>
+                                        <field name="name"/>
+                                        <field name="evidence_type"/>
+                                        <field name="external_url"/>
+                                        <field name="description"/>
+                                        <field name="uploaded_at"/>
+                                        <field name="preview_url"/>
+                                        <field name="is_image"/>
+                                        <templates>
+                                            <t t-name="card">
+                                                <div class="oe_kanban_global_click">
+                                                    <div t-if="record.is_image.raw_value and record.preview_url.raw_value"
+                                                         class="o_kanban_image">
+                                                        <img t-att-src="record.preview_url.raw_value"
+                                                             t-att-alt="record.name.value"
+                                                             style="width: 100%; max-height: 180px; object-fit: cover;"/>
+                                                    </div>
+                                                    <div t-else="" class="o_kanban_image">
+                                                        <div class="text-muted text-center p-4">Sin vista previa</div>
+                                                    </div>
+                                                    <div class="oe_kanban_details">
+                                                        <strong>
+                                                            <field name="name"/>
+                                                        </strong>
+                                                        <div>
+                                                            <field name="evidence_type"/>
+                                                        </div>
+                                                        <div class="text-muted">
+                                                            <field name="uploaded_at"/>
+                                                        </div>
+                                                        <div t-if="record.description.raw_value">
+                                                            <field name="description"/>
+                                                        </div>
+                                                        <a t-if="record.external_url.raw_value"
+                                                           t-att-href="record.external_url.raw_value"
+                                                           target="_blank"
+                                                           class="btn btn-primary btn-sm mt-2">
+                                                            Abrir en Drive
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </templates>
+                                    </kanban>
+                                </field>
+                                <separator string="Detalle de evidencias"/>
                                 <field name="external_evidence_ids">
                                     <list editable="bottom">
                                         <field name="name"/>
                                         <field name="evidence_type"/>
                                         <field name="external_url" widget="url"/>
+                                        <field name="drive_file_id" optional="hide"/>
+                                        <field name="mime_type" optional="hide"/>
                                         <field name="description"/>
                                         <field name="uploaded_by" readonly="1"/>
                                         <field name="uploaded_at" readonly="1"/>

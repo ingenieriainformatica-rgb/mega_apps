@@ -81,15 +81,18 @@ class FleetRepairDriveUploadWizard(models.TransientModel):
                         'parents': [folder['id']],
                     },
                     media_body=media,
-                    fields='id, name, webViewLink',
+                    fields='id, name, mimeType, webViewLink',
                     supportsAllDrives=True,
                 ).execute()
+                file_id = drive_file.get('id')
 
                 Evidence.create({
                     'repair_id': self.repair_id.id,
                     'name': drive_file.get('name') or filename,
                     'evidence_type': self.evidence_type,
                     'external_url': drive_file.get('webViewLink'),
+                    'drive_file_id': file_id,
+                    'mime_type': drive_file.get('mimeType') or mimetype,
                     'description': self.description,
                 })
                 created_count += 1
