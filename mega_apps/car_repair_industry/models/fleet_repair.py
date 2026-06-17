@@ -18,7 +18,7 @@ GOOGLE_DRIVE_CREDENTIALS_PATH = (
     / "credentials_google_drive/"
     / "odoo-taller-drive-9cd3c29a0d22.json"
 )
-GOOGLE_DRIVE_ROOT_FOLDER_ID = "1QqWEL3QyM7acouvlb-MmBhBD-rCdY6i6"
+GOOGLE_DRIVE_ROOT_FOLDER_ID = "1AObR25Y435J2gUYXdkBkRCZRXYM_MXch"
 GOOGLE_DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 
@@ -144,6 +144,111 @@ class FleetRepair(models.Model):
                 'name': item.name,
             })) #type: ignore
         self.reception_checklist_line_ids = lines
+
+    def _drive_get_google_modules(self):
+        try:
+            from google.oauth2 import service_account  # type: ignore
+            from googleapiclient.discovery import build  # type: ignore
+            from googleapiclient.errors import HttpError  # type: ignore
+        except ImportError as error:
+            raise UserError(_(
+                "Faltan dependencias de Google Drive en Python.\n"
+                "Instale:\n"
+                "pip install google-api-python-client google-auth google-auth-httplib2\n\n"
+                "Detalle: %s"
+            ) % error)
+        return service_account, build, HttpError
+
+    def _drive_get_service(self):
+        service_account, build, HttpError = self._drive_get_google_modules()
+        if not os.path.exists(GOOGLE_DRIVE_CREDENTIALS_PATH):
+            raise UserError(_(
+                "No se encontró el archivo de credenciales de Google Drive en:\n%s"
+            ) % GOOGLE_DRIVE_CREDENTIALS_PATH)
+
+        try:
+            credentials = service_account.Credentials.from_service_account_file(
+                GOOGLE_DRIVE_CREDENTIALS_PATH,
+                scopes=GOOGLE_DRIVE_SCOPES,
+            )
+            return build(
+                'drive',
+                'v3',
+                credentials=credentials,
+                cache_discovery=False,
+            )
+        except Exception as error:
+            raise UserError(_(
+                "No se pudo autenticar con Google Drive.\n\n"
+                "Detalle: %s"
+            ) % error)
+
+    def _drive_check_root_folder_access(self, drive_service):
+        try:
+            return drive_service.files().get(
+                fileId=GOOGLE_DRIVE_ROOT_FOLDER_ID,
+                fields='id, name, webViewLink',
+                supportsAllDrives=True,
+            ).execute()
+        except Exception as error:
+            raise UserError(_(
+                "No se pudo acceder a la carpeta raíz de Google Drive.\n"
+                "Verifique que esté compartida con la Service Account.\n\n"
+                "Detalle: %s"
+            ) % error)
+
+    def _drive_escape_query_value(self, value):
+        return (value or '').replace("\\", "\\\\").replace("'", "\\'")
+
+    def _drive_get_repair_folder_name(self, evidence_type=False):
+        self.ensure_one()
+        folder_name = self.sequence or self.display_name
+        evidence_labels = {
+            'recepcion': _("Recepción"),
+            'diagnostico': _("Diagnóstico"),
+            'reparacion': _("Reparación"),
+            'entrega': _("Entrega"),
+            'otro': _("Otro"),
+        }
+        if evidence_type:
+            folder_name = "%s - %s" % (
+                folder_name,
+                evidence_labels.get(evidence_type, evidence_type),  #type: ignore
+            )
+        return folder_name
+
+    def _drive_get_or_create_repair_folder(self, drive_service, evidence_type=False):
+        self.ensure_one()
+        self._drive_check_root_folder_access(drive_service)
+        folder_name = self._drive_get_repair_folder_name(evidence_type=evidence_type)
+        escaped_name = self._drive_escape_query_value(folder_name)
+        query = (
+            "mimeType = 'application/vnd.google-apps.folder' "
+            "and name = '%s' "
+            "and '%s' in parents "
+            "and trashed = false"
+        ) % (escaped_name, GOOGLE_DRIVE_ROOT_FOLDER_ID)
+
+        folder_list = drive_service.files().list(
+            q=query,
+            fields='files(id, name, webViewLink)',
+            pageSize=1,
+            supportsAllDrives=True,
+            includeItemsFromAllDrives=True,
+        ).execute()
+        folders = folder_list.get('files', [])
+        if folders:
+            return folders[0]
+
+        return drive_service.files().create(
+            body={
+                'name': folder_name,
+                'mimeType': 'application/vnd.google-apps.folder',
+                'parents': [GOOGLE_DRIVE_ROOT_FOLDER_ID],
+            },
+            fields='id, name, webViewLink',
+            supportsAllDrives=True,
+        ).execute()
 
     def button_view_diagnosis(self):
         list = []
@@ -380,51 +485,19 @@ class FleetRepair(models.Model):
         return result
 
     def action_test_google_drive_connection(self):
-        _logger.info("\n\n\n Module directory: %s \n\n\n", MODULE_DIR)
         self.ensure_one()
         if not (
             self.env.user.has_group('car_repair_industry.group_fleet_repair_service_manager')
             or self.env.user.has_group('base.group_system')
         ):
-            raise UserError(_("No tiene permisos para ejecutar esta prueba."))
-
-        try:
-            from google.oauth2 import service_account  # type: ignore
-            from googleapiclient.discovery import build  # type: ignore
-            from googleapiclient.errors import HttpError  # type: ignore
-        except ImportError as error:
-            raise UserError(_(
-                "Faltan dependencias de Google Drive en Python.\n"
-                "Instale:\n"
-                "pip install google-api-python-client google-auth google-auth-httplib2\n\n"
-                "Detalle: %s"
-            ) % error)
-
-        if not os.path.exists(GOOGLE_DRIVE_CREDENTIALS_PATH):
-            raise UserError(_(
-                "No se encontró el archivo de credenciales de Google Drive en:\n%s"
-            ) % GOOGLE_DRIVE_CREDENTIALS_PATH)
+            raise UserError("No tiene permisos para ejecutar esta prueba.")
 
         folder_name = "TEST ODOO DRIVE - %s" % (self.sequence or self.name or self.display_name)
 
+        drive_service = self._drive_get_service()
+        self._drive_check_root_folder_access(drive_service)
+        _, _, HttpError = self._drive_get_google_modules()
         try:
-            credentials = service_account.Credentials.from_service_account_file(
-                GOOGLE_DRIVE_CREDENTIALS_PATH,
-                scopes=GOOGLE_DRIVE_SCOPES,
-            )
-            drive_service = build(
-                'drive',
-                'v3',
-                credentials=credentials,
-                cache_discovery=False,
-            )
-
-            drive_service.files().get(
-                fileId=GOOGLE_DRIVE_ROOT_FOLDER_ID,
-                fields='id, name, webViewLink',
-                supportsAllDrives=True,
-            ).execute()
-
             folder = drive_service.files().create(
                 body={
                     'name': folder_name,
@@ -463,6 +536,19 @@ class FleetRepair(models.Model):
                 'type': 'success',
                 'sticky': False,
             }
+        }
+
+    def action_open_drive_upload_wizard(self):
+        self.ensure_one()
+        return {
+            'name': _("Subir fotos a Drive"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'fleet.repair.drive.upload.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_repair_id': self.id,
+            },
         }
 
     def action_print_receipt(self):

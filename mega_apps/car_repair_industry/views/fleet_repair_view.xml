@@ -18,6 +18,9 @@
                         <button name="action_test_google_drive_connection" string="Probar Google Drive"
                                 type="object" style="float:left;"
                                 groups="car_repair_industry.group_fleet_repair_service_manager,base.group_system"/>
+                        <button name="action_open_drive_upload_wizard" string="Subir fotos a Drive"
+                                type="object" style="float:left;"
+                                groups="base.group_user"/>
                         <field name="state" widget="statusbar"
                                statusbar_visible="draft,diagnosis,quote,saleorder,workorder,done"/>
                     </header>

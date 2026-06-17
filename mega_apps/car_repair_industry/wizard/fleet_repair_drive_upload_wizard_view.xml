@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_fleet_repair_drive_upload_wizard_form" model="ir.ui.view">
+            <field name="name">fleet.repair.drive.upload.wizard.form</field>
+            <field name="model">fleet.repair.drive.upload.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Subir fotos a Drive">
+                    <sheet>
+                        <group>
+                            <field name="repair_id"/>
+                            <field name="evidence_type"/>
+                            <field name="description"/>
+                        </group>
+                        <field name="line_ids">
+                            <list editable="bottom">
+                                <field name="image_file" filename="filename"/>
+                                <field name="filename"/>
+                            </list>
+                        </field>
+                    </sheet>
+                    <footer>
+                        <button name="action_upload_to_drive" string="Subir a Drive"
+                                type="object" class="btn-primary"/>
+                        <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>
