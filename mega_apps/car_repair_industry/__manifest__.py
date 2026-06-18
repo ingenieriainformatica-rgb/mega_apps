@@ -75,6 +75,7 @@
     'qweb': [
     ],
     "auto_install": False,
+    "application": True,
     "installable": True,
     'live_test_url': 'https://www.browseinfo.com/demo-request?app=car_repair_industry&version=19&edition=Community',
     "images": ['static/description/Banner.gif'],
