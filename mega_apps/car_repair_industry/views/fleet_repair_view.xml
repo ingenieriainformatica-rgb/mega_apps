@@ -157,8 +157,23 @@
                                     </kanban>
                                 </field>
                                 <separator string="Detalle de evidencias"/>
-                                <field name="external_evidence_ids">
+                                <field name="external_evidence_ids"
+                                       groups="car_repair_industry.group_fleet_repair_service_manager">
                                     <list editable="bottom">
+                                        <field name="name"/>
+                                        <field name="evidence_type"/>
+                                        <field name="external_url" widget="url"/>
+                                        <field name="drive_file_id" optional="hide"/>
+                                        <field name="mime_type" optional="hide"/>
+                                        <field name="description"/>
+                                        <field name="uploaded_by" readonly="1"/>
+                                        <field name="uploaded_at" readonly="1"/>
+                                        <field name="active" column_invisible="1"/>
+                                    </list>
+                                </field>
+                                <field name="external_evidence_ids"
+                                       groups="car_repair_industry.group_fleet_repair_technician,!car_repair_industry.group_fleet_repair_service_manager">
+                                    <list editable="bottom" delete="0">
                                         <field name="name"/>
                                         <field name="evidence_type"/>
                                         <field name="external_url" widget="url"/>
