@@ -34,6 +34,19 @@ class FleetRepairEvidence(models.Model):
         required=True,
         default='recepcion',
     )
+    evidence_category = fields.Selection(
+        [
+            ('externa', 'Externa'),
+            ('interna', 'Interna'),
+            ('dano_existente', 'Daño existente'),
+            ('pertenencias', 'Pertenencias'),
+            ('documentos', 'Documentos'),
+            ('otro', 'Otro'),
+        ],
+        string="Categoría",
+        default='otro',
+        required=True,
+    )
     external_url = fields.Char(string="Enlace de Drive", required=True)
     drive_file_id = fields.Char(string="Google Drive File ID")
     mime_type = fields.Char(string="MIME Type")

@@ -1,0 +1,78 @@
+.workshop-photo-uploader {
+    border: 1px solid #d8dde3;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.workshop-photo-dropzone {
+    align-items: center;
+    border: 1px dashed #7b8794;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+    min-height: 132px;
+    padding: 20px;
+    text-align: center;
+}
+
+.workshop-photo-dropzone:hover {
+    background: #f8f9fa;
+    border-color: #017e84;
+}
+
+.workshop-photo-dropzone .fa {
+    color: #017e84;
+    font-size: 28px;
+}
+
+.workshop-photo-preview-card {
+    border: 1px solid #d8dde3;
+    border-radius: 8px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.workshop-photo-preview-card > img,
+.workshop-evidence-image > img {
+    aspect-ratio: 4 / 3;
+    display: block;
+    object-fit: cover;
+    width: 100%;
+}
+
+.workshop-evidence-card {
+    font-size: 0.875rem;
+}
+
+.workshop-evidence-card .workshop-evidence-image > img {
+    aspect-ratio: 16 / 10;
+    max-height: 120px;
+}
+
+.workshop-evidence-image {
+    background: #f1f3f5;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.workshop-renting-company {
+    background: #f6f8f9;
+    border: 1px solid #d8dde3;
+    border-left: 4px solid #017e84;
+    border-radius: 6px;
+    padding: 16px;
+}
+
+.workshop-renting-company-icon {
+    align-items: center;
+    background: #017e84;
+    border-radius: 6px;
+    color: #fff;
+    display: flex;
+    flex: 0 0 40px;
+    height: 40px;
+    justify-content: center;
+}

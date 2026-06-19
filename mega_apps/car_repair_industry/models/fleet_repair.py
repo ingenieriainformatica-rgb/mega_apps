@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
 import logging
+import mimetypes
 import os
 from odoo import fields, models, api, _  # type: ignore
 from odoo import tools  # type: ignore
@@ -20,6 +21,10 @@ GOOGLE_DRIVE_CREDENTIALS_PATH = (
 )
 GOOGLE_DRIVE_ROOT_FOLDER_ID = "1AObR25Y435J2gUYXdkBkRCZRXYM_MXch"
 GOOGLE_DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive"]
+RENTING_PARTNER_PARAM = "car_repair_industry.renting_partner_id"
+RENTING_PARTNER_NAME = "RENTING COLOMBIA S A S"
+ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp'}
+ALLOWED_IMAGE_MIMETYPES = {'image/jpeg', 'image/png', 'image/webp'}
 
 
 class FleetRepair(models.Model):
@@ -37,6 +42,47 @@ class FleetRepair(models.Model):
     receipt_date = fields.Date(string='Date of Receipt', default=lambda self: fields.Date.context_today(self),)
     contact_name = fields.Char(string='Contact Name')
     phone = fields.Char(string='Contact Number')
+    customer_type = fields.Selection(
+        [
+            ('renting', 'Renting'),
+            ('particular', 'Particular'),
+        ],
+        string="Tipo de cliente",
+        default='particular',
+        required=True,
+        tracking=True,
+    )
+    renting_reference = fields.Char(string="CI / referencia Renting", copy=False)
+    renting_appointment_validated = fields.Boolean(string="Cita Renting validada", copy=False)
+    delivered_by_name = fields.Char(string="Persona que entrega", copy=False)
+    delivered_by_phone = fields.Char(string="Celular quien entrega", copy=False)
+    delivered_by_document = fields.Char(string="Documento quien entrega", copy=False)
+    delivered_by_email = fields.Char(string="Correo quien entrega", copy=False)
+    delivered_by_observation = fields.Text(string="Observaciones persona que entrega", copy=False)
+    reception_mileage = fields.Float(string="Kilometraje recepción", copy=False)
+    reception_fuel_level = fields.Selection(
+        [
+            ('empty', 'Vacío'),
+            ('reserve', 'Reserva'),
+            ('quarter', '1/4'),
+            ('half', '1/2'),
+            ('three_quarters', '3/4'),
+            ('full', 'Lleno'),
+        ],
+        string="Nivel de combustible recepción",
+        copy=False,
+    )
+    valuables_inside = fields.Selection(
+        [
+            ('yes', 'Sí'),
+            ('no', 'No'),
+        ],
+        string="Tiene objetos de valor",
+        copy=False,
+    )
+    valuables_description = fields.Text(string="Pertenencias / objetos de valor", copy=False)
+    received_documents = fields.Text(string="Documentos recibidos", copy=False)
+    reception_general_observations = fields.Text(string="Observaciones generales de recepción", copy=False)
     fleet_id = fields.Many2one('fleet.vehicle', 'Car')
     license_plate = fields.Char('License Plate',
                                 help='License plate number of the vehicle (ie: plate number for a car)')
@@ -58,6 +104,78 @@ class FleetRepair(models.Model):
         [('paid', 'paid'), ('free', 'Free')], string='Guarantee Type')
     service_type = fields.Many2one('service.type', string='Nature of Service')
     user_id = fields.Many2one('res.users', string='Assigned to', tracking=True)
+    portal_advisor_id = fields.Many2one(
+        'res.users',
+        string="Asesor recepción",
+        tracking=True,
+        copy=False,
+    )
+    portal_technician_id = fields.Many2one(
+        'res.users',
+        string="Técnico portal",
+        tracking=True,
+        copy=False,
+    )
+    road_test_user_id = fields.Many2one(
+        'res.users',
+        string="Responsable prueba de ruta",
+        tracking=True,
+        copy=False,
+    )
+    purchase_quote_user_id = fields.Many2one(
+        'res.users',
+        string="Asesor compras/cotizaciones",
+        tracking=True,
+        copy=False,
+    )
+    service_flow_state = fields.Selection(
+        [
+            ('received', 'Recibido'),
+            ('to_assign', 'Por asignar'),
+            ('assigned', 'Asignado'),
+            ('diagnosis', 'En diagnóstico'),
+            ('diagnosis_done', 'Diagnóstico finalizado'),
+            ('road_test_requested', 'Prueba de ruta solicitada'),
+            ('road_test', 'En prueba de ruta'),
+            ('road_test_done', 'Prueba de ruta finalizada'),
+            ('purchase_requested', 'Remitido a compras/cotizaciones'),
+            ('quote_ready', 'Cotización lista'),
+            ('quote_sent', 'Cotización enviada'),
+            ('approved', 'Aprobado'),
+            ('repair', 'En reparación'),
+            ('ready_delivery', 'Listo para entrega'),
+            ('delivered', 'Entregado'),
+            ('cancelled', 'Cancelado'),
+        ],
+        string="Flujo operativo",
+        default='received',
+        tracking=True,
+        copy=False,
+        index=True,
+    )
+    technician_started_at = fields.Datetime(string="Inicio técnico", readonly=True, copy=False)
+    technician_finished_at = fields.Datetime(string="Fin técnico", readonly=True, copy=False)
+    road_test_requested_at = fields.Datetime(string="Solicitud prueba ruta", readonly=True, copy=False)
+    road_test_started_at = fields.Datetime(string="Inicio prueba ruta", readonly=True, copy=False)
+    road_test_finished_at = fields.Datetime(string="Fin prueba ruta", readonly=True, copy=False)
+    sent_to_purchase_at = fields.Datetime(string="Remitido a compras", readonly=True, copy=False)
+    technical_observation = fields.Text(string="Observación técnica")
+    requested_materials = fields.Text(string="Materiales/repuestos requeridos")
+    road_test_result = fields.Text(string="Resultado prueba de ruta")
+    purchase_quote_note = fields.Text(string="Nota compras/cotizaciones")
+    closure_result = fields.Selection(
+        [
+            ('finished_ok', 'Finalizado correctamente'),
+            ('requires_road_test', 'Requiere prueba de ruta'),
+            ('pending_customer', 'Pendiente por cliente'),
+            ('rescheduled', 'Reprogramado'),
+            ('not_possible', 'No fue posible'),
+            ('requires_quote', 'Requiere cotización'),
+        ],
+        string="Resultado de cierre",
+        copy=False,
+        tracking=True,
+    )
     priority = fields.Selection([('0', 'Low'), ('1', 'Normal'), ('2', 'High')], 'Priority')
     description = fields.Text(string='Notes')
     service_detail = fields.Text(string='Service Details')
@@ -203,6 +321,8 @@ class FleetRepair(models.Model):
     def _drive_get_repair_folder_name(self, evidence_type=False):
         self.ensure_one()
         folder_name = self.sequence or self.display_name
+        if self.license_plate:
+            folder_name = "%s - %s" % (folder_name, self.license_plate)
         evidence_labels = {
             'recepcion': _("Recepción"),
             'diagnostico': _("Diagnóstico"),
@@ -217,18 +337,14 @@ class FleetRepair(models.Model):
             )
         return folder_name
 
-    def _drive_get_or_create_repair_folder(self, drive_service, evidence_type=False):
-        self.ensure_one()
-        self._drive_check_root_folder_access(drive_service)
-        folder_name = self._drive_get_repair_folder_name(evidence_type=evidence_type)
+    def _drive_get_or_create_child_folder(self, drive_service, parent_id, folder_name):
         escaped_name = self._drive_escape_query_value(folder_name)
         query = (
             "mimeType = 'application/vnd.google-apps.folder' "
             "and name = '%s' "
             "and '%s' in parents "
             "and trashed = false"
-        ) % (escaped_name, GOOGLE_DRIVE_ROOT_FOLDER_ID)
-
+        ) % (escaped_name, parent_id)
         folder_list = drive_service.files().list(
             q=query,
             fields='files(id, name, webViewLink)',
@@ -244,11 +360,211 @@ class FleetRepair(models.Model):
             body={
                 'name': folder_name,
                 'mimeType': 'application/vnd.google-apps.folder',
-                'parents': [GOOGLE_DRIVE_ROOT_FOLDER_ID],
+                'parents': [parent_id],
             },
             fields='id, name, webViewLink',
             supportsAllDrives=True,
         ).execute()
+
+    def _drive_get_or_create_repair_folder(self, drive_service, evidence_type=False):
+        self.ensure_one()
+        self._drive_check_root_folder_access(drive_service)
+        year = str((self.receipt_date or fields.Date.context_today(self)).year)
+        year_folder = self._drive_get_or_create_child_folder(
+            drive_service,
+            GOOGLE_DRIVE_ROOT_FOLDER_ID,
+            year,
+        )
+        repair_folder = self._drive_get_or_create_child_folder(
+            drive_service,
+            year_folder['id'],
+            self._drive_get_repair_folder_name(),
+        )
+        if not evidence_type:
+            return repair_folder
+        evidence_labels = {
+            'recepcion': _("Recepción"),
+            'diagnostico': _("Diagnóstico"),
+            'reparacion': _("Reparación"),
+            'entrega': _("Entrega"),
+            'otro': _("Otro"),
+        }
+        return self._drive_get_or_create_child_folder(
+            drive_service,
+            repair_folder['id'],
+            evidence_labels.get(evidence_type, evidence_type),  # type: ignore
+        )
+
+    def _get_renting_partner(self):
+        parameters = self.env['ir.config_parameter'].sudo()
+        partner_id = parameters.get_param(RENTING_PARTNER_PARAM)
+        partner = self.env['res.partner'].sudo().browse(int(partner_id or 0))
+        if not partner.exists():
+            partner = self.env['res.partner'].sudo().search([
+                ('name', '=ilike', RENTING_PARTNER_NAME),
+                ('is_company', '=', True),
+            ], limit=1)
+            if partner:
+                parameters.set_param(RENTING_PARTNER_PARAM, partner.id)
+        if not partner.exists():
+            raise UserError(_(
+                "No se encontró el contacto empresarial '%s'.\n"
+                "Créelo o configure el parámetro del sistema %s con su ID."
+            ) % (RENTING_PARTNER_NAME, RENTING_PARTNER_PARAM))
+        return partner
+
+    def _drive_prepare_image_file(self, filename, file_bytes, mimetype=False):
+        filename = (filename or '').strip()
+        if not filename:
+            raise UserError(_("Todos los archivos deben tener nombre."))
+        if not file_bytes:
+            raise UserError(_("El archivo %s está vacío.") % filename)
+
+        extension = Path(filename).suffix.lower()
+        if extension not in ALLOWED_IMAGE_EXTENSIONS:
+            raise UserError(_(
+                "Solo se permiten imágenes jpg, jpeg, png o webp.\n"
+                "Archivo no permitido: %s"
+            ) % filename)
+
+        guessed_mimetype = mimetype or mimetypes.guess_type(filename)[0] or ''
+        if guessed_mimetype not in ALLOWED_IMAGE_MIMETYPES:
+            raise UserError(_(
+                "El tipo MIME del archivo no es válido.\n"
+                "Archivo no permitido: %s"
+            ) % filename)
+
+        detected_mimetype = self._drive_detect_image_mimetype(file_bytes)
+        if detected_mimetype not in ALLOWED_IMAGE_MIMETYPES:
+            raise UserError(_(
+                "El contenido real del archivo no corresponde a una imagen válida.\n"
+                "Archivo no permitido: %s"
+            ) % filename)
+        if detected_mimetype != guessed_mimetype:
+            raise UserError(_(
+                "La extensión del archivo no coincide con su contenido real.\n"
+                "Archivo no permitido: %s"
+            ) % filename)
+
+        return {
+            'filename': filename,
+            'content': file_bytes,
+            'mimetype': guessed_mimetype,
+        }
+
+    def _drive_detect_image_mimetype(self, file_bytes):
+        if file_bytes.startswith(b'\xff\xd8\xff'):
+            return 'image/jpeg'
+        if file_bytes.startswith(b'\x89PNG\r\n\x1a\n'):
+            return 'image/png'
+        if (
+            len(file_bytes) >= 12
+            and file_bytes[:4] == b'RIFF'
+            and file_bytes[8:12] == b'WEBP'
+        ):
+            return 'image/webp'
+        return False
+
+    def _drive_rollback_uploaded_files(self, drive_service, uploaded_files):
+        for drive_file in uploaded_files:
+            file_id = drive_file.get('id')
+            if not file_id:
+                continue
+            try:
+                drive_service.files().delete(
+                    fileId=file_id,
+                    supportsAllDrives=True,
+                ).execute()
+                _logger.info("Rolled back uploaded Google Drive file %s.", file_id)
+            except Exception as delete_error:
+                _logger.warning(
+                    "Could not delete uploaded Google Drive file %s during rollback: %s",
+                    file_id,
+                    delete_error,
+                )
+                try:
+                    drive_service.files().update(
+                        fileId=file_id,
+                        body={'trashed': True},
+                        supportsAllDrives=True,
+                    ).execute()
+                    _logger.info("Moved uploaded Google Drive file %s to trash during rollback.", file_id)
+                except Exception as trash_error:
+                    _logger.warning(
+                        "Could not trash uploaded Google Drive file %s during rollback: %s",
+                        file_id,
+                        trash_error,
+                    )
+
+    def _drive_upload_evidence_images(self, files, evidence_type='recepcion', description=False):
+        self.ensure_one()
+        if not files:
+            return self.env['fleet.repair.evidence']
+
+        try:
+            from googleapiclient.http import MediaIoBaseUpload  # type: ignore
+        except ImportError as error:
+            raise UserError(_(
+                "Faltan dependencias de Google Drive en Python.\n"
+                "Instale:\n"
+                "pip install google-api-python-client google-auth google-auth-httplib2\n\n"
+                "Detalle: %s"
+            ) % error)
+
+        drive_service = self._drive_get_service()
+        _, _, HttpError = self._drive_get_google_modules()
+        folder = self._drive_get_or_create_repair_folder(
+            drive_service,
+            evidence_type=evidence_type,
+        )
+        Evidence = self.env['fleet.repair.evidence']
+        uploaded_files = []
+        evidences = Evidence.browse()
+        try:
+            for file_data in files:
+                from io import BytesIO
+                media = MediaIoBaseUpload(
+                    BytesIO(file_data['content']),
+                    mimetype=file_data['mimetype'],
+                    resumable=False,
+                )
+                drive_file = drive_service.files().create(
+                    body={
+                        'name': file_data['filename'],
+                        'parents': [folder['id']],
+                    },
+                    media_body=media,
+                    fields='id, name, mimeType, webViewLink',
+                    supportsAllDrives=True,
+                ).execute()
+                drive_file['evidence_category'] = file_data.get('evidence_category') or 'otro'
+                uploaded_files.append(drive_file)
+
+            for drive_file in uploaded_files:
+                evidences |= Evidence.create({
+                    'repair_id': self.id,
+                    'name': drive_file.get('name'),
+                    'evidence_type': evidence_type,
+                    'evidence_category': drive_file.get('evidence_category') or 'otro',
+                    'external_url': drive_file.get('webViewLink'),
+                    'drive_file_id': drive_file.get('id'),
+                    'mime_type': drive_file.get('mimeType'),
+                    'description': description,
+                })
+        except HttpError as error:
+            self._drive_rollback_uploaded_files(drive_service, uploaded_files)
+            raise UserError(_(
+                "No se pudieron subir las fotos a Google Drive.\n"
+                "Verifique permisos y cuota del Drive destino.\n\n"
+                "Detalle: %s"
+            ) % error)
+        except Exception as error:
+            self._drive_rollback_uploaded_files(drive_service, uploaded_files)
+            raise UserError(_(
+                "No se pudieron subir las fotos a Google Drive.\n\n"
+                "Detalle: %s"
+            ) % error)
+        return evidences
 
     def button_view_diagnosis(self):
         list = []
@@ -403,6 +719,127 @@ class FleetRepair(models.Model):
 
     def workorder_created(self):
         self.write({'state': 'workorder'})
+
+    def _notify_repair_group(self, group_xmlid, summary, note=False):
+        group = self.env.ref(group_xmlid, raise_if_not_found=False)
+        if not group:
+            return
+        activity_type = self.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False)
+        for repair in self:
+            users = group.users.filtered(lambda user: user.active and not user.share)
+            for user in users:
+                repair.activity_schedule(
+                    activity_type_id=activity_type.id if activity_type else False,
+                    user_id=user.id,
+                    summary=summary,
+                    note=note or summary,
+                )
+
+    def _notify_repair_user(self, user, summary, note=False):
+        activity_type = self.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False)
+        for repair in self:
+            if user and user.active:
+                repair.activity_schedule(
+                    activity_type_id=activity_type.id if activity_type else False,
+                    user_id=user.id,
+                    summary=summary,
+                    note=note or summary,
+                )
+
+    def get_service_flow_state_label(self):
+        self.ensure_one()
+        return dict(self._fields['service_flow_state'].selection).get(self.service_flow_state, self.service_flow_state)
+
+    def action_flow_mark_to_assign(self):
+        self.write({'service_flow_state': 'to_assign'})
+        self._notify_repair_group(
+            'car_repair_industry.group_fleet_repair_service_manager',
+            _("Nueva orden por asignar"),
+        )
+        return True
+
+    def action_flow_assign_technician(self):
+        for repair in self:
+            technician = repair.portal_technician_id or repair.user_id
+            if not technician:
+                raise UserError(_("Debe asignar un técnico antes de continuar."))
+            repair.write({
+                'user_id': technician.id,
+                'portal_technician_id': technician.id,
+                'service_flow_state': 'assigned',
+            })
+            repair._notify_repair_user(
+                technician,
+                _("Se le asignó una orden de servicio"),
+                _("Orden: %s") % (repair.sequence or repair.display_name),
+            )
+        return True
+
+    def action_flow_start_technician(self):
+        self.write({
+            'service_flow_state': 'diagnosis',
+            'technician_started_at': fields.Datetime.now(),
+        })
+        return True
+
+    def action_flow_request_road_test(self):
+        self.write({
+            'service_flow_state': 'road_test_requested',
+            'road_test_requested_at': fields.Datetime.now(),
+            'closure_result': 'requires_road_test',
+        })
+        self._notify_repair_group(
+            'car_repair_industry.group_fleet_repair_service_manager',
+            _("Solicitud de prueba de ruta"),
+        )
+        for repair in self:
+            repair._notify_repair_user(
+                repair.road_test_user_id,
+                _("Se le asignó una prueba de ruta"),
+                _("Orden: %s") % (repair.sequence or repair.display_name),
+            )
+        return True
+
+    def action_flow_start_road_test(self):
+        self.write({
+            'service_flow_state': 'road_test',
+            'road_test_started_at': fields.Datetime.now(),
+        })
+        return True
+
+    def action_flow_finish_road_test(self):
+        self.write({
+            'service_flow_state': 'road_test_done',
+            'road_test_finished_at': fields.Datetime.now(),
+        })
+        self._notify_repair_group(
+            'car_repair_industry.group_fleet_repair_service_manager',
+            _("Prueba de ruta finalizada"),
+        )
+        return True
+
+    def action_flow_send_to_purchase(self):
+        self.write({
+            'service_flow_state': 'purchase_requested',
+            'sent_to_purchase_at': fields.Datetime.now(),
+            'technician_finished_at': fields.Datetime.now(),
+            'closure_result': 'requires_quote',
+        })
+        self._notify_repair_group(
+            'car_repair_industry.group_fleet_repair_directeur_commercial',
+            _("Orden remitida a compras/cotizaciones"),
+        )
+        return True
+
+    def action_flow_quote_ready(self):
+        self.write({'service_flow_state': 'quote_ready'})
+        for repair in self:
+            repair._notify_repair_user(
+                repair.portal_advisor_id,
+                _("Cotización lista para enviar al cliente"),
+                _("Orden: %s") % (repair.sequence or repair.display_name),
+            )
+        return True
 
     @api.onchange('client_id')
     def onchange_partner_id(self):

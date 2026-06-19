@@ -77,6 +77,11 @@
                             <group>
                                 <field name="name" readonly="state != 'draft'" string="Descripción"/>
                                 <field name="user_id" readonly="state != 'draft'"  options="{'no_create': True, 'no_open':True}"/>
+                                <field name="service_flow_state" readonly="1"/>
+                                <field name="portal_advisor_id" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="portal_technician_id" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="road_test_user_id" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="purchase_quote_user_id" options="{'no_create': True, 'no_open': True}"/>
                                 <field name="confirm_sale_order" invisible="True"/>
                             </group>
                             <group>
@@ -103,6 +108,30 @@
                                         <field name="phone"/>
                                     </group>
                                 </group>
+                                <group string="Recepción">
+                                    <group>
+                                        <field name="customer_type"/>
+                                        <field name="renting_reference"/>
+                                        <field name="renting_appointment_validated"/>
+                                        <field name="reception_mileage"/>
+                                        <field name="reception_fuel_level"/>
+                                    </group>
+                                    <group>
+                                        <field name="delivered_by_name"/>
+                                        <field name="delivered_by_phone"/>
+                                        <field name="delivered_by_document"/>
+                                        <field name="delivered_by_email"/>
+                                        <field name="delivered_by_observation"/>
+                                    </group>
+                                    <group>
+                                        <field name="valuables_inside"/>
+                                        <field name="valuables_description"/>
+                                    </group>
+                                    <group>
+                                        <field name="received_documents"/>
+                                        <field name="reception_general_observations"/>
+                                    </group>
+                                </group>
                                 <separator string="Car Info"/>
                                 <field name="fleet_repair_line" readonly="state != 'draft'" widget="one2many_list"/>
                             </page>
@@ -114,6 +143,7 @@
                                     <kanban>
                                         <field name="name"/>
                                         <field name="evidence_type"/>
+                                        <field name="evidence_category"/>
                                         <field name="external_url"/>
                                         <field name="description"/>
                                         <field name="uploaded_at"/>
@@ -137,6 +167,8 @@
                                                         </strong>
                                                         <div>
                                                             <field name="evidence_type"/>
+                                                            <span> · </span>
+                                                            <field name="evidence_category"/>
                                                         </div>
                                                         <div class="text-muted">
                                                             <field name="uploaded_at"/>
@@ -162,6 +194,7 @@
                                     <list editable="bottom">
                                         <field name="name"/>
                                         <field name="evidence_type"/>
+                                        <field name="evidence_category"/>
                                         <field name="external_url" widget="url"/>
                                         <field name="drive_file_id" optional="hide"/>
                                         <field name="mime_type" optional="hide"/>
@@ -176,6 +209,7 @@
                                     <list editable="bottom" delete="0">
                                         <field name="name"/>
                                         <field name="evidence_type"/>
+                                        <field name="evidence_category"/>
                                         <field name="external_url" widget="url"/>
                                         <field name="drive_file_id" optional="hide"/>
                                         <field name="mime_type" optional="hide"/>
@@ -185,6 +219,25 @@
                                         <field name="active" column_invisible="1"/>
                                     </list>
                                 </field>
+                            </page>
+                            <page name="operational_flow" string="Flujo operativo">
+                                <group>
+                                    <group string="Trazabilidad">
+                                        <field name="technician_started_at"/>
+                                        <field name="technician_finished_at"/>
+                                        <field name="road_test_requested_at"/>
+                                        <field name="road_test_started_at"/>
+                                        <field name="road_test_finished_at"/>
+                                        <field name="sent_to_purchase_at"/>
+                                    </group>
+                                    <group string="Resultado">
+                                        <field name="closure_result"/>
+                                        <field name="technical_observation"/>
+                                        <field name="requested_materials"/>
+                                        <field name="road_test_result"/>
+                                        <field name="purchase_quote_note"/>
+                                    </group>
+                                </group>
                             </page>
                             <page name="reception_checklist" string="Checklist de recepción">
                                 <group>

@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_workshop_forbidden" name="Portal taller sin acceso">
+        <t t-call="website.layout">
+            <div class="container my-5">
+                <h1>No tiene acceso</h1>
+                <p>Su usuario no tiene permisos para esta operación del taller.</p>
+                <a href="/my" class="btn btn-secondary">Volver</a>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_workshop_dashboard" name="Portal taller">
+        <t t-call="website.layout">
+            <div class="container my-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h1 class="h3 mb-1">Taller de autos</h1>
+                        <p class="text-muted mb-0">Panel operativo</p>
+                    </div>
+                    <a t-if="is_advisor or is_internal_manager" href="/my/workshop/order/new" class="btn btn-primary">
+                        Nueva orden de servicio
+                    </a>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-2">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Total</div>
+                            <strong t-esc="stats['total']"/>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Por asignar</div>
+                            <strong t-esc="stats['to_assign']"/>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Asignadas</div>
+                            <strong t-esc="stats['assigned']"/>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Diagnóstico</div>
+                            <strong t-esc="stats['diagnosis']"/>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Ruta</div>
+                            <strong t-esc="stats['road_test']"/>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small">Compras</div>
+                            <strong t-esc="stats['purchase']"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="list-group">
+                    <a t-foreach="repairs" t-as="repair" t-att-href="'/my/workshop/order/%s' % repair.id"
+                       class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between gap-3">
+                            <div>
+                                <strong t-esc="repair.sequence or repair.display_name"/>
+                                <span class="text-muted"> - </span>
+                                <span t-esc="repair.name"/>
+                                <div class="small text-muted">
+                                    <span t-esc="repair.license_plate or 'Sin placa'"/>
+                                    <span> · </span>
+                                    <span t-esc="repair.client_id.display_name"/>
+                                </div>
+                            </div>
+                            <span class="badge text-bg-light align-self-start" t-esc="repair.get_service_flow_state_label()"/>
+                        </div>
+                    </a>
+                    <div t-if="not repairs" class="text-muted border rounded p-4">
+                        No hay órdenes para mostrar.
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_workshop_order_form" name="Portal taller nueva orden">
+        <t t-call="website.layout">
+            <div class="container my-4">
+                <div class="mb-3">
+                    <a href="/my/workshop" class="btn btn-link px-0">Volver al panel</a>
+                    <h1 class="h3">Nueva orden de servicio</h1>
+                </div>
+                <form method="post" enctype="multipart/form-data" class="row g-3 js-workshop-reception-form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="col-12">
+                        <label class="form-label d-block">Tipo de cliente</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_renting" value="renting"/>
+                            <label class="form-check-label" for="customer_type_renting">Renting</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_particular" value="particular" checked="checked"/>
+                            <label class="form-check-label" for="customer_type_particular">Particular</label>
+                        </div>
+                    </div>
+                    <div class="col-12 js-workshop-particular-fields">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Cliente particular</label>
+                                <input name="client_name" class="form-control js-workshop-particular-required" required="required"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Celular cliente</label>
+                                <input name="client_phone" type="tel" class="form-control"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Correo cliente</label>
+                                <input name="client_email" type="email" class="form-control"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 d-none js-workshop-renting-fields">
+                        <div class="workshop-renting-company">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="workshop-renting-company-icon" aria-hidden="true">
+                                    <i class="fa fa-building"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="small text-muted">Cliente corporativo</div>
+                                    <h2 class="h5 mb-2" t-esc="renting_partner.name"/>
+                                    <div class="row g-2 small">
+                                        <div class="col-md-4"><strong>NIT:</strong> <span t-esc="renting_partner.vat or 'Sin registrar'"/></div>
+                                        <div class="col-md-4"><strong>Teléfono:</strong> <span t-esc="renting_partner.phone or renting_partner.mobile or 'Sin registrar'"/></div>
+                                        <div class="col-md-4"><strong>Correo:</strong> <span t-esc="renting_partner.email or 'Sin registrar'"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-6">
+                                <label class="form-label">CI / referencia Renting</label>
+                                <input name="renting_reference" class="form-control js-workshop-renting-input" disabled="disabled"/>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input js-workshop-renting-input" type="checkbox" name="renting_appointment_validated" id="renting_appointment_validated" value="1" disabled="disabled"/>
+                                    <label class="form-check-label" for="renting_appointment_validated">Cita Renting validada</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Placa</label>
+                        <input name="license_plate" class="form-control text-uppercase" required="required"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kilometraje</label>
+                        <input name="reception_mileage" type="number" min="0" step="1" class="form-control"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Nivel de combustible</label>
+                        <select name="reception_fuel_level" class="form-select">
+                            <option value="">Seleccione...</option>
+                            <option value="empty">Vacío</option>
+                            <option value="reserve">Reserva</option>
+                            <option value="quarter">1/4</option>
+                            <option value="half">1/2</option>
+                            <option value="three_quarters">3/4</option>
+                            <option value="full">Lleno</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tipo de servicio</label>
+                        <select name="service_type" class="form-select">
+                            <option value="">Seleccione...</option>
+                            <option t-foreach="service_types" t-as="service" t-att-value="service.id" t-esc="service.name"/>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Plantilla checklist</label>
+                        <select name="template_id" class="form-select">
+                            <option t-foreach="templates" t-as="template" t-att-value="template.id"
+                                    t-att-selected="'selected' if selected_template and template.id == selected_template.id else None"
+                                    t-esc="template.name"/>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Motivo de ingreso</label>
+                        <input name="reason" class="form-control" required="required"/>
+                    </div>
+                    <div class="col-12">
+                        <h2 class="h5 mt-3">Persona que entrega el vehículo</h2>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Nombre</label>
+                        <input name="delivered_by_name" class="form-control"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Celular</label>
+                        <input name="delivered_by_phone" class="form-control"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Documento</label>
+                        <input name="delivered_by_document" class="form-control"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Correo</label>
+                        <input name="delivered_by_email" type="email" class="form-control"/>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Observaciones de quien entrega</label>
+                        <textarea name="delivered_by_observation" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">¿Tiene objetos de valor?</label>
+                        <select name="valuables_inside" class="form-select">
+                            <option value="">Seleccione...</option>
+                            <option value="no">No</option>
+                            <option value="yes">Sí</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Pertenencias / objetos de valor</label>
+                        <input name="valuables_description" class="form-control"/>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Documentos recibidos</label>
+                        <textarea name="received_documents" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Observaciones iniciales</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Observaciones generales de recepción</label>
+                        <textarea name="reception_general_observations" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <section class="workshop-photo-uploader">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                <div>
+                                    <h2 class="h5 mb-1">Evidencias de recepción</h2>
+                                    <p class="text-muted small mb-0">Las imágenes se almacenan en Google Drive.</p>
+                                </div>
+                                <span class="badge text-bg-light js-workshop-photo-count">0 fotos</span>
+                            </div>
+                            <label class="workshop-photo-dropzone" for="reception_photos">
+                                <i class="fa fa-camera" aria-hidden="true"></i>
+                                <span class="fw-semibold">Seleccionar fotos</span>
+                                <small>JPG, PNG o WEBP. Puedes elegir varias.</small>
+                            </label>
+                            <input id="reception_photos" name="reception_photos" type="file"
+                                   class="visually-hidden js-workshop-photo-input" multiple="multiple"
+                                   accept="image/jpeg,image/png,image/webp"/>
+                            <div class="row g-3 mt-1 js-workshop-photo-preview"></div>
+                            <div class="mt-3">
+                                <label class="form-label" for="photo_description">Descripción del lote</label>
+                                <textarea id="photo_description" name="photo_description" class="form-control"
+                                          rows="2" placeholder="Observación común para estas evidencias"></textarea>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="col-12" t-if="selected_template">
+                        <h2 class="h5 mt-3">Checklist de diagnóstico/recepción</h2>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Ítem</th>
+                                        <th style="width: 180px;">Estado</th>
+                                        <th>Observación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="selected_template.line_ids.filtered('active')" t-as="item">
+                                        <td t-esc="item.name"/>
+                                        <td>
+                                            <select t-att-name="'check_state_%s' % item.id" class="form-select">
+                                                <option value="good">Bueno</option>
+                                                <option value="regular">Regular</option>
+                                                <option value="bad">Malo</option>
+                                                <option value="not_apply" selected="selected">No aplica</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input t-att-name="'check_obs_%s' % item.id" class="form-control"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Crear orden de servicio</button>
+                        <a href="/my/workshop" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_workshop_order_detail" name="Portal taller detalle orden">
+        <t t-call="website.layout">
+            <div class="container my-4">
+                <a href="/my/workshop" class="btn btn-link px-0">Volver al panel</a>
+                <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start mb-3">
+                    <div>
+                        <h1 class="h3 mb-1" t-esc="repair.sequence or repair.display_name"/>
+                        <p class="text-muted mb-0" t-esc="repair.name"/>
+                    </div>
+                    <span class="badge text-bg-light" t-esc="repair.get_service_flow_state_label()"/>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <div class="border rounded p-3 h-100">
+                            <h2 class="h5">Datos de la orden</h2>
+                            <dl class="row mb-0">
+                                <dt class="col-5">Cliente</dt><dd class="col-7" t-esc="repair.client_id.display_name"/>
+                                <dt class="col-5">Tipo</dt><dd class="col-7" t-esc="dict(repair._fields['customer_type'].selection).get(repair.customer_type)"/>
+                                <dt class="col-5">Teléfono</dt><dd class="col-7" t-esc="repair.client_phone or repair.phone or ''"/>
+                                <dt class="col-5">Placa</dt><dd class="col-7" t-esc="repair.license_plate or ''"/>
+                                <dt class="col-5">Kilometraje</dt><dd class="col-7" t-esc="repair.reception_mileage or ''"/>
+                                <dt class="col-5">Combustible</dt><dd class="col-7" t-esc="dict(repair._fields['reception_fuel_level'].selection).get(repair.reception_fuel_level) or ''"/>
+                                <dt class="col-5">Entrega</dt><dd class="col-7" t-esc="repair.delivered_by_name or ''"/>
+                                <dt class="col-5">Celular entrega</dt><dd class="col-7" t-esc="repair.delivered_by_phone or ''"/>
+                                <dt class="col-5">Documento</dt><dd class="col-7" t-esc="repair.delivered_by_document or ''"/>
+                                <dt class="col-5">CI Renting</dt><dd class="col-7" t-esc="repair.renting_reference or ''"/>
+                                <dt class="col-5">Servicio</dt><dd class="col-7" t-esc="repair.service_type.name or ''"/>
+                                <dt class="col-5">Técnico</dt><dd class="col-7" t-esc="repair.portal_technician_id.display_name or repair.user_id.display_name or ''"/>
+                                <dt class="col-5">Prueba ruta</dt><dd class="col-7" t-esc="repair.road_test_user_id.display_name or ''"/>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="border rounded p-3 h-100">
+                            <h2 class="h5">Checklist</h2>
+                            <div t-if="repair.reception_checklist_line_ids" class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead><tr><th>Ítem</th><th>Estado</th><th>Observación</th></tr></thead>
+                                    <tbody>
+                                        <tr t-foreach="repair.reception_checklist_line_ids" t-as="line">
+                                            <td t-esc="line.name"/>
+                                            <td t-esc="dict(line._fields['state'].selection).get(line.state)"/>
+                                            <td t-esc="line.observation or ''"/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p t-if="not repair.reception_checklist_line_ids" class="text-muted mb-0">Sin checklist diligenciado.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div t-if="is_technician or is_internal_manager" class="border rounded p-3 mt-3">
+                    <h2 class="h5">Trabajo técnico</h2>
+                    <form t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <label class="form-label">Observación técnica / avance</label>
+                        <textarea name="technical_observation" class="form-control mb-3" rows="4"><t t-esc="repair.technical_observation or ''"/></textarea>
+                        <label class="form-label">Materiales o repuestos requeridos</label>
+                        <textarea name="requested_materials" class="form-control mb-3" rows="4"><t t-esc="repair.requested_materials or ''"/></textarea>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button name="action" value="start" class="btn btn-primary" type="submit">Iniciar trabajo</button>
+                            <button name="action" value="save" class="btn btn-secondary" type="submit">Guardar avance</button>
+                            <button name="action" value="request_road_test" class="btn btn-warning" type="submit">Solicitar prueba de ruta</button>
+                            <button name="action" value="send_purchase" class="btn btn-success" type="submit">Remitir a compras/cotizaciones</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div t-if="is_road_test or is_internal_manager" class="border rounded p-3 mt-3">
+                    <h2 class="h5">Prueba de ruta</h2>
+                    <form t-att-action="'/my/workshop/order/%s/road-test' % repair.id" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <label class="form-label">Resultado</label>
+                        <textarea name="road_test_result" class="form-control mb-3" rows="4"><t t-esc="repair.road_test_result or ''"/></textarea>
+                        <div class="d-flex gap-2">
+                            <button name="action" value="start" class="btn btn-primary" type="submit">Iniciar prueba</button>
+                            <button name="action" value="finish" class="btn btn-success" type="submit">Finalizar prueba</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="border rounded p-3 mt-3">
+                    <h2 class="h5">Evidencias externas</h2>
+                    <div class="row g-3" t-if="repair.external_evidence_ids">
+                        <div class="col-6 col-md-3 col-xl-2" t-foreach="repair.external_evidence_ids" t-as="evidence">
+                            <div class="border rounded p-2 h-100 workshop-evidence-card">
+                                <a t-if="evidence.is_image" t-att-href="evidence.preview_url" target="_blank" class="d-block workshop-evidence-image mb-2">
+                                    <img t-att-src="evidence.preview_url" class="img-fluid" alt="Evidencia" loading="lazy"/>
+                                </a>
+                                <strong class="d-block text-truncate" t-att-title="evidence.name" t-esc="evidence.name"/>
+                                <div class="small text-muted">
+                                    <span t-esc="dict(evidence._fields['evidence_type'].selection).get(evidence.evidence_type)"/>
+                                    <span> · </span>
+                                    <span t-esc="dict(evidence._fields['evidence_category'].selection).get(evidence.evidence_category)"/>
+                                </div>
+                                <p t-if="evidence.description" class="small mt-2 mb-0" t-esc="evidence.description"/>
+                                <div class="small text-muted mt-1" t-field="evidence.uploaded_at"/>
+                            </div>
+                        </div>
+                    </div>
+                    <p t-if="not repair.external_evidence_ids" class="text-muted mb-0">Sin evidencias externas.</p>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

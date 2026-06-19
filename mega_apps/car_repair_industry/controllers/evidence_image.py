@@ -31,13 +31,11 @@ class FleetRepairEvidenceImageController(http.Controller):
 
     @http.route('/car_repair/evidence/<int:evidence_id>/image', type='http', auth='user')
     def evidence_image(self, evidence_id, **kwargs):
-        evidence = request.env['fleet.repair.evidence'].browse(evidence_id)
+        evidence = request.env['fleet.repair.evidence'].sudo().browse(evidence_id)
         if not evidence.exists():
             return self._placeholder_response(status=404)
 
-        try:
-            evidence.check_access('read')
-        except (AccessError, MissingError):
+        if not self._can_read_evidence(evidence):
             return self._placeholder_response(status=404)
 
         drive_file_id = evidence.drive_file_id or evidence._extract_drive_file_id()
@@ -74,3 +72,33 @@ class FleetRepairEvidenceImageController(http.Controller):
         except Exception as error:
             _logger.warning("Google Drive evidence preview failed for evidence %s: %s", evidence.id, error)
         return self._placeholder_response()
+
+    def _can_read_evidence(self, evidence):
+        user = request.env.user
+        repair = evidence.repair_id
+        if (
+            user.has_group('base.group_system')
+            or user.has_group('car_repair_industry.group_fleet_repair_service_manager')
+            or user.has_group('car_repair_industry.group_fleet_repair_directeur_commercial')
+        ):
+            return True
+        if (
+            user.has_group('car_repair_industry.group_fleet_repair_portal_advisor')
+            and repair.portal_advisor_id.id == user.id
+        ):
+            return True
+        if (
+            user.has_group('car_repair_industry.group_fleet_repair_portal_technician')
+            and repair.portal_technician_id.id == user.id
+        ):
+            return True
+        if (
+            user.has_group('car_repair_industry.group_fleet_repair_portal_road_test')
+            and repair.road_test_user_id.id == user.id
+        ):
+            return True
+        try:
+            evidence.with_user(user).check_access('read')
+            return True
+        except (AccessError, MissingError):
+            return False

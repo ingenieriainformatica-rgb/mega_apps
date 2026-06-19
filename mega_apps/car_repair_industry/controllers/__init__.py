@@ -3,3 +3,4 @@
 
 from . import main
 from . import evidence_image
+from . import portal_workshop

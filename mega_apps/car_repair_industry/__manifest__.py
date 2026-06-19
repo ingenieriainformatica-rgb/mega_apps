@@ -33,10 +33,12 @@
         'wizard/fleet_repair_assign_to_head_tech_view.xml',
         'wizard/fleet_diagnose_assign_to_technician_view.xml',
         'wizard/fleet_repair_drive_upload_wizard_view.xml',
+        'views/res_users_view.xml',
         'views/fleet_repair_view.xml',
         'views/fleet_repair_service_checklist_view.xml',
         'views/fleet_repair_reception_checklist_views.xml',
         'views/fleet_repair_reception_checklist_data.xml',
+        'views/fleet_repair_service_type_data.xml',
         'views/fleet_repair_sequence.xml',
         'views/fleet_diagnose_view.xml',
         'views/fleet_workorder_sequence.xml',
@@ -48,6 +50,7 @@
         'views/fleet_vehicle_model_view.xml',
         'views/dashboard.xml',
         'views/templates.xml',
+        'views/portal_workshop_templates.xml',
         # 'views/fleet_vehicle_view.xml',
         'report/fleet_repair_label_view.xml',
         'report/fleet_repair_label_menu.xml',
@@ -65,7 +68,9 @@
     'assets': {
         'web.assets_frontend': [
             'car_repair_industry/static/src/css/custom.css',
+            'car_repair_industry/static/src/css/portal_workshop.css',
             'car_repair_industry/static/src/js/slot_time.js',
+            'car_repair_industry/static/src/js/portal_workshop_photos.js',
         ],
         'web.assets_backend': [
             'car_repair_industry/static/src/js/fleet_repair_dashboard.js',

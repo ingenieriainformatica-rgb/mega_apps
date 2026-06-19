@@ -10,4 +10,5 @@ from . import fleet_repair_evidence
 from . import calendar_event
 from . import appointment_slots
 from . import fleet_vehicle_model
+from . import res_users
 # from . import fleet_vehicle

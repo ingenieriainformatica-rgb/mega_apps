@@ -58,66 +58,14 @@ class FleetRepairDriveUploadWizard(models.TransientModel):
 
         validated_files = self._validate_upload_batch()
 
-        try:
-            from googleapiclient.http import MediaIoBaseUpload  # type: ignore
-            from googleapiclient.errors import HttpError  # type: ignore
-        except ImportError as error:
-            raise UserError(_(
-                "Faltan dependencias de Google Drive en Python.\n"
-                "Instale:\n"
-                "pip install google-api-python-client google-auth google-auth-httplib2\n\n"
-                "Detalle: %s"
-            ) % error)
+        for file_data in validated_files:
+            file_data.setdefault('evidence_category', 'otro')
 
-        drive_service = self.repair_id._drive_get_service()
-        folder = self.repair_id._drive_get_or_create_repair_folder(
-            drive_service,
+        evidences = self.repair_id._drive_upload_evidence_images(
+            validated_files,
             evidence_type=self.evidence_type,
+            description=self.description,
         )
-
-        Evidence = self.env['fleet.repair.evidence']
-        uploaded_files = []
-        try:
-            for file_data in validated_files:
-                media = MediaIoBaseUpload(
-                    io.BytesIO(file_data['content']),
-                    mimetype=file_data['mimetype'],
-                    resumable=False,
-                )
-                drive_file = drive_service.files().create(
-                    body={
-                        'name': file_data['filename'],
-                        'parents': [folder['id']],
-                    },
-                    media_body=media,
-                    fields='id, name, mimeType, webViewLink',
-                    supportsAllDrives=True,
-                ).execute()
-                uploaded_files.append(drive_file)
-
-            for drive_file in uploaded_files:
-                Evidence.create({
-                    'repair_id': self.repair_id.id,
-                    'name': drive_file.get('name'),
-                    'evidence_type': self.evidence_type,
-                    'external_url': drive_file.get('webViewLink'),
-                    'drive_file_id': drive_file.get('id'),
-                    'mime_type': drive_file.get('mimeType'),
-                    'description': self.description,
-                })
-        except HttpError as error:
-            self._rollback_uploaded_drive_files(drive_service, uploaded_files)
-            raise UserError(_(
-                "No se pudieron subir las fotos a Google Drive.\n"
-                "Verifique permisos y cuota del Drive destino.\n\n"
-                "Detalle: %s"
-            ) % error)
-        except Exception as error:
-            self._rollback_uploaded_drive_files(drive_service, uploaded_files)
-            raise UserError(_(
-                "No se pudieron subir las fotos a Google Drive.\n\n"
-                "Detalle: %s"
-            ) % error)
 
         self.line_ids.unlink()
 
@@ -126,7 +74,7 @@ class FleetRepairDriveUploadWizard(models.TransientModel):
             'tag': 'display_notification',
             'params': {
                 'title': _("Google Drive"),
-                'message': _("%s foto(s) subida(s) correctamente a Drive.") % len(uploaded_files),
+                'message': _("%s foto(s) subida(s) correctamente a Drive.") % len(evidences),
                 'type': 'success',
                 'sticky': False,
                 'next': {'type': 'ir.actions.act_window_close'},
