@@ -2,6 +2,7 @@
 <odoo>
     <data noupdate="1">
         <record id="service_type_alignment_balancing" model="service.type"><field name="name">Alineación y balanceo</field></record>
+        <record id="service_type_alignment_balancing" model="service.type"><field name="name">MegaCombo 7 servicios</field></record>
         <record id="service_type_oil_filters" model="service.type"><field name="name">Cambio de aceite y filtros</field></record>
         <record id="service_type_brakes" model="service.type"><field name="name">Revisión y reparación de frenos</field></record>
         <record id="service_type_engine_tune_up" model="service.type"><field name="name">Sincronización y afinación de motor</field></record>
@@ -13,9 +14,5 @@
         <record id="service_type_travel_safety" model="service.type"><field name="name">Revisión general para viaje y seguridad</field></record>
         <record id="service_type_battery_alternator" model="service.type"><field name="name">Revisión de batería y alternador</field></record>
         <record id="service_type_mileage_maintenance" model="service.type"><field name="name">Mantenimiento por kilometraje</field></record>
-        <record id="service_type_body_paint" model="service.type"><field name="name">Latonería y pintura</field></record>
-        <record id="service_type_polishing" model="service.type"><field name="name">Pulido y brillo</field></record>
-        <record id="service_type_headlight_restoration" model="service.type"><field name="name">Restauración de farolas</field></record>
-        <record id="service_type_interior_detailing" model="service.type"><field name="name">Detailing interior</field></record>
     </data>
 </odoo>
