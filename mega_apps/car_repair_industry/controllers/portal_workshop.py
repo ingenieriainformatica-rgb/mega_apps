@@ -66,28 +66,51 @@ class CarRepairPortalWorkshop(http.Controller):
             raise AccessError(_("No tiene acceso a esta orden."))
         return repair
 
-    def _dashboard_values(self):
+    FILTER_STATE_MAP = {
+        'to_assign': ('==', 'to_assign'),
+        'assigned': ('==', 'assigned'),
+        'diagnosis': ('==', 'diagnosis'),
+        'road_test': ('in', ('road_test_requested', 'road_test')),
+        'purchase': ('==', 'purchase_requested'),
+    }
+
+    def _dashboard_values(self, active_filter='all'):
         Repair = request.env['fleet.repair'].sudo()
-        repairs = Repair.search(self._portal_domain(), order='id desc', limit=80)
+        base_domain = self._portal_domain()
+        all_repairs = Repair.search(base_domain, order='id desc', limit=500)
+        if active_filter in self.FILTER_STATE_MAP:
+            op, val = self.FILTER_STATE_MAP[active_filter]
+            if op == '==':
+                filtered = all_repairs.filtered(lambda r: r.service_flow_state == val)
+            else:
+                filtered = all_repairs.filtered(lambda r: r.service_flow_state in val)
+        else:
+            filtered = all_repairs
         return {
-            'repairs': repairs,
+            'repairs': filtered,
+            'all_count': len(all_repairs),
             'is_advisor': self._is_advisor(),
             'is_technician': self._is_technician(),
             'is_road_test': self._is_road_test(),
             'is_internal_manager': self._is_internal_manager(),
+            'active_filter': active_filter,
             'stats': {
-                'total': len(repairs),
-                'to_assign': len(repairs.filtered(lambda r: r.service_flow_state == 'to_assign')),
-                'assigned': len(repairs.filtered(lambda r: r.service_flow_state == 'assigned')),
-                'diagnosis': len(repairs.filtered(lambda r: r.service_flow_state == 'diagnosis')),
-                'road_test': len(repairs.filtered(lambda r: r.service_flow_state in ('road_test_requested', 'road_test'))),
-                'purchase': len(repairs.filtered(lambda r: r.service_flow_state == 'purchase_requested')),
+                'total': len(all_repairs),
+                'to_assign': len(all_repairs.filtered(lambda r: r.service_flow_state == 'to_assign')),
+                'assigned': len(all_repairs.filtered(lambda r: r.service_flow_state == 'assigned')),
+                'diagnosis': len(all_repairs.filtered(lambda r: r.service_flow_state == 'diagnosis')),
+                'road_test': len(all_repairs.filtered(lambda r: r.service_flow_state in ('road_test_requested', 'road_test'))),
+                'purchase': len(all_repairs.filtered(lambda r: r.service_flow_state == 'purchase_requested')),
             },
         }
 
     @http.route(['/my/workshop', '/my/workshop/orders'], type='http', auth='user', website=True)
-    def workshop_dashboard(self, **kwargs):
-        return request.render('car_repair_industry.portal_workshop_dashboard', self._dashboard_values())
+    def workshop_dashboard(self, filter=None, **kwargs):
+        active_filter = filter if filter in self.FILTER_STATE_MAP else 'all'
+        return request.render(
+            'car_repair_industry.portal_workshop_dashboard',
+            self._dashboard_values(active_filter),
+        )
 
     @http.route('/my/workshop/order/new', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def workshop_order_new(self, **post):
@@ -96,9 +119,13 @@ class CarRepairPortalWorkshop(http.Controller):
 
         Template = request.env['fleet.repair.reception.checklist.template'].sudo()
         ServiceType = request.env['service.type'].sudo()
+        VehicleModel = request.env['fleet.vehicle.model'].sudo()
+        VehicleBrand = request.env['fleet.vehicle.model.brand'].sudo()
         templates = Template.search([('active', '=', True)], order='name')
         service_types = ServiceType.search([], order='name')
-        renting_partner = request.env['fleet.repair'].sudo()._get_renting_partner()
+        vehicle_models = VehicleModel.search([], order='name')
+        vehicle_brands = VehicleBrand.search([], order='name')
+        renting_partner = request.env['fleet.repair'].sudo()._find_renting_partner()
         selected_template = Template.browse(int(post.get('template_id') or 0)) if post.get('template_id') else templates[:1]
 
         if request.httprequest.method == 'POST':
@@ -110,6 +137,8 @@ class CarRepairPortalWorkshop(http.Controller):
             'templates': templates,
             'selected_template': selected_template,
             'service_types': service_types,
+            'vehicle_models': vehicle_models,
+            'vehicle_brands': vehicle_brands,
             'renting_partner': renting_partner,
         })
 
@@ -185,6 +214,31 @@ class CarRepairPortalWorkshop(http.Controller):
             client_email = partner.email or ''
             contact_name = delivered_by_name
             contact_phone = delivered_by_phone
+        elif customer_type == 'corporate':
+            company_name = (post.get('company_name') or '').strip()
+            company_vat = (post.get('company_vat') or '').strip()
+            if not company_name:
+                raise UserError(_("Para Corporativo debe registrar la razón social de la empresa."))
+            if not delivered_by_name or not delivered_by_phone:
+                raise UserError(_("Para Corporativo debe registrar nombre y celular de quien entrega el vehículo."))
+            partner = Partner.browse()
+            if company_vat:
+                partner = Partner.search([('vat', '=', company_vat)], limit=1)
+            if not partner:
+                partner = Partner.search([('name', '=ilike', company_name), ('is_company', '=', True)], limit=1)
+            if not partner:
+                partner = Partner.create({
+                    'name': company_name,
+                    'is_company': True,
+                    'vat': company_vat,
+                    'phone': delivered_by_phone,
+                    'mobile': delivered_by_phone,
+                    'email': delivered_by_email or client_email,
+                })
+            client_phone = partner.phone or partner.mobile or delivered_by_phone
+            client_email = partner.email or client_email
+            contact_name = delivered_by_name
+            contact_phone = delivered_by_phone
         else:
             if not client_name:
                 raise UserError(_("Debe registrar el nombre del cliente particular."))
@@ -202,6 +256,10 @@ class CarRepairPortalWorkshop(http.Controller):
             contact_phone = delivered_by_phone or client_phone
 
         service_type_id = int(post.get('service_type') or 0)
+        vehicle_brand_id = int(post.get('vehicle_brand_id') or 0)
+        vehicle_model_id = int(post.get('vehicle_model_id') or 0)
+        model_year = (post.get('model_year') or '').strip()
+        engine_displacement = (post.get('engine_displacement') or '').strip()
         values = {
             'name': post.get('reason') or _('Orden de servicio portal'),
             'client_id': partner.id,
@@ -225,6 +283,13 @@ class CarRepairPortalWorkshop(http.Controller):
             'received_documents': post.get('received_documents'),
             'reception_general_observations': post.get('reception_general_observations'),
             'license_plate': (post.get('license_plate') or '').upper(),
+            'model_id': vehicle_model_id or False,
+            'vehicle_brand_id': vehicle_brand_id or False,
+            'model_year': model_year or False,
+            'engine_displacement': engine_displacement or False,
+            'engine_number': (post.get('engine_number') or '').strip() or False,
+            'vin_sn': (post.get('vin_sn') or '').strip().upper() or False,
+            'fuel_type': post.get('fuel_type') or False,
             'service_type': service_type_id or False,
             'description': post.get('description'),
             'service_detail': post.get('reason'),
@@ -235,6 +300,13 @@ class CarRepairPortalWorkshop(http.Controller):
         request.env['fleet.repair.line'].sudo().create({
             'fleet_repair_id': repair.id,
             'license_plate': repair.license_plate,
+            'model_id': vehicle_model_id or False,
+            'vehicle_brand_id': vehicle_brand_id or False,
+            'model_year': model_year or False,
+            'engine_displacement': engine_displacement or False,
+            'engine_number': repair.engine_number or False,
+            'vin_sn': repair.vin_sn or False,
+            'fuel_type': post.get('fuel_type') or False,
             'service_type': service_type_id or False,
             'service_detail': post.get('reason'),
             'list_of_damage': post.get('description'),
@@ -245,6 +317,7 @@ class CarRepairPortalWorkshop(http.Controller):
             for item in template.line_ids.filtered('active'):
                 ChecklistLine.create({
                     'repair_id': repair.id,
+                    'checklist_type': 'asesor',
                     'template_id': template.id,
                     'template_line_id': item.id,
                     'sequence': item.sequence,
@@ -252,6 +325,8 @@ class CarRepairPortalWorkshop(http.Controller):
                     'state': post.get('check_state_%s' % item.id) or 'not_apply',
                     'observation': post.get('check_obs_%s' % item.id),
                 })
+
+        self._ensure_tecnico_checklist_lines(repair)
 
         if validated_files:
             repair._drive_upload_evidence_images(
@@ -274,6 +349,7 @@ class CarRepairPortalWorkshop(http.Controller):
             repair = self._get_repair(repair_id)
         except (AccessError, MissingError):
             return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        self._ensure_tecnico_checklist_lines(repair)
         return request.render('car_repair_industry.portal_workshop_order_detail', {
             'repair': repair,
             'is_advisor': self._is_advisor(),
@@ -281,6 +357,31 @@ class CarRepairPortalWorkshop(http.Controller):
             'is_road_test': self._is_road_test(),
             'is_internal_manager': self._is_internal_manager(),
         })
+
+    def _ensure_tecnico_checklist_lines(self, repair):
+        ChecklistLine = request.env['fleet.repair.reception.checklist.line'].sudo()
+        existing_tecnico = ChecklistLine.search_count([
+            ('repair_id', '=', repair.id),
+            ('checklist_type', '=', 'tecnico'),
+        ])
+        if existing_tecnico:
+            return
+        tecnico_template = request.env['fleet.repair.reception.checklist.template'].sudo().search([
+            ('name', '=ilike', 'Checklist técnico'),
+            ('active', '=', True),
+        ], limit=1)
+        if not tecnico_template:
+            return
+        for item in tecnico_template.line_ids.filtered('active'):
+            ChecklistLine.create({
+                'repair_id': repair.id,
+                'checklist_type': 'tecnico',
+                'template_id': tecnico_template.id,
+                'template_line_id': item.id,
+                'sequence': item.sequence,
+                'name': item.name,
+                'state': 'not_apply',
+            })
 
     @http.route('/my/workshop/order/<int:repair_id>/technician', type='http', auth='user', website=True, methods=['POST'])
     def workshop_technician_update(self, repair_id, **post):
@@ -293,6 +394,44 @@ class CarRepairPortalWorkshop(http.Controller):
             'requested_materials': post.get('requested_materials'),
         }
         repair.sudo().write(values)
+
+        ChecklistLine = request.env['fleet.repair.reception.checklist.line'].sudo()
+        tecnico_lines = ChecklistLine.search([
+            ('repair_id', '=', repair.id),
+            ('checklist_type', '=', 'tecnico'),
+        ])
+        allowed_states = {'good', 'regular', 'bad', 'not_apply'}
+        allowed_repaired = {'yes', 'no', 'pending'}
+        for line in tecnico_lines:
+            state = post.get('tech_state_%s' % line.id)
+            observation = post.get('tech_obs_%s' % line.id)
+            repaired = post.get('tech_repaired_%s' % line.id)
+            measurement_left = post.get('tech_measure_left_%s' % line.id)
+            measurement_right = post.get('tech_measure_right_%s' % line.id)
+            position = post.get('tech_position_%s' % line.id)
+            expiration_date = post.get('tech_expiration_%s' % line.id)
+            write_vals = {}
+            if state in allowed_states:
+                write_vals['state'] = state
+            if observation is not None:
+                write_vals['observation'] = observation
+            if repaired in allowed_repaired:
+                write_vals['repaired'] = repaired
+            if measurement_left is not None:
+                write_vals['measurement_left'] = measurement_left
+            if measurement_right is not None:
+                write_vals['measurement_right'] = measurement_right
+            if position is not None:
+                write_vals['position'] = position
+            if expiration_date:
+                try:
+                    from datetime import datetime
+                    write_vals['expiration_date'] = datetime.strptime(expiration_date, '%Y-%m-%d').date()
+                except (ValueError, TypeError):
+                    pass
+            if write_vals:
+                line.write(write_vals)
+
         if action == 'start':
             repair.sudo().action_flow_start_technician()
         elif action == 'request_road_test':
@@ -313,4 +452,41 @@ class CarRepairPortalWorkshop(http.Controller):
             repair.sudo().action_flow_start_road_test()
         else:
             repair.sudo().action_flow_finish_road_test()
+        return request.redirect('/my/workshop/order/%s' % repair.id)
+
+    @http.route('/my/workshop/order/<int:repair_id>/technician/photos', type='http', auth='user', website=True, methods=['POST'])
+    def workshop_technician_photos(self, repair_id, **post):
+        repair = self._get_repair(repair_id)
+        if not (self._is_technician() or self._is_internal_manager()):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+
+        Repair = request.env['fleet.repair'].sudo()
+        validated_files = []
+        uploads = request.httprequest.files.getlist('technician_photos')
+        categories = request.httprequest.form.getlist('tech_photo_category')
+        evidence_categories = {'externa', 'interna', 'dano_existente', 'pertenencias', 'documentos', 'otro'}
+        for index, upload in enumerate(uploads):
+            if not upload or not upload.filename:
+                continue
+            file_data = Repair._drive_prepare_image_file(
+                upload.filename,
+                upload.read(),
+                mimetype=upload.mimetype,
+            )
+            category = categories[index] if index < len(categories) else 'otro'
+            file_data['evidence_category'] = category if category in evidence_categories else 'otro'
+            validated_files.append(file_data)
+
+        if validated_files:
+            evidence_type = post.get('evidence_type') or 'diagnostico'
+            if evidence_type not in {'diagnostico', 'reparacion', 'entrega', 'otro'}:
+                evidence_type = 'diagnostico'
+            description = post.get('photo_description') or repair.service_detail or ''
+            repair._drive_upload_evidence_images(
+                self._rename_reception_photo_files(repair, validated_files),
+                evidence_type=evidence_type,
+                description=description,
+            )
+            repair.message_post(body=_("Subida de %s foto(s) de tipo '%s' desde portal por %s.") % (
+                len(validated_files), evidence_type, request.env.user.display_name))
         return request.redirect('/my/workshop/order/%s' % repair.id)

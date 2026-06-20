@@ -43,8 +43,22 @@ class FleetRepairReceptionChecklistTemplate(models.Model):
 class FleetRepairReceptionChecklistTemplateLine(models.Model):
     _name = 'fleet.repair.reception.checklist.template.line'
     _description = "Reception Checklist Template Item"
-    _order = 'sequence, id'
+    _order = 'section, sequence, id'
 
+    section = fields.Selection(
+        [
+            ('general_1', 'Inspección general (columna 1)'),
+            ('general_2', 'Inspección general (columna 2)'),
+            ('brakes', 'Inspección de sistema de frenos'),
+            ('tires', 'Inspección de llantas'),
+            ('documents', 'Estado de documentos'),
+        ],
+        string="Sección",
+        default='general_1',
+        required=True,
+        index=True,
+        help="Define la sección del layout tipo Excel donde se muestra el ítem.",
+    )
     sequence = fields.Integer(default=10)
     template_id = fields.Many2one(
         'fleet.repair.reception.checklist.template',
@@ -54,13 +68,31 @@ class FleetRepairReceptionChecklistTemplateLine(models.Model):
     )
     name = fields.Char(string="Item", required=True, translate=True)
     active = fields.Boolean(default=True)
+    display_options = fields.Char(
+        string="Opciones (texto)",
+        help="Lista separada por comas con las opciones a mostrar en el portal. "
+             "Por ejemplo 'Sí,No' o 'Sí,No,Foto'. Si se deja vacío se usan las "
+             "opciones por defecto (Bueno / Regular / Malo / No aplica).",
+    )
 
 
 class FleetRepairReceptionChecklistLine(models.Model):
     _name = 'fleet.repair.reception.checklist.line'
     _description = "Reception Checklist Line"
-    _order = 'sequence, id'
+    _order = 'checklist_type, sequence, id'
 
+    checklist_type = fields.Selection(
+        [
+            ('asesor', 'Asesor'),
+            ('tecnico', 'Técnico'),
+        ],
+        string="Tipo de checklist",
+        default='asesor',
+        required=True,
+        index=True,
+        help="Indica si esta línea pertenece al checklist rápido del asesor "
+             "(Llave/Matrícula) o al checklist detallado que llena el técnico.",
+    )
     sequence = fields.Integer(default=10)
     repair_id = fields.Many2one(
         'fleet.repair',
@@ -91,6 +123,22 @@ class FleetRepairReceptionChecklistLine(models.Model):
         default='not_apply',
     )
     observation = fields.Text(string="Observación")
+    measurement_left = fields.Char(
+        string="Medida IZQ / Profundidad",
+        help="Para frenos: profundidad lado izquierdo. Para llantas: profundidad de la banda de rodamiento.",
+    )
+    measurement_right = fields.Char(
+        string="Medida DER",
+        help="Para frenos: profundidad lado derecho.",
+    )
+    position = fields.Char(
+        string="Posición",
+        help="Para llantas: posición (DD, DI, TD, TI).",
+    )
+    expiration_date = fields.Date(
+        string="Fecha de vencimiento",
+        help="Para documentos: fecha de vencimiento (RTM, SOAT).",
+    )
     repaired = fields.Selection(
         [
             ('yes', 'Sí'),

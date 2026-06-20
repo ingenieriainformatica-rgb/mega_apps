@@ -11,6 +11,11 @@
                                 invisible="state != 'draft'" type="object" class="oe_highlight" style="float:left;"
                                 groups="car_repair_industry.group_fleet_repair_service_manager,car_repair_industry.group_fleet_repair_directeur_commercial"/>
 
+                        <button name="action_flow_assign_technician" string="Asignar técnico"
+                                type="object" class="oe_highlight" style="float:left;"
+                                invisible="service_flow_state != 'to_assign' or not (portal_technician_id or user_id)"
+                                groups="car_repair_industry.group_fleet_repair_service_manager,car_repair_industry.group_fleet_repair_head_technician,car_repair_industry.group_fleet_repair_directeur_commercial"/>
+
                         <button name="action_print_receipt" string="Print Receipt" invisible="state != 'draft'"
                                 type="object" style="float:left;"/>
                         <button name="action_print_label" string="Print Label" invisible="state != 'draft'"
@@ -110,7 +115,7 @@
                                 </group>
                                 <group string="Recepción">
                                     <group>
-                                        <field name="customer_type"/>
+                                        <field name="customer_type" widget="selection"/>
                                         <field name="renting_reference"/>
                                         <field name="renting_appointment_validated"/>
                                         <field name="reception_mileage"/>
@@ -255,6 +260,27 @@
                                         <field name="repaired"/>
                                         <field name="template_id" column_invisible="1" force_save="1"/>
                                         <field name="template_line_id" column_invisible="1" force_save="1"/>
+                                        <field name="checklist_type" column_invisible="1" force_save="1"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page name="technical_checklist" string="Checklist técnico">
+                                <group>
+                                    <field name="technical_checklist_template_id"
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                </group>
+                                <field name="technical_checklist_line_ids">
+                                    <list editable="bottom"
+                                          decoration-danger="state == 'bad'"
+                                          decoration-warning="state == 'regular'">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="name" readonly="1" force_save="1"/>
+                                        <field name="state"/>
+                                        <field name="observation"/>
+                                        <field name="repaired"/>
+                                        <field name="template_id" column_invisible="1" force_save="1"/>
+                                        <field name="template_line_id" column_invisible="1" force_save="1"/>
+                                        <field name="checklist_type" column_invisible="1" force_save="1"/>
                                     </list>
                                 </field>
                             </page>

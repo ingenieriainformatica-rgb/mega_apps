@@ -13,74 +13,162 @@
     <template id="portal_workshop_dashboard" name="Portal taller">
         <t t-call="website.layout">
             <div class="container my-4">
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                    <div>
-                        <h1 class="h3 mb-1">Taller de autos</h1>
-                        <p class="text-muted mb-0">Panel operativo</p>
-                    </div>
-                    <a t-if="is_advisor or is_internal_manager" href="/my/workshop/order/new" class="btn btn-primary">
-                        Nueva orden de servicio
-                    </a>
-                </div>
-
-                <div class="row g-3 mb-4">
-                    <div class="col-6 col-md-2">
-                        <div class="border rounded p-3 h-100">
-                            <div class="text-muted small">Total</div>
-                            <strong t-esc="stats['total']"/>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <div class="border rounded p-3 h-100">
-                            <div class="text-muted small">Por asignar</div>
-                            <strong t-esc="stats['to_assign']"/>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <div class="border rounded p-3 h-100">
-                            <div class="text-muted small">Asignadas</div>
-                            <strong t-esc="stats['assigned']"/>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <div class="border rounded p-3 h-100">
-                            <div class="text-muted small">Diagnóstico</div>
-                            <strong t-esc="stats['diagnosis']"/>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <div class="border rounded p-3 h-100">
-                            <div class="text-muted small">Ruta</div>
-                            <strong t-esc="stats['road_test']"/>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <div class="border rounded p-3 h-100">
-                            <div class="text-muted small">Compras</div>
-                            <strong t-esc="stats['purchase']"/>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="list-group">
-                    <a t-foreach="repairs" t-as="repair" t-att-href="'/my/workshop/order/%s' % repair.id"
-                       class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between gap-3">
-                            <div>
-                                <strong t-esc="repair.sequence or repair.display_name"/>
-                                <span class="text-muted"> - </span>
-                                <span t-esc="repair.name"/>
-                                <div class="small text-muted">
-                                    <span t-esc="repair.license_plate or 'Sin placa'"/>
-                                    <span> · </span>
-                                    <span t-esc="repair.client_id.display_name"/>
-                                </div>
+                <div class="workshop-dashboard-header mb-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="workshop-dashboard-icon">
+                                <i class="fa fa-wrench"></i>
                             </div>
-                            <span class="badge text-bg-light align-self-start" t-esc="repair.get_service_flow_state_label()"/>
+                            <div>
+                                <h1 class="h2 mb-1">Taller de autos</h1>
+                                <p class="text-muted mb-0">Panel operativo · Órdenes de servicio</p>
+                            </div>
                         </div>
+                        <a t-if="is_advisor or is_internal_manager" href="/my/workshop/order/new" class="btn btn-primary btn-lg">
+                            <i class="fa fa-plus-circle"></i> Nueva orden de servicio
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-4">
+                    <div class="col-6 col-md-4 col-xl-2">
+                        <a t-att-href="'/my/workshop'" t-att-class="'workshop-stat-card workshop-stat-total h-100' + (' is-active' if active_filter == 'all' else '')">
+                            <div class="workshop-stat-icon"><i class="fa fa-list-alt"></i></div>
+                            <div>
+                                <div class="workshop-stat-label">Total</div>
+                                <div class="workshop-stat-value" t-esc="stats['total']"/>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-2">
+                        <a t-att-href="'/my/workshop?filter=to_assign'" t-att-class="'workshop-stat-card workshop-stat-to-assign h-100' + (' is-active' if active_filter == 'to_assign' else '')">
+                            <div class="workshop-stat-icon"><i class="fa fa-hourglass-half"></i></div>
+                            <div>
+                                <div class="workshop-stat-label">Por asignar</div>
+                                <div class="workshop-stat-value" t-esc="stats['to_assign']"/>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-2">
+                        <a t-att-href="'/my/workshop?filter=assigned'" t-att-class="'workshop-stat-card workshop-stat-assigned h-100' + (' is-active' if active_filter == 'assigned' else '')">
+                            <div class="workshop-stat-icon"><i class="fa fa-user-check"></i></div>
+                            <div>
+                                <div class="workshop-stat-label">Asignadas</div>
+                                <div class="workshop-stat-value" t-esc="stats['assigned']"/>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-2">
+                        <a t-att-href="'/my/workshop?filter=diagnosis'" t-att-class="'workshop-stat-card workshop-stat-diagnosis h-100' + (' is-active' if active_filter == 'diagnosis' else '')">
+                            <div class="workshop-stat-icon"><i class="fa fa-stethoscope"></i></div>
+                            <div>
+                                <div class="workshop-stat-label">Diagnóstico</div>
+                                <div class="workshop-stat-value" t-esc="stats['diagnosis']"/>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-2">
+                        <a t-att-href="'/my/workshop?filter=road_test'" t-att-class="'workshop-stat-card workshop-stat-road h-100' + (' is-active' if active_filter == 'road_test' else '')">
+                            <div class="workshop-stat-icon"><i class="fa fa-road"></i></div>
+                            <div>
+                                <div class="workshop-stat-label">Ruta</div>
+                                <div class="workshop-stat-value" t-esc="stats['road_test']"/>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-2">
+                        <a t-att-href="'/my/workshop?filter=purchase'" t-att-class="'workshop-stat-card workshop-stat-purchase h-100' + (' is-active' if active_filter == 'purchase' else '')">
+                            <div class="workshop-stat-icon"><i class="fa fa-shopping-cart"></i></div>
+                            <div>
+                                <div class="workshop-stat-label">Compras</div>
+                                <div class="workshop-stat-value" t-esc="stats['purchase']"/>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="workshop-filter-bar mb-3">
+                    <a t-att-href="'/my/workshop'"
+                       t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'all' else '')">
+                        Todas <span class="badge text-bg-light" t-esc="all_count"/>
                     </a>
-                    <div t-if="not repairs" class="text-muted border rounded p-4">
-                        No hay órdenes para mostrar.
+                    <a t-att-href="'/my/workshop?filter=to_assign'"
+                       t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'to_assign' else '')">
+                        <i class="fa fa-hourglass-half"></i> Por asignar
+                    </a>
+                    <a t-att-href="'/my/workshop?filter=assigned'"
+                       t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'assigned' else '')">
+                        <i class="fa fa-user-check"></i> Asignadas
+                    </a>
+                    <a t-att-href="'/my/workshop?filter=diagnosis'"
+                       t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'diagnosis' else '')">
+                        <i class="fa fa-stethoscope"></i> Diagnóstico
+                    </a>
+                    <a t-att-href="'/my/workshop?filter=road_test'"
+                       t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'road_test' else '')">
+                        <i class="fa fa-road"></i> Ruta
+                    </a>
+                    <a t-att-href="'/my/workshop?filter=purchase'"
+                       t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'purchase' else '')">
+                        <i class="fa fa-shopping-cart"></i> Compras
+                    </a>
+                </div>
+
+                <div class="workshop-list-card">
+                    <div class="workshop-list-card-header d-flex flex-wrap align-items-center gap-2">
+                        <div class="workshop-list-title">
+                            <i class="fa fa-list"></i>
+                            <t t-if="active_filter == 'all'">Todas las órdenes</t>
+                            <t t-else="">Órdenes filtradas</t>
+                            <span class="badge text-bg-light ms-1" t-esc="len(repairs)"/>
+                        </div>
+                        <div class="workshop-list-meta text-muted small ms-auto" t-if="repairs">
+                            Mostrando <strong t-esc="len(repairs)"/> de <strong t-esc="all_count"/>
+                        </div>
+                    </div>
+
+                    <div t-if="not repairs" class="workshop-list-empty">
+                        <i class="fa fa-inbox"></i>
+                        <h3 class="h6 mt-2 mb-1">Sin órdenes en esta vista</h3>
+                        <p class="text-muted small mb-0">Cambia el filtro o crea una nueva orden para empezar.</p>
+                    </div>
+
+                    <div t-else="" class="table-responsive">
+                        <table class="workshop-list-table table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="workshop-list-th-seq">#</th>
+                                    <th>Placa</th>
+                                    <th>Cliente</th>
+                                    <th class="workshop-list-th-svc">Servicio</th>
+                                    <th class="workshop-list-th-tech">Técnico</th>
+                                    <th>Estado</th>
+                                    <th class="workshop-list-th-date">Recibido</th>
+                                    <th class="workshop-list-th-action"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="repairs" t-as="repair" class="workshop-list-row js-workshop-order-row"
+                                    t-att-data-href="'/my/workshop/order/%s' % repair.id">
+                                    <td class="workshop-list-seq" t-esc="repair.sequence or repair.display_name"/>
+                                    <td>
+                                        <span class="workshop-list-plate" t-esc="repair.license_plate or '—'"/>
+                                    </td>
+                                    <td>
+                                        <span class="workshop-list-primary" t-esc="repair.client_id.display_name or '—'"/>
+                                    </td>
+                                    <td class="text-muted small" t-esc="repair.service_type.name or '—'"/>
+                                    <td class="text-muted small" t-esc="(repair.portal_technician_id.display_name or repair.user_id.display_name or '—')"/>
+                                    <td>
+                                        <span class="workshop-list-state" t-esc="repair.get_service_flow_state_label()"/>
+                                    </td>
+                                    <td class="workshop-list-date text-muted small" t-esc="repair.receipt_date and repair.receipt_date.strftime('%d/%m/%Y') or '—'"/>
+                                    <td class="workshop-list-action text-end">
+                                        <i class="fa fa-chevron-right text-muted"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -90,48 +178,94 @@
     <template id="portal_workshop_order_form" name="Portal taller nueva orden">
         <t t-call="website.layout">
             <div class="container my-4">
-                <div class="mb-3">
-                    <a href="/my/workshop" class="btn btn-link px-0">Volver al panel</a>
-                    <h1 class="h3">Nueva orden de servicio</h1>
-                </div>
-                <form method="post" enctype="multipart/form-data" class="row g-3 js-workshop-reception-form">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                    <div class="col-12">
-                        <label class="form-label d-block">Tipo de cliente</label>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_renting" value="renting"/>
-                            <label class="form-check-label" for="customer_type_renting">Renting</label>
+                <div class="workshop-form-header mb-4">
+                    <a href="/my/workshop" class="workshop-back-link">
+                        <i class="fa fa-arrow-left"></i> Volver al panel
+                    </a>
+                    <div class="d-flex align-items-center gap-3 mt-2">
+                        <div class="workshop-form-icon">
+                            <i class="fa fa-file-alt"></i>
                         </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_particular" value="particular" checked="checked"/>
-                            <label class="form-check-label" for="customer_type_particular">Particular</label>
+                        <div>
+                            <h1 class="h2 mb-1">Nueva orden de servicio</h1>
+                            <p class="text-muted mb-0">Recepción del vehículo en taller</p>
                         </div>
                     </div>
-                    <div class="col-12 js-workshop-particular-fields">
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="js-workshop-reception-form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                    <div class="workshop-form-section">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">1</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Tipo de cliente</h2>
+                                <p class="workshop-form-section-subtitle">Selecciona el origen del cliente que entrega el vehículo</p>
+                            </div>
+                        </div>
+                        <div class="workshop-customer-type-grid">
+                            <label class="workshop-customer-type-card" for="customer_type_renting">
+                                <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_renting" value="renting"/>
+                                <div class="workshop-customer-type-icon workshop-customer-type-renting"><i class="fa fa-building"></i></div>
+                                <div class="workshop-customer-type-name">Renting</div>
+                                <div class="workshop-customer-type-desc">Flotas de empresas de alquiler</div>
+                            </label>
+                            <label class="workshop-customer-type-card" for="customer_type_particular">
+                                <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_particular" value="particular" checked="checked"/>
+                                <div class="workshop-customer-type-icon workshop-customer-type-particular"><i class="fa fa-user"></i></div>
+                                <div class="workshop-customer-type-name">Particular</div>
+                                <div class="workshop-customer-type-desc">Persona natural</div>
+                            </label>
+                            <label class="workshop-customer-type-card" for="customer_type_corporate">
+                                <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_corporate" value="corporate"/>
+                                <div class="workshop-customer-type-icon workshop-customer-type-corporate"><i class="fa fa-briefcase"></i></div>
+                                <div class="workshop-customer-type-name">Corporativo</div>
+                                <div class="workshop-customer-type-desc">Empresa con flota propia</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="workshop-form-section js-workshop-particular-fields">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">2</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Datos del cliente particular</h2>
+                                <p class="workshop-form-section-subtitle">Información de contacto del cliente</p>
+                            </div>
+                        </div>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Cliente particular</label>
-                                <input name="client_name" class="form-control js-workshop-particular-required" required="required"/>
+                                <label class="form-label">Nombre del cliente <span class="text-danger">*</span></label>
+                                <input name="client_name" class="form-control js-workshop-particular-required" required="required" placeholder="Nombre completo"/>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label">Celular cliente</label>
-                                <input name="client_phone" type="tel" class="form-control"/>
+                                <label class="form-label">Celular</label>
+                                <input name="client_phone" type="tel" class="form-control" placeholder="300 123 4567"/>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label">Correo cliente</label>
-                                <input name="client_email" type="email" class="form-control"/>
+                                <label class="form-label">Correo</label>
+                                <input name="client_email" type="email" class="form-control" placeholder="correo@ejemplo.com"/>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 d-none js-workshop-renting-fields">
-                        <div class="workshop-renting-company">
+
+                    <div class="workshop-form-section d-none js-workshop-renting-fields">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">2</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Cliente Renting</h2>
+                                <p class="workshop-form-section-subtitle">Datos del cliente corporativo y referencia de la cita</p>
+                            </div>
+                        </div>
+                        <div class="workshop-renting-company mb-3">
                             <div class="d-flex align-items-start gap-3">
                                 <div class="workshop-renting-company-icon" aria-hidden="true">
                                     <i class="fa fa-building"></i>
                                 </div>
                                 <div class="flex-grow-1">
                                     <div class="small text-muted">Cliente corporativo</div>
-                                    <h2 class="h5 mb-2" t-esc="renting_partner.name"/>
+                                    <h3 class="h5 mb-2" t-esc="renting_partner.name"/>
                                     <div class="row g-2 small">
                                         <div class="col-md-4"><strong>NIT:</strong> <span t-esc="renting_partner.vat or 'Sin registrar'"/></div>
                                         <div class="col-md-4"><strong>Teléfono:</strong> <span t-esc="renting_partner.phone or renting_partner.mobile or 'Sin registrar'"/></div>
@@ -140,115 +274,238 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row g-3 mt-1">
+                        <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">CI / referencia Renting</label>
-                                <input name="renting_reference" class="form-control js-workshop-renting-input" disabled="disabled"/>
+                                <input name="renting_reference" class="form-control js-workshop-renting-input" disabled="disabled" placeholder="Ej. CI-12345"/>
                             </div>
                             <div class="col-md-6 d-flex align-items-end">
-                                <div class="form-check mb-2">
+                                <div class="form-check">
                                     <input class="form-check-input js-workshop-renting-input" type="checkbox" name="renting_appointment_validated" id="renting_appointment_validated" value="1" disabled="disabled"/>
                                     <label class="form-check-label" for="renting_appointment_validated">Cita Renting validada</label>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Placa</label>
-                        <input name="license_plate" class="form-control text-uppercase" required="required"/>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Kilometraje</label>
-                        <input name="reception_mileage" type="number" min="0" step="1" class="form-control"/>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Nivel de combustible</label>
-                        <select name="reception_fuel_level" class="form-select">
-                            <option value="">Seleccione...</option>
-                            <option value="empty">Vacío</option>
-                            <option value="reserve">Reserva</option>
-                            <option value="quarter">1/4</option>
-                            <option value="half">1/2</option>
-                            <option value="three_quarters">3/4</option>
-                            <option value="full">Lleno</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Tipo de servicio</label>
-                        <select name="service_type" class="form-select">
-                            <option value="">Seleccione...</option>
-                            <option t-foreach="service_types" t-as="service" t-att-value="service.id" t-esc="service.name"/>
-                        </select>
-                    </div>
-                    <div class="col-md-5">
-                        <label class="form-label">Plantilla checklist</label>
-                        <select name="template_id" class="form-select">
-                            <option t-foreach="templates" t-as="template" t-att-value="template.id"
-                                    t-att-selected="'selected' if selected_template and template.id == selected_template.id else None"
-                                    t-esc="template.name"/>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Motivo de ingreso</label>
-                        <input name="reason" class="form-control" required="required"/>
-                    </div>
-                    <div class="col-12">
-                        <h2 class="h5 mt-3">Persona que entrega el vehículo</h2>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Nombre</label>
-                        <input name="delivered_by_name" class="form-control"/>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Celular</label>
-                        <input name="delivered_by_phone" class="form-control"/>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Documento</label>
-                        <input name="delivered_by_document" class="form-control"/>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Correo</label>
-                        <input name="delivered_by_email" type="email" class="form-control"/>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Observaciones de quien entrega</label>
-                        <textarea name="delivered_by_observation" class="form-control" rows="2"></textarea>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">¿Tiene objetos de valor?</label>
-                        <select name="valuables_inside" class="form-select">
-                            <option value="">Seleccione...</option>
-                            <option value="no">No</option>
-                            <option value="yes">Sí</option>
-                        </select>
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label">Pertenencias / objetos de valor</label>
-                        <input name="valuables_description" class="form-control"/>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Documentos recibidos</label>
-                        <textarea name="received_documents" class="form-control" rows="2"></textarea>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Observaciones iniciales</label>
-                        <textarea name="description" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Observaciones generales de recepción</label>
-                        <textarea name="reception_general_observations" class="form-control" rows="3"></textarea>
+
+                    <div class="workshop-form-section d-none js-workshop-corporate-fields">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">2</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Datos del cliente corporativo</h2>
+                                <p class="workshop-form-section-subtitle">Información de la empresa</p>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Razón social <span class="text-danger">*</span></label>
+                                <input name="company_name" class="form-control js-workshop-corporate-input js-workshop-corporate-required" placeholder="Nombre de la empresa" disabled="disabled"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">NIT</label>
+                                <input name="company_vat" class="form-control js-workshop-corporate-input" placeholder="NIT de la empresa" disabled="disabled"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Correo corporativo</label>
+                                <input name="company_email" type="email" class="form-control js-workshop-corporate-input" disabled="disabled"/>
+                            </div>
+                        </div>
+                        <div class="alert alert-info mt-3 mb-0">
+                            <i class="fa fa-info-circle"></i>
+                            El cliente corporativo se registra como compañía (<em>Es compañía</em> = True). Si el NIT ya existe en el sistema, se reutilizará el contacto.
+                        </div>
                     </div>
 
-                    <div class="col-12">
-                        <section class="workshop-photo-uploader">
-                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                                <div>
-                                    <h2 class="h5 mb-1">Evidencias de recepción</h2>
-                                    <p class="text-muted small mb-0">Las imágenes se almacenan en Google Drive.</p>
-                                </div>
-                                <span class="badge text-bg-light js-workshop-photo-count">0 fotos</span>
+                    <div class="workshop-form-section">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">3</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Datos del vehículo</h2>
+                                <p class="workshop-form-section-subtitle">Identificación y características</p>
                             </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Placa <span class="text-danger">*</span></label>
+                                <input name="license_plate" class="form-control text-uppercase workshop-input-uppercase" required="required" placeholder="ABC123"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Marca</label>
+                                <select name="vehicle_brand_id" class="form-select js-workshop-vehicle-brand">
+                                    <option value="">Seleccione...</option>
+                                    <option t-foreach="vehicle_brands" t-as="brand"
+                                            t-att-value="brand.id"
+                                            t-esc="brand.name"/>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Línea</label>
+                                <select name="vehicle_model_id" class="form-select js-workshop-vehicle-model">
+                                    <option value="">Seleccione marca primero...</option>
+                                    <option t-foreach="vehicle_models" t-as="vmodel"
+                                            t-att-value="vmodel.id"
+                                            t-att-data-brand-id="vmodel.brand_id.id or 0"
+                                            t-esc="vmodel.name"/>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Modelo (año)</label>
+                                <input name="model_year" type="number" min="1900" max="2100" step="1"
+                                       class="form-control js-workshop-vehicle-year" placeholder="2017"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Cilindraje (cc)</label>
+                                <input name="engine_displacement" type="number" min="0" step="1"
+                                       class="form-control" placeholder="1998"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Nº de motor</label>
+                                <input name="engine_number" class="form-control text-uppercase workshop-input-uppercase" maxlength="64"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Nº de chasis (VIN)</label>
+                                <input name="vin_sn" class="form-control text-uppercase workshop-input-uppercase" maxlength="32"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Tipo de combustible</label>
+                                <select name="fuel_type" class="form-select">
+                                    <option value="">Seleccione...</option>
+                                    <option value="gasoline">Gasolina</option>
+                                    <option value="diesel">Diésel</option>
+                                    <option value="full_hybrid">Híbrido</option>
+                                    <option value="plug_in_hybrid_gasoline">Híbrido enchufable (gasolina)</option>
+                                    <option value="plug_in_hybrid_diesel">Híbrido enchufable (diésel)</option>
+                                    <option value="cng">GNC</option>
+                                    <option value="lpg">GLP</option>
+                                    <option value="hydrogen">Hidrógeno</option>
+                                    <option value="electric">Eléctrico</option>
+                                    <option value="hybrid">Híbrido (otro)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Kilometraje</label>
+                                <input name="reception_mileage" type="number" min="0" step="1" class="form-control" placeholder="85000"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Nivel de combustible</label>
+                                <select name="reception_fuel_level" class="form-select">
+                                    <option value="">Seleccione...</option>
+                                    <option value="empty">Vacío</option>
+                                    <option value="reserve">Reserva</option>
+                                    <option value="quarter">1/4</option>
+                                    <option value="half">1/2</option>
+                                    <option value="three_quarters">3/4</option>
+                                    <option value="full">Lleno</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workshop-form-section">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">4</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Servicio solicitado</h2>
+                                <p class="workshop-form-section-subtitle">Tipo de trabajo y motivo de ingreso</p>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Tipo de servicio</label>
+                                <select name="service_type" class="form-select">
+                                    <option value="">Seleccione...</option>
+                                    <option t-foreach="service_types" t-as="service" t-att-value="service.id" t-esc="service.name"/>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Plantilla checklist</label>
+                                <select name="template_id" class="form-select">
+                                    <option t-foreach="templates" t-as="template" t-att-value="template.id"
+                                            t-att-selected="'selected' if selected_template and template.id == selected_template.id else None"
+                                            t-esc="template.name"/>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Motivo de ingreso <span class="text-danger">*</span></label>
+                                <input name="reason" class="form-control" required="required" placeholder="Ej. Mantenimiento preventivo"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workshop-form-section">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">5</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Persona que entrega el vehículo</h2>
+                                <p class="workshop-form-section-subtitle">Datos de quien hace la entrega física</p>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Nombre</label>
+                                <input name="delivered_by_name" class="form-control" placeholder="Nombre completo"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Celular</label>
+                                <input name="delivered_by_phone" class="form-control" placeholder="300 123 4567"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Documento</label>
+                                <input name="delivered_by_document" class="form-control" placeholder="CC / NIT"/>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Correo</label>
+                                <input name="delivered_by_email" type="email" class="form-control" placeholder="correo@ejemplo.com"/>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Observaciones de quien entrega</label>
+                                <textarea name="delivered_by_observation" class="form-control" rows="2" placeholder="Información adicional relevante..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workshop-form-section">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">6</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Pertenencias y documentos</h2>
+                                <p class="workshop-form-section-subtitle">Objetos de valor y documentos recibidos</p>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">¿Tiene objetos de valor?</label>
+                                <select name="valuables_inside" class="form-select">
+                                    <option value="">Seleccione...</option>
+                                    <option value="no">No</option>
+                                    <option value="yes">Sí</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Pertenencias / objetos de valor</label>
+                                <input name="valuables_description" class="form-control" placeholder="Ej. Celular, billetera, documentos..."/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Documentos recibidos</label>
+                                <textarea name="received_documents" class="form-control" rows="2" placeholder="Tarjeta de propiedad, SOAT, etc."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Observaciones generales de recepción</label>
+                                <textarea name="reception_general_observations" class="form-control" rows="2" placeholder="Novedad al recibir el vehículo..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workshop-form-section">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">7</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Evidencias fotográficas</h2>
+                                <p class="workshop-form-section-subtitle">Las imágenes se almacenan en Google Drive</p>
+                            </div>
+                            <span class="badge text-bg-light js-workshop-photo-count ms-auto align-self-center">0 fotos</span>
+                        </div>
+                        <section class="workshop-photo-uploader">
                             <label class="workshop-photo-dropzone" for="reception_photos">
                                 <i class="fa fa-camera" aria-hidden="true"></i>
                                 <span class="fw-semibold">Seleccionar fotos</span>
@@ -266,13 +523,19 @@
                         </section>
                     </div>
 
-                    <div class="col-12" t-if="selected_template">
-                        <h2 class="h5 mt-3">Checklist de diagnóstico/recepción</h2>
+                    <div t-if="selected_template" class="workshop-form-section">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">8</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Checklist de diagnóstico / recepción</h2>
+                                <p class="workshop-form-section-subtitle">Plantilla: <strong t-esc="selected_template.name"/></p>
+                            </div>
+                        </div>
                         <div class="table-responsive">
-                            <table class="table align-middle">
+                            <table class="workshop-checklist-create-table table align-middle mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Ítem</th>
+                                        <th style="width: 50%;">Ítem</th>
                                         <th style="width: 180px;">Estado</th>
                                         <th>Observación</th>
                                     </tr>
@@ -282,10 +545,20 @@
                                         <td t-esc="item.name"/>
                                         <td>
                                             <select t-att-name="'check_state_%s' % item.id" class="form-select">
-                                                <option value="good">Bueno</option>
-                                                <option value="regular">Regular</option>
-                                                <option value="bad">Malo</option>
-                                                <option value="not_apply" selected="selected">No aplica</option>
+                                                <t t-if="item.display_options">
+                                                    <t t-set="state_values" t-value="['good', 'bad', 'regular', 'not_apply']"/>
+                                                    <t t-foreach="item.display_options.split(',')" t-as="opt_label">
+                                                        <option t-att-value="state_values[opt_label_index]"
+                                                                t-att-selected="'selected' if opt_label_index == 0 else None"
+                                                                t-esc="opt_label.strip()"/>
+                                                    </t>
+                                                </t>
+                                                <t t-else="">
+                                                    <option value="good">Bueno</option>
+                                                    <option value="regular">Regular</option>
+                                                    <option value="bad">Malo</option>
+                                                    <option value="not_apply" selected="selected">No aplica</option>
+                                                </t>
                                             </select>
                                         </td>
                                         <td>
@@ -297,9 +570,11 @@
                         </div>
                     </div>
 
-                    <div class="col-12 d-flex gap-2">
-                        <button class="btn btn-primary" type="submit">Crear orden de servicio</button>
-                        <a href="/my/workshop" class="btn btn-secondary">Cancelar</a>
+                    <div class="workshop-form-actionbar">
+                        <a href="/my/workshop" class="btn btn-light">Cancelar</a>
+                        <button class="btn btn-primary btn-lg" type="submit">
+                            <i class="fa fa-check"></i> Crear orden de servicio
+                        </button>
                     </div>
                 </form>
             </div>
@@ -309,42 +584,153 @@
     <template id="portal_workshop_order_detail" name="Portal taller detalle orden">
         <t t-call="website.layout">
             <div class="container my-4">
-                <a href="/my/workshop" class="btn btn-link px-0">Volver al panel</a>
-                <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start mb-3">
-                    <div>
-                        <h1 class="h3 mb-1" t-esc="repair.sequence or repair.display_name"/>
-                        <p class="text-muted mb-0" t-esc="repair.name"/>
+                <div class="workshop-detail-header">
+                    <a href="/my/workshop" class="workshop-back-link">
+                        <i class="fa fa-arrow-left"></i> Volver al panel
+                    </a>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="workshop-detail-icon">
+                                <i class="fa fa-file-invoice"></i>
+                            </div>
+                            <div>
+                                <div class="workshop-detail-seq" t-esc="repair.sequence or repair.display_name"/>
+                                <h1 class="h3 mb-0" t-esc="repair.name"/>
+                            </div>
+                        </div>
+                        <span class="workshop-detail-state" t-esc="repair.get_service_flow_state_label()"/>
                     </div>
-                    <span class="badge text-bg-light" t-esc="repair.get_service_flow_state_label()"/>
+                    <div class="workshop-detail-quickinfo">
+                        <div class="workshop-detail-quickinfo-cell">
+                            <div class="workshop-detail-quickinfo-label"><i class="fa fa-car"></i> Placa</div>
+                            <div class="workshop-detail-quickinfo-value" t-esc="repair.license_plate or '—'"/>
+                        </div>
+                        <div class="workshop-detail-quickinfo-cell">
+                            <div class="workshop-detail-quickinfo-label"><i class="fa fa-user"></i> Cliente</div>
+                            <div class="workshop-detail-quickinfo-value text-truncate" t-esc="repair.client_id.display_name or '—'"/>
+                        </div>
+                        <div class="workshop-detail-quickinfo-cell">
+                            <div class="workshop-detail-quickinfo-label"><i class="fa fa-user-cog"></i> Técnico</div>
+                            <div class="workshop-detail-quickinfo-value text-truncate" t-esc="(repair.portal_technician_id.display_name or repair.user_id.display_name or '—')"/>
+                        </div>
+                        <div class="workshop-detail-quickinfo-cell">
+                            <div class="workshop-detail-quickinfo-label"><i class="fa fa-wrench"></i> Servicio</div>
+                            <div class="workshop-detail-quickinfo-value text-truncate" t-esc="(repair.service_type.name or '—')"/>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="row g-3">
                     <div class="col-lg-5">
-                        <div class="border rounded p-3 h-100">
-                            <h2 class="h5">Datos de la orden</h2>
-                            <dl class="row mb-0">
-                                <dt class="col-5">Cliente</dt><dd class="col-7" t-esc="repair.client_id.display_name"/>
-                                <dt class="col-5">Tipo</dt><dd class="col-7" t-esc="dict(repair._fields['customer_type'].selection).get(repair.customer_type)"/>
-                                <dt class="col-5">Teléfono</dt><dd class="col-7" t-esc="repair.client_phone or repair.phone or ''"/>
-                                <dt class="col-5">Placa</dt><dd class="col-7" t-esc="repair.license_plate or ''"/>
-                                <dt class="col-5">Kilometraje</dt><dd class="col-7" t-esc="repair.reception_mileage or ''"/>
-                                <dt class="col-5">Combustible</dt><dd class="col-7" t-esc="dict(repair._fields['reception_fuel_level'].selection).get(repair.reception_fuel_level) or ''"/>
-                                <dt class="col-5">Entrega</dt><dd class="col-7" t-esc="repair.delivered_by_name or ''"/>
-                                <dt class="col-5">Celular entrega</dt><dd class="col-7" t-esc="repair.delivered_by_phone or ''"/>
-                                <dt class="col-5">Documento</dt><dd class="col-7" t-esc="repair.delivered_by_document or ''"/>
-                                <dt class="col-5">CI Renting</dt><dd class="col-7" t-esc="repair.renting_reference or ''"/>
-                                <dt class="col-5">Servicio</dt><dd class="col-7" t-esc="repair.service_type.name or ''"/>
-                                <dt class="col-5">Técnico</dt><dd class="col-7" t-esc="repair.portal_technician_id.display_name or repair.user_id.display_name or ''"/>
-                                <dt class="col-5">Prueba ruta</dt><dd class="col-7" t-esc="repair.road_test_user_id.display_name or ''"/>
-                            </dl>
+                        <div class="workshop-info-card h-100">
+                            <div class="workshop-info-card-header">
+                                <i class="fa fa-car"></i>
+                                <h2 class="workshop-info-card-title">Datos del vehículo</h2>
+                            </div>
+                            <div class="workshop-info-card-body">
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Placa</span>
+                                    <span class="workshop-info-value" t-esc="repair.license_plate or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Marca</span>
+                                    <span class="workshop-info-value" t-esc="repair.vehicle_brand_id.name or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Línea</span>
+                                    <span class="workshop-info-value" t-esc="repair.model_id.name or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Modelo (año)</span>
+                                    <span class="workshop-info-value" t-esc="repair.model_year or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Cilindraje (cc)</span>
+                                    <span class="workshop-info-value" t-esc="repair.engine_displacement or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Combustible</span>
+                                    <span class="workshop-info-value" t-esc="dict(repair._fields['fuel_type'].selection).get(repair.fuel_type) or repair.fuel_type or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Nº de chasis (VIN)</span>
+                                    <span class="workshop-info-value text-truncate" t-esc="repair.vin_sn or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Nº de motor</span>
+                                    <span class="workshop-info-value text-truncate" t-esc="repair.engine_number or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Kilometraje</span>
+                                    <span class="workshop-info-value" t-esc="repair.reception_mileage or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Nivel combustible</span>
+                                    <span class="workshop-info-value" t-esc="dict(repair._fields['reception_fuel_level'].selection).get(repair.reception_fuel_level) or '—'"/>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-7">
-                        <div class="border rounded p-3 h-100">
-                            <h2 class="h5">Checklist</h2>
-                            <div t-if="repair.reception_checklist_line_ids" class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead><tr><th>Ítem</th><th>Estado</th><th>Observación</th></tr></thead>
+                        <div class="workshop-info-card h-100">
+                            <div class="workshop-info-card-header">
+                                <i class="fa fa-clipboard-list"></i>
+                                <h2 class="workshop-info-card-title">Datos de la orden</h2>
+                            </div>
+                            <div class="workshop-info-card-body">
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Cliente</span>
+                                    <span class="workshop-info-value text-truncate" t-esc="repair.client_id.display_name or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Tipo</span>
+                                    <span class="workshop-info-value" t-esc="dict(repair._fields['customer_type'].selection).get(repair.customer_type)"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Teléfono</span>
+                                    <span class="workshop-info-value" t-esc="repair.client_phone or repair.phone or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Persona que entrega</span>
+                                    <span class="workshop-info-value text-truncate" t-esc="repair.delivered_by_name or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Celular entrega</span>
+                                    <span class="workshop-info-value" t-esc="repair.delivered_by_phone or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Documento</span>
+                                    <span class="workshop-info-value" t-esc="repair.delivered_by_document or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">CI Renting</span>
+                                    <span class="workshop-info-value" t-esc="repair.renting_reference or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Servicio</span>
+                                    <span class="workshop-info-value" t-esc="repair.service_type.name or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Técnico</span>
+                                    <span class="workshop-info-value text-truncate" t-esc="repair.portal_technician_id.display_name or repair.user_id.display_name or '—'"/>
+                                </div>
+                                <div class="workshop-info-row">
+                                    <span class="workshop-info-label">Prueba ruta</span>
+                                    <span class="workshop-info-value text-truncate" t-esc="repair.road_test_user_id.display_name or '—'"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border rounded p-3 mt-3">
+                    <h2 class="h5">Checklist</h2>
+                    <p t-if="repair.reception_checklist_template_id" class="small text-muted mb-2">
+                        Plantilla aplicada: <strong t-esc="repair.reception_checklist_template_id.name"/>
+                    </p>
+                    <div t-if="repair.reception_checklist_line_ids" class="table-responsive">
+                        <table class="table table-sm">
+                            <thead><tr><th>Ítem</th><th>Estado</th><th>Observación</th></tr></thead>
                             <tbody>
                                 <tr t-foreach="repair.reception_checklist_line_ids" t-as="line">
                                     <td t-esc="line.name"/>
@@ -357,11 +743,250 @@
                                     <td t-att-class="line.state == 'bad' and 'text-danger fw-bold' or (line.observation and 'text-danger')" t-esc="line.observation or ''"/>
                                 </tr>
                             </tbody>
-                                </table>
-                            </div>
-                            <p t-if="not repair.reception_checklist_line_ids" class="text-muted mb-0">Sin checklist diligenciado.</p>
-                        </div>
+                        </table>
                     </div>
+                    <p t-if="not repair.reception_checklist_line_ids" class="text-muted mb-0">Sin checklist diligenciado.</p>
+                </div>
+
+                <div class="border rounded p-3 mt-3">
+                    <h2 class="h5">Checklist técnico</h2>
+                    <p class="small text-muted mb-2">
+                        Checklist detallado que el técnico llena durante la inspección / diagnóstico del vehículo.
+                    </p>
+                    <t t-set="tecnico_lines" t-value="repair.technical_checklist_line_ids"/>
+                    <t t-if="not tecnico_lines">
+                        <p class="text-muted mb-0">Aún no hay líneas de checklist técnico registradas para esta orden.</p>
+                    </t>
+                    <t t-else="">
+                        <t t-set="is_editor" t-value="is_technician or is_internal_manager"/>
+                        <t t-set="sec1_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'general_1')"/>
+                        <t t-set="sec2_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'general_2')"/>
+                        <t t-set="brake_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'brakes')"/>
+                        <t t-set="tire_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'tires')"/>
+                        <t t-set="doc_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'documents')"/>
+
+                        <form t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post" id="tecnico_checklist_form">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="action" value="save"/>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-lg-6">
+                                    <div class="workshop-checklist-section h-100">
+                                        <table class="workshop-checklist-table table table-sm mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="workshop-checklist-num">N°</th>
+                                                    <th>INSPECCIÓN</th>
+                                                    <th class="workshop-checklist-estado" colspan="2">ESTADO</th>
+                                                    <th>OBSERVACIONES</th>
+                                                </tr>
+                                                <tr class="workshop-checklist-subheader">
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th><i class="fa fa-check text-success"></i> Bueno</th>
+                                                    <th><i class="fa fa-times text-danger"></i> Malo</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="sec1_lines" t-as="tline">
+                                                    <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
+                                                    <td t-esc="tline.name"/>
+                                                    <td class="workshop-checklist-tick" t-att-class="tline.state == 'good' and 'is-good' or ''">
+                                                        <t t-if="is_editor">
+                                                            <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="good" t-att-checked="'checked' if tline.state == 'good' else None" class="form-check-input"/>
+                                                        </t>
+                                                        <i t-else="" t-if="tline.state == 'good'" class="fa fa-check text-success"/>
+                                                    </td>
+                                                    <td class="workshop-checklist-tick" t-att-class="tline.state == 'bad' and 'is-bad' or ''">
+                                                        <t t-if="is_editor">
+                                                            <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="bad" t-att-checked="'checked' if tline.state == 'bad' else None" class="form-check-input"/>
+                                                        </t>
+                                                        <i t-else="" t-if="tline.state == 'bad'" class="fa fa-times text-danger"/>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="is_editor">
+                                                            <input t-att-name="'tech_obs_%s' % tline.id" class="form-control form-control-sm" t-att-value="tline.observation or ''"/>
+                                                        </t>
+                                                        <t t-else="" t-esc="tline.observation or ''"/>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <div class="workshop-checklist-section h-100">
+                                        <table class="workshop-checklist-table table table-sm mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th class="workshop-checklist-num">N°</th>
+                                                    <th>INSPECCIÓN</th>
+                                                    <th class="workshop-checklist-estado" colspan="2">ESTADO</th>
+                                                    <th>OBSERVACIONES</th>
+                                                </tr>
+                                                <tr class="workshop-checklist-subheader">
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th><i class="fa fa-check text-success"></i> Bueno</th>
+                                                    <th><i class="fa fa-times text-danger"></i> Malo</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="sec2_lines" t-as="tline">
+                                                    <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
+                                                    <td t-esc="tline.name"/>
+                                                    <td class="workshop-checklist-tick" t-att-class="tline.state == 'good' and 'is-good' or ''">
+                                                        <t t-if="is_editor">
+                                                            <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="good" t-att-checked="'checked' if tline.state == 'good' else None" class="form-check-input"/>
+                                                        </t>
+                                                        <i t-else="" t-if="tline.state == 'good'" class="fa fa-check text-success"/>
+                                                    </td>
+                                                    <td class="workshop-checklist-tick" t-att-class="tline.state == 'bad' and 'is-bad' or ''">
+                                                        <t t-if="is_editor">
+                                                            <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="bad" t-att-checked="'checked' if tline.state == 'bad' else None" class="form-check-input"/>
+                                                        </t>
+                                                        <i t-else="" t-if="tline.state == 'bad'" class="fa fa-times text-danger"/>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="is_editor">
+                                                            <input t-att-name="'tech_obs_%s' % tline.id" class="form-control form-control-sm" t-att-value="tline.observation or ''"/>
+                                                        </t>
+                                                        <t t-else="" t-esc="tline.observation or ''"/>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-1">
+                                <div class="col-12 col-lg-5">
+                                    <div class="workshop-checklist-section h-100">
+                                        <table class="workshop-checklist-table table table-sm mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="5" class="workshop-checklist-section-title text-center">INSPECCIÓN DE SISTEMA DE FRENOS</th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="workshop-checklist-num">N°</th>
+                                                    <th>PARTE</th>
+                                                    <th class="text-center" colspan="2">PROFUNDIDAD (mm)</th>
+                                                    <th class="workshop-checklist-estado">ESTADO</th>
+                                                </tr>
+                                                <tr>
+                                                    <th></th>
+                                                    <th></th>
+                                                    <th class="workshop-checklist-izq-der">IZQ</th>
+                                                    <th class="workshop-checklist-izq-der">DER</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="brake_lines" t-as="tline">
+                                                    <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
+                                                    <td t-esc="tline.name"/>
+                                                    <td>
+                                                        <t t-if="is_editor">
+                                                            <input t-att-name="'tech_measure_left_%s' % tline.id" class="form-control form-control-sm text-end" t-att-value="tline.measurement_left or ''" placeholder="mm"/>
+                                                        </t>
+                                                        <t t-else="" t-esc="(tline.measurement_left or '') + ' mm'"/>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="is_editor">
+                                                            <input t-att-name="'tech_measure_right_%s' % tline.id" class="form-control form-control-sm text-end" t-att-value="tline.measurement_right or ''" placeholder="mm"/>
+                                                        </t>
+                                                        <t t-else="" t-esc="(tline.measurement_right or '') + ' mm'"/>
+                                                    </td>
+                                                    <td>
+                                                        <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select form-select-sm">
+                                                            <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">B</option>
+                                                            <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">M</option>
+                                                            <option value="not_apply" t-att-selected="'selected' if tline.state == 'not_apply' else None">N/A</option>
+                                                        </select>
+                                                        <span t-else="" t-if="tline.state == 'good'" class="badge bg-success">Bueno</span>
+                                                        <span t-else="" t-if="tline.state == 'bad'" class="badge bg-danger">Malo</span>
+                                                        <span t-else="" t-if="tline.state == 'not_apply'" class="badge bg-secondary">N/A</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div t-if="is_editor" class="mt-2">
+                                            <input t-att-name="'tech_obs_%s' % brake_lines[0].id if brake_lines else '0'" type="hidden" value=""/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-3">
+                                    <div class="workshop-checklist-section h-100">
+                                        <table class="workshop-checklist-table table table-sm mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="2" class="workshop-checklist-section-title text-center">INSPECCIÓN LLANTAS</th>
+                                                </tr>
+                                                <tr>
+                                                    <th>POS</th>
+                                                    <th>PROFUND.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="tire_lines" t-as="tline">
+                                                    <td>
+                                                        <t t-if="is_editor">
+                                                            <select t-att-name="'tech_position_%s' % tline.id" class="form-select form-select-sm">
+                                                                <option value="DD" t-att-selected="'selected' if tline.position == 'DD' else None">DD</option>
+                                                                <option value="DI" t-att-selected="'selected' if tline.position == 'DI' else None">DI</option>
+                                                                <option value="TD" t-att-selected="'selected' if tline.position == 'TD' else None">TD</option>
+                                                                <option value="TI" t-att-selected="'selected' if tline.position == 'TI' else None">TI</option>
+                                                            </select>
+                                                        </t>
+                                                        <t t-else="" t-esc="tline.position or tline.name"/>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="is_editor">
+                                                            <input t-att-name="'tech_measure_left_%s' % tline.id" class="form-control form-control-sm text-end" t-att-value="tline.measurement_left or ''" placeholder="mm"/>
+                                                        </t>
+                                                        <t t-else="" t-esc="(tline.measurement_left or '') + ' mm'"/>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-4">
+                                    <div class="workshop-checklist-section h-100">
+                                        <table class="workshop-checklist-table table table-sm mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="2" class="workshop-checklist-section-title text-center">ESTADO DE DOCUMENTOS</th>
+                                                </tr>
+                                                <tr>
+                                                    <th>DOCUMENTO</th>
+                                                    <th>VENCIMIENTO</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="doc_lines" t-as="tline">
+                                                    <td t-esc="tline.name"/>
+                                                    <td>
+                                                        <t t-if="is_editor">
+                                                            <input type="date" t-att-name="'tech_expiration_%s' % tline.id" class="form-control form-control-sm" t-att-value="tline.expiration_date and tline.expiration_date.strftime('%Y-%m-%d') or ''"/>
+                                                        </t>
+                                                        <t t-else="" t-esc="tline.expiration_date and tline.expiration_date.strftime('%d/%m/%Y') or ''"/>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-3" t-if="is_editor">
+                                <button type="submit" class="btn btn-primary">Guardar checklist técnico</button>
+                            </div>
+                        </form>
+                    </t>
                 </div>
 
                 <div t-if="is_technician or is_internal_manager" class="border rounded p-3 mt-3">
@@ -377,6 +1002,51 @@
                             <button name="action" value="save" class="btn btn-secondary" type="submit">Guardar avance</button>
                             <button name="action" value="request_road_test" class="btn btn-warning" type="submit">Solicitar prueba de ruta</button>
                             <button name="action" value="send_purchase" class="btn btn-success" type="submit">Remitir a compras/cotizaciones</button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4"/>
+                    <h3 class="h6">Evidencias del técnico</h3>
+                    <p class="small text-muted">
+                        Sube fotos del diagnóstico o de la reparación. Se almacenan en Google Drive y aparecen en la galería inferior.
+                    </p>
+                    <form t-att-action="'/my/workshop/order/%s/technician/photos' % repair.id"
+                          method="post" enctype="multipart/form-data"
+                          class="js-workshop-technician-photos">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Tipo de evidencia</label>
+                                <select name="evidence_type" class="form-select">
+                                    <option value="diagnostico" selected="selected">Diagnóstico</option>
+                                    <option value="reparacion">Reparación</option>
+                                    <option value="entrega">Entrega</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-9">
+                                <label class="form-label">Descripción del lote</label>
+                                <input name="photo_description" class="form-control"
+                                       placeholder="Observación común para estas fotos"
+                                       t-att-value="repair.service_detail or ''"/>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="workshop-photo-dropzone" for="technician_photos">
+                                <i class="fa fa-camera" aria-hidden="true"></i>
+                                <span class="fw-semibold">Seleccionar fotos</span>
+                                <small>JPG, PNG o WEBP. Puedes elegir varias.</small>
+                            </label>
+                            <input id="technician_photos" name="technician_photos" type="file"
+                                   class="visually-hidden js-workshop-technician-photo-input" multiple="multiple"
+                                   accept="image/jpeg,image/png,image/webp"/>
+                            <div class="row g-3 mt-1 js-workshop-technician-photo-preview"></div>
+                            <div class="mt-2">
+                                <span class="badge text-bg-light js-workshop-technician-photo-count">0 fotos</span>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">Subir evidencias</button>
                         </div>
                     </form>
                 </div>

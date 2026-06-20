@@ -45,9 +45,10 @@ class FleetRepair(models.Model):
     customer_type = fields.Selection(
         [
             ('renting', 'Renting'),
-            ('particular', 'Particular'),
+            ('particular', '1a1'),
+            ('corporate', 'MegaSur'),
         ],
-        string="Tipo de cliente",
+        string="Sede",
         default='particular',
         required=True,
         tracking=True,
@@ -88,6 +89,30 @@ class FleetRepair(models.Model):
                                 help='License plate number of the vehicle (ie: plate number for a car)')
     vin_sn = fields.Char('Chassis Number', help='Unique number written on the vehicle motor (VIN/SN number)')
     model_id = fields.Many2one('fleet.vehicle.model', 'Model', help='Model of the vehicle')
+    vehicle_brand_id = fields.Many2one(
+        'fleet.vehicle.model.brand',
+        string='Marca',
+        help='Marca del vehículo (filtra la lista de líneas/modelos).',
+        copy=False,
+    )
+    model_year = fields.Char(
+        string='Modelo (año)',
+        size=4,
+        copy=False,
+        help='Año del modelo del vehículo (ej. 2017).',
+    )
+    engine_displacement = fields.Char(
+        string='Cilindraje',
+        size=8,
+        copy=False,
+        help='Cilindraje del motor en cc (ej. 1998).',
+    )
+    engine_number = fields.Char(
+        string='Número de motor',
+        size=64,
+        copy=False,
+        help='Número de motor del vehículo.',
+    )
     fuel_type = fields.Selection([('diesel', 'Diesel'),
                                   ('gasoline', 'Gasoline'),
                                   ('full_hybrid', 'Full Hybrid'),
@@ -219,12 +244,29 @@ class FleetRepair(models.Model):
         'fleet.repair.reception.checklist.template',
         string="Plantilla de checklist de recepción",
         tracking=True,
+        help="Plantilla del checklist diligenciado por el asesor en la recepción. "
+             "Solo afecta a las líneas con tipo 'asesor'.",
     )
     reception_checklist_line_ids = fields.One2many(
         'fleet.repair.reception.checklist.line',
         'repair_id',
-        string="Checklist de recepción",
+        string="Checklist de recepción (asesor)",
         copy=True,
+        domain=[('checklist_type', '=', 'asesor')],
+    )
+    technical_checklist_template_id = fields.Many2one(
+        'fleet.repair.reception.checklist.template',
+        string="Plantilla de checklist técnico",
+        tracking=True,
+        help="Plantilla del checklist diligenciado por el técnico durante el diagnóstico / reparación. "
+             "Solo afecta a las líneas con tipo 'tecnico'.",
+    )
+    technical_checklist_line_ids = fields.One2many(
+        'fleet.repair.reception.checklist.line',
+        'repair_id',
+        string="Checklist técnico",
+        copy=True,
+        domain=[('checklist_type', '=', 'tecnico')],
     )
     feedback_description = fields.Char(string="Feedback")
     rating = fields.Selection([('0', 'Low'), ('1', 'Normal'), ('2', 'High')], string="Rating")
@@ -249,19 +291,42 @@ class FleetRepair(models.Model):
     @api.onchange('reception_checklist_template_id')
     def _onchange_reception_checklist_template_id(self):
         template = self.reception_checklist_template_id
+        existing_asesor_ids = self.reception_checklist_line_ids.filtered(
+            lambda l: l.checklist_type == 'asesor'
+        ).ids
+        operations = [(2, line_id, 0) for line_id in existing_asesor_ids]
         if not template:
-            self.reception_checklist_line_ids = [(5, 0, 0)]
+            self.reception_checklist_line_ids = operations
             return
-
-        lines = [(5, 0, 0)]
         for item in template.line_ids.filtered('active'):
-            lines.append((0, 0, {
+            operations.append((0, 0, {
                 'sequence': item.sequence,
                 'template_id': template.id,
                 'template_line_id': item.id,
                 'name': item.name,
-            })) #type: ignore
-        self.reception_checklist_line_ids = lines
+                'checklist_type': 'asesor',
+            }))
+        self.reception_checklist_line_ids = operations
+
+    @api.onchange('technical_checklist_template_id')
+    def _onchange_technical_checklist_template_id(self):
+        template = self.technical_checklist_template_id
+        existing_tecnico_ids = self.reception_checklist_line_ids.filtered(
+            lambda l: l.checklist_type == 'tecnico'
+        ).ids
+        operations = [(2, line_id, 0) for line_id in existing_tecnico_ids]
+        if not template:
+            self.reception_checklist_line_ids = operations
+            return
+        for item in template.line_ids.filtered('active'):
+            operations.append((0, 0, {
+                'sequence': item.sequence,
+                'template_id': template.id,
+                'template_line_id': item.id,
+                'name': item.name,
+                'checklist_type': 'tecnico',
+            }))
+        self.reception_checklist_line_ids = operations
 
     def _drive_get_google_modules(self):
         try:
@@ -395,23 +460,31 @@ class FleetRepair(models.Model):
             evidence_labels.get(evidence_type, evidence_type),  # type: ignore
         )
 
-    def _get_renting_partner(self):
+    def _search_renting_partner(self):
         parameters = self.env['ir.config_parameter'].sudo()
         partner_id = parameters.get_param(RENTING_PARTNER_PARAM)
         partner = self.env['res.partner'].sudo().browse(int(partner_id or 0))
-        if not partner.exists():
-            partner = self.env['res.partner'].sudo().search([
-                ('name', '=ilike', RENTING_PARTNER_NAME),
-                ('is_company', '=', True),
-            ], limit=1)
-            if partner:
-                parameters.set_param(RENTING_PARTNER_PARAM, partner.id)
+        if partner.exists():
+            return partner
+        partner = self.env['res.partner'].sudo().search([
+            ('name', '=ilike', RENTING_PARTNER_NAME),
+            ('is_company', '=', True),
+        ], limit=1)
+        if partner:
+            parameters.set_param(RENTING_PARTNER_PARAM, partner.id)
+        return partner if partner.exists() else self.env['res.partner']
+
+    def _get_renting_partner(self):
+        partner = self._search_renting_partner()
         if not partner.exists():
             raise UserError(_(
                 "No se encontró el contacto empresarial '%s'.\n"
                 "Créelo o configure el parámetro del sistema %s con su ID."
             ) % (RENTING_PARTNER_NAME, RENTING_PARTNER_PARAM))
         return partner
+
+    def _find_renting_partner(self):
+        return self._search_renting_partner()
 
     def _drive_prepare_image_file(self, filename, file_bytes, mimetype=False):
         filename = (filename or '').strip()
@@ -1084,6 +1157,15 @@ class FleetRepair(models.Model):
                     body = Markup("El usuario <b>%s</b> eliminó las imágenes: %s") % (user_name, names)
                     rec.message_post(body=body)
 
+        # 4) Auto-transición del flujo cuando se asigna/desasigna un técnico
+        if 'portal_technician_id' in vals or 'user_id' in vals:
+            for rec in self:
+                has_tech = bool(rec.portal_technician_id or rec.user_id)
+                if has_tech and rec.service_flow_state == 'to_assign':
+                    rec.write({'service_flow_state': 'assigned'})
+                elif not has_tech and rec.service_flow_state == 'assigned':
+                    rec.write({'service_flow_state': 'to_assign'})
+
         return res
 
 
@@ -1118,6 +1200,14 @@ class FleetRepairLine(models.Model):
                                 help='License plate number of the vehicle (ie: plate number for a car)')
     vin_sn = fields.Char('Chassis Number', help='Unique number written on the vehicle motor (VIN/SN number)')
     model_id = fields.Many2one('fleet.vehicle.model', 'Model', help='Model of the vehicle')
+    vehicle_brand_id = fields.Many2one(
+        'fleet.vehicle.model.brand',
+        string='Marca',
+        copy=False,
+    )
+    model_year = fields.Char(string='Modelo (año)', size=4, copy=False)
+    engine_displacement = fields.Char(string='Cilindraje', size=8, copy=False)
+    engine_number = fields.Char(string='Número de motor', size=64, copy=False)
     fuel_type = fields.Selection([('diesel', 'Diesel'),
                                   ('petrol', 'Petrol'),
                                   ('gasoline', 'Gasoline'),
