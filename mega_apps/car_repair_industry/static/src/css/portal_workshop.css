@@ -906,3 +906,552 @@
 .workshop-list-action {
     color: #adb5bd;
 }
+
+.workshop-service-grid {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    margin-top: 4px;
+}
+
+.workshop-service-card {
+    align-items: center;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.workshop-service-card:hover {
+    background: #f8f9fa;
+    border-color: #017e84;
+}
+
+.workshop-service-card .form-check-input {
+    margin: 0;
+}
+
+.workshop-service-card .form-check-input:checked + .workshop-service-icon {
+    color: #017e84;
+}
+
+.workshop-service-card:has(.form-check-input:checked) {
+    background: #e6f4f5;
+    border-color: #017e84;
+    box-shadow: 0 0 0 2px rgba(1, 126, 132, 0.08);
+}
+
+.workshop-service-icon {
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.workshop-service-name {
+    color: #212529;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.workshop-service-summary {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+.workshop-service-progress {
+    background: #e9ecef;
+    border-radius: 999px;
+    height: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.workshop-service-progress-fill {
+    background: linear-gradient(90deg, #017e84, #198754);
+    border-radius: 999px;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.workshop-service-table {
+    margin-bottom: 0;
+}
+
+.workshop-service-table thead th {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    color: #6c757d;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 8px 10px;
+    text-transform: uppercase;
+}
+
+.workshop-service-table tbody td {
+    border-color: #f1f3f5;
+    padding: 8px 10px;
+    vertical-align: middle;
+}
+
+.workshop-service-num {
+    color: #6c757d;
+    font-family: monospace;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.workshop-service-row-pendiente {
+    background: rgba(108, 117, 125, 0.04);
+}
+
+.workshop-service-row-en_progreso {
+    background: rgba(246, 166, 9, 0.06);
+}
+
+.workshop-service-row-completado {
+    background: rgba(25, 135, 84, 0.06);
+}
+
+.workshop-service-row-completado .fw-semibold {
+    color: #198754;
+    text-decoration: line-through;
+}
+
+@media print {
+    body.workshop-printing-checklist > *:not(#workshop-checklist-tecnico):not(.o_top_fixed_element) {
+        display: none !important;
+    }
+    body.workshop-printing-checklist {
+        background: #fff !important;
+    }
+    body.workshop-printing-checklist #workshop-checklist-tecnico {
+        background: #fff !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    body.workshop-printing-checklist #workshop-checklist-tecnico .workshop-checklist-section,
+    body.workshop-printing-checklist #workshop-checklist-tecnico .workshop-checklist-table,
+    body.workshop-printing-checklist #workshop-checklist-tecnico .table {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        box-shadow: none;
+    }
+    body.workshop-printing-checklist #workshop-checklist-tecnico .js-workshop-print-checklist,
+    body.workshop-printing-checklist #workshop-checklist-tecnico button,
+    body.workshop-printing-checklist #workshop-checklist-tecnico input,
+    body.workshop-printing-checklist #workshop-checklist-tecnico select {
+        display: none !important;
+    }
+    body.workshop-printing-checklist #workshop-checklist-tecnico .form-select,
+    body.workshop-printing-checklist #workshop-checklist-tecnico .form-control {
+        border: 0 !important;
+        background: transparent !important;
+        padding: 0 !important;
+        color: #000 !important;
+    }
+    body.workshop-printing-checklist #workshop-checklist-tecnico .workshop-checklist-tick {
+        background: #fff !important;
+    }
+}
+
+.workshop-info-row-multiline {
+    align-items: flex-start;
+}
+
+.workshop-info-services {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.workshop-service-chip {
+    align-items: center;
+    background: #e6f4f5;
+    border: 1px solid #b3dfe1;
+    border-radius: 999px;
+    color: #017e84;
+    display: inline-flex;
+    font-size: 0.75rem;
+    font-weight: 500;
+    gap: 4px;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 3px 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.workshop-service-chip .fa {
+    color: #017e84;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+}
+
+.workshop-quickinfo-services {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+    color: #fff !important;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    text-align: right;
+}
+
+.workshop-quickinfo-chip {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 2px 8px;
+    white-space: nowrap;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.workshop-quickinfo-more {
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    white-space: nowrap;
+}
+
+/* ─── Buscador ──────────────────────────────────────────────── */
+
+.workshop-search-bar .input-group .form-control {
+    border-left: 0;
+}
+
+.workshop-search-bar .input-group .form-control:focus {
+    box-shadow: none;
+    border-color: #ced4da;
+}
+
+.workshop-search-bar .input-group-text {
+    border-right: 0;
+}
+
+/* ─── Encabezado de resultados ──────────────────────────────── */
+
+.workshop-results-header {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.workshop-results-title {
+    align-items: center;
+    color: #212529;
+    display: inline-flex;
+    font-size: 0.95rem;
+    font-weight: 600;
+    gap: 8px;
+}
+
+.workshop-results-meta {
+    font-size: 0.82rem;
+}
+
+/* ─── Cuadrícula de tarjetas ────────────────────────────────── */
+
+.workshop-cards-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+
+@media (max-width: 575.98px) {
+    .workshop-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ─── Tarjeta de orden ──────────────────────────────────────── */
+
+.workshop-order-card-wrap {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    border-top: 3px solid #adb5bd;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.workshop-order-card-wrap:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.09);
+    transform: translateY(-1px);
+}
+
+/* Acento superior según estado */
+.workshop-state-received         { border-top-color: #adb5bd; }
+.workshop-state-to_assign        { border-top-color: #f6a609; }
+.workshop-state-assigned         { border-top-color: #4a6cf7; }
+.workshop-state-diagnosis        { border-top-color: #5c6bc0; }
+.workshop-state-diagnosis_done   { border-top-color: #017e84; }
+.workshop-state-road_test_requested { border-top-color: #9c27b0; }
+.workshop-state-road_test        { border-top-color: #7b1fa2; }
+.workshop-state-road_test_done   { border-top-color: #6a1b9a; }
+.workshop-state-purchase_requested { border-top-color: #198754; }
+.workshop-state-quote_ready      { border-top-color: #2e7d32; }
+.workshop-state-quote_sent       { border-top-color: #00695c; }
+.workshop-state-approved         { border-top-color: #00897b; }
+.workshop-state-repair           { border-top-color: #017e84; }
+.workshop-state-ready_delivery   { border-top-color: #1e8449; }
+.workshop-state-delivered        { border-top-color: #6c757d; }
+.workshop-state-cancelled        { border-top-color: #dc3545; }
+
+/* ─── Encabezado de tarjeta ─────────────────────────────────── */
+
+.workshop-card-head {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px 8px;
+    gap: 10px;
+}
+
+.workshop-card-seq {
+    color: #212529;
+    font-family: monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Badge de estado */
+.workshop-card-badge {
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 3px 10px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: #e9ecef;
+    color: #495057;
+}
+
+.workshop-badge-received          { background: #e9ecef;  color: #495057; }
+.workshop-badge-to_assign         { background: #fff3cd;  color: #856404; }
+.workshop-badge-assigned          { background: #dde3fd;  color: #2c47b5; }
+.workshop-badge-diagnosis         { background: #e8eaf6;  color: #3949ab; }
+.workshop-badge-diagnosis_done    { background: #e0f2f1;  color: #00695c; }
+.workshop-badge-road_test_requested { background: #f3e5f5; color: #6a1b9a; }
+.workshop-badge-road_test         { background: #ede7f6;  color: #5e35b1; }
+.workshop-badge-road_test_done    { background: #e8eaf6;  color: #4527a0; }
+.workshop-badge-purchase_requested { background: #d1e7dd; color: #0a3622; }
+.workshop-badge-quote_ready       { background: #c8e6c9;  color: #1b5e20; }
+.workshop-badge-quote_sent        { background: #b2dfdb;  color: #004d40; }
+.workshop-badge-approved          { background: #b2ebf2;  color: #006064; }
+.workshop-badge-repair            { background: #e0f4f5;  color: #015a5e; }
+.workshop-badge-ready_delivery    { background: #d4edda;  color: #155724; }
+.workshop-badge-delivered         { background: #e9ecef;  color: #495057; }
+.workshop-badge-cancelled         { background: #f8d7da;  color: #842029; }
+
+/* ─── Cuerpo de tarjeta ─────────────────────────────────────── */
+
+.workshop-card-body {
+    flex: 1;
+    padding: 4px 16px 12px;
+}
+
+.workshop-card-vehicle {
+    align-items: center;
+    border-bottom: 1px solid #f1f3f5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    padding-top: 4px;
+}
+
+.workshop-card-vehicle .fa {
+    color: #017e84;
+    flex-shrink: 0;
+}
+
+.workshop-card-plate {
+    background: #e9ecef;
+    border-radius: 5px;
+    color: #212529;
+    font-family: monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    text-transform: uppercase;
+}
+
+.workshop-card-vehicle-model {
+    font-size: 0.82rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.workshop-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.workshop-card-meta-row {
+    align-items: baseline;
+    display: flex;
+    gap: 7px;
+}
+
+.workshop-card-meta-label {
+    color: #adb5bd;
+    flex: 0 0 16px;
+    font-size: 0.78rem;
+    text-align: center;
+}
+
+.workshop-card-meta-value {
+    color: #495057;
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ─── Pie de tarjeta ────────────────────────────────────────── */
+
+.workshop-card-footer {
+    align-items: center;
+    border-top: 1px solid #f1f3f5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+    padding: 10px 16px;
+}
+
+.workshop-card-footer-left {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+.workshop-card-svc-toggle {
+    align-items: center;
+    color: #495057;
+    display: inline-flex;
+    font-size: 0.8rem;
+    gap: 5px;
+}
+
+.workshop-card-svc-toggle:hover {
+    border-color: #017e84;
+    color: #017e84;
+}
+
+.workshop-card-svc-chevron {
+    transition: transform 0.2s ease;
+}
+
+.workshop-card-svc-toggle[aria-expanded="true"] .workshop-card-svc-chevron {
+    transform: rotate(180deg);
+}
+
+.workshop-card-no-svc {
+    font-size: 0.8rem;
+}
+
+.workshop-card-btn-detail {
+    background: #017e84;
+    border-color: #017e84;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.workshop-card-btn-detail:hover {
+    background: #016a6f;
+    border-color: #016a6f;
+}
+
+/* ─── Servicios colapsables ─────────────────────────────────── */
+
+.workshop-card-svc-collapse {
+    border-top: 1px solid #e9ecef;
+}
+
+.workshop-card-svc-list {
+    padding: 8px 16px 12px;
+}
+
+.workshop-card-svc-item {
+    align-items: flex-start;
+    border-bottom: 1px solid #f8f9fa;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    padding: 7px 4px;
+}
+
+.workshop-card-svc-item:last-child {
+    border-bottom: 0;
+}
+
+.workshop-svc-row-completado .workshop-card-svc-name .fw-semibold {
+    color: #198754;
+    text-decoration: line-through;
+}
+
+.workshop-card-svc-name {
+    flex: 1;
+    font-size: 0.85rem;
+    min-width: 0;
+}
+
+.workshop-card-svc-detail {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+}
+
+.workshop-svc-badge {
+    border-radius: 999px;
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.workshop-svc-badge-pendiente  { background: #e9ecef; color: #495057; }
+.workshop-svc-badge-en_progreso { background: #fff3cd; color: #856404; }
+.workshop-svc-badge-completado  { background: #d1e7dd; color: #0a3622; }
+
+@media (max-width: 575.98px) {
+    .workshop-card-head { padding: 10px 14px 6px; }
+    .workshop-card-body { padding: 4px 14px 10px; }
+    .workshop-card-footer { padding: 8px 14px; }
+    .workshop-card-svc-list { padding: 6px 14px 10px; }
+}

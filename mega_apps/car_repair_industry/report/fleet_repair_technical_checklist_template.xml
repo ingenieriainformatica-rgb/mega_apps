@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="fleet_repair_technical_checklist_document">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="car_repair_industry.fleet_repair_technical_checklist_template_view" t-lang="lang"/>
+                </t>
+            </t>
+        </template>
+
+        <template id="fleet_repair_technical_checklist_template_view">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="o.with_context(lang=lang)"/>
+                <t t-set="company" t-value="env.company"/>
+                <div class="page">
+                    <style>
+                        .cl-header {
+                            background: linear-gradient(135deg, #017e84 0%, #025a5e 100%);
+                            color: #fff;
+                            padding: 8px 14px;
+                            border-radius: 6px;
+                            margin-bottom: 8px;
+                        }
+                        .cl-header h1 {
+                            font-size: 18px;
+                            font-weight: 700;
+                            margin: 0 0 2px 0;
+                            letter-spacing: 0.5px;
+                        }
+                        .cl-header .cl-subtitle {
+                            font-size: 10px;
+                            opacity: 0.9;
+                            margin: 0;
+                        }
+                        .cl-header .cl-meta {
+                            font-size: 9px;
+                            margin-top: 4px;
+                            padding-top: 4px;
+                            border-top: 1px solid rgba(255,255,255,0.2);
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                        .cl-info-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 8px;
+                            font-size: 8.5px;
+                        }
+                        .cl-info-table td {
+                            padding: 3px 6px;
+                            border: 1px solid #d0d7de;
+                            vertical-align: top;
+                            line-height: 1.2;
+                        }
+                        .cl-info-table .cl-label {
+                            background: #f4f6f8;
+                            color: #495057;
+                            font-weight: 600;
+                            text-transform: uppercase;
+                            font-size: 7.5px;
+                            letter-spacing: 0.3px;
+                            width: 16%;
+                        }
+                        .cl-info-table .cl-value {
+                            color: #212529;
+                            font-size: 8.5px;
+                        }
+                        .cl-section-title {
+                            background: #017e84;
+                            color: #fff;
+                            padding: 4px 10px;
+                            font-size: 9.5px;
+                            font-weight: 700;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            border-radius: 3px 3px 0 0;
+                            margin: 8px 0 0 0;
+                        }
+                        .cl-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 8.5px;
+                            margin-bottom: 0;
+                            line-height: 1.2;
+                        }
+                        .cl-table thead th {
+                            background: #e9ecef;
+                            color: #495057;
+                            font-weight: 600;
+                            text-transform: uppercase;
+                            font-size: 7.5px;
+                            padding: 3px 4px;
+                            border: 1px solid #adb5bd;
+                            text-align: center;
+                            letter-spacing: 0.2px;
+                            line-height: 1.1;
+                        }
+                        .cl-table tbody td {
+                            padding: 2px 4px;
+                            border: 1px solid #dee2e6;
+                            color: #212529;
+                            vertical-align: middle;
+                            line-height: 1.2;
+                        }
+                        .cl-table tbody tr:nth-child(even) td {
+                            background: #f8f9fa;
+                        }
+                        .cl-num {
+                            text-align: center;
+                            font-family: monospace;
+                            font-weight: 700;
+                            color: #6c757d;
+                            width: 4%;
+                        }
+                        .cl-status-bb {
+                            text-align: center;
+                            width: 6%;
+                        }
+                        .cl-status-bb.is-good {
+                            background: #d1e7dd;
+                            color: #0f5132;
+                            font-weight: 700;
+                            font-size: 12px;
+                        }
+                        .cl-status-bb.is-bad {
+                            background: #f8d7da;
+                            color: #842029;
+                            font-weight: 700;
+                            font-size: 12px;
+                        }
+                        .cl-status-pendiente {
+                            color: #adb5bd;
+                            font-size: 10px;
+                        }
+                        .cl-obs {
+                            font-size: 8px;
+                            color: #495057;
+                        }
+                        .cl-measure {
+                            text-align: center;
+                            font-family: monospace;
+                            font-weight: 600;
+                            color: #017e84;
+                        }
+                        .cl-section-wrapper {
+                            border: 1px solid #dee2e6;
+                            border-top: 0;
+                            border-radius: 0 0 3px 3px;
+                            margin-bottom: 0;
+                        }
+                        .cl-grid-2 {
+                            display: table;
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        .cl-grid-2 > div {
+                            display: table-cell;
+                            width: 50%;
+                            vertical-align: top;
+                            padding-right: 4px;
+                        }
+                        .cl-grid-2 > div:last-child {
+                            padding-right: 0;
+                            padding-left: 4px;
+                        }
+                        .cl-grid-2 .cl-section-title { margin-top: 0; }
+                        .cl-signatures {
+                            margin-top: 12px;
+                            page-break-inside: avoid;
+                        }
+                        .cl-signatures table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        .cl-signatures td {
+                            width: 50%;
+                            padding: 0 10px;
+                            vertical-align: bottom;
+                        }
+                        .cl-signatures .cl-line {
+                            border-top: 1.5px solid #212529;
+                            padding-top: 4px;
+                            text-align: center;
+                            font-size: 8.5px;
+                            color: #495057;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+                        .cl-footer-meta {
+                            margin-top: 8px;
+                            padding-top: 4px;
+                            border-top: 1px solid #e9ecef;
+                            font-size: 7.5px;
+                            color: #6c757d;
+                            text-align: right;
+                        }
+                    </style>
+
+                    <div class="cl-header">
+                        <table style="width:100%; border-collapse:collapse;">
+                            <tr>
+                                <td style="width:80px; vertical-align:middle; padding:0;">
+                                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)"
+                                         style="max-height:60px; max-width:80px; background:#fff; padding:4px; border-radius:4px;"/>
+                                </td>
+                                <td style="vertical-align:middle; padding-left:14px;">
+                                    <h1 style="margin:0 0 4px 0;">CHECKLIST TÉCNICO</h1>
+                                    <p class="cl-subtitle" style="margin:0;">
+                                        <strong t-esc="o.sequence or ''"/> · <span t-esc="o.name or ''"/>
+                                    </p>
+                                    <p class="cl-subtitle" style="margin:2px 0 0 0; font-size:10px;" t-esc="company.name"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="cl-meta">
+                            <span>Fecha de impresión: <t t-esc="today_date"/></span>
+                            <span>Orden: <t t-esc="o.id"/></span>
+                        </div>
+                    </div>
+
+                    <table class="cl-info-table">
+                        <tr>
+                            <td class="cl-label">Cliente</td>
+                            <td class="cl-value" t-esc="o.client_id.display_name or '—'"/>
+                            <td class="cl-label">Placa</td>
+                            <td class="cl-value" t-esc="o.license_plate or '—'"/>
+                        </tr>
+                        <tr>
+                            <td class="cl-label">Tipo</td>
+                            <td class="cl-value" t-esc="dict(o._fields['customer_type'].selection).get(o.customer_type) or '—'"/>
+                            <td class="cl-label">Marca / Línea</td>
+                            <td class="cl-value" t-esc="(o.vehicle_brand_id.name or '') + (' / ' if (o.vehicle_brand_id and o.model_id) else '') + (o.model_id.name or '') or '—'"/>
+                        </tr>
+                        <tr>
+                            <td class="cl-label">Teléfono</td>
+                            <td class="cl-value" t-esc="o.client_phone or '—'"/>
+                            <td class="cl-label">Modelo (año)</td>
+                            <td class="cl-value" t-esc="o.model_year or '—'"/>
+                        </tr>
+                        <tr>
+                            <td class="cl-label">Servicio</td>
+                            <td class="cl-value" t-esc="o.service_type.name or '—'"/>
+                            <td class="cl-label">Kilometraje</td>
+                            <td class="cl-value" t-esc="o.reception_mileage or '—'"/>
+                        </tr>
+                        <tr>
+                            <td class="cl-label">Fecha de recepción</td>
+                            <td class="cl-value" t-esc="o.receipt_date and o.receipt_date.strftime('%d/%m/%Y') or '—'"/>
+                            <td class="cl-label">Técnico</td>
+                            <td class="cl-value" t-esc="(o.portal_technician_id.display_name or o.user_id.display_name or '—')"/>
+                        </tr>
+                    </table>
+
+                    <t t-set="tecnico_lines" t-value="o.technical_checklist_line_ids"/>
+                    <t t-set="sec1_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'general_1')"/>
+                    <t t-set="sec2_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'general_2')"/>
+                    <t t-set="brake_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'brakes')"/>
+                    <t t-set="tire_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'tires')"/>
+                    <t t-set="doc_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'documents')"/>
+
+                    <t t-if="sec1_lines or sec2_lines">
+                        <div class="cl-section-title">1. INSPECCIÓN GENERAL</div>
+                        <div class="cl-grid-2">
+                            <div>
+                                <t t-if="sec1_lines">
+                                    <table class="cl-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="cl-num">N°</th>
+                                                <th style="text-align:left; width:42%;">Ítem</th>
+                                                <th class="cl-status-bb">✓ Bueno</th>
+                                                <th class="cl-status-bb">✗ Malo</th>
+                                                <th style="text-align:left;">Observaciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="sec1_lines" t-as="tline">
+                                                <td class="cl-num" t-esc="tline.sequence // 10"/>
+                                                <td t-esc="tline.name"/>
+                                                <td class="cl-status-bb" t-att-class="tline.state == 'good' and 'cl-status-bb is-good' or 'cl-status-bb'">
+                                                    <t t-out="'✓' if tline.state == 'good' else ''"/>
+                                                </td>
+                                                <td class="cl-status-bb" t-att-class="tline.state == 'bad' and 'cl-status-bb is-bad' or 'cl-status-bb'">
+                                                    <t t-out="'✗' if tline.state == 'bad' else ''"/>
+                                                </td>
+                                                <td class="cl-obs" t-esc="tline.observation or ''"/>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </t>
+                            </div>
+                            <div>
+                                <t t-if="sec2_lines">
+                                    <table class="cl-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="cl-num">N°</th>
+                                                <th style="text-align:left; width:42%;">Ítem</th>
+                                                <th class="cl-status-bb">✓ Bueno</th>
+                                                <th class="cl-status-bb">✗ Malo</th>
+                                                <th style="text-align:left;">Observaciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="sec2_lines" t-as="tline">
+                                                <td class="cl-num" t-esc="tline.sequence // 10"/>
+                                                <td t-esc="tline.name"/>
+                                                <td class="cl-status-bb" t-att-class="tline.state == 'good' and 'cl-status-bb is-good' or 'cl-status-bb'">
+                                                    <t t-out="'✓' if tline.state == 'good' else ''"/>
+                                                </td>
+                                                <td class="cl-status-bb" t-att-class="tline.state == 'bad' and 'cl-status-bb is-bad' or 'cl-status-bb'">
+                                                    <t t-out="'✗' if tline.state == 'bad' else ''"/>
+                                                </td>
+                                                <td class="cl-obs" t-esc="tline.observation or ''"/>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
+                    <t t-if="brake_lines">
+                        <div class="cl-section-title">2. INSPECCIÓN DE SISTEMA DE FRENOS</div>
+                        <table class="cl-table">
+                            <thead>
+                                <tr>
+                                    <th class="cl-num">N°</th>
+                                    <th style="text-align:left; width:32%;">Parte</th>
+                                    <th style="width:11%;">Prof. IZQ (mm)</th>
+                                    <th style="width:11%;">Prof. DER (mm)</th>
+                                    <th style="text-align:left;">Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="brake_lines" t-as="tline">
+                                    <td class="cl-num" t-esc="tline.sequence // 10"/>
+                                    <td t-esc="tline.name"/>
+                                    <td class="cl-measure" t-esc="tline.measurement_left or '—'"/>
+                                    <td class="cl-measure" t-esc="tline.measurement_right or '—'"/>
+                                    <td class="cl-obs" t-esc="tline.observation or ''"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <t t-if="tire_lines">
+                        <div class="cl-section-title">3. INSPECCIÓN DE LLANTAS</div>
+                        <table class="cl-table">
+                            <thead>
+                                <tr>
+                                    <th class="cl-num">N°</th>
+                                    <th style="width:50%;">Posición</th>
+                                    <th style="width:50%;">Profundidad (mm)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="tire_lines" t-as="tline">
+                                    <td class="cl-num" t-esc="tline.sequence // 10"/>
+                                    <td t-esc="tline.position or tline.name"/>
+                                    <td class="cl-measure" t-esc="tline.measurement_left or '—'"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <t t-if="doc_lines">
+                        <div class="cl-section-title">4. ESTADO DE DOCUMENTOS</div>
+                        <table class="cl-table">
+                            <thead>
+                                <tr>
+                                    <th class="cl-num">N°</th>
+                                    <th style="width:50%;">Documento</th>
+                                    <th style="width:50%;">Vencimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="doc_lines" t-as="tline">
+                                    <td class="cl-num" t-esc="tline.sequence // 10"/>
+                                    <td t-esc="tline.name"/>
+                                    <td style="text-align:center;" t-esc="tline.expiration_date and tline.expiration_date.strftime('%d/%m/%Y') or '—'"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <div class="cl-signatures">
+                        <table>
+                            <tr>
+                                <td>
+                                    <div class="cl-line">Firma del técnico</div>
+                                </td>
+                                <td>
+                                    <div class="cl-line">Firma del supervisor</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="cl-footer-meta">
+                        Generado el <t t-esc="today_date"/> ·
+                        Orden <t t-esc="o.sequence or o.display_name"/> ·
+                        Total ítems: <t t-esc="len(tecnico_lines)"/>
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

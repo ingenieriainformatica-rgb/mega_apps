@@ -58,6 +58,8 @@
         'report/fleet_repair_receipt_menu.xml',
         'report/fleet_repair_checklist_view.xml',
         'report/fleet_repair_checklist_menu.xml',
+        'report/fleet_repair_technical_checklist_template.xml',
+        'report/fleet_repair_technical_checklist_menu.xml',
         'report/fleet_diagnostic_request_report_view.xml',
         'report/fleet_diagnostic_request_report_menu.xml',
         'report/fleet_diagnostic_result_report_view.xml',

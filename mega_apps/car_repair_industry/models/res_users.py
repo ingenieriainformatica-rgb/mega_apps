@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, fields, models
+from odoo import api, fields, models  #type: ignore
 
 
 class ResUsers(models.Model):
@@ -8,15 +8,29 @@ class ResUsers(models.Model):
 
     car_repair_portal_profile = fields.Selection(
         selection=[
-            ('advisor', 'Asesor recepción'),
-            ('technician', 'Técnico'),
-            ('road_test', 'Prueba de ruta'),
+            ('advisor', 'Asesor de recepción'),
+            ('technician', 'Técnico mecánico'),
+            ('road_test', 'Técnico de ruta'),
         ],
         string="Perfil portal taller",
         compute='_compute_car_repair_portal_profile',
         inverse='_inverse_car_repair_portal_profile',
         readonly=False,
         help="Perfil de Taller de autos para usuarios portal.",
+    )
+
+    car_repair_user_type = fields.Selection(
+        selection=[
+            ('internal', 'Usuario interno (empleado)'),
+            ('portal', 'Usuario portal (cliente / proveedor)'),
+        ],
+        string='Tipo de usuario (Taller)',
+        compute='_compute_car_repair_user_type',
+        inverse='_inverse_car_repair_user_type',
+        readonly=False,
+        precompute=False,
+        help='Selecciona si el usuario tiene acceso al backend (interno) o solo al portal. '
+             'Reemplaza visualmente al selector USER TYPE de Odoo, que solo se muestra a superusuarios.',
     )
 
     @api.depends('groups_id')
@@ -50,3 +64,29 @@ class ResUsers(models.Model):
                 commands.append((4, selected_group.id))
             if commands:
                 user.groups_id = commands
+
+    @api.depends('share')
+    def _compute_car_repair_user_type(self):
+        for user in self:
+            if user.share:
+                user.car_repair_user_type = 'portal'
+            else:
+                user.car_repair_user_type = 'internal'
+
+    def _inverse_car_repair_user_type(self):
+        for user in self:
+            target_share = (user.car_repair_user_type == 'portal')
+            if user.share != target_share:
+                user.share = target_share
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if 'car_repair_user_type' in vals and 'share' not in vals:
+                vals['share'] = (vals['car_repair_user_type'] == 'portal')
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if 'car_repair_user_type' in vals and 'share' not in vals:
+            vals['share'] = (vals['car_repair_user_type'] == 'portal')
+        return super().write(vals)

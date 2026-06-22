@@ -51,7 +51,7 @@
                     </div>
                     <div class="col-6 col-md-4 col-xl-2">
                         <a t-att-href="'/my/workshop?filter=assigned'" t-att-class="'workshop-stat-card workshop-stat-assigned h-100' + (' is-active' if active_filter == 'assigned' else '')">
-                            <div class="workshop-stat-icon"><i class="fa fa-user-check"></i></div>
+                            <div class="workshop-stat-icon"><i class="fa fa-users"></i></div>
                             <div>
                                 <div class="workshop-stat-label">Asignadas</div>
                                 <div class="workshop-stat-value" t-esc="stats['assigned']"/>
@@ -90,7 +90,7 @@
                 <div class="workshop-filter-bar mb-3">
                     <a t-att-href="'/my/workshop'"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'all' else '')">
-                        Todas <span class="badge text-bg-light" t-esc="all_count"/>
+                        Todas <span class="badge text-bg-light" t-esc="stats['total']"/>
                     </a>
                     <a t-att-href="'/my/workshop?filter=to_assign'"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'to_assign' else '')">
@@ -114,62 +114,147 @@
                     </a>
                 </div>
 
-                <div class="workshop-list-card">
-                    <div class="workshop-list-card-header d-flex flex-wrap align-items-center gap-2">
-                        <div class="workshop-list-title">
-                            <i class="fa fa-list"></i>
-                            <t t-if="active_filter == 'all'">Todas las órdenes</t>
-                            <t t-else="">Órdenes filtradas</t>
-                            <span class="badge text-bg-light ms-1" t-esc="len(repairs)"/>
-                        </div>
-                        <div class="workshop-list-meta text-muted small ms-auto" t-if="repairs">
-                            Mostrando <strong t-esc="len(repairs)"/> de <strong t-esc="all_count"/>
-                        </div>
+                <!-- Buscador -->
+                <form class="workshop-search-bar mb-3" method="get" action="/my/workshop">
+                    <t t-if="active_filter != 'all'">
+                        <input type="hidden" name="filter" t-att-value="active_filter"/>
+                    </t>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fa fa-search text-muted"></i></span>
+                        <input type="text" name="search" class="form-control border-start-0"
+                               placeholder="Buscar por orden, placa o cliente..."
+                               t-att-value="search"/>
+                        <button class="btn btn-primary" type="submit">Buscar</button>
+                        <a t-if="search"
+                           t-att-href="'/my/workshop' + ('?filter=' + active_filter if active_filter != 'all' else '')"
+                           class="btn btn-outline-secondary" title="Limpiar búsqueda" aria-label="Limpiar búsqueda">
+                            <i class="fa fa-times"></i>
+                        </a>
                     </div>
+                </form>
 
-                    <div t-if="not repairs" class="workshop-list-empty">
-                        <i class="fa fa-inbox"></i>
-                        <h3 class="h6 mt-2 mb-1">Sin órdenes en esta vista</h3>
-                        <p class="text-muted small mb-0">Cambia el filtro o crea una nueva orden para empezar.</p>
+                <!-- Encabezado de resultados -->
+                <div class="workshop-results-header mb-3">
+                    <div class="workshop-results-title">
+                        <i class="fa fa-list text-muted"></i>
+                        <t t-if="active_filter == 'all'">Todas las órdenes</t>
+                        <t t-else="">Órdenes filtradas</t>
+                        <span class="badge text-bg-secondary ms-1" t-esc="repair_count"/>
                     </div>
+                    <div t-if="search" class="workshop-results-meta text-muted small">
+                        Resultados para: <strong t-esc="search"/>
+                    </div>
+                    <div t-elif="pager['page_count'] > 1" class="workshop-results-meta text-muted small">
+                        Página <strong t-esc="pager['page']['num']"/> de <strong t-esc="pager['page_count']"/>
+                    </div>
+                </div>
 
-                    <div t-else="" class="table-responsive">
-                        <table class="workshop-list-table table table-hover align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="workshop-list-th-seq">#</th>
-                                    <th>Placa</th>
-                                    <th>Cliente</th>
-                                    <th class="workshop-list-th-svc">Servicio</th>
-                                    <th class="workshop-list-th-tech">Técnico</th>
-                                    <th>Estado</th>
-                                    <th class="workshop-list-th-date">Recibido</th>
-                                    <th class="workshop-list-th-action"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr t-foreach="repairs" t-as="repair" class="workshop-list-row js-workshop-order-row"
-                                    t-att-data-href="'/my/workshop/order/%s' % repair.id">
-                                    <td class="workshop-list-seq" t-esc="repair.sequence or repair.display_name"/>
-                                    <td>
-                                        <span class="workshop-list-plate" t-esc="repair.license_plate or '—'"/>
-                                    </td>
-                                    <td>
-                                        <span class="workshop-list-primary" t-esc="repair.client_id.display_name or '—'"/>
-                                    </td>
-                                    <td class="text-muted small" t-esc="repair.service_type.name or '—'"/>
-                                    <td class="text-muted small" t-esc="(repair.portal_technician_id.display_name or repair.user_id.display_name or '—')"/>
-                                    <td>
-                                        <span class="workshop-list-state" t-esc="repair.get_service_flow_state_label()"/>
-                                    </td>
-                                    <td class="workshop-list-date text-muted small" t-esc="repair.receipt_date and repair.receipt_date.strftime('%d/%m/%Y') or '—'"/>
-                                    <td class="workshop-list-action text-end">
-                                        <i class="fa fa-chevron-right text-muted"></i>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!-- Estado vacío -->
+                <div t-if="not repairs" class="workshop-list-empty">
+                    <i class="fa fa-inbox"></i>
+                    <h3 class="h6 mt-2 mb-1">Sin órdenes en esta vista</h3>
+                    <p class="text-muted small mb-0">
+                        <t t-if="search">No se encontraron órdenes para "<strong t-esc="search"/>".</t>
+                        <t t-else="">Cambia el filtro o crea una nueva orden para empezar.</t>
+                    </p>
+                </div>
+
+                <!-- Cuadrícula de tarjetas -->
+                <div t-else="" class="workshop-cards-grid">
+                    <div t-foreach="repairs" t-as="repair"
+                         t-attf-class="workshop-order-card-wrap workshop-state-#{repair.service_flow_state or 'received'}">
+
+                        <!-- Encabezado de tarjeta -->
+                        <div class="workshop-card-head">
+                            <span class="workshop-card-seq" t-esc="repair.sequence or repair.display_name"/>
+                            <span t-attf-class="workshop-card-badge workshop-badge-#{repair.service_flow_state or 'received'}"
+                                  t-esc="repair.get_service_flow_state_label()"/>
+                        </div>
+
+                        <!-- Cuerpo de tarjeta -->
+                        <div class="workshop-card-body">
+                            <div class="workshop-card-vehicle">
+                                <i class="fa fa-car" aria-hidden="true"></i>
+                                <span class="workshop-card-plate" t-esc="repair.license_plate or '—'"/>
+                                <t t-set="vparts" t-value="[x for x in [repair.vehicle_brand_id.name, repair.model_id.name, repair.model_year] if x]"/>
+                                <span t-if="vparts" class="workshop-card-vehicle-model text-muted" t-esc="' · '.join(vparts)"/>
+                            </div>
+                            <div class="workshop-card-meta">
+                                <div class="workshop-card-meta-row" t-if="repair.client_id">
+                                    <span class="workshop-card-meta-label"><i class="fa fa-user" aria-hidden="true"></i></span>
+                                    <span class="workshop-card-meta-value" t-esc="repair.client_id.display_name"/>
+                                </div>
+                                <div class="workshop-card-meta-row" t-if="repair.receipt_date">
+                                    <span class="workshop-card-meta-label"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                    <span class="workshop-card-meta-value" t-esc="repair.receipt_date.strftime('%d/%m/%Y')"/>
+                                </div>
+                                <div class="workshop-card-meta-row" t-if="repair.portal_advisor_id">
+                                    <span class="workshop-card-meta-label"><i class="fa fa-id-badge" aria-hidden="true"></i></span>
+                                    <span class="workshop-card-meta-value" t-esc="repair.portal_advisor_id.display_name"/>
+                                </div>
+                                <div class="workshop-card-meta-row" t-if="repair.portal_technician_id or repair.user_id">
+                                    <span class="workshop-card-meta-label"><i class="fa fa-wrench" aria-hidden="true"></i></span>
+                                    <span class="workshop-card-meta-value" t-esc="(repair.portal_technician_id or repair.user_id).display_name"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pie de tarjeta -->
+                        <div class="workshop-card-footer">
+                            <div class="workshop-card-footer-left">
+                                <t t-set="svc_lines" t-value="repair.fleet_repair_line"/>
+                                <t t-set="svc_count" t-value="len(svc_lines)"/>
+                                <t t-if="svc_count">
+                                    <button class="btn btn-sm btn-outline-secondary workshop-card-svc-toggle"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            t-att-data-bs-target="'#svc-collapse-%s' % repair.id"
+                                            aria-expanded="false"
+                                            t-att-aria-controls="'svc-collapse-%s' % repair.id">
+                                        <i class="fa fa-list-ul" aria-hidden="true"></i>
+                                        Ver servicios (<t t-esc="svc_count"/>)
+                                        <i class="fa fa-chevron-down workshop-card-svc-chevron" aria-hidden="true"></i>
+                                    </button>
+                                </t>
+                                <span t-else="" class="workshop-card-no-svc text-muted small">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i> Sin servicios
+                                </span>
+                            </div>
+                            <a t-att-href="'/my/workshop/order/%s' % repair.id"
+                               class="btn btn-sm btn-primary workshop-card-btn-detail">
+                                Ver orden <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                            </a>
+                        </div>
+
+                        <!-- Servicios colapsables -->
+                        <div t-if="svc_count"
+                             class="collapse workshop-card-svc-collapse"
+                             t-att-id="'svc-collapse-%s' % repair.id">
+                            <div class="workshop-card-svc-list">
+                                <div t-foreach="svc_lines" t-as="svc"
+                                     t-attf-class="workshop-card-svc-item workshop-svc-row-#{svc.tecnico_status or 'pendiente'}">
+                                    <div class="workshop-card-svc-name">
+                                        <span class="fw-semibold" t-esc="svc.service_type.name or '—'"/>
+                                        <span t-if="svc.service_detail" class="text-muted small d-block workshop-card-svc-detail"
+                                              t-esc="svc.service_detail"/>
+                                    </div>
+                                    <span t-attf-class="workshop-svc-badge workshop-svc-badge-#{svc.tecnico_status or 'pendiente'}">
+                                        <t t-if="svc.tecnico_status == 'completado'">Completado</t>
+                                        <t t-elif="svc.tecnico_status == 'en_progreso'">En progreso</t>
+                                        <t t-else="">Pendiente</t>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
+                </div>
+
+                <!-- Paginador -->
+                <div t-if="pager['page_count'] > 1" class="d-flex justify-content-center mt-4">
+                    <t t-call="portal.pager">
+                        <t t-set="pager" t-value="pager"/>
+                    </t>
                 </div>
             </div>
         </t>
@@ -410,14 +495,20 @@
                             </div>
                         </div>
                         <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Tipo de servicio</label>
-                                <select name="service_type" class="form-select">
-                                    <option value="">Seleccione...</option>
-                                    <option t-foreach="service_types" t-as="service" t-att-value="service.id" t-esc="service.name"/>
-                                </select>
+                            <div class="col-12">
+                                <label class="form-label">Servicios solicitados <span class="text-danger">*</span></label>
+                                <p class="form-text small text-muted mb-2">Marca todos los servicios que el cliente solicita. El técnico marcará cada uno como vaya completándolo.</p>
+                                <div class="workshop-service-grid">
+                                    <t t-foreach="service_types" t-as="service">
+                                        <label class="workshop-service-card" t-att-for="'service_type_%s' % service.id">
+                                            <input type="checkbox" name="service_types" t-att-value="service.id" t-att-id="'service_type_%s' % service.id" class="form-check-input"/>
+                                            <i class="fa fa-wrench workshop-service-icon"></i>
+                                            <span class="workshop-service-name" t-esc="service.name"/>
+                                        </label>
+                                    </t>
+                                </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Plantilla checklist</label>
                                 <select name="template_id" class="form-select">
                                     <option t-foreach="templates" t-as="template" t-att-value="template.id"
@@ -425,7 +516,7 @@
                                             t-esc="template.name"/>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Motivo de ingreso <span class="text-danger">*</span></label>
                                 <input name="reason" class="form-control" required="required" placeholder="Ej. Mantenimiento preventivo"/>
                             </div>
@@ -614,8 +705,14 @@
                             <div class="workshop-detail-quickinfo-value text-truncate" t-esc="(repair.portal_technician_id.display_name or repair.user_id.display_name or '—')"/>
                         </div>
                         <div class="workshop-detail-quickinfo-cell">
-                            <div class="workshop-detail-quickinfo-label"><i class="fa fa-wrench"></i> Servicio</div>
-                            <div class="workshop-detail-quickinfo-value text-truncate" t-esc="(repair.service_type.name or '—')"/>
+                            <div class="workshop-detail-quickinfo-label"><i class="fa fa-wrench"></i> Servicios</div>
+                            <div class="workshop-detail-quickinfo-value workshop-quickinfo-services">
+                                <t t-set="qs_records" t-value="repair.fleet_repair_line.filtered(lambda l: l.service_type)"/>
+                                <t t-if="qs_records">
+                                    <span t-foreach="qs_records" t-as="qs" class="workshop-quickinfo-chip" t-esc="qs.service_type.name"/>
+                                </t>
+                                <span t-else="" class="text-muted">—</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -706,9 +803,18 @@
                                     <span class="workshop-info-label">CI Renting</span>
                                     <span class="workshop-info-value" t-esc="repair.renting_reference or '—'"/>
                                 </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Servicio</span>
-                                    <span class="workshop-info-value" t-esc="repair.service_type.name or '—'"/>
+                                <div class="workshop-info-row workshop-info-row-multiline">
+                                    <span class="workshop-info-label">Servicios</span>
+                                    <div class="workshop-info-value workshop-info-services">
+                                        <t t-set="service_records" t-value="repair.fleet_repair_line.filtered(lambda l: l.service_type)"/>
+                                        <t t-if="service_records">
+                                            <span t-foreach="service_records" t-as="svc" class="workshop-service-chip">
+                                                <i class="fa fa-wrench"></i>
+                                                <span t-esc="svc.service_type.name"/>
+                                            </span>
+                                        </t>
+                                        <span t-else="" class="text-muted">—</span>
+                                    </div>
                                 </div>
                                 <div class="workshop-info-row">
                                     <span class="workshop-info-label">Técnico</span>
@@ -721,6 +827,79 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="border rounded p-3 mt-3">
+                    <h2 class="h5 mb-1">
+                        <i class="fa fa-wrench text-muted"></i> Servicios solicitados
+                    </h2>
+                    <p class="small text-muted mb-3">Servicios registrados en la orden. El técnico marca cada uno a medida que lo completa.</p>
+                    <t t-set="svc_done" t-value="len(service_lines.filtered(lambda l: l.tecnico_status == 'completado'))"/>
+                    <t t-set="svc_total" t-value="len(service_lines)"/>
+                    <div class="workshop-service-summary mb-3" t-if="svc_total">
+                        <div class="workshop-service-progress">
+                            <div class="workshop-service-progress-fill" t-attf-style="width: {{ (100 * svc_done / svc_total if svc_total else 0) }}%;"/>
+                        </div>
+                        <div class="workshop-service-progress-label small text-muted">
+                            <strong t-esc="svc_done"/> de <strong t-esc="svc_total"/> servicios completados
+                        </div>
+                    </div>
+                    <div t-if="not service_lines" class="text-muted">No hay servicios registrados para esta orden.</div>
+                    <form t-if="service_lines" id="workshop-services-form"
+                          t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="action" value="save"/>
+                        <div class="table-responsive">
+                            <table class="workshop-service-table table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 36px;">#</th>
+                                        <th>Servicio</th>
+                                        <th style="width: 200px;">Estado</th>
+                                        <th>Notas del técnico</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="service_lines" t-as="svc" t-att-class="'workshop-service-row workshop-service-row-' + (svc.tecnico_status or 'pendiente')">
+                                        <td class="workshop-service-num" t-esc="svc_index + 1"/>
+                                        <td>
+                                            <div class="fw-semibold" t-esc="svc.service_type.name or '—'"/>
+                                            <div class="small text-muted" t-if="svc.service_detail" t-esc="svc.service_detail"/>
+                                        </td>
+                                        <td>
+                                            <t t-if="is_technician or is_internal_manager">
+                                                <select t-att-name="'svc_status_%s' % svc.id" class="form-select form-select-sm workshop-service-status-select">
+                                                    <option value="pendiente" t-att-selected="'selected' if svc.tecnico_status == 'pendiente' else None">⏳ Pendiente</option>
+                                                    <option value="en_progreso" t-att-selected="'selected' if svc.tecnico_status == 'en_progreso' else None">⚙ En progreso</option>
+                                                    <option value="completado" t-att-selected="'selected' if svc.tecnico_status == 'completado' else None">✓ Completado</option>
+                                                </select>
+                                            </t>
+                                            <t t-else="">
+                                                <span t-if="svc.tecnico_status == 'pendiente'" class="badge bg-secondary">Pendiente</span>
+                                                <span t-if="svc.tecnico_status == 'en_progreso'" class="badge bg-warning text-dark">En progreso</span>
+                                                <span t-if="svc.tecnico_status == 'completado'" class="badge bg-success">Completado</span>
+                                            </t>
+                                        </td>
+                                        <td>
+                                            <t t-if="is_technician or is_internal_manager">
+                                                <input t-att-name="'svc_notes_%s' % svc.id" class="form-control form-control-sm"
+                                                       t-att-placeholder="'Notas sobre ' + (svc.service_type.name or 'este servicio')"
+                                                       t-att-value="svc.tecnico_notes or ''"/>
+                                            </t>
+                                            <t t-else="">
+                                                <span t-esc="svc.tecnico_notes or ''" class="text-muted small"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-end mt-2" t-if="is_technician or is_internal_manager">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fa fa-check"></i> Guardar avance de servicios
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="border rounded p-3 mt-3">
@@ -748,12 +927,25 @@
                     <p t-if="not repair.reception_checklist_line_ids" class="text-muted mb-0">Sin checklist diligenciado.</p>
                 </div>
 
-                <div class="border rounded p-3 mt-3">
-                    <h2 class="h5">Checklist técnico</h2>
-                    <p class="small text-muted mb-2">
-                        Checklist detallado que el técnico llena durante la inspección / diagnóstico del vehículo.
-                    </p>
+                <div id="workshop-checklist-tecnico" class="border rounded p-3 mt-3">
                     <t t-set="tecnico_lines" t-value="repair.technical_checklist_line_ids"/>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <div>
+                            <h2 class="h5 mb-0">Checklist técnico</h2>
+                            <p class="small text-muted mb-0">
+                                Checklist detallado que el técnico llena durante la inspección / diagnóstico del vehículo.
+                            </p>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 ms-auto" t-if="tecnico_lines and (repair.portal_technician_id or repair.user_id)">
+                            <a t-att-href="'/my/workshop/order/%s/checklist/pdf' % repair.id"
+                               class="btn btn-primary btn-sm" target="_blank" rel="noopener">
+                                <i class="fa fa-file-pdf"></i> Descargar PDF
+                            </a>
+                            <button type="button" class="btn btn-outline-primary btn-sm js-workshop-print-checklist" t-att-data-target="'workshop-checklist-tecnico'">
+                                <i class="fa fa-print"></i> Imprimir
+                            </button>
+                        </div>
+                    </div>
                     <t t-if="not tecnico_lines">
                         <p class="text-muted mb-0">Aún no hay líneas de checklist técnico registradas para esta orden.</p>
                     </t>

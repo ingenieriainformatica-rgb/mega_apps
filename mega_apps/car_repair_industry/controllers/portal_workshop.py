@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from odoo import _, http
+from odoo import _, fields, http
 from pathlib import Path
 
 from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.http import request
+from odoo.addons.portal.controllers.portal import pager as portal_pager
+
+_WORKSHOP_REPAIRS_PER_PAGE = 20
 
 
 class CarRepairPortalWorkshop(http.Controller):
@@ -74,42 +77,90 @@ class CarRepairPortalWorkshop(http.Controller):
         'purchase': ('==', 'purchase_requested'),
     }
 
-    def _dashboard_values(self, active_filter='all'):
+    def _dashboard_values(self, active_filter='all', search='', page=1):
         Repair = request.env['fleet.repair'].sudo()
         base_domain = self._portal_domain()
-        all_repairs = Repair.search(base_domain, order='id desc', limit=500)
+
+        # Filter domain applied on top of base access domain
+        filter_domain = list(base_domain)
         if active_filter in self.FILTER_STATE_MAP:
             op, val = self.FILTER_STATE_MAP[active_filter]
             if op == '==':
-                filtered = all_repairs.filtered(lambda r: r.service_flow_state == val)
+                filter_domain.append(('service_flow_state', '=', val))
             else:
-                filtered = all_repairs.filtered(lambda r: r.service_flow_state in val)
-        else:
-            filtered = all_repairs
+                filter_domain.append(('service_flow_state', 'in', list(val)))
+
+        # Search domain applied on top of filter domain
+        search_domain = list(filter_domain)
+        if search:
+            search_domain += ['|', '|', '|',
+                ('sequence', 'ilike', search),
+                ('license_plate', 'ilike', search),
+                ('client_id.name', 'ilike', search),
+                ('name', 'ilike', search),
+            ]
+
+        repair_count = Repair.search_count(search_domain)
+
+        url_args = {}
+        if active_filter != 'all':
+            url_args['filter'] = active_filter
+        if search:
+            url_args['search'] = search
+
+        pager_values = portal_pager(
+            url='/my/workshop',
+            total=repair_count,
+            page=page,
+            step=_WORKSHOP_REPAIRS_PER_PAGE,
+            scope=7,
+            url_args=url_args,
+        )
+
+        repairs = Repair.search(
+            search_domain,
+            order='id desc',
+            limit=_WORKSHOP_REPAIRS_PER_PAGE,
+            offset=pager_values['offset'],
+        )
+
+        # Stats always reflect all accessible repairs (no search/filter applied)
+        stats = {
+            'total': Repair.search_count(base_domain),
+            'to_assign': Repair.search_count(base_domain + [('service_flow_state', '=', 'to_assign')]),
+            'assigned': Repair.search_count(base_domain + [('service_flow_state', '=', 'assigned')]),
+            'diagnosis': Repair.search_count(base_domain + [('service_flow_state', '=', 'diagnosis')]),
+            'road_test': Repair.search_count(base_domain + [('service_flow_state', 'in', ['road_test_requested', 'road_test'])]),
+            'purchase': Repair.search_count(base_domain + [('service_flow_state', '=', 'purchase_requested')]),
+        }
+
         return {
-            'repairs': filtered,
-            'all_count': len(all_repairs),
+            'repairs': repairs,
+            'repair_count': repair_count,
+            'search': search,
+            'pager': pager_values,
             'is_advisor': self._is_advisor(),
             'is_technician': self._is_technician(),
             'is_road_test': self._is_road_test(),
             'is_internal_manager': self._is_internal_manager(),
             'active_filter': active_filter,
-            'stats': {
-                'total': len(all_repairs),
-                'to_assign': len(all_repairs.filtered(lambda r: r.service_flow_state == 'to_assign')),
-                'assigned': len(all_repairs.filtered(lambda r: r.service_flow_state == 'assigned')),
-                'diagnosis': len(all_repairs.filtered(lambda r: r.service_flow_state == 'diagnosis')),
-                'road_test': len(all_repairs.filtered(lambda r: r.service_flow_state in ('road_test_requested', 'road_test'))),
-                'purchase': len(all_repairs.filtered(lambda r: r.service_flow_state == 'purchase_requested')),
-            },
+            'stats': stats,
         }
 
-    @http.route(['/my/workshop', '/my/workshop/orders'], type='http', auth='user', website=True)
-    def workshop_dashboard(self, filter=None, **kwargs):
+    @http.route(
+        ['/my/workshop', '/my/workshop/orders', '/my/workshop/page/<int:page>'],
+        type='http', auth='user', website=True,
+    )
+    def workshop_dashboard(self, filter=None, search='', page=1, **kwargs):
         active_filter = filter if filter in self.FILTER_STATE_MAP else 'all'
+        search = (search or '').strip()
+        try:
+            page = max(1, int(page))
+        except (TypeError, ValueError):
+            page = 1
         return request.render(
             'car_repair_industry.portal_workshop_dashboard',
-            self._dashboard_values(active_filter),
+            self._dashboard_values(active_filter, search, page),
         )
 
     @http.route('/my/workshop/order/new', type='http', auth='user', website=True, methods=['GET', 'POST'])
@@ -255,7 +306,16 @@ class CarRepairPortalWorkshop(http.Controller):
             contact_name = delivered_by_name or client_name
             contact_phone = delivered_by_phone or client_phone
 
-        service_type_id = int(post.get('service_type') or 0)
+        service_type_ids = []
+        raw_service_types = request.httprequest.form.getlist('service_types')
+        for raw in raw_service_types:
+            try:
+                service_type_ids.append(int(raw))
+            except (TypeError, ValueError):
+                continue
+        if not service_type_ids:
+            raise UserError(_("Debe seleccionar al menos un servicio."))
+        primary_service_type_id = service_type_ids[0]
         vehicle_brand_id = int(post.get('vehicle_brand_id') or 0)
         vehicle_model_id = int(post.get('vehicle_model_id') or 0)
         model_year = (post.get('model_year') or '').strip()
@@ -290,27 +350,30 @@ class CarRepairPortalWorkshop(http.Controller):
             'engine_number': (post.get('engine_number') or '').strip() or False,
             'vin_sn': (post.get('vin_sn') or '').strip().upper() or False,
             'fuel_type': post.get('fuel_type') or False,
-            'service_type': service_type_id or False,
+            'service_type': primary_service_type_id or False,
             'description': post.get('description'),
             'service_detail': post.get('reason'),
             'portal_advisor_id': request.env.user.id,
             'service_flow_state': 'to_assign',
         }
         repair = Repair.create(values)
-        request.env['fleet.repair.line'].sudo().create({
-            'fleet_repair_id': repair.id,
-            'license_plate': repair.license_plate,
-            'model_id': vehicle_model_id or False,
-            'vehicle_brand_id': vehicle_brand_id or False,
-            'model_year': model_year or False,
-            'engine_displacement': engine_displacement or False,
-            'engine_number': repair.engine_number or False,
-            'vin_sn': repair.vin_sn or False,
-            'fuel_type': post.get('fuel_type') or False,
-            'service_type': service_type_id or False,
-            'service_detail': post.get('reason'),
-            'list_of_damage': post.get('description'),
-        })
+        RepairLine = request.env['fleet.repair.line'].sudo()
+        for index, service_id in enumerate(service_type_ids, start=1):
+            RepairLine.create({
+                'fleet_repair_id': repair.id,
+                'license_plate': repair.license_plate,
+                'model_id': vehicle_model_id or False,
+                'vehicle_brand_id': vehicle_brand_id or False,
+                'model_year': model_year or False,
+                'engine_displacement': engine_displacement or False,
+                'engine_number': repair.engine_number or False,
+                'vin_sn': repair.vin_sn or False,
+                'fuel_type': post.get('fuel_type') or False,
+                'service_type': service_id or False,
+                'service_detail': post.get('reason') if index == 1 else False,
+                'list_of_damage': post.get('description') if index == 1 else False,
+                'tecnico_status': 'pendiente',
+            })
 
         if template:
             repair.write({'reception_checklist_template_id': template.id})
@@ -352,6 +415,9 @@ class CarRepairPortalWorkshop(http.Controller):
         self._ensure_tecnico_checklist_lines(repair)
         return request.render('car_repair_industry.portal_workshop_order_detail', {
             'repair': repair,
+            'service_lines': request.env['fleet.repair.line'].sudo().search(
+                [('fleet_repair_id', '=', repair.id)], order='id asc'
+            ),
             'is_advisor': self._is_advisor(),
             'is_technician': self._is_technician(),
             'is_road_test': self._is_road_test(),
@@ -394,6 +460,20 @@ class CarRepairPortalWorkshop(http.Controller):
             'requested_materials': post.get('requested_materials'),
         }
         repair.sudo().write(values)
+
+        RepairLine = request.env['fleet.repair.line'].sudo()
+        service_lines = RepairLine.search([('fleet_repair_id', '=', repair.id)])
+        allowed_statuses = {'pendiente', 'en_progreso', 'completado'}
+        for line in service_lines:
+            new_status = post.get('svc_status_%s' % line.id)
+            new_notes = post.get('svc_notes_%s' % line.id)
+            write_vals = {}
+            if new_status in allowed_statuses:
+                write_vals['tecnico_status'] = new_status
+            if new_notes is not None:
+                write_vals['tecnico_notes'] = new_notes
+            if write_vals:
+                line.write(write_vals)
 
         ChecklistLine = request.env['fleet.repair.reception.checklist.line'].sudo()
         tecnico_lines = ChecklistLine.search([
@@ -441,6 +521,37 @@ class CarRepairPortalWorkshop(http.Controller):
         else:
             repair.message_post(body=_("Avance técnico guardado por %s.") % request.env.user.display_name)
         return request.redirect('/my/workshop/order/%s' % repair.id)
+
+    @http.route('/my/workshop/order/<int:repair_id>/checklist/pdf', type='http', auth='user', website=True)
+    def workshop_checklist_pdf(self, repair_id, **kwargs):
+        repair = self._get_repair(repair_id)
+        if not repair.technical_checklist_line_ids:
+            return request.redirect('/my/workshop/order/%s' % repair.id)
+        report = request.env['ir.actions.report'].sudo()._get_report(
+            'car_repair_industry.fleet_repair_technical_checklist_document'
+        )
+        if not report:
+            raise UserError(_("No se encontró el reporte de checklist técnico."))
+        today = fields.Date.today()
+        data = {
+            'lang': request.env.lang,
+            'today_date': today.strftime('%d/%m/%Y'),
+        }
+        pdf_content, content_type = report._render_qweb_pdf(
+            report.report_name, [repair.id], data=data
+        )
+        pdf_content = pdf_content and pdf_content[0] if isinstance(pdf_content, tuple) else pdf_content
+        sequence = repair.sequence or repair.display_name or f'orden-{repair.id}'
+        safe_sequence = ''.join(c if c.isalnum() or c in '-_' else '_' for c in str(sequence))
+        filename = f'checklist-tecnico-{safe_sequence}.pdf'
+        return request.make_response(
+            pdf_content,
+            headers=[
+                ('Content-Type', 'application/pdf'),
+                ('Content-Length', len(pdf_content)),
+                ('Content-Disposition', f'attachment; filename="{filename}"'),
+            ],
+        )
 
     @http.route('/my/workshop/order/<int:repair_id>/road-test', type='http', auth='user', website=True, methods=['POST'])
     def workshop_road_test_update(self, repair_id, **post):

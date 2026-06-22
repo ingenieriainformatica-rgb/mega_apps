@@ -1230,6 +1230,21 @@ class FleetRepairLine(models.Model):
     diagnose_id = fields.Many2one('fleet.diagnose', string='Car Diagnose', copy=False)
     workorder_id = fields.Many2one('fleet.workorder', string='Car Work Order', copy=False)
     source_line_id = fields.Many2one('fleet.repair.line', string='Source')
+    tecnico_status = fields.Selection(
+        [
+            ('pendiente', 'Pendiente'),
+            ('en_progreso', 'En progreso'),
+            ('completado', 'Completado'),
+        ],
+        string="Estado del técnico",
+        default='pendiente',
+        tracking=True,
+        help="Marca el avance del técnico sobre este servicio específico.",
+    )
+    tecnico_notes = fields.Text(
+        string="Notas del técnico",
+        help="Notas u observaciones del técnico al ejecutar este servicio.",
+    )
     est_ser_hour = fields.Float(string='Estimated Sevice Hours')
     service_product_id = fields.Many2one('product.product', string='Service Product')
     service_product_price = fields.Float('Service Product Price')

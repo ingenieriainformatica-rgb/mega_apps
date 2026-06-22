@@ -284,18 +284,31 @@ publicWidget.registry.WorkshopTechnicianPhotos = publicWidget.Widget.extend({
         });
     },
 });
-publicWidget.registry.WorkshopOrderRow = publicWidget.Widget.extend({
-    selector: ".js-workshop-order-row",
+publicWidget.registry.WorkshopPrintChecklist = publicWidget.Widget.extend({
+    selector: ".js-workshop-print-checklist",
     events: {
-        "click": "_onRowClick",
+        "click": "_onPrintClick",
     },
-    _onRowClick(event) {
-        if (event.target.closest("a, button, input, select, textarea")) {
+    _onPrintClick() {
+        const targetId = this.el.dataset.target;
+        const target = targetId && document.getElementById(targetId);
+        if (!target) {
+            window.print();
             return;
         }
-        const href = this.el.dataset.href;
-        if (href) {
-            window.location.assign(href);
-        }
+        const hadClass = document.body.classList.contains("workshop-printing-checklist");
+        document.body.classList.add("workshop-printing-checklist");
+        const cleanup = () => {
+            document.body.classList.remove("workshop-printing-checklist");
+            window.removeEventListener("afterprint", cleanup);
+        };
+        window.addEventListener("afterprint", cleanup);
+        const restore = () => {
+            if (!hadClass) {
+                document.body.classList.remove("workshop-printing-checklist");
+            }
+        };
+        setTimeout(restore, 1500);
+        window.print();
     },
 });
