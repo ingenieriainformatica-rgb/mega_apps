@@ -163,6 +163,13 @@
             <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_directeur_commercial'))]"/>
         </record>
 
+        <!-- Grupo almacén - solicitudes de repuestos -->
+        <record id="group_fleet_repair_spare_warehouse" model="res.groups">
+            <field name="name">Almacén - Solicitudes de repuestos</field>
+            <field name="category_id" ref="car_repair_industry.module_category_fleet_repair"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
         <!-- Reglas portal -->
         <record id="car_repair_rule_portal_advisor_repair" model="ir.rule">
             <field name="name">Portal asesor - sus órdenes</field>
@@ -186,6 +193,66 @@
             <field name="global" eval="False"/>
             <field name="domain_force">[('road_test_user_id', '=', user.id)]</field>
             <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_portal_road_test'))]"/>
+        </record>
+
+        <!-- Reglas solicitudes de repuestos - portal técnico solo ve las suyas -->
+        <record id="car_repair_spare_request_rule_portal_technician" model="ir.rule">
+            <field name="name">Solicitud repuestos - técnico portal solo sus solicitudes</field>
+            <field name="model_id" ref="model_fleet_repair_spare_request"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[('requested_by_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_portal_technician'))]"/>
+        </record>
+
+        <record id="car_repair_spare_request_line_rule_portal_technician" model="ir.rule">
+            <field name="name">Líneas repuestos - técnico portal solo sus solicitudes</field>
+            <field name="model_id" ref="model_fleet_repair_spare_request_line"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[('request_id.requested_by_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_portal_technician'))]"/>
+        </record>
+
+        <!-- Reglas solicitudes de repuestos - almacén ve todas las de su compañía -->
+        <record id="car_repair_spare_request_rule_warehouse" model="ir.rule">
+            <field name="name">Solicitud repuestos - almacén todas de su compañía</field>
+            <field name="model_id" ref="model_fleet_repair_spare_request"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_spare_warehouse'))]"/>
+        </record>
+
+        <record id="car_repair_spare_request_line_rule_warehouse" model="ir.rule">
+            <field name="name">Líneas repuestos - almacén todas</field>
+            <field name="model_id" ref="model_fleet_repair_spare_request_line"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_spare_warehouse'))]"/>
+        </record>
+
+        <!-- Regla catálogo almacén (gestión) -->
+        <record id="car_repair_spare_catalog_rule_warehouse" model="ir.rule">
+            <field name="name">Catálogo repuestos - almacén acceso total</field>
+            <field name="model_id" ref="model_fleet_repair_spare_catalog"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_spare_warehouse'))]"/>
+        </record>
+
+        <!-- Reglas supervisor y director: acceso total a solicitudes -->
+        <record id="car_repair_spare_request_rule_manager" model="ir.rule">
+            <field name="name">Solicitud repuestos - supervisor acceso total</field>
+            <field name="model_id" ref="model_fleet_repair_spare_request"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_service_manager'))]"/>
+        </record>
+
+        <record id="car_repair_spare_request_line_rule_manager" model="ir.rule">
+            <field name="name">Líneas repuestos - supervisor acceso total</field>
+            <field name="model_id" ref="model_fleet_repair_spare_request_line"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_service_manager'))]"/>
         </record>
 
     </data>

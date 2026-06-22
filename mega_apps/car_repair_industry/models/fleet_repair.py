@@ -823,6 +823,23 @@ class FleetRepair(models.Model):
         self.ensure_one()
         return dict(self._fields['service_flow_state'].selection).get(self.service_flow_state, self.service_flow_state)
 
+    _STATE_LABELS_ES = {
+        'draft':              'Recibido',
+        'diagnosis':          'En diagnóstico',
+        'diagnosis_complete': 'Diagnóstico completo',
+        'quote':              'Cotización enviada',
+        'saleorder':          'Cotización aprobada',
+        'workorder':          'En reparación',
+        'work_completed':     'Trabajo completado',
+        'invoiced':           'Facturado',
+        'done':               'Finalizado',
+        'cancel':             'Cancelado',
+    }
+
+    def get_state_label(self):
+        self.ensure_one()
+        return self._STATE_LABELS_ES.get(self.state, self.state or '')
+
     def action_flow_mark_to_assign(self):
         self.write({'service_flow_state': 'to_assign'})
         self._notify_repair_group(

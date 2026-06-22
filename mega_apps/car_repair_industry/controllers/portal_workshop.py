@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 from odoo import _, fields, http
 from pathlib import Path
 
@@ -601,3 +602,139 @@ class CarRepairPortalWorkshop(http.Controller):
             repair.message_post(body=_("Subida de %s foto(s) de tipo '%s' desde portal por %s.") % (
                 len(validated_files), evidence_type, request.env.user.display_name))
         return request.redirect('/my/workshop/order/%s' % repair.id)
+
+    # ─── Solicitud de repuestos ────────────────────────────────────────────────
+
+    @http.route('/my/workshop/spare-catalog', type='http', auth='user', website=True, methods=['GET'])
+    def workshop_spare_catalog(self, q='', **kwargs):
+        if not self._is_technician():
+            return request.make_response(
+                json.dumps({'error': 'forbidden'}),
+                headers=[('Content-Type', 'application/json')],
+                status=403,
+            )
+        q = (q or '').strip()
+        if len(q) < 2:
+            return request.make_response(
+                json.dumps([]),
+                headers=[('Content-Type', 'application/json')],
+            )
+        results = request.env['fleet.repair.spare.catalog'].sudo().search(
+            [('name', 'ilike', q), ('active', '=', True)],
+            order='name asc',
+            limit=25,
+        )
+        data = [{'id': r.id, 'name': r.name} for r in results]
+        return request.make_response(
+            json.dumps(data),
+            headers=[('Content-Type', 'application/json')],
+        )
+
+    @http.route(
+        '/my/workshop/order/<int:repair_id>/spares/submit',
+        type='http', auth='user', website=True, methods=['POST'],
+        csrf=True,
+    )
+    def workshop_spare_submit(self, repair_id, **post):
+        if not self._is_technician():
+            return request.make_response(
+                json.dumps({'error': 'forbidden'}),
+                headers=[('Content-Type', 'application/json')],
+                status=403,
+            )
+
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError) as exc:
+            return request.make_response(
+                json.dumps({'error': str(exc)}),
+                headers=[('Content-Type', 'application/json')],
+                status=403,
+            )
+
+        # Parse lines sent as JSON in the "lines" field
+        try:
+            raw_lines = json.loads(post.get('lines') or '[]')
+        except (ValueError, TypeError):
+            return request.make_response(
+                json.dumps({'error': _('Formato de líneas inválido.')}),
+                headers=[('Content-Type', 'application/json')],
+                status=400,
+            )
+
+        if not isinstance(raw_lines, list) or not raw_lines:
+            return request.make_response(
+                json.dumps({'error': _('Debe agregar al menos un repuesto.')}),
+                headers=[('Content-Type', 'application/json')],
+                status=400,
+            )
+
+        # Validate each line before any write — use user's own env (portal has read access)
+        Catalog = request.env['fleet.repair.spare.catalog']
+        validated_lines = []
+        for item in raw_lines:
+            if not isinstance(item, dict):
+                continue
+            try:
+                catalog_id = int(item.get('catalog_id') or 0)
+                qty = float(item.get('quantity') or 0)
+            except (ValueError, TypeError):
+                return request.make_response(
+                    json.dumps({'error': _('Datos de línea inválidos.')}),
+                    headers=[('Content-Type', 'application/json')],
+                    status=400,
+                )
+            if catalog_id <= 0:
+                return request.make_response(
+                    json.dumps({'error': _('Repuesto no válido.')}),
+                    headers=[('Content-Type', 'application/json')],
+                    status=400,
+                )
+            if qty <= 0:
+                return request.make_response(
+                    json.dumps({'error': _('La cantidad debe ser mayor que cero.')}),
+                    headers=[('Content-Type', 'application/json')],
+                    status=400,
+                )
+            catalog_item = Catalog.search([('id', '=', catalog_id), ('active', '=', True)], limit=1)
+            if not catalog_item:
+                return request.make_response(
+                    json.dumps({'error': _('Repuesto no encontrado en el catálogo.')}),
+                    headers=[('Content-Type', 'application/json')],
+                    status=400,
+                )
+            note = (item.get('note') or '').strip()[:500]
+            validated_lines.append({
+                'spare_catalog_id': catalog_item.id,
+                'quantity': qty,
+                'technician_note': note or False,
+            })
+
+        if not validated_lines:
+            return request.make_response(
+                json.dumps({'error': _('Debe agregar al menos un repuesto válido.')}),
+                headers=[('Content-Type', 'application/json')],
+                status=400,
+            )
+
+        # All validations passed — create with sudo()
+        SpareRequest = request.env['fleet.repair.spare.request'].sudo()
+        SpareRequestLine = request.env['fleet.repair.spare.request.line'].sudo()
+
+        spare_request = SpareRequest.create({
+            'repair_id': repair.id,
+            'requested_by_id': request.env.user.id,
+            'company_id': request.env.company.id,
+        })
+        for line_vals in validated_lines:
+            line_vals['request_id'] = spare_request.id
+            SpareRequestLine.create(line_vals)
+
+        spare_request.message_post(
+            body=_("Solicitud de repuestos enviada desde portal por %s.") % request.env.user.display_name
+        )
+
+        return request.make_response(
+            json.dumps({'ok': True, 'request_id': spare_request.id}),
+            headers=[('Content-Type', 'application/json')],
+        )

@@ -284,6 +284,193 @@ publicWidget.registry.WorkshopTechnicianPhotos = publicWidget.Widget.extend({
         });
     },
 });
+publicWidget.registry.WorkshopSpareRequest = publicWidget.Widget.extend({
+    selector: "#workshop-spare-request-section",
+
+    start() {
+        this._lines = [];
+        this._selected = null;
+        this._debounceTimer = null;
+
+        this._searchInput = this.el.querySelector("#spare-catalog-search");
+        this._dropdown = this.el.querySelector("#spare-catalog-dropdown");
+        this._qtyInput = this.el.querySelector("#spare-catalog-qty");
+        this._noteInput = this.el.querySelector("#spare-catalog-note");
+        this._addBtn = this.el.querySelector("#spare-add-line-btn");
+        this._tbody = this.el.querySelector("#spare-lines-tbody");
+        this._linesContainer = this.el.querySelector("#spare-lines-container");
+        this._linesEmpty = this.el.querySelector("#spare-lines-empty");
+        this._submitBtn = this.el.querySelector("#spare-submit-btn");
+        this._errorBox = this.el.querySelector("#spare-submit-error");
+        this._successBox = this.el.querySelector("#spare-submit-success");
+
+        this._catalogUrl = this.el.dataset.catalogUrl;
+        this._submitUrl = this.el.dataset.submitUrl;
+
+        this._searchInput.addEventListener("input", () => this._onSearchInput());
+        this._searchInput.addEventListener("blur", () => {
+            setTimeout(() => this._hideDropdown(), 200);
+        });
+        this._addBtn.addEventListener("click", () => this._onAddLine());
+        this._submitBtn.addEventListener("click", () => this._onSubmit());
+
+        return this._super(...arguments);
+    },
+
+    _onSearchInput() {
+        clearTimeout(this._debounceTimer);
+        this._selected = null;
+        this._addBtn.disabled = true;
+        const q = this._searchInput.value.trim();
+        if (q.length < 2) {
+            this._hideDropdown();
+            return;
+        }
+        this._debounceTimer = setTimeout(() => this._fetchCatalog(q), 300);
+    },
+
+    async _fetchCatalog(q) {
+        try {
+            const resp = await fetch(`${this._catalogUrl}?q=${encodeURIComponent(q)}`, {
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+            });
+            if (!resp.ok) {
+                this._hideDropdown();
+                return;
+            }
+            const items = await resp.json();
+            this._renderDropdown(items);
+        } catch {
+            this._hideDropdown();
+        }
+    },
+
+    _renderDropdown(items) {
+        this._dropdown.replaceChildren();
+        if (!items || items.length === 0) {
+            this._hideDropdown();
+            return;
+        }
+        for (const item of items) {
+            const a = document.createElement("a");
+            a.className = "dropdown-item";
+            a.href = "#";
+            a.textContent = item.name;
+            a.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                this._selectCatalogItem(item);
+            });
+            this._dropdown.appendChild(a);
+        }
+        this._dropdown.style.display = "block";
+    },
+
+    _selectCatalogItem(item) {
+        this._selected = item;
+        this._searchInput.value = item.name;
+        this._addBtn.disabled = false;
+        this._hideDropdown();
+    },
+
+    _hideDropdown() {
+        this._dropdown.style.display = "none";
+    },
+
+    _onAddLine() {
+        if (!this._selected) return;
+        const qty = parseFloat(this._qtyInput.value) || 0;
+        if (qty <= 0) {
+            this._qtyInput.focus();
+            return;
+        }
+        const note = this._noteInput.value.trim();
+        this._lines.push({ catalog_id: this._selected.id, name: this._selected.name, quantity: qty, note });
+        this._renderLines();
+        this._searchInput.value = "";
+        this._qtyInput.value = "1";
+        this._noteInput.value = "";
+        this._selected = null;
+        this._addBtn.disabled = true;
+    },
+
+    _renderLines() {
+        this._tbody.replaceChildren();
+        if (this._lines.length === 0) {
+            this._linesContainer.style.display = "none";
+            this._linesEmpty.style.display = "";
+            this._submitBtn.disabled = true;
+            return;
+        }
+        this._linesContainer.style.display = "";
+        this._linesEmpty.style.display = "none";
+        this._submitBtn.disabled = false;
+
+        this._lines.forEach((line, idx) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td class="small">${this._escapeHtml(line.name)}</td>
+                <td class="text-center small">${line.quantity}</td>
+                <td class="small text-muted">${this._escapeHtml(line.note || "—")}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0 js-spare-remove-line"
+                            data-idx="${idx}" title="Quitar">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                </td>`;
+            tr.querySelector(".js-spare-remove-line").addEventListener("click", () => {
+                this._lines.splice(idx, 1);
+                this._renderLines();
+            });
+            this._tbody.appendChild(tr);
+        });
+    },
+
+    async _onSubmit() {
+        this._errorBox.classList.add("d-none");
+        this._successBox.classList.add("d-none");
+        if (this._lines.length === 0) return;
+
+        const csrfToken = this.el.querySelector("#spare-csrf-token")?.value || "";
+        const body = new FormData();
+        body.append("csrf_token", csrfToken);
+        body.append("lines", JSON.stringify(
+            this._lines.map((l) => ({ catalog_id: l.catalog_id, quantity: l.quantity, note: l.note }))
+        ));
+
+        this._submitBtn.disabled = true;
+        this._submitBtn.textContent = "Enviando…";
+
+        try {
+            const resp = await fetch(this._submitUrl, { method: "POST", body });
+            const data = await resp.json();
+            if (data.ok) {
+                this._successBox.textContent = "Solicitud enviada correctamente. Recargando…";
+                this._successBox.classList.remove("d-none");
+                this._lines = [];
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                this._errorBox.textContent = data.error || "Error al enviar la solicitud.";
+                this._errorBox.classList.remove("d-none");
+                this._submitBtn.disabled = false;
+                this._submitBtn.textContent = "Enviar solicitud al almacén";
+            }
+        } catch {
+            this._errorBox.textContent = "Error de red. Intente de nuevo.";
+            this._errorBox.classList.remove("d-none");
+            this._submitBtn.disabled = false;
+            this._submitBtn.textContent = "Enviar solicitud al almacén";
+        }
+    },
+
+    _escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    },
+});
+
 publicWidget.registry.WorkshopPrintChecklist = publicWidget.Widget.extend({
     selector: ".js-workshop-print-checklist",
     events: {

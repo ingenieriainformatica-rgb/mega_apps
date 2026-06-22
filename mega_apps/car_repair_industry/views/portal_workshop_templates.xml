@@ -159,95 +159,85 @@
                     </p>
                 </div>
 
-                <!-- Cuadrícula de tarjetas -->
-                <div t-else="" class="workshop-cards-grid">
-                    <div t-foreach="repairs" t-as="repair"
-                         t-attf-class="workshop-order-card-wrap workshop-state-#{repair.service_flow_state or 'received'}">
+                <!-- Tabla de órdenes -->
+                <div t-else="" class="table-responsive">
+                    <table class="table table-sm table-hover workshop-orders-table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="workshop-col-seq">Orden</th>
+                                <th class="workshop-col-state">Estado</th>
+                                <th class="workshop-col-vehicle">Placa / Vehículo</th>
+                                <th class="workshop-col-client">Cliente</th>
+                                <th class="workshop-col-date">Fecha</th>
+                                <th class="workshop-col-people d-none d-md-table-cell">Asesor / Técnico</th>
+                                <th class="workshop-col-svcs text-center d-none d-sm-table-cell">Servicios</th>
+                                <th class="workshop-col-action"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="repairs" t-as="repair"
+                                t-attf-class="workshop-table-row workshop-row-state-#{repair.state or 'draft'}">
 
-                        <!-- Encabezado de tarjeta -->
-                        <div class="workshop-card-head">
-                            <span class="workshop-card-seq" t-esc="repair.sequence or repair.display_name"/>
-                            <span t-attf-class="workshop-card-badge workshop-badge-#{repair.service_flow_state or 'received'}"
-                                  t-esc="repair.get_service_flow_state_label()"/>
-                        </div>
+                                <!-- Orden -->
+                                <td class="workshop-col-seq fw-semibold text-nowrap">
+                                    <t t-esc="repair.sequence or repair.display_name"/>
+                                </td>
 
-                        <!-- Cuerpo de tarjeta -->
-                        <div class="workshop-card-body">
-                            <div class="workshop-card-vehicle">
-                                <i class="fa fa-car" aria-hidden="true"></i>
-                                <span class="workshop-card-plate" t-esc="repair.license_plate or '—'"/>
-                                <t t-set="vparts" t-value="[x for x in [repair.vehicle_brand_id.name, repair.model_id.name, repair.model_year] if x]"/>
-                                <span t-if="vparts" class="workshop-card-vehicle-model text-muted" t-esc="' · '.join(vparts)"/>
-                            </div>
-                            <div class="workshop-card-meta">
-                                <div class="workshop-card-meta-row" t-if="repair.client_id">
-                                    <span class="workshop-card-meta-label"><i class="fa fa-user" aria-hidden="true"></i></span>
-                                    <span class="workshop-card-meta-value" t-esc="repair.client_id.display_name"/>
-                                </div>
-                                <div class="workshop-card-meta-row" t-if="repair.receipt_date">
-                                    <span class="workshop-card-meta-label"><i class="fa fa-calendar" aria-hidden="true"></i></span>
-                                    <span class="workshop-card-meta-value" t-esc="repair.receipt_date.strftime('%d/%m/%Y')"/>
-                                </div>
-                                <div class="workshop-card-meta-row" t-if="repair.portal_advisor_id">
-                                    <span class="workshop-card-meta-label"><i class="fa fa-id-badge" aria-hidden="true"></i></span>
-                                    <span class="workshop-card-meta-value" t-esc="repair.portal_advisor_id.display_name"/>
-                                </div>
-                                <div class="workshop-card-meta-row" t-if="repair.portal_technician_id or repair.user_id">
-                                    <span class="workshop-card-meta-label"><i class="fa fa-wrench" aria-hidden="true"></i></span>
-                                    <span class="workshop-card-meta-value" t-esc="(repair.portal_technician_id or repair.user_id).display_name"/>
-                                </div>
-                            </div>
-                        </div>
+                                <!-- Estado -->
+                                <td class="workshop-col-state">
+                                    <span t-attf-class="workshop-badge-sm workshop-badge-#{repair.state or 'draft'}"
+                                          t-esc="repair.get_state_label()"/>
+                                </td>
 
-                        <!-- Pie de tarjeta -->
-                        <div class="workshop-card-footer">
-                            <div class="workshop-card-footer-left">
-                                <t t-set="svc_lines" t-value="repair.fleet_repair_line"/>
-                                <t t-set="svc_count" t-value="len(svc_lines)"/>
-                                <t t-if="svc_count">
-                                    <button class="btn btn-sm btn-outline-secondary workshop-card-svc-toggle"
-                                            type="button"
-                                            data-bs-toggle="collapse"
-                                            t-att-data-bs-target="'#svc-collapse-%s' % repair.id"
-                                            aria-expanded="false"
-                                            t-att-aria-controls="'svc-collapse-%s' % repair.id">
-                                        <i class="fa fa-list-ul" aria-hidden="true"></i>
-                                        Ver servicios (<t t-esc="svc_count"/>)
-                                        <i class="fa fa-chevron-down workshop-card-svc-chevron" aria-hidden="true"></i>
-                                    </button>
-                                </t>
-                                <span t-else="" class="workshop-card-no-svc text-muted small">
-                                    <i class="fa fa-info-circle" aria-hidden="true"></i> Sin servicios
-                                </span>
-                            </div>
-                            <a t-att-href="'/my/workshop/order/%s' % repair.id"
-                               class="btn btn-sm btn-primary workshop-card-btn-detail">
-                                Ver orden <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                            </a>
-                        </div>
+                                <!-- Placa / Vehículo -->
+                                <td class="workshop-col-vehicle">
+                                    <span class="fw-semibold text-nowrap" t-esc="repair.license_plate or '—'"/>
+                                    <t t-set="vparts" t-value="[x for x in [repair.vehicle_brand_id.name, repair.model_id.name, repair.model_year] if x]"/>
+                                    <div t-if="vparts" class="text-muted small" t-esc="' · '.join(vparts)"/>
+                                </td>
 
-                        <!-- Servicios colapsables -->
-                        <div t-if="svc_count"
-                             class="collapse workshop-card-svc-collapse"
-                             t-att-id="'svc-collapse-%s' % repair.id">
-                            <div class="workshop-card-svc-list">
-                                <div t-foreach="svc_lines" t-as="svc"
-                                     t-attf-class="workshop-card-svc-item workshop-svc-row-#{svc.tecnico_status or 'pendiente'}">
-                                    <div class="workshop-card-svc-name">
-                                        <span class="fw-semibold" t-esc="svc.service_type.name or '—'"/>
-                                        <span t-if="svc.service_detail" class="text-muted small d-block workshop-card-svc-detail"
-                                              t-esc="svc.service_detail"/>
+                                <!-- Cliente -->
+                                <td class="workshop-col-client">
+                                    <t t-esc="repair.client_id.display_name or '—'"/>
+                                </td>
+
+                                <!-- Fecha -->
+                                <td class="workshop-col-date text-nowrap text-muted small">
+                                    <t t-if="repair.receipt_date">
+                                        <t t-esc="repair.receipt_date.strftime('%d/%m/%Y')"/>
+                                    </t>
+                                    <t t-else="">—</t>
+                                </td>
+
+                                <!-- Asesor / Técnico -->
+                                <td class="workshop-col-people d-none d-md-table-cell">
+                                    <div t-if="repair.portal_advisor_id" class="small text-nowrap">
+                                        <i class="fa fa-id-badge text-muted me-1" aria-hidden="true"></i>
+                                        <t t-esc="repair.portal_advisor_id.display_name"/>
                                     </div>
-                                    <span t-attf-class="workshop-svc-badge workshop-svc-badge-#{svc.tecnico_status or 'pendiente'}">
-                                        <t t-if="svc.tecnico_status == 'completado'">Completado</t>
-                                        <t t-elif="svc.tecnico_status == 'en_progreso'">En progreso</t>
-                                        <t t-else="">Pendiente</t>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+                                    <div t-if="repair.portal_technician_id or repair.user_id" class="small text-nowrap">
+                                        <i class="fa fa-wrench text-muted me-1" aria-hidden="true"></i>
+                                        <t t-esc="(repair.portal_technician_id or repair.user_id).display_name"/>
+                                    </div>
+                                </td>
 
-                    </div>
+                                <!-- Servicios -->
+                                <td class="workshop-col-svcs text-center d-none d-sm-table-cell">
+                                    <t t-set="svc_count" t-value="len([l for l in repair.fleet_repair_line if l.service_type])"/>
+                                    <span t-if="svc_count" class="badge text-bg-secondary" t-esc="svc_count"/>
+                                    <span t-else="" class="text-muted small">—</span>
+                                </td>
+
+                                <!-- Acción -->
+                                <td class="workshop-col-action text-end text-nowrap">
+                                    <a t-att-href="'/my/workshop/order/%s' % repair.id"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <!-- Paginador -->
@@ -689,7 +679,7 @@
                                 <h1 class="h3 mb-0" t-esc="repair.name"/>
                             </div>
                         </div>
-                        <span class="workshop-detail-state" t-esc="repair.get_service_flow_state_label()"/>
+                        <span class="workshop-detail-state" t-esc="repair.get_state_label()"/>
                     </div>
                     <div class="workshop-detail-quickinfo">
                         <div class="workshop-detail-quickinfo-cell">
@@ -1146,32 +1136,6 @@
                                         </table>
                                     </div>
                                 </div>
-                                <div class="col-12 col-lg-4">
-                                    <div class="workshop-checklist-section h-100">
-                                        <table class="workshop-checklist-table table table-sm mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th colspan="2" class="workshop-checklist-section-title text-center">ESTADO DE DOCUMENTOS</th>
-                                                </tr>
-                                                <tr>
-                                                    <th>DOCUMENTO</th>
-                                                    <th>VENCIMIENTO</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr t-foreach="doc_lines" t-as="tline">
-                                                    <td t-esc="tline.name"/>
-                                                    <td>
-                                                        <t t-if="is_editor">
-                                                            <input type="date" t-att-name="'tech_expiration_%s' % tline.id" class="form-control form-control-sm" t-att-value="tline.expiration_date and tline.expiration_date.strftime('%Y-%m-%d') or ''"/>
-                                                        </t>
-                                                        <t t-else="" t-esc="tline.expiration_date and tline.expiration_date.strftime('%d/%m/%Y') or ''"/>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
                             </div>
 
                             <div class="d-flex justify-content-end mt-3" t-if="is_editor">
@@ -1241,6 +1205,125 @@
                             <button type="submit" class="btn btn-primary">Subir evidencias</button>
                         </div>
                     </form>
+                </div>
+
+                <!-- ── Solicitud de repuestos ── -->
+                <div t-if="is_technician" class="border rounded p-3 mt-3" id="workshop-spare-request-section"
+                     t-att-data-repair-id="repair.id"
+                     t-att-data-catalog-url="'/my/workshop/spare-catalog'"
+                     t-att-data-submit-url="'/my/workshop/order/%s/spares/submit' % repair.id">
+
+                    <div class="d-flex align-items-center mb-3">
+                        <h2 class="h5 mb-0">Solicitud de repuestos para cotizar</h2>
+                        <button type="button"
+                                class="btn btn-outline-primary btn-sm ms-auto"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#spare-request-form-collapse"
+                                aria-expanded="false">
+                            <i class="fa fa-plus me-1"></i>Nueva solicitud
+                        </button>
+                    </div>
+
+                    <!-- Solicitudes anteriores -->
+                    <div t-if="repair.spare_request_ids">
+                        <p class="small text-muted mb-2">Solicitudes enviadas:</p>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th class="text-center"># Repuestos</th>
+                                        <th>Estado</th>
+                                        <th>Obs. almacén</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="repair.spare_request_ids" t-as="sr">
+                                        <td><t t-esc="sr.request_date.strftime('%d/%m/%Y %H:%M') if sr.request_date else '—'"/></td>
+                                        <td class="text-center"><t t-esc="sr.line_count"/></td>
+                                        <td>
+                                            <span t-att-class="'badge ' + ('text-bg-info' if sr.state == 'requested' else 'text-bg-success' if sr.state == 'reviewed' else 'text-bg-secondary')"
+                                                  t-esc="dict(sr._fields['state'].selection).get(sr.state)"/>
+                                        </td>
+                                        <td class="small text-muted"><t t-esc="sr.warehouse_note or '—'"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p t-if="not repair.spare_request_ids" class="small text-muted mb-3">
+                        Aún no hay solicitudes de repuestos para esta orden.
+                    </p>
+
+                    <!-- Formulario nueva solicitud (colapsable) -->
+                    <div class="collapse" id="spare-request-form-collapse">
+                        <input type="hidden" id="spare-csrf-token" t-att-value="request.csrf_token()"/>
+                        <hr class="my-3"/>
+                        <h3 class="h6 mb-3">Nueva solicitud de repuestos</h3>
+
+                        <!-- Buscador de catálogo -->
+                        <div class="row g-2 align-items-end mb-3">
+                            <div class="col-sm-8">
+                                <label class="form-label small">Buscar repuesto en catálogo</label>
+                                <div class="position-relative">
+                                    <input type="text"
+                                           id="spare-catalog-search"
+                                           class="form-control"
+                                           placeholder="Escribe al menos 2 letras..."
+                                           autocomplete="off"/>
+                                    <div id="spare-catalog-dropdown"
+                                         class="dropdown-menu w-100 workshop-spare-dropdown"
+                                         style="display:none;position:absolute;z-index:1000;max-height:220px;overflow-y:auto;"/>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <label class="form-label small">Cantidad</label>
+                                <input type="number" id="spare-catalog-qty" class="form-control"
+                                       value="1" min="0.01" step="0.01"/>
+                            </div>
+                            <div class="col-sm-2 d-flex align-items-end">
+                                <button type="button" id="spare-add-line-btn"
+                                        class="btn btn-secondary w-100"
+                                        disabled="disabled">
+                                    <i class="fa fa-plus me-1"></i>Agregar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Observación (opcional)</label>
+                            <input type="text" id="spare-catalog-note" class="form-control form-control-sm"
+                                   placeholder="Especificación adicional del técnico"/>
+                        </div>
+
+                        <!-- Tabla de líneas agregadas -->
+                        <div id="spare-lines-container" class="table-responsive mb-3" style="display:none;">
+                            <table class="table table-sm table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Repuesto</th>
+                                        <th class="text-center" style="width:90px;">Cantidad</th>
+                                        <th>Observación</th>
+                                        <th style="width:50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="spare-lines-tbody"></tbody>
+                            </table>
+                        </div>
+                        <p id="spare-lines-empty" class="small text-muted">
+                            Agregue repuestos usando el buscador de arriba.
+                        </p>
+
+                        <!-- Alertas -->
+                        <div id="spare-submit-error" class="alert alert-danger d-none small"></div>
+                        <div id="spare-submit-success" class="alert alert-success d-none small"></div>
+
+                        <!-- Botón enviar -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="button" id="spare-submit-btn" class="btn btn-primary" disabled="disabled">
+                                <i class="fa fa-send me-1"></i>Enviar solicitud al almacén
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div t-if="is_road_test or is_internal_manager" class="border rounded p-3 mt-3">

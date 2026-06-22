@@ -1203,6 +1203,19 @@
 }
 
 /* Acento superior según estado */
+/* state (estado de negocio) */
+.workshop-state-draft               { border-top-color: #adb5bd; }
+.workshop-state-diagnosis           { border-top-color: #5c6bc0; }
+.workshop-state-diagnosis_complete  { border-top-color: #017e84; }
+.workshop-state-quote               { border-top-color: #f6a609; }
+.workshop-state-saleorder           { border-top-color: #00897b; }
+.workshop-state-workorder           { border-top-color: #e65100; }
+.workshop-state-work_completed      { border-top-color: #2e7d32; }
+.workshop-state-invoiced            { border-top-color: #1565c0; }
+.workshop-state-done                { border-top-color: #198754; }
+.workshop-state-cancel              { border-top-color: #dc3545; }
+
+/* service_flow_state (flujo operativo) — se mantienen para compatibilidad */
 .workshop-state-received         { border-top-color: #adb5bd; }
 .workshop-state-to_assign        { border-top-color: #f6a609; }
 .workshop-state-assigned         { border-top-color: #4a6cf7; }
@@ -1252,6 +1265,19 @@
     color: #495057;
 }
 
+/* Badges por state (estado de negocio) */
+.workshop-badge-draft               { background: #e9ecef;  color: #495057; }
+.workshop-badge-diagnosis           { background: #e8eaf6;  color: #3949ab; }
+.workshop-badge-diagnosis_complete  { background: #e0f2f1;  color: #00695c; }
+.workshop-badge-quote               { background: #fff3cd;  color: #856404; }
+.workshop-badge-saleorder           { background: #b2ebf2;  color: #006064; }
+.workshop-badge-workorder           { background: #ffe0b2;  color: #e65100; }
+.workshop-badge-work_completed      { background: #c8e6c9;  color: #1b5e20; }
+.workshop-badge-invoiced            { background: #bbdefb;  color: #1565c0; }
+.workshop-badge-done                { background: #d1e7dd;  color: #0a3622; }
+.workshop-badge-cancel              { background: #f8d7da;  color: #842029; }
+
+/* Badges por service_flow_state — se mantienen */
 .workshop-badge-received          { background: #e9ecef;  color: #495057; }
 .workshop-badge-to_assign         { background: #fff3cd;  color: #856404; }
 .workshop-badge-assigned          { background: #dde3fd;  color: #2c47b5; }
@@ -1454,4 +1480,81 @@
     .workshop-card-body { padding: 4px 14px 10px; }
     .workshop-card-footer { padding: 8px 14px; }
     .workshop-card-svc-list { padding: 6px 14px 10px; }
+}
+
+/* ─── Tabla de órdenes /my/workshop ────────────────────────── */
+
+.workshop-orders-table {
+    font-size: 0.875rem;
+}
+
+.workshop-orders-table thead th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    color: #6c757d;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 10px 12px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.workshop-orders-table tbody td {
+    border-color: #f1f3f5;
+    padding: 9px 12px;
+    vertical-align: middle;
+}
+
+.workshop-orders-table tbody tr:hover td {
+    background: #f8fdfd;
+}
+
+/* Franja de color izquierda según estado */
+.workshop-table-row { border-left: 3px solid transparent; }
+.workshop-row-state-draft               { border-left-color: #adb5bd; }
+.workshop-row-state-diagnosis           { border-left-color: #5c6bc0; }
+.workshop-row-state-diagnosis_complete  { border-left-color: #017e84; }
+.workshop-row-state-quote               { border-left-color: #f6a609; }
+.workshop-row-state-saleorder           { border-left-color: #00897b; }
+.workshop-row-state-workorder           { border-left-color: #e65100; }
+.workshop-row-state-work_completed      { border-left-color: #2e7d32; }
+.workshop-row-state-invoiced            { border-left-color: #1565c0; }
+.workshop-row-state-done                { border-left-color: #198754; }
+.workshop-row-state-cancel              { border-left-color: #dc3545; }
+
+/* Badge compacto — usa los mismos colores workshop-badge-* */
+.workshop-badge-sm {
+    border-radius: 999px;
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 2px 8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Columnas */
+.workshop-col-seq    { width: 120px; white-space: nowrap; }
+.workshop-col-state  { width: 140px; }
+.workshop-col-date   { width: 90px; }
+.workshop-col-svcs   { width: 70px; }
+.workshop-col-action { width: 46px; }
+
+/* ── Solicitud de repuestos ── */
+.workshop-spare-dropdown {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
+}
+
+.workshop-spare-dropdown .dropdown-item {
+    font-size: 0.875rem;
+    padding: 6px 14px;
+    cursor: pointer;
+}
+
+.workshop-spare-dropdown .dropdown-item:hover {
+    background-color: #f0f4ff;
+    color: #0d6efd;
 }

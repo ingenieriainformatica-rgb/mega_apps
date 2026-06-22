@@ -71,6 +71,15 @@
                                     invisible="inv_count == 0" groups="base.group_user">
                                 <field name="inv_count" widget="statinfo" string="Invoices"/>
                             </button>
+
+                            <button type="object"
+                                    name="action_view_spare_requests"
+                                    class="oe_stat_button"
+                                    icon="fa-shopping-cart"
+                                    invisible="spare_request_count == 0"
+                                    groups="car_repair_industry.group_fleet_repair_spare_warehouse,car_repair_industry.group_fleet_repair_service_manager,base.group_system">
+                                <field name="spare_request_count" widget="statinfo" string="Repuestos"/>
+                            </button>
                         </div>
 
                         <div class="oe_title oe_left">
@@ -310,6 +319,32 @@
                                         <field name="company_id" column_invisible="1"/>
                                         <field name="currency_id" column_invisible="1"/>
                                         <field name="account_id" required="False" column_invisible="1"/>
+                                    </list>
+                                </field>
+                            </page>
+
+                            <page name="spare_requests" string="Repuestos solicitados"
+                                  groups="car_repair_industry.group_fleet_repair_spare_warehouse,car_repair_industry.group_fleet_repair_service_manager,base.group_system">
+                                <field name="spare_request_ids" readonly="1">
+                                    <list string="Solicitudes de repuestos"
+                                          decoration-info="state == 'requested'"
+                                          decoration-success="state == 'reviewed'"
+                                          decoration-muted="state == 'cancelled'">
+                                        <field name="request_date" string="Fecha"/>
+                                        <field name="requested_by_id" string="Técnico"/>
+                                        <field name="line_count" string="# Repuestos"/>
+                                        <field name="state" widget="badge"
+                                               decoration-info="state == 'requested'"
+                                               decoration-success="state == 'reviewed'"
+                                               decoration-danger="state == 'cancelled'"/>
+                                        <field name="warehouse_note" string="Obs. almacén" optional="show"/>
+                                        <button name="action_mark_reviewed"
+                                                string="Marcar revisada"
+                                                type="object"
+                                                icon="fa-check"
+                                                class="btn-sm btn-success"
+                                                invisible="state != 'requested'"
+                                                groups="car_repair_industry.group_fleet_repair_spare_warehouse,car_repair_industry.group_fleet_repair_service_manager,base.group_system"/>
                                     </list>
                                 </field>
                             </page>

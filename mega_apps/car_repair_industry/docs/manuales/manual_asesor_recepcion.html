@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Usuario — Asesor de Recepción — MegaTecnicentro</title>
+<style>
+  /* ============================
+     RESET Y BASE
+     ============================ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 10pt; }
+
+  body {
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    color: #1a1a1a;
+    line-height: 1.6;
+    background: #fff;
+  }
+
+  /* ============================
+     PRINT LAYOUT
+     ============================ */
+  @page {
+    size: A4;
+    margin: 2.5cm 2.5cm 3cm 2.5cm;
+    @top-center {
+      content: "Manual de Usuario — Asesor de Recepción";
+      font-size: 8pt;
+      color: #666;
+      border-bottom: 0.5pt solid #ccc;
+      padding-bottom: 4pt;
+    }
+    @bottom-left {
+      content: "MegaTecnicentro";
+      font-size: 8pt;
+      color: #666;
+    }
+    @bottom-right {
+      content: "Página " counter(page) " de " counter(pages);
+      font-size: 8pt;
+      color: #666;
+    }
+  }
+
+  @page :first {
+    @top-center { content: none; }
+    @bottom-left { content: none; }
+    @bottom-right { content: none; }
+  }
+
+  @media print {
+    .page-break { page-break-before: always; }
+    .no-break { page-break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+  }
+
+  /* ============================
+     PORTADA
+     ============================ */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 95vh;
+    text-align: center;
+    padding: 4cm 2cm;
+    page-break-after: always;
+  }
+
+  .cover-logo {
+    width: 80px;
+    height: 80px;
+    background: #017e84;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2cm;
+    font-size: 2em;
+    color: white;
+    font-weight: bold;
+  }
+
+  .cover-badge {
+    display: inline-block;
+    background: #f0f9fa;
+    color: #017e84;
+    border: 1.5pt solid #017e84;
+    border-radius: 20pt;
+    padding: 4pt 16pt;
+    font-size: 9pt;
+    font-weight: 600;
+    letter-spacing: 0.5pt;
+    text-transform: uppercase;
+    margin-bottom: 1.2cm;
+  }
+
+  .cover h1 {
+    font-size: 26pt;
+    font-weight: 700;
+    color: #017e84;
+    line-height: 1.2;
+    margin-bottom: 0.5cm;
+  }
+
+  .cover h2 {
+    font-size: 16pt;
+    font-weight: 400;
+    color: #333;
+    margin-bottom: 1.5cm;
+    border: none;
+  }
+
+  .cover-divider {
+    width: 80pt;
+    height: 3pt;
+    background: #017e84;
+    margin: 0 auto 1.5cm;
+    border-radius: 2pt;
+  }
+
+  .cover-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5cm 1.5cm;
+    margin-bottom: 2cm;
+    text-align: left;
+    font-size: 9pt;
+  }
+
+  .cover-meta-item { border-left: 3pt solid #017e84; padding-left: 8pt; }
+  .cover-meta-label { color: #888; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.5pt; }
+  .cover-meta-value { font-weight: 600; color: #1a1a1a; }
+
+  .cover-footer {
+    margin-top: auto;
+    padding-top: 1cm;
+    border-top: 1pt solid #e0e0e0;
+    font-size: 8pt;
+    color: #888;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* ============================
+     TABLA DE CONTENIDO
+     ============================ */
+  .toc-page {
+    page-break-after: always;
+    padding: 1cm 0;
+  }
+
+  .toc-title {
+    font-size: 16pt;
+    font-weight: 700;
+    color: #017e84;
+    margin-bottom: 0.8cm;
+    padding-bottom: 0.3cm;
+    border-bottom: 2pt solid #017e84;
+  }
+
+  .toc-list { list-style: none; }
+  .toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    padding: 5pt 0;
+    border-bottom: 0.5pt dotted #ddd;
+  }
+  .toc-num {
+    font-weight: 700;
+    color: #017e84;
+    min-width: 28pt;
+    font-size: 10pt;
+  }
+  .toc-text {
+    flex: 1;
+    color: #1a1a1a;
+    font-size: 10pt;
+  }
+  .toc-sub {
+    margin-left: 28pt;
+    border-bottom: none;
+    padding: 2pt 0;
+  }
+  .toc-sub .toc-text { font-size: 9pt; color: #555; }
+
+  /* ============================
+     TIPOGRAFÍA Y ESTRUCTURA
+     ============================ */
+  .section {
+    margin-bottom: 1cm;
+  }
+
+  h1, h2, h3, h4 {
+    line-height: 1.25;
+    color: #017e84;
+  }
+
+  h1 {
+    font-size: 18pt;
+    font-weight: 700;
+    margin: 0.8cm 0 0.4cm;
+    padding-bottom: 0.25cm;
+    border-bottom: 2.5pt solid #017e84;
+  }
+
+  h2 {
+    font-size: 14pt;
+    font-weight: 700;
+    margin: 0.7cm 0 0.3cm;
+    padding-bottom: 0.2cm;
+    border-bottom: 1.5pt solid #b2e0e3;
+  }
+
+  h3 {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #015a5e;
+    margin: 0.5cm 0 0.25cm;
+  }
+
+  h4 {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #333;
+    margin: 0.4cm 0 0.2cm;
+    text-transform: uppercase;
+    letter-spacing: 0.3pt;
+  }
+
+  p {
+    margin-bottom: 0.35cm;
+    font-size: 10pt;
+    text-align: justify;
+  }
+
+  strong { color: #111; }
+
+  /* ============================
+     LISTAS
+     ============================ */
+  ul, ol {
+    margin: 0.3cm 0 0.4cm 1.2cm;
+    font-size: 10pt;
+  }
+  li { margin-bottom: 0.15cm; line-height: 1.5; }
+  ul ul, ol ol, ul ol, ol ul { margin-top: 0.1cm; margin-bottom: 0.1cm; }
+
+  /* ============================
+     TABLAS
+     ============================ */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    margin: 0.4cm 0;
+    page-break-inside: avoid;
+  }
+
+  thead {
+    background: #017e84;
+    color: white;
+  }
+
+  th {
+    padding: 6pt 8pt;
+    text-align: left;
+    font-weight: 600;
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.3pt;
+  }
+
+  td {
+    padding: 5pt 8pt;
+    border-bottom: 0.5pt solid #e0e0e0;
+    vertical-align: top;
+    line-height: 1.4;
+  }
+
+  tr:nth-child(even) td { background: #f7fbfb; }
+  tr:hover td { background: #edf7f8; }
+
+  /* ============================
+     BLOQUES ESPECIALES
+     ============================ */
+  .note, blockquote {
+    background: #f0f9fa;
+    border-left: 4pt solid #017e84;
+    border-radius: 0 4pt 4pt 0;
+    padding: 8pt 12pt;
+    margin: 0.4cm 0;
+    font-size: 9pt;
+    color: #1a4a4e;
+    page-break-inside: avoid;
+  }
+
+  .note strong, blockquote strong { color: #017e84; }
+
+  .note-warning {
+    background: #fffbf0;
+    border-left-color: #d97706;
+    color: #7c4a00;
+  }
+  .note-warning strong { color: #d97706; }
+
+  .note-success {
+    background: #f0fdf4;
+    border-left-color: #16a34a;
+    color: #14532d;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: baseline;
+    gap: 6pt;
+    margin: 3pt 0;
+    font-size: 9.5pt;
+  }
+  .checklist-ok { color: #16a34a; font-weight: 700; }
+  .checklist-err { color: #dc2626; font-weight: 700; }
+
+  /* Código inline */
+  code {
+    background: #f0f0f0;
+    border: 0.5pt solid #ddd;
+    border-radius: 2pt;
+    padding: 1pt 4pt;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 8.5pt;
+    color: #c0392b;
+  }
+
+  /* ============================
+     SECCIÓN BADGE / NÚMERO
+     ============================ */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4cm;
+    margin: 0.6cm 0 0.3cm;
+  }
+
+  .section-num {
+    width: 28pt;
+    height: 28pt;
+    background: #017e84;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13pt;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .section-title-text {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #017e84;
+    border-bottom: 1.5pt solid #b2e0e3;
+    flex: 1;
+    padding-bottom: 0.15cm;
+  }
+
+  /* ============================
+     PIE DE PÁGINA MANUAL
+     ============================ */
+  .manual-footer {
+    margin-top: 1cm;
+    padding-top: 0.5cm;
+    border-top: 1pt solid #e0e0e0;
+    text-align: center;
+    font-size: 8pt;
+    color: #888;
+    page-break-before: always;
+  }
+
+  /* ============================
+     CAPTURE PLACEHOLDER
+     ============================ */
+  .capture-placeholder {
+    border: 1.5pt dashed #aed4d6;
+    background: #f7fbfb;
+    border-radius: 6pt;
+    padding: 0.5cm;
+    text-align: center;
+    margin: 0.4cm 0;
+    color: #5a8a8d;
+    font-size: 9pt;
+    font-style: italic;
+    page-break-inside: avoid;
+  }
+  .capture-placeholder::before {
+    content: "📷 ";
+    font-style: normal;
+  }
+
+  /* ============================
+     SCREEN ONLY
+     ============================ */
+  @media screen {
+    body { max-width: 800px; margin: 0 auto; padding: 2cm; background: #f4f4f4; }
+    .section, .toc-page, .cover { background: white; padding: 1.5cm; margin-bottom: 1cm; box-shadow: 0 2px 8px rgba(0,0,0,.1); border-radius: 4pt; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========================================
+     PORTADA
+     ======================================== -->
+<div class="cover">
+  <div class="cover-logo">MT</div>
+  <div class="cover-badge">Rol: Asesor de Recepción</div>
+  <h1>Manual de Usuario<br>Sistema de Taller de Autos</h1>
+  <h2>Odoo 18 — Portal de Taller</h2>
+  <div class="cover-divider"></div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Organización</div>
+      <div class="cover-meta-value">MegaTecnicentro</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Versión</div>
+      <div class="cover-meta-value">1.0</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Fecha</div>
+      <div class="cover-meta-value">Junio 2026</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Sistema</div>
+      <div class="cover-meta-value">Odoo 18 Portal</div>
+    </div>
+  </div>
+  <div class="cover-footer">
+    Documento de uso interno — MegaTecnicentro &nbsp;|&nbsp; Versión 1.0 &nbsp;|&nbsp; Junio 2026
+  </div>
+</div>
+
+<!-- ========================================
+     TABLA DE CONTENIDO
+     ======================================== -->
+<div class="toc-page">
+  <div class="toc-title">Tabla de contenido</div>
+  <ul class="toc-list">
+    <li class="toc-item">
+      <span class="toc-num">1.</span>
+      <span class="toc-text">Introducción</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">1.1</span>
+      <span class="toc-text">Objetivo del rol</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">1.2</span>
+      <span class="toc-text">Responsabilidades del Asesor de Recepción</span>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">2.</span>
+      <span class="toc-text">Requisitos previos</span>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">3.</span>
+      <span class="toc-text">Acceso al sistema</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">3.1</span>
+      <span class="toc-text">Ingreso al portal</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">3.2</span>
+      <span class="toc-text">Inicio de sesión</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num">3.3</span>
+      <span class="toc-text">Problemas de acceso</span>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">4.</span>
+      <span class="toc-text">Crear una nueva orden de trabajo</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num"></span>
+      <span class="toc-text">Paso 1 — Tipo de cliente</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num"></span>
+      <span class="toc-text">Paso 2 — Datos del cliente</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num"></span>
+      <span class="toc-text">Paso 3 — Datos del vehículo</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num"></span>
+      <span class="toc-text">Paso 4 — Servicio solicitado</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num"></span>
+      <span class="toc-text">Paso 5 — Persona que entrega el vehículo</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num"></span>
+      <span class="toc-text">Paso 6 — Pertenencias y documentos</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num"></span>
+      <span class="toc-text">Paso 7 — Evidencias fotográficas</span>
+    </li>
+    <li class="toc-item toc-sub">
+      <span class="toc-num"></span>
+      <span class="toc-text">Paso 8 — Checklist de recepción</span>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">5.</span>
+      <span class="toc-text">Guardar la orden</span>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">6.</span>
+      <span class="toc-text">Buenas prácticas</span>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">7.</span>
+      <span class="toc-text">Preguntas frecuentes</span>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">8.</span>
+      <span class="toc-text">Glosario de términos</span>
+    </li>
+  </ul>
+</div>
+
+<!-- ========================================
+     SECCIÓN 1 — INTRODUCCIÓN
+     ======================================== -->
+<div class="section page-break">
+  <h1>1. Introducción</h1>
+
+  <h2>1.1 Objetivo del rol</h2>
+  <p>
+    El <strong>Asesor de Recepción</strong> es la persona encargada de recibir los vehículos en el taller y
+    registrar toda la información necesaria para iniciar el proceso de reparación o mantenimiento.
+    Su trabajo es el primer paso del flujo operativo y su correcta ejecución garantiza que el técnico
+    cuente con todos los datos para realizar su trabajo.
+  </p>
+
+  <h2>1.2 Responsabilidades del Asesor de Recepción</h2>
+  <ul>
+    <li>Identificar correctamente al cliente y el tipo de servicio que solicita.</li>
+    <li>Registrar los datos completos del vehículo en el sistema.</li>
+    <li>Documentar el estado del vehículo al momento de ingreso.</li>
+    <li>Registrar los servicios solicitados por el cliente.</li>
+    <li>Anotar las pertenencias y documentos recibidos junto al vehículo.</li>
+    <li>Tomar fotografías de evidencia cuando corresponda.</li>
+    <li>Diligenciar el checklist de recepción según la plantilla asignada.</li>
+  </ul>
+
+  <blockquote>
+    <strong>Nota importante:</strong> El Asesor de Recepción únicamente tiene acceso al portal web
+    para crear órdenes de trabajo. No tiene acceso al sistema administrativo interno (backend) de Odoo.
+  </blockquote>
+</div>
+
+<!-- ========================================
+     SECCIÓN 2 — REQUISITOS PREVIOS
+     ======================================== -->
+<div class="section page-break">
+  <h1>2. Requisitos previos</h1>
+  <p>Antes de utilizar el sistema, asegúrese de contar con lo siguiente:</p>
+
+  <table>
+    <thead>
+      <tr><th>Requisito</th><th>Descripción</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Usuario</strong></td><td>Nombre de usuario o correo electrónico asignado por el administrador</td></tr>
+      <tr><td><strong>Contraseña</strong></td><td>Contraseña provisional entregada en el proceso de activación</td></tr>
+      <tr><td><strong>Dispositivo</strong></td><td>Computador, tableta o celular con conexión a internet</td></tr>
+      <tr><td><strong>Navegador</strong></td><td>Google Chrome, Microsoft Edge, Mozilla Firefox o Safari (versiones recientes)</td></tr>
+      <tr><td><strong>Conexión</strong></td><td>Acceso a internet estable</td></tr>
+    </tbody>
+  </table>
+
+  <blockquote class="note-warning">
+    Si no tiene usuario o contraseña, comuníquese con el administrador del sistema antes de continuar.
+  </blockquote>
+</div>
+
+<!-- ========================================
+     SECCIÓN 3 — ACCESO AL SISTEMA
+     ======================================== -->
+<div class="section page-break">
+  <h1>3. Acceso al sistema</h1>
+
+  <h2>3.1 Ingreso al portal</h2>
+  <ol>
+    <li>Abra el navegador de internet en su dispositivo.</li>
+    <li>Escriba en la barra de direcciones la URL del sistema proporcionada por el administrador.</li>
+    <li>Presione <strong>Enter</strong> para cargar la página.</li>
+  </ol>
+
+  <div class="capture-placeholder">CAPTURA 1 — Pantalla de inicio de sesión del portal<br>
+    <em>El usuario verá una pantalla con el logotipo de la empresa y dos campos: uno para el correo
+    electrónico y otro para la contraseña. En la parte inferior hay un botón azul que dice "Iniciar sesión".</em>
+  </div>
+
+  <h2>3.2 Inicio de sesión</h2>
+  <ol>
+    <li>En el campo <strong>Correo electrónico</strong>, escriba su correo o nombre de usuario asignado.</li>
+    <li>En el campo <strong>Contraseña</strong>, escriba su contraseña.</li>
+    <li>Haga clic en el botón <strong>Iniciar sesión</strong>.</li>
+  </ol>
+  <p>
+    Si los datos son correctos, el sistema lo llevará automáticamente al panel del taller
+    (<code>/my/workshop</code>).
+  </p>
+
+  <div class="capture-placeholder">CAPTURA 2 — Panel principal del taller (pantalla /my/workshop)<br>
+    <em>El usuario verá el panel de órdenes de trabajo con tarjetas que muestran el resumen de cada orden.
+    En la parte superior derecha hay un botón verde que dice "Nueva orden de servicio".</em>
+  </div>
+
+  <h2>3.3 Problemas de acceso</h2>
+  <table>
+    <thead>
+      <tr><th>Problema</th><th>Solución</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>"Nombre de usuario o contraseña incorrectos"</td>
+        <td>Verifique mayúsculas y espacios. Si persiste, contacte al administrador para restablecer la contraseña.</td>
+      </tr>
+      <tr>
+        <td>La página no carga</td>
+        <td>Verifique la conexión a internet. Intente con otro navegador.</td>
+      </tr>
+      <tr>
+        <td>No aparece el botón "Nueva orden de servicio"</td>
+        <td>Su usuario no tiene permisos de Asesor de Recepción. Contacte al administrador.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========================================
+     SECCIÓN 4 — CREAR NUEVA ORDEN
+     ======================================== -->
+<div class="section page-break">
+  <h1>4. Crear una nueva orden de trabajo</h1>
+
+  <p>
+    Para crear una nueva orden, haga clic en el botón <strong>Nueva orden de servicio</strong>
+    ubicado en la parte superior del panel. El sistema lo llevará al formulario de creación.
+  </p>
+
+  <div class="capture-placeholder">CAPTURA 3 — Vista completa del formulario de nueva orden de trabajo<br>
+    <em>El formulario está organizado en 8 secciones numeradas. Cada sección tiene un título y un número
+    circular de color verde a la izquierda. Los campos marcados con asterisco rojo (*) son obligatorios.</em>
+  </div>
+
+  <p>El formulario se compone de las siguientes secciones:</p>
+
+  <table>
+    <thead>
+      <tr><th>N°</th><th>Sección</th><th>Descripción</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>1</strong></td><td>Tipo de cliente</td><td>Identifica si es cliente particular, Renting o corporativo</td></tr>
+      <tr><td><strong>2</strong></td><td>Datos del cliente</td><td>Información de contacto del propietario del vehículo</td></tr>
+      <tr><td><strong>3</strong></td><td>Datos del vehículo</td><td>Placa, marca, modelo y características técnicas</td></tr>
+      <tr><td><strong>4</strong></td><td>Servicio solicitado</td><td>Tipo de trabajo que se va a realizar</td></tr>
+      <tr><td><strong>5</strong></td><td>Persona que entrega</td><td>Datos de quien trae el vehículo físicamente</td></tr>
+      <tr><td><strong>6</strong></td><td>Pertenencias y documentos</td><td>Objetos de valor y documentos recibidos con el vehículo</td></tr>
+      <tr><td><strong>7</strong></td><td>Evidencias fotográficas</td><td>Fotos del vehículo al momento del ingreso</td></tr>
+      <tr><td><strong>8</strong></td><td>Checklist de recepción</td><td>Lista de verificación del estado del vehículo</td></tr>
+    </tbody>
+  </table>
+
+  <blockquote>
+    Llene el formulario de arriba hacia abajo en orden. No omita las secciones obligatorias.
+  </blockquote>
+</div>
+
+<!-- PASO 1 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div class="section-title-text">Tipo de cliente</div>
+  </div>
+
+  <div class="capture-placeholder">CAPTURA 4 — Sección 1: Tipo de cliente con las tres opciones visibles<br>
+    <em>El usuario verá tres tarjetas grandes: "Renting" (ícono de edificio), "Particular" (ícono de persona,
+    seleccionada por defecto) y "Corporativo" (ícono de maletín). Hacer clic en una tarjeta la selecciona
+    y cambia la sección 2 del formulario.</em>
+  </div>
+
+  <p>El formulario muestra tres opciones:</p>
+
+  <table>
+    <thead>
+      <tr><th>Opción</th><th>Descripción</th><th>Cuándo usarla</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Renting</strong></td>
+        <td>Flotas de empresas de alquiler</td>
+        <td>Cuando el vehículo pertenece a la empresa de Renting registrada en el sistema</td>
+      </tr>
+      <tr>
+        <td><strong>Particular</strong></td>
+        <td>Persona natural</td>
+        <td>Cuando el cliente es una persona que lleva su propio vehículo <em>(opción predeterminada)</em></td>
+      </tr>
+      <tr>
+        <td><strong>Corporativo</strong></td>
+        <td>Empresa con flota propia</td>
+        <td>Cuando el vehículo pertenece a una empresa cliente distinta a Renting</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Cómo seleccionar:</strong> Haga clic sobre la tarjeta correspondiente. La tarjeta seleccionada
+  quedará resaltada con un borde de color verde.</p>
+
+  <blockquote class="note-warning">
+    <strong>Importante:</strong> La selección del tipo de cliente cambia automáticamente los campos que se
+    muestran en la sección 2. Seleccione el tipo correcto antes de continuar.
+  </blockquote>
+</div>
+
+<!-- PASO 2 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div class="section-title-text">Datos del cliente</div>
+  </div>
+  <p>Los campos de esta sección varían según el tipo de cliente seleccionado en el Paso 1.</p>
+
+  <h3>Opción A: Cliente Particular</h3>
+  <div class="capture-placeholder">CAPTURA 5 — Sección 2 con tipo "Particular" seleccionado<br>
+    <em>Se muestran tres campos: "Nombre del cliente" (obligatorio, con asterisco rojo), "Celular" y "Correo".</em>
+  </div>
+  <table>
+    <thead><tr><th>Campo</th><th>Obligatorio</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Nombre del cliente</strong></td><td>Sí *</td><td>Nombre completo del propietario del vehículo</td><td><code>Carlos Andrés Pérez Gómez</code></td></tr>
+      <tr><td><strong>Celular</strong></td><td>No</td><td>Número de teléfono celular del cliente</td><td><code>300 123 4567</code></td></tr>
+      <tr><td><strong>Correo</strong></td><td>No</td><td>Dirección de correo electrónico</td><td><code>carlos@correo.com</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Opción B: Cliente Renting</h3>
+  <div class="capture-placeholder">CAPTURA 6 — Sección 2 con tipo "Renting" seleccionado<br>
+    <em>Se muestra un bloque con el nombre, NIT, teléfono y correo de la empresa Renting (datos de solo
+    lectura). Debajo aparecen dos campos: "CI / referencia Renting" y la casilla "Cita Renting validada".</em>
+  </div>
+  <p>Al seleccionar Renting, el sistema muestra automáticamente los datos de la empresa Renting registrada.
+  El asesor solo debe completar:</p>
+  <table>
+    <thead><tr><th>Campo</th><th>Obligatorio</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>CI / referencia Renting</strong></td><td>No</td><td>Número de referencia o código interno de la cita de Renting</td><td><code>CI-12345</code></td></tr>
+      <tr><td><strong>Cita Renting validada</strong></td><td>No</td><td>Marque esta casilla si la cita fue previamente validada con Renting</td><td><em>(casilla de verificación)</em></td></tr>
+    </tbody>
+  </table>
+  <blockquote>
+    <strong>Nota:</strong> Para clientes Renting, los campos <strong>Nombre</strong> y <strong>Celular</strong>
+    de la sección 5 (Persona que entrega el vehículo) se vuelven <strong>obligatorios</strong>.
+  </blockquote>
+
+  <h3>Opción C: Cliente Corporativo</h3>
+  <div class="capture-placeholder">CAPTURA 7 — Sección 2 con tipo "Corporativo" seleccionado<br>
+    <em>Se muestran tres campos: "Razón social" (obligatorio, con asterisco rojo), "NIT" y "Correo corporativo".</em>
+  </div>
+  <table>
+    <thead><tr><th>Campo</th><th>Obligatorio</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Razón social</strong></td><td>Sí *</td><td>Nombre legal completo de la empresa</td><td><code>Transportes XYZ S.A.S.</code></td></tr>
+      <tr><td><strong>NIT</strong></td><td>No</td><td>Número de identificación tributaria de la empresa</td><td><code>900123456-7</code></td></tr>
+      <tr><td><strong>Correo corporativo</strong></td><td>No</td><td>Correo electrónico de la empresa</td><td><code>contacto@empresa.com</code></td></tr>
+    </tbody>
+  </table>
+  <blockquote>
+    <strong>Consejo:</strong> Si el NIT ya está registrado en el sistema, el sistema reconocerá automáticamente
+    a la empresa y no la duplicará. Ingrese siempre el NIT cuando lo conozca.
+  </blockquote>
+  <blockquote>
+    <strong>Nota:</strong> Para clientes Corporativos, los campos <strong>Nombre</strong> y <strong>Celular</strong>
+    de la sección 5 se vuelven <strong>obligatorios</strong>.
+  </blockquote>
+</div>
+
+<!-- PASO 3 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div class="section-title-text">Datos del vehículo</div>
+  </div>
+
+  <div class="capture-placeholder">CAPTURA 8 — Sección 3: Datos del vehículo con todos los campos visibles<br>
+    <em>Se muestra una cuadrícula con 10 campos organizados en filas. El campo "Placa" tiene un asterisco
+    rojo (obligatorio). Los campos de texto convierten automáticamente las letras a mayúsculas.</em>
+  </div>
+
+  <h4>Campo obligatorio</h4>
+  <table>
+    <thead><tr><th>Campo</th><th>Obligatorio</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Placa</strong></td><td>Sí *</td><td>Número de placa del vehículo. Se convierte automáticamente a mayúsculas</td><td><code>ABC123</code></td></tr>
+    </tbody>
+  </table>
+
+  <h4>Campos opcionales</h4>
+  <table>
+    <thead><tr><th>Campo</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Marca</strong></td><td>Fabricante del vehículo. Seleccione de la lista desplegable</td><td><code>Renault</code></td></tr>
+      <tr><td><strong>Línea</strong></td><td>Referencia o línea del vehículo. Solo se activa después de seleccionar la Marca</td><td><code>Logan</code></td></tr>
+      <tr><td><strong>Modelo (año)</strong></td><td>Año de fabricación del vehículo (4 dígitos)</td><td><code>2019</code></td></tr>
+      <tr><td><strong>Cilindraje (cc)</strong></td><td>Capacidad del motor en centímetros cúbicos</td><td><code>1598</code></td></tr>
+      <tr><td><strong>Nº de motor</strong></td><td>Número de serie del motor. Se convierte a mayúsculas automáticamente</td><td><code>K7MA7123456</code></td></tr>
+      <tr><td><strong>Nº de chasis (VIN)</strong></td><td>Número de identificación vehicular. Máximo 32 caracteres</td><td><code>9FB3XXBBD0BH00001</code></td></tr>
+      <tr><td><strong>Tipo de combustible</strong></td><td>Seleccione el tipo de combustible del vehículo</td><td><code>Gasolina</code></td></tr>
+      <tr><td><strong>Kilometraje</strong></td><td>Lectura del odómetro al momento del ingreso</td><td><code>85000</code></td></tr>
+      <tr><td><strong>Nivel de combustible</strong></td><td>Indicador del nivel de combustible al recibir el vehículo</td><td><code>1/2</code></td></tr>
+    </tbody>
+  </table>
+
+  <h4>Opciones para Tipo de combustible</h4>
+  <p>Gasolina &nbsp;·&nbsp; Diésel &nbsp;·&nbsp; Híbrido &nbsp;·&nbsp; Híbrido enchufable (gasolina)
+  &nbsp;·&nbsp; Híbrido enchufable (diésel) &nbsp;·&nbsp; GNC &nbsp;·&nbsp; GLP &nbsp;·&nbsp;
+  Hidrógeno &nbsp;·&nbsp; Eléctrico &nbsp;·&nbsp; Híbrido (otro)</p>
+
+  <h4>Opciones para Nivel de combustible</h4>
+  <p>Vacío &nbsp;·&nbsp; Reserva &nbsp;·&nbsp; 1/4 &nbsp;·&nbsp; 1/2 &nbsp;·&nbsp; 3/4 &nbsp;·&nbsp; Lleno</p>
+
+  <blockquote class="note-success">
+    <strong>Buena práctica:</strong> Registre siempre el kilometraje y el nivel de combustible. Estos datos
+    protegen tanto al cliente como al taller ante posibles reclamaciones.
+  </blockquote>
+
+  <blockquote>
+    <strong>Importante sobre la Línea:</strong> El campo "Línea" solo muestra opciones después de haber
+    seleccionado una "Marca". Si no aparecen opciones en "Línea", verifique que ya seleccionó la marca correcta.
+  </blockquote>
+</div>
+
+<!-- PASO 4 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div class="section-title-text">Servicio solicitado</div>
+  </div>
+
+  <div class="capture-placeholder">CAPTURA 9 — Sección 4: Servicios solicitados con casillas de verificación y campos de motivo<br>
+    <em>Se muestra una cuadrícula de tarjetas con los tipos de servicio disponibles. Debajo hay dos campos:
+    "Plantilla checklist" (lista desplegable) y "Motivo de ingreso" (campo de texto obligatorio).</em>
+  </div>
+
+  <h3>Servicios solicitados (obligatorio — al menos uno)</h3>
+  <p>Los servicios disponibles aparecen como tarjetas con casillas de verificación.
+  Puede seleccionar <strong>más de un servicio</strong> en la misma orden.</p>
+  <blockquote class="note-warning">
+    <strong>Importante:</strong> Debe seleccionar al menos un servicio. Si no selecciona ninguno, el sistema
+    mostrará un error y no le permitirá guardar la orden.
+  </blockquote>
+
+  <h3>Plantilla checklist</h3>
+  <table>
+    <thead><tr><th>Campo</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Plantilla checklist</strong></td>
+        <td>Seleccione la plantilla de inspección que corresponde al tipo de servicio.
+        La plantilla predeterminada aparece preseleccionada.</td>
+      </tr>
+    </tbody>
+  </table>
+  <blockquote>La selección de la plantilla determina qué ítems aparecerán en la sección 8 (Checklist de recepción).</blockquote>
+
+  <h3>Motivo de ingreso (obligatorio)</h3>
+  <table>
+    <thead><tr><th>Campo</th><th>Obligatorio</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Motivo de ingreso</strong></td>
+        <td>Sí *</td>
+        <td>Descripción breve del motivo por el cual el cliente trae el vehículo</td>
+        <td><code>Mantenimiento preventivo 10.000 km</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <blockquote class="note-success">
+    Sea específico en el motivo. Una descripción clara ayuda al técnico a entender el problema antes de
+    ver el vehículo.
+  </blockquote>
+</div>
+
+<!-- PASO 5 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div class="section-title-text">Persona que entrega el vehículo</div>
+  </div>
+
+  <div class="capture-placeholder">CAPTURA 10 — Sección 5: Datos de quien entrega el vehículo<br>
+    <em>Se muestran 5 campos: "Nombre", "Celular", "Documento", "Correo" y "Observaciones de quien entrega".
+    Para clientes Renting y Corporativo, Nombre y Celular muestran asterisco rojo.</em>
+  </div>
+
+  <p>Esta sección registra los datos de la persona que <strong>físicamente entrega el vehículo</strong>
+  en el taller. Esta persona puede ser diferente al propietario del vehículo.</p>
+
+  <table>
+    <thead><tr><th>Campo</th><th>Obligatorio</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Nombre</strong></td>
+        <td>Sí* (Renting/Corporativo) / No (Particular)</td>
+        <td>Nombre completo de quien entrega el vehículo</td>
+        <td><code>Juan David Ramírez</code></td>
+      </tr>
+      <tr>
+        <td><strong>Celular</strong></td>
+        <td>Sí* (Renting/Corporativo) / No (Particular)</td>
+        <td>Número de contacto de quien entrega</td>
+        <td><code>315 987 6543</code></td>
+      </tr>
+      <tr>
+        <td><strong>Documento</strong></td>
+        <td>No</td>
+        <td>Número de cédula o documento de identificación</td>
+        <td><code>1020304050</code></td>
+      </tr>
+      <tr>
+        <td><strong>Correo</strong></td>
+        <td>No</td>
+        <td>Dirección de correo electrónico de quien entrega</td>
+        <td><code>jramrez@empresa.com</code></td>
+      </tr>
+      <tr>
+        <td><strong>Observaciones de quien entrega</strong></td>
+        <td>No</td>
+        <td>Cualquier indicación o novedad comunicada por quien trae el vehículo</td>
+        <td><code>El cliente indica que el ruido aparece solo en frío</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <blockquote>
+    <strong>Cuándo es obligatorio Nombre y Celular:</strong> Si seleccionó tipo de cliente
+    <strong>Renting</strong> o <strong>Corporativo</strong>, estos dos campos son obligatorios.
+    Para clientes <strong>Particulares</strong> son opcionales.
+  </blockquote>
+</div>
+
+<!-- PASO 6 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div class="section-title-text">Pertenencias y documentos</div>
+  </div>
+
+  <div class="capture-placeholder">CAPTURA 11 — Sección 6: Pertenencias y documentos<br>
+    <em>Se muestran 4 campos: una lista desplegable "¿Tiene objetos de valor?", el campo "Pertenencias /
+    objetos de valor" y dos áreas de texto: "Documentos recibidos" y "Observaciones generales de recepción".</em>
+  </div>
+
+  <p>Esta sección permite registrar los objetos y documentos que el cliente deja dentro del vehículo
+  o entrega al taller.</p>
+
+  <table>
+    <thead><tr><th>Campo</th><th>Obligatorio</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>¿Tiene objetos de valor?</strong></td>
+        <td>No</td>
+        <td>Indique si el cliente dejó objetos de valor dentro del vehículo</td>
+        <td><code>Sí</code></td>
+      </tr>
+      <tr>
+        <td><strong>Pertenencias / objetos de valor</strong></td>
+        <td>No</td>
+        <td>Describa qué objetos de valor se encontraron o reportó el cliente</td>
+        <td><code>Celular iPhone en la guantera, gafas de sol en el tablero</code></td>
+      </tr>
+      <tr>
+        <td><strong>Documentos recibidos</strong></td>
+        <td>No</td>
+        <td>Liste los documentos que el cliente entregó con el vehículo</td>
+        <td><code>Tarjeta de propiedad, SOAT vigente</code></td>
+      </tr>
+      <tr>
+        <td><strong>Observaciones generales de recepción</strong></td>
+        <td>No</td>
+        <td>Anote cualquier novedad importante al recibir el vehículo</td>
+        <td><code>Vehículo llega con rayón en guardabarro trasero izquierdo (preexistente)</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <blockquote class="note-warning">
+    <strong>Importante:</strong> Si el cliente reporta objetos de valor dentro del vehículo, regístrelos
+    siempre. Esto protege al taller ante posibles reclamaciones posteriores.
+  </blockquote>
+</div>
+
+<!-- PASO 7 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div class="section-title-text">Evidencias fotográficas</div>
+  </div>
+
+  <div class="capture-placeholder">CAPTURA 12 — Sección 7: Área de carga de fotografías con la zona de arrastre visible<br>
+    <em>Se muestra un rectángulo punteado con un ícono de cámara y el texto "Seleccionar fotos".
+    Cada foto cargada aparecerá como una miniatura con un selector de categoría debajo.</em>
+  </div>
+
+  <h3>Cómo cargar fotografías</h3>
+  <ol>
+    <li>Haga clic en el rectángulo punteado que dice <strong>"Seleccionar fotos"</strong>.</li>
+    <li>Se abrirá el explorador de archivos de su dispositivo.</li>
+    <li>Seleccione una o varias fotografías (puede seleccionar varias a la vez manteniendo presionada la tecla <code>Ctrl</code>).</li>
+    <li>Haga clic en <strong>Abrir</strong> o <strong>Aceptar</strong>.</li>
+    <li>Las fotos aparecerán como miniaturas en la pantalla.</li>
+    <li>Para cada foto, seleccione la <strong>categoría</strong> correspondiente en el menú desplegable.</li>
+  </ol>
+
+  <h3>Formatos aceptados</h3>
+  <p>JPG / JPEG &nbsp;·&nbsp; PNG &nbsp;·&nbsp; WEBP</p>
+
+  <h3>Categorías disponibles para las fotografías</h3>
+  <table>
+    <thead><tr><th>Categoría</th><th>Cuándo usarla</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Externa</strong></td><td>Fotos del exterior del vehículo (carrocería, puertas, capó, maletero)</td></tr>
+      <tr><td><strong>Interna</strong></td><td>Fotos del interior (tablero, asientos, piso)</td></tr>
+      <tr><td><strong>Daño existente</strong></td><td>Fotos de golpes, rayones o daños preexistentes</td></tr>
+      <tr><td><strong>Pertenencias</strong></td><td>Fotos de los objetos de valor dentro del vehículo</td></tr>
+      <tr><td><strong>Documentos</strong></td><td>Fotos de documentos entregados con el vehículo</td></tr>
+      <tr><td><strong>Otro</strong></td><td>Cualquier otra evidencia que no encaje en las categorías anteriores</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Descripción del lote</h3>
+  <table>
+    <thead><tr><th>Campo</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Descripción del lote</strong></td>
+        <td>Nota general que aplica a todas las fotos de esta carga</td>
+        <td><code>Evidencia de ingreso. Rayón preexistente en guardabarro derecho.</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <blockquote>
+    Para eliminar una foto antes de guardar, haga clic en el ícono de papelera que aparece en la esquina
+    de cada miniatura.
+  </blockquote>
+</div>
+
+<!-- PASO 8 -->
+<div class="section page-break">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div class="section-title-text">Checklist de recepción</div>
+  </div>
+
+  <div class="capture-placeholder">CAPTURA 13 — Sección 8: Checklist con tabla de ítems, columna de estado y observaciones<br>
+    <em>Se muestra una tabla con tres columnas: "Ítem" (nombre del componente), "Estado" (menú desplegable)
+    y "Observación" (campo de texto). Cada fila corresponde a un ítem de la plantilla seleccionada.</em>
+  </div>
+
+  <blockquote>
+    Esta sección aparece únicamente cuando se seleccionó una <strong>Plantilla checklist</strong>
+    en la sección 4.
+  </blockquote>
+
+  <h3>Opciones de estado por ítem</h3>
+  <table>
+    <thead><tr><th>Estado</th><th>Significado</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Bueno</strong></td><td>El componente está en buen estado</td></tr>
+      <tr><td><strong>Regular</strong></td><td>El componente presenta desgaste pero funciona</td></tr>
+      <tr><td><strong>Malo</strong></td><td>El componente está dañado o no funciona</td></tr>
+      <tr><td><strong>No aplica</strong></td><td>El ítem no corresponde a este tipo de vehículo o servicio</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Cómo diligenciar el checklist</h3>
+  <ol>
+    <li>Para cada ítem de la lista, seleccione el estado en el menú desplegable de la columna <strong>Estado</strong>.</li>
+    <li>Si el ítem presenta alguna observación relevante, escríbala en la columna <strong>Observación</strong>.</li>
+    <li>Complete todos los ítems que apliquen.</li>
+  </ol>
+</div>
+
+<!-- ========================================
+     SECCIÓN 5 — GUARDAR LA ORDEN
+     ======================================== -->
+<div class="section page-break">
+  <h1>5. Guardar la orden</h1>
+  <p>Una vez que haya completado todos los campos necesarios, proceda a guardar la orden.</p>
+
+  <h2>Cómo guardar</h2>
+  <ol>
+    <li>Baje hasta el final del formulario.</li>
+    <li>Haga clic en el botón que dice <strong>"Crear orden de servicio"</strong>.</li>
+  </ol>
+
+  <div class="capture-placeholder">CAPTURA 14 — Barra de acciones al final del formulario con el botón "Crear orden de servicio"<br>
+    <em>En la parte inferior de la página se muestra una barra fija con dos botones: "Cancelar" (gris, a la
+    izquierda) y "Crear orden de servicio" (verde oscuro, a la derecha).</em>
+  </div>
+
+  <h2>¿Qué sucede después de guardar?</h2>
+  <ol>
+    <li>El sistema verifica que todos los campos obligatorios estén completos.</li>
+    <li>Si todo está correcto, la orden se crea automáticamente y el sistema le asigna un
+    <strong>número de referencia</strong> (por ejemplo: <code>OT-00045</code>).</li>
+    <li>El sistema lo redirige automáticamente a la página de detalle de la orden.</li>
+    <li>La orden aparecerá en el panel principal con el estado <strong>"Por asignar"</strong>.</li>
+  </ol>
+
+  <div class="capture-placeholder">CAPTURA 15 — Página de confirmación / detalle de la orden recién creada<br>
+    <em>El usuario verá la página de detalle con el número de referencia visible en la parte superior,
+    el estado "Por asignar" destacado en color naranja, y un resumen de todos los datos registrados.</em>
+  </div>
+
+  <h2>Cómo identificar que la orden fue creada correctamente</h2>
+  <div class="checklist-item"><span class="checklist-ok">✅</span> El sistema lo lleva a una nueva página (el detalle de la orden).</div>
+  <div class="checklist-item"><span class="checklist-ok">✅</span> En la parte superior aparece el <strong>número de referencia</strong> de la orden.</div>
+  <div class="checklist-item"><span class="checklist-ok">✅</span> El estado de la orden muestra <strong>"Por asignar"</strong>.</div>
+  <div class="checklist-item"><span class="checklist-ok">✅</span> Al regresar al panel, la nueva orden aparece en la lista de tarjetas.</div>
+
+  <h2>Errores al guardar</h2>
+  <table>
+    <thead><tr><th>Mensaje de error</th><th>Causa</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Campo marcado en rojo sin diligenciar</td>
+        <td>Un campo obligatorio está vacío</td>
+        <td>Complete todos los campos con asterisco rojo (*)</td>
+      </tr>
+      <tr>
+        <td>"Debe seleccionar al menos un servicio"</td>
+        <td>No se marcó ningún servicio en la sección 4</td>
+        <td>Seleccione al menos un tipo de servicio</td>
+      </tr>
+      <tr>
+        <td>"Debe registrar el nombre del cliente particular"</td>
+        <td>El campo Nombre del cliente está vacío para tipo Particular</td>
+        <td>Complete el nombre del cliente</td>
+      </tr>
+      <tr>
+        <td>"Para Renting debe registrar nombre y celular de quien entrega el vehículo"</td>
+        <td>Tipo Renting seleccionado pero la sección 5 está incompleta</td>
+        <td>Complete Nombre y Celular en la sección 5</td>
+      </tr>
+      <tr>
+        <td>"Para Corporativo debe registrar la razón social de la empresa"</td>
+        <td>Tipo Corporativo seleccionado pero falta la razón social</td>
+        <td>Complete la Razón social en la sección 2</td>
+      </tr>
+      <tr>
+        <td>"Para Corporativo debe registrar nombre y celular de quien entrega el vehículo"</td>
+        <td>Tipo Corporativo seleccionado pero la sección 5 está incompleta</td>
+        <td>Complete Nombre y Celular en la sección 5</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========================================
+     SECCIÓN 6 — BUENAS PRÁCTICAS
+     ======================================== -->
+<div class="section page-break">
+  <h1>6. Buenas prácticas</h1>
+
+  <h2>6.1 Verificación de la placa</h2>
+  <ul>
+    <li>Confirme la placa directamente con el vehículo físico, no con el cliente de memoria.</li>
+    <li>Revise que la placa registrada en el sistema coincida exactamente con la del vehículo.</li>
+    <li>La placa se guarda en <strong>mayúsculas</strong> automáticamente; no es necesario que la escriba en mayúsculas.</li>
+    <li>Si hay alguna duda sobre la placa, consulte la tarjeta de propiedad del vehículo.</li>
+  </ul>
+
+  <h2>6.2 Verificación de datos del cliente</h2>
+  <ul>
+    <li>Para clientes <strong>Particulares</strong>: confirme el nombre completo (no abreviaturas) y registre el celular para facilitar el contacto posterior.</li>
+    <li>Para clientes <strong>Corporativos</strong>: solicite siempre el NIT para evitar duplicar el contacto en el sistema.</li>
+    <li>Para clientes <strong>Renting</strong>: verifique que la cita haya sido previamente aprobada y registre el número de referencia (CI).</li>
+  </ul>
+
+  <h2>6.3 Descripción de servicios y motivo de ingreso</h2>
+  <p>Sea específico en el campo <strong>Motivo de ingreso</strong>. Evite descripciones genéricas:</p>
+  <div class="checklist-item"><span class="checklist-err">❌</span> <strong>Incorrecto:</strong> <code>Problema con el carro</code></div>
+  <div class="checklist-item"><span class="checklist-ok">✅</span> <strong>Correcto:</strong> <code>Ruido fuerte en la suspensión delantera derecha al pasar por baches</code></div>
+  <p style="margin-top:0.3cm">Seleccione <strong>todos</strong> los servicios que el cliente solicita, no solo el principal.</p>
+
+  <h2>6.4 Registro del estado del vehículo</h2>
+  <ul>
+    <li>Registre siempre el <strong>kilometraje</strong> leyendo directamente el tablero del vehículo.</li>
+    <li>Registre el <strong>nivel de combustible</strong> observando el indicador del tablero.</li>
+    <li>Anote en <strong>Observaciones generales de recepción</strong> cualquier daño visible en la carrocería antes del ingreso, aunque sea leve (rayones, abolladuras, vidrios rotos).</li>
+  </ul>
+
+  <h2>6.5 Evidencias fotográficas</h2>
+  <ul>
+    <li>Tome fotografías de los <strong>4 lados del vehículo</strong> (frente, trasera, lado izquierdo, lado derecho).</li>
+    <li>Tome fotos detalladas de <strong>daños preexistentes</strong> y clasifíquelos en la categoría "Daño existente".</li>
+    <li>Si el cliente reporta objetos de valor, <strong>fotografíe los objetos</strong> y clasifíquelos en "Pertenencias".</li>
+  </ul>
+
+  <h2>6.6 No presionar "Cancelar" por error</h2>
+  <p>El botón <strong>Cancelar</strong> descarta todos los datos ingresados en el formulario.
+  Si cerró el formulario por error antes de guardar, deberá iniciar el registro desde cero.</p>
+</div>
+
+<!-- ========================================
+     SECCIÓN 7 — PREGUNTAS FRECUENTES
+     ======================================== -->
+<div class="section page-break">
+  <h1>7. Preguntas frecuentes</h1>
+
+  <h3>¿Puedo crear una orden sin seleccionar la marca y el modelo del vehículo?</h3>
+  <p>Sí. La Marca, Línea y Modelo (año) son campos opcionales. Sin embargo, se recomienda completarlos para facilitar el trabajo del técnico.</p>
+
+  <h3>¿Qué pasa si el cliente ya está registrado en el sistema?</h3>
+  <p>El sistema identifica a los clientes por celular o correo (para Particulares) y por NIT (para Corporativos). Si el cliente ya existe, el sistema lo vincula automáticamente sin crear un duplicado.</p>
+
+  <h3>¿Puedo registrar más de un servicio en una sola orden?</h3>
+  <p>Sí. El formulario permite seleccionar múltiples servicios para la misma orden haciendo clic en cada tarjeta de servicio.</p>
+
+  <h3>¿Qué debo hacer si no encuentro la marca del vehículo en la lista?</h3>
+  <p>Si la marca no aparece en la lista desplegable, deje el campo en blanco y anote la marca manualmente en el campo <strong>Motivo de ingreso</strong> o en <strong>Observaciones generales de recepción</strong>. Notifique al administrador para que la agregue al sistema.</p>
+
+  <h3>¿Puedo editar una orden después de crearla?</h3>
+  <p>El Asesor de Recepción <strong>no tiene permisos para editar órdenes</strong> una vez guardadas. Si necesita corregir un dato, comuníquese con el administrador del sistema.</p>
+
+  <h3>¿Qué hace el sistema con las fotografías que cargo?</h3>
+  <p>Las fotografías se almacenan en Google Drive vinculado al taller. Quedan disponibles en el detalle de la orden. No se guardan en el dispositivo del asesor.</p>
+
+  <h3>¿Qué significa el estado "Por asignar"?</h3>
+  <p>"Por asignar" es el estado inicial de toda orden recién creada. Indica que la orden fue registrada correctamente y está esperando que el jefe de taller le asigne un técnico.</p>
+
+  <h3>¿El checklist de la sección 8 es obligatorio?</h3>
+  <p>No. El checklist aparece solo si hay una plantilla seleccionada. Diligenciarlo correctamente mejora la calidad del servicio, pero el sistema permite guardar la orden aunque no se complete.</p>
+
+  <h3>¿Qué hago si la página muestra un error diferente a los descritos en el manual?</h3>
+  <p>Tome una captura de pantalla del error, anote la hora en que ocurrió y comuníquese con el administrador del sistema.</p>
+
+  <h3>¿Puedo usar el sistema desde mi celular?</h3>
+  <p>Sí. El portal está diseñado para funcionar en celular, tableta y computador. En celulares, los campos se reorganizan verticalmente y los botones se adaptan al tamaño de la pantalla.</p>
+</div>
+
+<!-- ========================================
+     SECCIÓN 8 — GLOSARIO
+     ======================================== -->
+<div class="section page-break">
+  <h1>8. Glosario de términos</h1>
+
+  <table>
+    <thead><tr><th>Término</th><th>Definición</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Asesor de Recepción</strong></td><td>Persona encargada de recibir los vehículos en el taller y registrar la información inicial en el sistema</td></tr>
+      <tr><td><strong>Orden de trabajo</strong></td><td>Registro digital que documenta el ingreso de un vehículo al taller y los servicios a realizar</td></tr>
+      <tr><td><strong>Portal</strong></td><td>Interfaz web de Odoo accesible desde el navegador, diferente al sistema administrativo interno</td></tr>
+      <tr><td><strong>Placa</strong></td><td>Número de identificación vehicular asignado por el organismo de tránsito</td></tr>
+      <tr><td><strong>VIN / Nº de chasis</strong></td><td>Número de Identificación Vehicular. Código único de 17 caracteres grabado en el chasis del vehículo</td></tr>
+      <tr><td><strong>Nº de motor</strong></td><td>Número de serie grabado directamente en el bloque del motor del vehículo</td></tr>
+      <tr><td><strong>Cilindraje (cc)</strong></td><td>Capacidad volumétrica del motor medida en centímetros cúbicos</td></tr>
+      <tr><td><strong>Kilometraje</strong></td><td>Lectura del odómetro del vehículo que indica la distancia total recorrida en kilómetros</td></tr>
+      <tr><td><strong>Renting</strong></td><td>Modalidad de flota vehicular en la que los vehículos pertenecen a una empresa de alquiler a largo plazo</td></tr>
+      <tr><td><strong>Cliente Corporativo</strong></td><td>Empresa que tiene flota propia de vehículos y los lleva al taller para mantenimiento</td></tr>
+      <tr><td><strong>CI / Referencia Renting</strong></td><td>Código de identificación de la cita o contrato asignado por la empresa Renting</td></tr>
+      <tr><td><strong>Cita Renting validada</strong></td><td>Confirmación de que la empresa Renting aprobó previamente el ingreso del vehículo al taller</td></tr>
+      <tr><td><strong>Checklist de recepción</strong></td><td>Lista de verificación estandarizada que documenta el estado de los componentes del vehículo al ingreso</td></tr>
+      <tr><td><strong>Plantilla checklist</strong></td><td>Formato predefinido con los ítems específicos que se deben revisar según el tipo de servicio</td></tr>
+      <tr><td><strong>Evidencias fotográficas</strong></td><td>Fotografías del vehículo tomadas al momento del ingreso para documentar su estado</td></tr>
+      <tr><td><strong>Google Drive</strong></td><td>Servicio de almacenamiento en la nube donde se guardan las fotografías cargadas en el sistema</td></tr>
+      <tr><td><strong>Estado "Por asignar"</strong></td><td>Estado inicial de una orden recién creada, indica que aún no tiene técnico asignado</td></tr>
+      <tr><td><strong>Motivo de ingreso</strong></td><td>Descripción breve del problema o servicio que solicita el cliente</td></tr>
+      <tr><td><strong>Persona que entrega</strong></td><td>Persona que lleva físicamente el vehículo al taller. Puede ser diferente al propietario</td></tr>
+      <tr><td><strong>Razón social</strong></td><td>Nombre legal y completo de una empresa tal como está registrado ante la autoridad tributaria</td></tr>
+      <tr><td><strong>NIT</strong></td><td>Número de Identificación Tributaria. Identificador único de una empresa ante la DIAN (Colombia)</td></tr>
+      <tr><td><strong>GNC</strong></td><td>Gas Natural Comprimido. Tipo de combustible alternativo a la gasolina</td></tr>
+      <tr><td><strong>GLP</strong></td><td>Gas Licuado de Petróleo (propano/butano). Tipo de combustible alternativo</td></tr>
+      <tr><td><strong>Nivel de combustible</strong></td><td>Indicador de la cantidad de combustible en el tanque al momento de recibir el vehículo</td></tr>
+      <tr><td><strong>Objetos de valor</strong></td><td>Pertenencias del cliente que se encuentran dentro del vehículo al momento del ingreso</td></tr>
+      <tr><td><strong>Campo obligatorio</strong></td><td>Campo marcado con un asterisco rojo (*) que debe ser diligenciado para poder guardar la orden</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PIE DE PÁGINA -->
+<div class="manual-footer">
+  <p>Manual de Usuario — Sistema de Taller de Autos &nbsp;·&nbsp; Rol: Asesor de Recepción</p>
+  <p>Versión 1.0 &nbsp;·&nbsp; Junio 2026 &nbsp;·&nbsp; MegaTecnicentro</p>
+</div>
+
+</body>
+</html>

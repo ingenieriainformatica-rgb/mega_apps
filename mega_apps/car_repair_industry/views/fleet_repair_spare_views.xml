@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             CATÁLOGO DE REPUESTOS GENÉRICOS
+             ═══════════════════════════════════════════════════════════════ -->
+
+        <record id="view_spare_catalog_list" model="ir.ui.view">
+            <field name="name">fleet.repair.spare.catalog.list</field>
+            <field name="model">fleet.repair.spare.catalog</field>
+            <field name="arch" type="xml">
+                <list string="Catálogo de repuestos" editable="bottom"
+                      decoration-muted="not active">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                    <field name="active" column_invisible="1"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_spare_catalog_form" model="ir.ui.view">
+            <field name="name">fleet.repair.spare.catalog.form</field>
+            <field name="model">fleet.repair.spare.catalog</field>
+            <field name="arch" type="xml">
+                <form string="Repuesto genérico">
+                    <sheet>
+                        <widget name="web_ribbon" title="Archivado" bg_color="text-bg-danger"
+                                invisible="active"/>
+                        <group>
+                            <group>
+                                <field name="name" placeholder="Ej: ACEITE MOTOR 5W30"/>
+                                <field name="sequence"/>
+                            </group>
+                            <group>
+                                <field name="active"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_spare_catalog_search" model="ir.ui.view">
+            <field name="name">fleet.repair.spare.catalog.search</field>
+            <field name="model">fleet.repair.spare.catalog</field>
+            <field name="arch" type="xml">
+                <search string="Buscar repuesto">
+                    <field name="name" string="Nombre" filter_domain="[('name', 'ilike', self)]"/>
+                    <filter string="Activos" name="active" domain="[('active', '=', True)]"/>
+                    <filter string="Archivados" name="archived" domain="[('active', '=', False)]"/>
+                    <group expand="0" string="Agrupar por">
+                        <filter string="Estado" name="by_active" context="{'group_by': 'active'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_spare_catalog" model="ir.actions.act_window">
+            <field name="name">Catálogo de repuestos</field>
+            <field name="res_model">fleet.repair.spare.catalog</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'search_default_active': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No hay repuestos en el catálogo todavía.
+                </p>
+                <p>
+                    Agregue los nombres genéricos de repuestos que los técnicos
+                    podrán seleccionar al solicitar cotizaciones al almacén.
+                </p>
+            </field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             SOLICITUDES DE REPUESTOS (BACKEND)
+             ═══════════════════════════════════════════════════════════════ -->
+
+        <record id="view_spare_request_list" model="ir.ui.view">
+            <field name="name">fleet.repair.spare.request.list</field>
+            <field name="model">fleet.repair.spare.request</field>
+            <field name="arch" type="xml">
+                <list string="Solicitudes de repuestos"
+                      decoration-info="state == 'requested'"
+                      decoration-success="state == 'reviewed'"
+                      decoration-muted="state == 'cancelled'">
+                    <field name="repair_id"/>
+                    <field name="request_date"/>
+                    <field name="requested_by_id"/>
+                    <field name="line_count" string="Repuestos"/>
+                    <field name="state" widget="badge"
+                           decoration-info="state == 'requested'"
+                           decoration-success="state == 'reviewed'"
+                           decoration-danger="state == 'cancelled'"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_spare_request_form" model="ir.ui.view">
+            <field name="name">fleet.repair.spare.request.form</field>
+            <field name="model">fleet.repair.spare.request</field>
+            <field name="arch" type="xml">
+                <form string="Solicitud de repuestos">
+                    <header>
+                        <button name="action_mark_reviewed"
+                                string="Marcar como revisada"
+                                type="object"
+                                class="btn-primary"
+                                invisible="state != 'requested'"
+                                groups="car_repair_industry.group_fleet_repair_spare_warehouse,car_repair_industry.group_fleet_repair_service_manager,base.group_system"/>
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="requested,reviewed"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="Información general">
+                                <field name="repair_id" readonly="1"/>
+                                <field name="requested_by_id" readonly="1"/>
+                                <field name="request_date" readonly="1"/>
+                                <field name="line_count" readonly="1"/>
+                            </group>
+                            <group string="Almacén">
+                                <field name="warehouse_note"
+                                       placeholder="Observación interna del almacén..."
+                                       readonly="state == 'cancelled'"
+                                       groups="car_repair_industry.group_fleet_repair_spare_warehouse,car_repair_industry.group_fleet_repair_service_manager,base.group_system"/>
+                            </group>
+                        </group>
+                        <separator string="Repuestos solicitados"/>
+                        <field name="line_ids" readonly="1">
+                            <list string="Líneas">
+                                <field name="spare_catalog_id" string="Repuesto"/>
+                                <field name="quantity"/>
+                                <field name="technician_note" string="Observación del técnico"/>
+                            </list>
+                        </field>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_spare_request_search" model="ir.ui.view">
+            <field name="name">fleet.repair.spare.request.search</field>
+            <field name="model">fleet.repair.spare.request</field>
+            <field name="arch" type="xml">
+                <search string="Buscar solicitudes">
+                    <field name="repair_id"/>
+                    <field name="requested_by_id"/>
+                    <filter string="Solicitado" name="requested" domain="[('state', '=', 'requested')]"/>
+                    <filter string="Revisado" name="reviewed" domain="[('state', '=', 'reviewed')]"/>
+                    <group expand="0" string="Agrupar por">
+                        <filter string="Estado" name="by_state" context="{'group_by': 'state'}"/>
+                        <filter string="Técnico" name="by_tech" context="{'group_by': 'requested_by_id'}"/>
+                        <filter string="Orden" name="by_repair" context="{'group_by': 'repair_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Acción filtrada por repair_id — usada por el smart button -->
+        <record id="action_spare_request_from_repair" model="ir.actions.act_window">
+            <field name="name">Solicitudes de repuestos</field>
+            <field name="res_model">fleet.repair.spare.request</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain">[('repair_id', '=', active_id)]</field>
+            <field name="context">{'default_repair_id': active_id}</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             MENÚ
+             ═══════════════════════════════════════════════════════════════ -->
+
+        <!-- Submenú Configuración bajo el menú principal del módulo -->
+        <menuitem
+            id="menu_fleet_repair_config"
+            name="Configuración"
+            parent="car_repair_industry.menu_main_car_repair"
+            sequence="50"
+            groups="car_repair_industry.group_fleet_repair_spare_warehouse,car_repair_industry.group_fleet_repair_service_manager"/>
+
+        <menuitem
+            id="menu_spare_catalog"
+            name="Catálogo de repuestos"
+            parent="menu_fleet_repair_config"
+            action="action_spare_catalog"
+            sequence="10"
+            groups="car_repair_industry.group_fleet_repair_spare_warehouse,car_repair_industry.group_fleet_repair_service_manager"/>
+
+    </data>
+</odoo>

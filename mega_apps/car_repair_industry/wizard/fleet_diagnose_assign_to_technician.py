@@ -12,6 +12,8 @@ class FleetDiagnoseAssigntoTechnician(models.TransientModel):
 
     def do_assign_technician(self):
         if self.user_id and self._context.get('active_id'):
-            self.env['fleet.diagnose'].browse(self._context.get('active_id')).write(
-                {'user_id': self.user_id.id, 'state': 'in_progress'})
+            diagnose = self.env['fleet.diagnose'].browse(self._context.get('active_id'))
+            diagnose.write({'user_id': self.user_id.id, 'state': 'in_progress'})
+            if diagnose.fleet_repair_id:
+                diagnose.fleet_repair_id.write({'portal_technician_id': self.user_id.id})
         return {'type': 'ir.actions.act_window_close'}
