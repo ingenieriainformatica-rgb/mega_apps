@@ -12,8 +12,19 @@
                         <button name="action_create_quotation" string="Create Quotation" type="object"
                                 class="oe_highlight" style="float:left;" invisible="state != 'in_progress'"
                                 groups="car_repair_industry.group_fleet_repair_service_manager" confirm="Estas seguro?"/>
-                        <button name="%(action_fleet_diagnose_assign_to_technician)d" string="Assign to Technician"
-                                invisible="state != 'draft'" type="action" class="oe_highlight" style="float:left;"
+                        <button name="%(action_fleet_diagnose_assign_to_technician)d"
+                                string="Asignar al técnico"
+                                type="action"
+                                class="oe_highlight"
+                                invisible="state != 'draft' or user_id"
+                                context="{'is_reassignment': False}"
+                                groups="car_repair_industry.group_fleet_repair_head_technician,car_repair_industry.group_fleet_repair_directeur_commercial,car_repair_industry.group_fleet_repair_service_manager"/>
+                        <button name="%(action_fleet_diagnose_assign_to_technician)d"
+                                string="Reasignar técnico"
+                                type="action"
+                                class="oe_highlight"
+                                invisible="state != 'in_progress' or not user_id"
+                                context="{'is_reassignment': True}"
                                 groups="car_repair_industry.group_fleet_repair_head_technician,car_repair_industry.group_fleet_repair_directeur_commercial,car_repair_industry.group_fleet_repair_service_manager"/>
 
                         <field name="state" widget="statusbar" statusbar_visible="draft,done"/>

@@ -6,23 +6,40 @@
             <field name="name">fleet.diagnose.assignto.tech.form</field>
             <field name="model">fleet.diagnose.assignto.technician</field>
             <field name="arch" type="xml">
-                <form string="Assign To Technician">
+                <form string="Asignación de técnico">
                     <group>
-                        <field name="user_id" style="width: 50%" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="is_reassignment" invisible="1"/>
+                        <field name="current_user_id"
+                               string="Técnico actual"
+                               readonly="1"
+                               invisible="not is_reassignment"/>
+                        <field name="user_id"
+                               string="Nuevo técnico"
+                               options="{'no_create': True, 'no_open': True}"
+                               domain="[('active', '=', True), ('share', '=', True)]"/>
+                        <field name="reassign_reason"
+                               string="Motivo de reasignación"
+                               invisible="not is_reassignment"
+                               required="is_reassignment"
+                               placeholder="Ej: Incapacidad, Accidente, Cambio de turno..."/>
                     </group>
                     <footer>
-                        <button name="do_assign_technician" string="Assign" type="object" class="oe_highlight"/>
+                        <button name="do_assign_technician"
+                                string="Confirmar"
+                                type="object"
+                                class="oe_highlight"/>
                         or
-                        <button string="Cancel" class="oe_link" special="cancel"/>
+                        <button string="Cancelar"
+                                class="oe_link"
+                                special="cancel"/>
                     </footer>
                 </form>
             </field>
         </record>
 
         <record id="action_fleet_diagnose_assign_to_technician" model="ir.actions.act_window">
-            <field name="name">Assign To Technician</field>
+            <field name="name">Asignación de técnico</field>
             <field name="res_model">fleet.diagnose.assignto.technician</field>
-
             <field name="view_mode">form</field>
             <field name="view_id" ref="view_fleet_diagnose_assign_to_tech_form"/>
             <field name="target">new</field>

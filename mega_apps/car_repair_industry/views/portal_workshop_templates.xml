@@ -259,11 +259,11 @@
                     </a>
                     <div class="d-flex align-items-center gap-3 mt-2">
                         <div class="workshop-form-icon">
-                            <i class="fa fa-file-alt"></i>
+                            <i class="fa fa-car"></i>
                         </div>
                         <div>
-                            <h1 class="h2 mb-1">Nueva orden de servicio</h1>
-                            <p class="text-muted mb-0">Recepción del vehículo en taller</p>
+                            <h1 class="h2 mb-1">Registro de ingreso al taller</h1>
+                            <p class="text-muted mb-0">Complete el formulario para registrar la recepción del vehículo</p>
                         </div>
                     </div>
                 </div>
@@ -275,7 +275,7 @@
                         <div class="workshop-form-section-header">
                             <div class="workshop-form-section-number">1</div>
                             <div>
-                                <h2 class="workshop-form-section-title">Tipo de cliente</h2>
+                                <h2 class="workshop-form-section-title">Categoría del cliente</h2>
                                 <p class="workshop-form-section-subtitle">Selecciona el origen del cliente que entrega el vehículo</p>
                             </div>
                         </div>
@@ -283,21 +283,43 @@
                             <label class="workshop-customer-type-card" for="customer_type_renting">
                                 <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_renting" value="renting"/>
                                 <div class="workshop-customer-type-icon workshop-customer-type-renting"><i class="fa fa-building"></i></div>
-                                <div class="workshop-customer-type-name">Renting</div>
+                                <div class="workshop-customer-type-name">Sede renting</div>
                                 <div class="workshop-customer-type-desc">Flotas de empresas de alquiler</div>
                             </label>
                             <label class="workshop-customer-type-card" for="customer_type_particular">
                                 <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_particular" value="particular" checked="checked"/>
                                 <div class="workshop-customer-type-icon workshop-customer-type-particular"><i class="fa fa-user"></i></div>
-                                <div class="workshop-customer-type-name">Particular</div>
+                                <div class="workshop-customer-type-name">Sede 1a1</div>
                                 <div class="workshop-customer-type-desc">Persona natural</div>
                             </label>
                             <label class="workshop-customer-type-card" for="customer_type_corporate">
                                 <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_corporate" value="corporate"/>
                                 <div class="workshop-customer-type-icon workshop-customer-type-corporate"><i class="fa fa-briefcase"></i></div>
-                                <div class="workshop-customer-type-name">Corporativo</div>
+                                <div class="workshop-customer-type-name">Sede MegaSur</div>
                                 <div class="workshop-customer-type-desc">Empresa con flota propia</div>
                             </label>
+                        </div>
+
+                        <!-- Sub-sección renting: visible solo cuando se selecciona Renting -->
+                        <div class="js-workshop-renting-mode-section d-none mt-3 pt-3 border-top">
+                            <p class="fw-semibold small mb-2">
+                                <i class="fa fa-question-circle text-muted me-1"></i>
+                                ¿Cómo se registra el cliente de este vehículo?
+                            </p>
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <label class="workshop-customer-type-card flex-fill" style="max-width: 280px;" for="renting_mode_billing">
+                                    <input class="form-check-input js-workshop-renting-mode" type="radio" name="renting_mode" id="renting_mode_billing" value="billing" checked="checked" disabled="disabled"/>
+                                    <div class="workshop-customer-type-icon workshop-customer-type-renting"><i class="fa fa-building"></i></div>
+                                    <div class="workshop-customer-type-name">Facturar al renting</div>
+                                    <div class="workshop-customer-type-desc">Se asigna la empresa de renting como cliente</div>
+                                </label>
+                                <label class="workshop-customer-type-card flex-fill" style="max-width: 280px;" for="renting_mode_client">
+                                    <input class="form-check-input js-workshop-renting-mode" type="radio" name="renting_mode" id="renting_mode_client" value="client" disabled="disabled"/>
+                                    <div class="workshop-customer-type-icon workshop-customer-type-particular"><i class="fa fa-user"></i></div>
+                                    <div class="workshop-customer-type-name">Cliente del renting</div>
+                                    <div class="workshop-customer-type-desc">Se registra el conductor como cliente particular</div>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -330,10 +352,10 @@
                             <div class="workshop-form-section-number">2</div>
                             <div>
                                 <h2 class="workshop-form-section-title">Cliente Renting</h2>
-                                <p class="workshop-form-section-subtitle">Datos del cliente corporativo y referencia de la cita</p>
+                                <p class="workshop-form-section-subtitle">Empresa de renting asignada como cliente de la orden</p>
                             </div>
                         </div>
-                        <div class="workshop-renting-company mb-3">
+                        <div class="workshop-renting-company">
                             <div class="d-flex align-items-start gap-3">
                                 <div class="workshop-renting-company-icon" aria-hidden="true">
                                     <i class="fa fa-building"></i>
@@ -346,18 +368,6 @@
                                         <div class="col-md-4"><strong>Teléfono:</strong> <span t-esc="renting_partner.phone or renting_partner.mobile or 'Sin registrar'"/></div>
                                         <div class="col-md-4"><strong>Correo:</strong> <span t-esc="renting_partner.email or 'Sin registrar'"/></div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">CI / referencia Renting</label>
-                                <input name="renting_reference" class="form-control js-workshop-renting-input" disabled="disabled" placeholder="Ej. CI-12345"/>
-                            </div>
-                            <div class="col-md-6 d-flex align-items-end">
-                                <div class="form-check">
-                                    <input class="form-check-input js-workshop-renting-input" type="checkbox" name="renting_appointment_validated" id="renting_appointment_validated" value="1" disabled="disabled"/>
-                                    <label class="form-check-label" for="renting_appointment_validated">Cita Renting validada</label>
                                 </div>
                             </div>
                         </div>
@@ -488,7 +498,7 @@
                             <div class="col-12">
                                 <label class="form-label">Servicios solicitados <span class="text-danger">*</span></label>
                                 <p class="form-text small text-muted mb-2">Marca todos los servicios que el cliente solicita. El técnico marcará cada uno como vaya completándolo.</p>
-                                <div class="workshop-service-grid">
+                                <div class="workshop-service-grid" id="service-grid-existing">
                                     <t t-foreach="service_types" t-as="service">
                                         <label class="workshop-service-card" t-att-for="'service_type_%s' % service.id">
                                             <input type="checkbox" name="service_types" t-att-value="service.id" t-att-id="'service_type_%s' % service.id" class="form-check-input"/>
@@ -496,6 +506,16 @@
                                             <span class="workshop-service-name" t-esc="service.name"/>
                                         </label>
                                     </t>
+                                </div>
+                                <div class="mt-3">
+                                    <label class="form-label small text-muted">¿No encuentras el servicio que necesitas? Agrégalo:</label>
+                                    <div class="input-group input-group-sm" style="max-width: 420px;">
+                                        <input type="text" id="new-service-input" class="form-control" placeholder="Nombre del nuevo servicio..."/>
+                                        <button type="button" class="btn btn-outline-secondary" id="btn-add-service">
+                                            <i class="fa fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                    <div class="workshop-service-grid mt-2" id="new-services-container"></div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -818,549 +838,671 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="border rounded p-3 mt-3">
-                    <h2 class="h5 mb-1">
-                        <i class="fa fa-wrench text-muted"></i> Servicios solicitados
-                    </h2>
-                    <p class="small text-muted mb-3">Servicios registrados en la orden. El técnico marca cada uno a medida que lo completa.</p>
                     <t t-set="svc_done" t-value="len(service_lines.filtered(lambda l: l.tecnico_status == 'completado'))"/>
                     <t t-set="svc_total" t-value="len(service_lines)"/>
-                    <div class="workshop-service-summary mb-3" t-if="svc_total">
-                        <div class="workshop-service-progress">
-                            <div class="workshop-service-progress-fill" t-attf-style="width: {{ (100 * svc_done / svc_total if svc_total else 0) }}%;"/>
-                        </div>
-                        <div class="workshop-service-progress-label small text-muted">
-                            <strong t-esc="svc_done"/> de <strong t-esc="svc_total"/> servicios completados
-                        </div>
-                    </div>
-                    <div t-if="not service_lines" class="text-muted">No hay servicios registrados para esta orden.</div>
-                    <form t-if="service_lines" id="workshop-services-form"
-                          t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post">
-                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <input type="hidden" name="action" value="save"/>
-                        <div class="table-responsive">
-                            <table class="workshop-service-table table table-sm align-middle">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 36px;">#</th>
-                                        <th>Servicio</th>
-                                        <th style="width: 200px;">Estado</th>
-                                        <th>Notas del técnico</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr t-foreach="service_lines" t-as="svc" t-att-class="'workshop-service-row workshop-service-row-' + (svc.tecnico_status or 'pendiente')">
-                                        <td class="workshop-service-num" t-esc="svc_index + 1"/>
-                                        <td>
-                                            <div class="fw-semibold" t-esc="svc.service_type.name or '—'"/>
-                                            <div class="small text-muted" t-if="svc.service_detail" t-esc="svc.service_detail"/>
-                                        </td>
-                                        <td>
-                                            <t t-if="is_technician or is_internal_manager">
-                                                <select t-att-name="'svc_status_%s' % svc.id" class="form-select form-select-sm workshop-service-status-select">
-                                                    <option value="pendiente" t-att-selected="'selected' if svc.tecnico_status == 'pendiente' else None">⏳ Pendiente</option>
-                                                    <option value="en_progreso" t-att-selected="'selected' if svc.tecnico_status == 'en_progreso' else None">⚙ En progreso</option>
-                                                    <option value="completado" t-att-selected="'selected' if svc.tecnico_status == 'completado' else None">✓ Completado</option>
-                                                </select>
-                                            </t>
-                                            <t t-else="">
-                                                <span t-if="svc.tecnico_status == 'pendiente'" class="badge bg-secondary">Pendiente</span>
-                                                <span t-if="svc.tecnico_status == 'en_progreso'" class="badge bg-warning text-dark">En progreso</span>
-                                                <span t-if="svc.tecnico_status == 'completado'" class="badge bg-success">Completado</span>
-                                            </t>
-                                        </td>
-                                        <td>
-                                            <t t-if="is_technician or is_internal_manager">
-                                                <input t-att-name="'svc_notes_%s' % svc.id" class="form-control form-control-sm"
-                                                       t-att-placeholder="'Notas sobre ' + (svc.service_type.name or 'este servicio')"
-                                                       t-att-value="svc.tecnico_notes or ''"/>
-                                            </t>
-                                            <t t-else="">
-                                                <span t-esc="svc.tecnico_notes or ''" class="text-muted small"/>
-                                            </t>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="d-flex justify-content-end mt-2" t-if="is_technician or is_internal_manager">
-                            <button class="btn btn-primary" type="submit">
-                                <i class="fa fa-check"></i> Guardar avance de servicios
+                <div class="accordion mt-3" id="accordion-workshop-sections">
+
+                    <!-- 1. Servicios solicitados -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-services">
+                            <button class="accordion-button" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse-services"
+                                    aria-expanded="true" aria-controls="collapse-services">
+                                <i class="fa fa-wrench me-2"></i> Servicios solicitados
                             </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="border rounded p-3 mt-3">
-                    <h2 class="h5">Checklist</h2>
-                    <p t-if="repair.reception_checklist_template_id" class="small text-muted mb-2">
-                        Plantilla aplicada: <strong t-esc="repair.reception_checklist_template_id.name"/>
-                    </p>
-                    <div t-if="repair.reception_checklist_line_ids" class="table-responsive">
-                        <table class="table table-sm">
-                            <thead><tr><th>Ítem</th><th>Estado</th><th>Observación</th></tr></thead>
-                            <tbody>
-                                <tr t-foreach="repair.reception_checklist_line_ids" t-as="line">
-                                    <td t-esc="line.name"/>
-                                    <td>
-                                        <span t-if="line.state == 'good'" class="badge bg-success" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
-                                        <span t-if="line.state == 'regular'" class="badge bg-warning text-dark" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
-                                        <span t-if="line.state == 'bad'" class="badge bg-danger" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
-                                        <span t-if="line.state == 'not_apply'" class="badge bg-secondary" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
-                                    </td>
-                                    <td t-att-class="line.state == 'bad' and 'text-danger fw-bold' or (line.observation and 'text-danger')" t-esc="line.observation or ''"/>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p t-if="not repair.reception_checklist_line_ids" class="text-muted mb-0">Sin checklist diligenciado.</p>
-                </div>
-
-                <div id="workshop-checklist-tecnico" class="border rounded p-3 mt-3">
-                    <t t-set="tecnico_lines" t-value="repair.technical_checklist_line_ids"/>
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                        <div>
-                            <h2 class="h5 mb-0">Checklist técnico</h2>
-                            <p class="small text-muted mb-0">
-                                Checklist detallado que el técnico llena durante la inspección / diagnóstico del vehículo.
-                            </p>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 ms-auto" t-if="tecnico_lines and (repair.portal_technician_id or repair.user_id)">
-                            <a t-att-href="'/my/workshop/order/%s/checklist/pdf' % repair.id"
-                               class="btn btn-primary btn-sm" target="_blank" rel="noopener">
-                                <i class="fa fa-file-pdf"></i> Descargar PDF
-                            </a>
-                            <button type="button" class="btn btn-outline-primary btn-sm js-workshop-print-checklist" t-att-data-target="'workshop-checklist-tecnico'">
-                                <i class="fa fa-print"></i> Imprimir
-                            </button>
-                        </div>
-                    </div>
-                    <t t-if="not tecnico_lines">
-                        <p class="text-muted mb-0">Aún no hay líneas de checklist técnico registradas para esta orden.</p>
-                    </t>
-                    <t t-else="">
-                        <t t-set="is_editor" t-value="is_technician or is_internal_manager"/>
-                        <t t-set="sec1_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'general_1')"/>
-                        <t t-set="sec2_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'general_2')"/>
-                        <t t-set="brake_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'brakes')"/>
-                        <t t-set="tire_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'tires')"/>
-                        <t t-set="doc_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'documents')"/>
-
-                        <form t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post" id="tecnico_checklist_form">
-                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                            <input type="hidden" name="action" value="save"/>
-
-                            <div class="row g-3">
-                                <div class="col-12 col-lg-6">
-                                    <div class="workshop-checklist-section h-100">
-                                        <table class="workshop-checklist-table table table-sm mb-0">
+                        </h2>
+                        <div id="collapse-services" class="accordion-collapse collapse show"
+                             aria-labelledby="heading-services">
+                            <div class="accordion-body">
+                                <p class="small text-muted mb-3">Servicios registrados en la orden. El técnico marca cada uno a medida que lo completa.</p>
+                                <t t-set="svc_done" t-value="len(service_lines.filtered(lambda l: l.tecnico_status == 'completado'))"/>
+                                <t t-set="svc_total" t-value="len(service_lines)"/>
+                                <div class="workshop-service-summary mb-3" t-if="svc_total">
+                                    <div class="workshop-service-progress">
+                                        <div class="workshop-service-progress-fill" t-attf-style="width: {{ (100 * svc_done / svc_total if svc_total else 0) }}%;"/>
+                                    </div>
+                                    <div class="workshop-service-progress-label small text-muted">
+                                        <strong t-esc="svc_done"/> de <strong t-esc="svc_total"/> servicios completados
+                                    </div>
+                                </div>
+                                <div t-if="not service_lines" class="text-muted">No hay servicios registrados para esta orden.</div>
+                                <form t-if="service_lines" id="workshop-services-form"
+                                      t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="action" value="save"/>
+                                    <div class="table-responsive">
+                                        <table class="workshop-service-table table table-sm align-middle">
                                             <thead>
                                                 <tr>
-                                                    <th class="workshop-checklist-num">N°</th>
-                                                    <th>INSPECCIÓN</th>
-                                                    <th class="workshop-checklist-estado" colspan="2">ESTADO</th>
-                                                    <th>OBSERVACIONES</th>
-                                                </tr>
-                                                <tr class="workshop-checklist-subheader">
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th><i class="fa fa-check text-success"></i> Bueno</th>
-                                                    <th><i class="fa fa-times text-danger"></i> Malo</th>
-                                                    <th></th>
+                                                    <th style="width: 36px;">#</th>
+                                                    <th>Servicio</th>
+                                                    <th style="width: 200px;">Estado</th>
+                                                    <th>Notas del técnico</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr t-foreach="sec1_lines" t-as="tline">
-                                                    <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
-                                                    <td t-esc="tline.name"/>
-                                                    <td class="workshop-checklist-tick" t-att-class="tline.state == 'good' and 'is-good' or ''">
-                                                        <t t-if="is_editor">
-                                                            <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="good" t-att-checked="'checked' if tline.state == 'good' else None" class="form-check-input"/>
-                                                        </t>
-                                                        <i t-else="" t-if="tline.state == 'good'" class="fa fa-check text-success"/>
-                                                    </td>
-                                                    <td class="workshop-checklist-tick" t-att-class="tline.state == 'bad' and 'is-bad' or ''">
-                                                        <t t-if="is_editor">
-                                                            <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="bad" t-att-checked="'checked' if tline.state == 'bad' else None" class="form-check-input"/>
-                                                        </t>
-                                                        <i t-else="" t-if="tline.state == 'bad'" class="fa fa-times text-danger"/>
+                                                <tr t-foreach="service_lines" t-as="svc" t-att-class="'workshop-service-row workshop-service-row-' + (svc.tecnico_status or 'pendiente')">
+                                                    <td class="workshop-service-num" t-esc="svc_index + 1"/>
+                                                    <td>
+                                                        <div class="fw-semibold" t-esc="svc.service_type.name or '—'"/>
+                                                        <div class="small text-muted" t-if="svc.service_detail" t-esc="svc.service_detail"/>
                                                     </td>
                                                     <td>
-                                                        <t t-if="is_editor">
-                                                            <input t-att-name="'tech_obs_%s' % tline.id" class="form-control form-control-sm" t-att-value="tline.observation or ''"/>
+                                                        <t t-if="is_technician or is_internal_manager">
+                                                            <select t-att-name="'svc_status_%s' % svc.id" class="form-select form-select-sm workshop-service-status-select">
+                                                                <option value="pendiente" t-att-selected="'selected' if svc.tecnico_status == 'pendiente' else None">⏳ Pendiente</option>
+                                                                <option value="en_progreso" t-att-selected="'selected' if svc.tecnico_status == 'en_progreso' else None">⚙ En progreso</option>
+                                                                <option value="completado" t-att-selected="'selected' if svc.tecnico_status == 'completado' else None">✓ Completado</option>
+                                                            </select>
                                                         </t>
-                                                        <t t-else="" t-esc="tline.observation or ''"/>
+                                                        <t t-else="">
+                                                            <span t-if="svc.tecnico_status == 'pendiente'" class="badge bg-secondary">Pendiente</span>
+                                                            <span t-if="svc.tecnico_status == 'en_progreso'" class="badge bg-warning text-dark">En progreso</span>
+                                                            <span t-if="svc.tecnico_status == 'completado'" class="badge bg-success">Completado</span>
+                                                        </t>
+                                                    </td>
+                                                    <td>
+                                                        <t t-if="is_technician or is_internal_manager">
+                                                            <input t-att-name="'svc_notes_%s' % svc.id" class="form-control form-control-sm"
+                                                                   t-att-placeholder="'Notas sobre ' + (svc.service_type.name or 'este servicio')"
+                                                                   t-att-value="svc.tecnico_notes or ''"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span t-esc="svc.tecnico_notes or ''" class="text-muted small"/>
+                                                        </t>
                                                     </td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
+                                    <div class="d-flex justify-content-end mt-2" t-if="is_technician or is_internal_manager">
+                                        <button class="btn btn-primary" type="submit">
+                                            <i class="fa fa-check"></i> Guardar avance de servicios
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Checklist de recepción -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-checklist-recepcion">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse-checklist-recepcion"
+                                    aria-expanded="false" aria-controls="collapse-checklist-recepcion">
+                                <span class="fw-semibold me-2">Checklist de recepción</span>
+                                <span t-if="repair.reception_checklist_template_id" class="small text-muted fw-normal">
+                                    · <t t-esc="repair.reception_checklist_template_id.name"/>
+                                </span>
+                            </button>
+                        </h2>
+                        <div id="collapse-checklist-recepcion" class="accordion-collapse collapse"
+                             aria-labelledby="heading-checklist-recepcion">
+                            <div class="accordion-body p-0">
+                                <div t-if="repair.reception_checklist_line_ids" class="table-responsive">
+                                    <table class="table table-sm mb-0">
+                                        <thead class="table-light">
+                                            <tr><th>Ítem</th><th>Estado</th><th>Observación</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="repair.reception_checklist_line_ids" t-as="line">
+                                                <td t-esc="line.name"/>
+                                                <td>
+                                                    <span t-if="line.state == 'good'" class="badge bg-success" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
+                                                    <span t-if="line.state == 'regular'" class="badge bg-warning text-dark" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
+                                                    <span t-if="line.state == 'bad'" class="badge bg-danger" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
+                                                    <span t-if="line.state == 'not_apply'" class="badge bg-secondary" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
+                                                </td>
+                                                <td t-att-class="line.state == 'bad' and 'text-danger fw-bold' or (line.observation and 'text-danger')" t-esc="line.observation or ''"/>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
-                                <div class="col-12 col-lg-6">
-                                    <div class="workshop-checklist-section h-100">
-                                        <table class="workshop-checklist-table table table-sm mb-0">
-                                            <thead>
+                                <p t-if="not repair.reception_checklist_line_ids" class="text-muted mb-0 p-3">Sin checklist diligenciado.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Checklist técnico -->
+                    <div id="workshop-checklist-tecnico" class="accordion-item">
+                        <h2 class="accordion-header" id="heading-checklist-tecnico">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse-checklist-tecnico"
+                                    aria-expanded="false" aria-controls="collapse-checklist-tecnico">
+                                <i class="fa fa-clipboard me-2"></i> Checklist técnico
+                            </button>
+                        </h2>
+                        <div id="collapse-checklist-tecnico" class="accordion-collapse collapse"
+                             aria-labelledby="heading-checklist-tecnico">
+                            <div class="accordion-body">
+                                <t t-set="tecnico_lines" t-value="repair.technical_checklist_line_ids"/>
+                                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                    <div>
+                                        <h2 class="h5 mb-0">Checklist técnico</h2>
+                                        <p class="small text-muted mb-0">
+                                            Checklist detallado que el técnico llena durante la inspección / diagnóstico del vehículo.
+                                        </p>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2 ms-auto" t-if="tecnico_lines and (repair.portal_technician_id or repair.user_id)">
+                                        <a t-att-href="'/my/workshop/order/%s/checklist/pdf' % repair.id"
+                                           class="btn btn-primary btn-sm" target="_blank" rel="noopener">
+                                            <i class="fa fa-file-pdf"></i> Descargar PDF
+                                        </a>
+                                        <button type="button" class="btn btn-outline-primary btn-sm js-workshop-print-checklist" t-att-data-target="'workshop-checklist-tecnico'">
+                                            <i class="fa fa-print"></i> Imprimir
+                                        </button>
+                                    </div>
+                                </div>
+                                <t t-if="not tecnico_lines">
+                                    <p class="text-muted mb-0">Aún no hay líneas de checklist técnico registradas para esta orden.</p>
+                                </t>
+                                <t t-else="">
+                                    <t t-set="is_editor" t-value="is_technician or is_internal_manager"/>
+                                    <t t-set="sec1_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'general_1')"/>
+                                    <t t-set="sec2_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'general_2')"/>
+                                    <t t-set="brake_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'brakes')"/>
+                                    <t t-set="tire_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'tires')"/>
+                                    <t t-set="doc_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'documents')"/>
+
+                                    <form t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post" id="tecnico_checklist_form">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <input type="hidden" name="action" value="save"/>
+
+                                        <div class="row g-3">
+                                            <div class="col-12 col-lg-6">
+                                                <div class="workshop-checklist-section h-100">
+                                                    <table class="workshop-checklist-table table table-sm mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="workshop-checklist-num">N°</th>
+                                                                <th>INSPECCIÓN</th>
+                                                                <th class="workshop-checklist-estado" colspan="2">ESTADO</th>
+                                                                <th>OBSERVACIONES</th>
+                                                            </tr>
+                                                            <tr class="workshop-checklist-subheader">
+                                                                <th></th>
+                                                                <th></th>
+                                                                <th><i class="fa fa-check text-success"></i> Bueno</th>
+                                                                <th><i class="fa fa-times text-danger"></i> Malo</th>
+                                                                <th></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr t-foreach="sec1_lines" t-as="tline">
+                                                                <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
+                                                                <td t-esc="tline.name"/>
+                                                                <td class="workshop-checklist-tick" t-att-class="tline.state == 'good' and 'is-good' or ''">
+                                                                    <t t-if="is_editor">
+                                                                        <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="good" required="required" t-att-checked="'checked' if tline.state == 'good' else None" class="form-check-input"/>
+                                                                    </t>
+                                                                    <i t-else="" t-if="tline.state == 'good'" class="fa fa-check text-success"/>
+                                                                </td>
+                                                                <td class="workshop-checklist-tick" t-att-class="tline.state == 'bad' and 'is-bad' or ''">
+                                                                    <t t-if="is_editor">
+                                                                        <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="bad" required="required" t-att-checked="'checked' if tline.state == 'bad' else None" class="form-check-input"/>
+                                                                    </t>
+                                                                    <i t-else="" t-if="tline.state == 'bad'" class="fa fa-times text-danger"/>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-if="is_editor">
+                                                                        <input t-att-name="'tech_obs_%s' % tline.id" class="form-control form-control-sm" t-att-value="tline.observation or ''"/>
+                                                                    </t>
+                                                                    <t t-else="" t-esc="tline.observation or ''"/>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-lg-6">
+                                                <div class="workshop-checklist-section h-100">
+                                                    <table class="workshop-checklist-table table table-sm mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="workshop-checklist-num">N°</th>
+                                                                <th>INSPECCIÓN</th>
+                                                                <th class="workshop-checklist-estado" colspan="2">ESTADO</th>
+                                                                <th>OBSERVACIONES</th>
+                                                            </tr>
+                                                            <tr class="workshop-checklist-subheader">
+                                                                <th></th>
+                                                                <th></th>
+                                                                <th><i class="fa fa-check text-success"></i> Bueno</th>
+                                                                <th><i class="fa fa-times text-danger"></i> Malo</th>
+                                                                <th></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr t-foreach="sec2_lines" t-as="tline">
+                                                                <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
+                                                                <td t-esc="tline.name"/>
+                                                                <td class="workshop-checklist-tick" t-att-class="tline.state == 'good' and 'is-good' or ''">
+                                                                    <t t-if="is_editor">
+                                                                        <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="good" required="required" t-att-checked="'checked' if tline.state == 'good' else None" class="form-check-input"/>
+                                                                    </t>
+                                                                    <i t-else="" t-if="tline.state == 'good'" class="fa fa-check text-success"/>
+                                                                </td>
+                                                                <td class="workshop-checklist-tick" t-att-class="tline.state == 'bad' and 'is-bad' or ''">
+                                                                    <t t-if="is_editor">
+                                                                        <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="bad" required="required" t-att-checked="'checked' if tline.state == 'bad' else None" class="form-check-input"/>
+                                                                    </t>
+                                                                    <i t-else="" t-if="tline.state == 'bad'" class="fa fa-times text-danger"/>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-if="is_editor">
+                                                                        <input t-att-name="'tech_obs_%s' % tline.id" class="form-control form-control-sm" t-att-value="tline.observation or ''"/>
+                                                                    </t>
+                                                                    <t t-else="" t-esc="tline.observation or ''"/>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mt-1">
+                                            <div class="col-12 col-lg-8">
+                                                <div class="workshop-checklist-section h-100">
+                                                    <table class="workshop-checklist-table table table-sm mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th colspan="5" class="workshop-checklist-section-title text-center">INSPECCIÓN DE SISTEMA DE FRENOS</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="workshop-checklist-num">N°</th>
+                                                                <th>PARTE</th>
+                                                                <th class="text-center" colspan="2">PROFUNDIDAD (mm) <span class="text-danger">*</span></th>
+                                                                <th class="workshop-checklist-estado">ESTADO</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th></th>
+                                                                <th></th>
+                                                                <th class="workshop-checklist-izq-der">IZQ</th>
+                                                                <th class="workshop-checklist-izq-der">DER</th>
+                                                                <th></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr t-foreach="brake_lines" t-as="tline">
+                                                                <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
+                                                                <td t-esc="tline.name"/>
+                                                                <td>
+                                                                    <t t-if="is_editor">
+                                                                        <input t-att-name="'tech_measure_left_%s' % tline.id" class="form-control form-control-sm text-end" required="required" t-att-value="tline.measurement_left or ''" placeholder="mm"/>
+                                                                    </t>
+                                                                    <t t-else="" t-esc="(tline.measurement_left or '') + ' mm'"/>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-if="is_editor">
+                                                                        <input t-att-name="'tech_measure_right_%s' % tline.id" class="form-control form-control-sm text-end" required="required" t-att-value="tline.measurement_right or ''" placeholder="mm"/>
+                                                                    </t>
+                                                                    <t t-else="" t-esc="(tline.measurement_right or '') + ' mm'"/>
+                                                                </td>
+                                                                <td>
+                                                                    <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select form-select-sm">
+                                                                        <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">Bueno</option>
+                                                                        <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">Malo</option>
+                                                                        <option value="not_apply" t-att-selected="'selected' if tline.state == 'not_apply' else None">N/A</option>
+                                                                    </select>
+                                                                    <span t-else="" t-if="tline.state == 'good'" class="badge bg-success">Bueno</span>
+                                                                    <span t-else="" t-if="tline.state == 'bad'" class="badge bg-danger">Malo</span>
+                                                                    <span t-else="" t-if="tline.state == 'not_apply'" class="badge bg-secondary">N/A</span>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <div t-if="is_editor" class="mt-2">
+                                                        <input t-att-name="'tech_obs_%s' % brake_lines[0].id if brake_lines else '0'" type="hidden" value=""/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-lg-4">
+                                                <div class="workshop-checklist-section h-100">
+                                                    <table class="workshop-checklist-table table table-sm mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th colspan="3" class="workshop-checklist-section-title text-center">INSPECCIÓN LLANTAS</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>POS</th>
+                                                                <th>POSICIÓN</th>
+                                                                <th>PROFUND. <span class="text-danger">*</span></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr t-foreach="tire_lines" t-as="tline">
+                                                                <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
+                                                                <td>
+                                                                    <t t-if="is_editor">
+                                                                        <select t-att-name="'tech_position_%s' % tline.id" class="form-select form-select-sm">
+                                                                            <option value="DD" t-att-selected="'selected' if tline.position == 'DD' else None">DD – Del. Der.</option>
+                                                                            <option value="DI" t-att-selected="'selected' if tline.position == 'DI' else None">DI – Del. Izq.</option>
+                                                                            <option value="TD" t-att-selected="'selected' if tline.position == 'TD' else None">TD – Tra. Der.</option>
+                                                                            <option value="TI" t-att-selected="'selected' if tline.position == 'TI' else None">TI – Tra. Izq.</option>
+                                                                        </select>
+                                                                    </t>
+                                                                    <t t-else="" t-esc="tline.position or tline.name"/>
+                                                                </td>
+                                                                <td>
+                                                                    <t t-if="is_editor">
+                                                                        <input t-att-name="'tech_measure_left_%s' % tline.id" class="form-control form-control-sm text-end" required="required" t-att-value="tline.measurement_left or ''" placeholder="mm"/>
+                                                                    </t>
+                                                                    <t t-else="" t-esc="(tline.measurement_left or '') + ' mm'"/>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div t-if="is_editor" class="mt-3">
+                                            <div id="checklist-error-msg" class="alert alert-danger d-none" role="alert">
+                                                <i class="fa fa-exclamation-triangle me-2"></i>
+                                                <strong>Formulario incompleto.</strong> Por favor selecciona el estado (Bueno / Malo) de cada ítem de inspección y completa todas las medidas de frenos y llantas antes de guardar.
+                                            </div>
+                                            <div class="d-flex justify-content-end">
+                                                <button type="submit" class="btn btn-primary" id="btn-save-checklist">
+                                                    <i class="fa fa-save me-1"></i> Guardar checklist técnico
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Trabajo técnico y evidencias -->
+                    <div class="accordion-item" t-if="is_technician or is_internal_manager">
+                        <h2 class="accordion-header" id="heading-trabajo-tecnico">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse-trabajo-tecnico"
+                                    aria-expanded="false" aria-controls="collapse-trabajo-tecnico">
+                                <i class="fa fa-tools me-2"></i> Trabajo técnico y evidencias
+                            </button>
+                        </h2>
+                        <div id="collapse-trabajo-tecnico" class="accordion-collapse collapse"
+                             aria-labelledby="heading-trabajo-tecnico">
+                            <div class="accordion-body">
+                                <h2 class="h5">Trabajo técnico</h2>
+                                <form t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <label class="form-label">Observación técnica / avance</label>
+                                    <textarea name="technical_observation" class="form-control mb-3" rows="4"><t t-esc="repair.technical_observation or ''"/></textarea>
+                                    <label class="form-label">Materiales o repuestos requeridos</label>
+                                    <textarea name="requested_materials" class="form-control mb-3" rows="4"><t t-esc="repair.requested_materials or ''"/></textarea>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button name="action" value="start" class="btn btn-primary" type="submit">Iniciar trabajo</button>
+                                        <button name="action" value="save" class="btn btn-secondary" type="submit">Guardar avance</button>
+                                        <button name="action" value="request_road_test" class="btn btn-warning" type="submit">Solicitar prueba de ruta</button>
+                                        <button name="action" value="send_purchase" class="btn btn-success" type="submit">Remitir a compras/cotizaciones</button>
+                                    </div>
+                                </form>
+
+                                <hr class="my-4"/>
+                                <h3 class="h6">Evidencias del técnico</h3>
+                                <p class="small text-muted">
+                                    Sube fotos del diagnóstico o de la reparación. Se almacenan en Google Drive y aparecen en la galería inferior.
+                                </p>
+                                <form t-att-action="'/my/workshop/order/%s/technician/photos' % repair.id"
+                                      method="post" enctype="multipart/form-data"
+                                      class="js-workshop-technician-photos">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Tipo de evidencia</label>
+                                            <select name="evidence_type" class="form-select">
+                                                <option value="diagnostico" selected="selected">Diagnóstico</option>
+                                                <option value="reparacion">Reparación</option>
+                                                <option value="entrega">Entrega</option>
+                                                <option value="otro">Otro</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <label class="form-label">Descripción del lote</label>
+                                            <input name="photo_description" class="form-control"
+                                                   placeholder="Observación común para estas fotos"
+                                                   t-att-value="repair.service_detail or ''"/>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="workshop-photo-dropzone" for="technician_photos">
+                                            <i class="fa fa-camera" aria-hidden="true"></i>
+                                            <span class="fw-semibold">Seleccionar fotos</span>
+                                            <small>JPG, PNG o WEBP. Puedes elegir varias.</small>
+                                        </label>
+                                        <input id="technician_photos" name="technician_photos" type="file"
+                                               class="visually-hidden js-workshop-technician-photo-input" multiple="multiple"
+                                               accept="image/jpeg,image/png,image/webp"/>
+                                        <div class="row g-3 mt-1 js-workshop-technician-photo-preview"></div>
+                                        <div class="mt-2">
+                                            <span class="badge text-bg-light js-workshop-technician-photo-count">0 fotos</span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-end mt-3">
+                                        <button type="submit" class="btn btn-primary">Subir evidencias</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Solicitud de repuestos -->
+                    <div class="accordion-item" id="workshop-spare-request-section"
+                         t-att-data-repair-id="repair.id"
+                         t-att-data-catalog-url="'/my/workshop/spare-catalog'"
+                         t-att-data-submit-url="'/my/workshop/order/%s/spares/submit' % repair.id">
+                        <h2 class="accordion-header" id="heading-repuestos">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse-repuestos"
+                                    aria-expanded="false" aria-controls="collapse-repuestos">
+                                <i class="fa fa-cogs me-2"></i> Solicitud de repuestos para cotizar
+                            </button>
+                        </h2>
+                        <div id="collapse-repuestos" class="accordion-collapse collapse"
+                             aria-labelledby="heading-repuestos">
+                            <div class="accordion-body">
+                                <div class="d-flex align-items-center mb-3" t-if="is_technician">
+                                    <button type="button"
+                                            class="btn btn-outline-primary btn-sm ms-auto"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#spare-request-form-collapse"
+                                            aria-expanded="false">
+                                        <i class="fa fa-plus me-1"></i>Nueva solicitud
+                                    </button>
+                                </div>
+
+                                <!-- Solicitudes anteriores -->
+                                <div t-if="repair.spare_request_ids">
+                                    <p class="small text-muted mb-2">Solicitudes enviadas:</p>
+                                    <div class="table-responsive mb-3">
+                                        <table class="table table-sm table-bordered mb-0">
+                                            <thead class="table-light">
                                                 <tr>
-                                                    <th class="workshop-checklist-num">N°</th>
-                                                    <th>INSPECCIÓN</th>
-                                                    <th class="workshop-checklist-estado" colspan="2">ESTADO</th>
-                                                    <th>OBSERVACIONES</th>
-                                                </tr>
-                                                <tr class="workshop-checklist-subheader">
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th><i class="fa fa-check text-success"></i> Bueno</th>
-                                                    <th><i class="fa fa-times text-danger"></i> Malo</th>
-                                                    <th></th>
+                                                    <th>Fecha</th>
+                                                    <th class="text-center"># Repuestos</th>
+                                                    <th>Estado</th>
+                                                    <th>Obs. almacén</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr t-foreach="sec2_lines" t-as="tline">
-                                                    <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
-                                                    <td t-esc="tline.name"/>
-                                                    <td class="workshop-checklist-tick" t-att-class="tline.state == 'good' and 'is-good' or ''">
-                                                        <t t-if="is_editor">
-                                                            <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="good" t-att-checked="'checked' if tline.state == 'good' else None" class="form-check-input"/>
-                                                        </t>
-                                                        <i t-else="" t-if="tline.state == 'good'" class="fa fa-check text-success"/>
-                                                    </td>
-                                                    <td class="workshop-checklist-tick" t-att-class="tline.state == 'bad' and 'is-bad' or ''">
-                                                        <t t-if="is_editor">
-                                                            <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="bad" t-att-checked="'checked' if tline.state == 'bad' else None" class="form-check-input"/>
-                                                        </t>
-                                                        <i t-else="" t-if="tline.state == 'bad'" class="fa fa-times text-danger"/>
-                                                    </td>
+                                                <tr t-foreach="repair.spare_request_ids" t-as="sr">
+                                                    <td><t t-esc="sr.request_date.strftime('%d/%m/%Y %H:%M') if sr.request_date else '—'"/></td>
+                                                    <td class="text-center"><t t-esc="sr.line_count"/></td>
                                                     <td>
-                                                        <t t-if="is_editor">
-                                                            <input t-att-name="'tech_obs_%s' % tline.id" class="form-control form-control-sm" t-att-value="tline.observation or ''"/>
-                                                        </t>
-                                                        <t t-else="" t-esc="tline.observation or ''"/>
+                                                        <span t-att-class="'badge ' + ('text-bg-info' if sr.state == 'requested' else 'text-bg-success' if sr.state == 'reviewed' else 'text-bg-secondary')"
+                                                              t-esc="dict(sr._fields['state'].selection).get(sr.state)"/>
                                                     </td>
+                                                    <td class="small text-muted"><t t-esc="sr.warehouse_note or '—'"/></td>
                                                 </tr>
                                             </tbody>
                                         </table>
+                                    </div>
+                                </div>
+                                <p t-if="not repair.spare_request_ids" class="small text-muted mb-3">
+                                    Aún no hay solicitudes de repuestos para esta orden.
+                                </p>
+
+                                <!-- Formulario nueva solicitud (solo técnico) -->
+                                <div t-if="is_technician" class="collapse" id="spare-request-form-collapse">
+                                    <input type="hidden" id="spare-csrf-token" t-att-value="request.csrf_token()"/>
+                                    <hr class="my-3"/>
+                                    <h3 class="h6 mb-3">Nueva solicitud de repuestos</h3>
+
+                                    <!-- Buscador de catálogo -->
+                                    <div class="row g-2 align-items-end mb-3">
+                                        <div class="col-sm-8">
+                                            <label class="form-label small">Buscar repuesto en catálogo</label>
+                                            <div class="position-relative">
+                                                <input type="text"
+                                                       id="spare-catalog-search"
+                                                       class="form-control"
+                                                       placeholder="Escribe al menos 2 letras..."
+                                                       autocomplete="off"/>
+                                                <div id="spare-catalog-dropdown"
+                                                     class="dropdown-menu w-100 workshop-spare-dropdown"
+                                                     style="display:none;position:absolute;z-index:1000;max-height:220px;overflow-y:auto;"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <label class="form-label small">Cantidad</label>
+                                            <input type="number" id="spare-catalog-qty" class="form-control"
+                                                   value="1" min="0.01" step="0.01"/>
+                                        </div>
+                                        <div class="col-sm-2 d-flex align-items-end">
+                                            <button type="button" id="spare-add-line-btn"
+                                                    class="btn btn-secondary w-100"
+                                                    disabled="disabled">
+                                                <i class="fa fa-plus me-1"></i>Agregar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Observación (opcional)</label>
+                                        <input type="text" id="spare-catalog-note" class="form-control form-control-sm"
+                                               placeholder="Especificación adicional del técnico"/>
+                                    </div>
+
+                                    <!-- Tabla de líneas agregadas -->
+                                    <div id="spare-lines-container" class="table-responsive mb-3" style="display:none;">
+                                        <table class="table table-sm table-bordered mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Repuesto</th>
+                                                    <th class="text-center" style="width:90px;">Cantidad</th>
+                                                    <th>Observación</th>
+                                                    <th style="width:50px;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="spare-lines-tbody"></tbody>
+                                        </table>
+                                    </div>
+                                    <p id="spare-lines-empty" class="small text-muted">
+                                        Agregue repuestos usando el buscador de arriba.
+                                    </p>
+
+                                    <!-- Alertas -->
+                                    <div id="spare-submit-error" class="alert alert-danger d-none small"></div>
+                                    <div id="spare-submit-success" class="alert alert-success d-none small"></div>
+
+                                    <!-- Botón enviar -->
+                                    <div class="d-flex justify-content-end mt-3">
+                                        <button type="button" id="spare-submit-btn" class="btn btn-primary" disabled="disabled">
+                                            <i class="fa fa-send me-1"></i>Enviar solicitud al almacén
+                                        </button>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="row g-3 mt-1">
-                                <div class="col-12 col-lg-5">
-                                    <div class="workshop-checklist-section h-100">
-                                        <table class="workshop-checklist-table table table-sm mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th colspan="5" class="workshop-checklist-section-title text-center">INSPECCIÓN DE SISTEMA DE FRENOS</th>
-                                                </tr>
-                                                <tr>
-                                                    <th class="workshop-checklist-num">N°</th>
-                                                    <th>PARTE</th>
-                                                    <th class="text-center" colspan="2">PROFUNDIDAD (mm)</th>
-                                                    <th class="workshop-checklist-estado">ESTADO</th>
-                                                </tr>
-                                                <tr>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th class="workshop-checklist-izq-der">IZQ</th>
-                                                    <th class="workshop-checklist-izq-der">DER</th>
-                                                    <th></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr t-foreach="brake_lines" t-as="tline">
-                                                    <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
-                                                    <td t-esc="tline.name"/>
-                                                    <td>
-                                                        <t t-if="is_editor">
-                                                            <input t-att-name="'tech_measure_left_%s' % tline.id" class="form-control form-control-sm text-end" t-att-value="tline.measurement_left or ''" placeholder="mm"/>
-                                                        </t>
-                                                        <t t-else="" t-esc="(tline.measurement_left or '') + ' mm'"/>
-                                                    </td>
-                                                    <td>
-                                                        <t t-if="is_editor">
-                                                            <input t-att-name="'tech_measure_right_%s' % tline.id" class="form-control form-control-sm text-end" t-att-value="tline.measurement_right or ''" placeholder="mm"/>
-                                                        </t>
-                                                        <t t-else="" t-esc="(tline.measurement_right or '') + ' mm'"/>
-                                                    </td>
-                                                    <td>
-                                                        <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select form-select-sm">
-                                                            <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">B</option>
-                                                            <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">M</option>
-                                                            <option value="not_apply" t-att-selected="'selected' if tline.state == 'not_apply' else None">N/A</option>
-                                                        </select>
-                                                        <span t-else="" t-if="tline.state == 'good'" class="badge bg-success">Bueno</span>
-                                                        <span t-else="" t-if="tline.state == 'bad'" class="badge bg-danger">Malo</span>
-                                                        <span t-else="" t-if="tline.state == 'not_apply'" class="badge bg-secondary">N/A</span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        <div t-if="is_editor" class="mt-2">
-                                            <input t-att-name="'tech_obs_%s' % brake_lines[0].id if brake_lines else '0'" type="hidden" value=""/>
+                    <!-- 6. Prueba de ruta -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-prueba-ruta">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse-prueba-ruta"
+                                    aria-expanded="false" aria-controls="collapse-prueba-ruta">
+                                <i class="fa fa-road me-2"></i> Prueba de ruta
+                            </button>
+                        </h2>
+                        <div id="collapse-prueba-ruta" class="accordion-collapse collapse"
+                             aria-labelledby="heading-prueba-ruta">
+                            <div class="accordion-body">
+                                <t t-if="is_road_test">
+                                    <form t-att-action="'/my/workshop/order/%s/road-test' % repair.id" method="post">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <label class="form-label">Resultado</label>
+                                        <textarea name="road_test_result" class="form-control mb-3" rows="4"><t t-esc="repair.road_test_result or ''"/></textarea>
+                                        <div class="d-flex gap-2">
+                                            <button name="action" value="start" class="btn btn-primary" type="submit">Iniciar prueba</button>
+                                            <button name="action" value="finish" class="btn btn-success" type="submit">Finalizar prueba</button>
+                                        </div>
+                                    </form>
+                                </t>
+                                <t t-else="">
+                                    <label class="form-label text-muted small">Resultado</label>
+                                    <p t-if="repair.road_test_result" class="mb-0" t-esc="repair.road_test_result"/>
+                                    <p t-else="" class="text-muted mb-0 fst-italic">Sin resultado registrado.</p>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Evidencias externas -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-evidencias">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse-evidencias"
+                                    aria-expanded="false" aria-controls="collapse-evidencias">
+                                <i class="fa fa-picture-o me-2"></i> Evidencias externas
+                            </button>
+                        </h2>
+                        <div id="collapse-evidencias" class="accordion-collapse collapse"
+                             aria-labelledby="heading-evidencias">
+                            <div class="accordion-body">
+                                <div class="row g-3" t-if="repair.external_evidence_ids">
+                                    <div class="col-6 col-md-3 col-xl-2" t-foreach="repair.external_evidence_ids" t-as="evidence">
+                                        <div class="border rounded p-2 h-100 workshop-evidence-card">
+                                            <a t-if="evidence.is_image" t-att-href="evidence.preview_url" target="_blank" class="d-block workshop-evidence-image mb-2">
+                                                <img t-att-src="evidence.preview_url" class="img-fluid" alt="Evidencia" loading="lazy"/>
+                                            </a>
+                                            <strong class="d-block text-truncate" t-att-title="evidence.name" t-esc="evidence.name"/>
+                                            <div class="small text-muted">
+                                                <span t-esc="dict(evidence._fields['evidence_type'].selection).get(evidence.evidence_type)"/>
+                                                <span> · </span>
+                                                <span t-esc="dict(evidence._fields['evidence_category'].selection).get(evidence.evidence_category)"/>
+                                            </div>
+                                            <p t-if="evidence.description" class="small mt-2 mb-0" t-esc="evidence.description"/>
+                                            <div class="small text-muted mt-1" t-field="evidence.uploaded_at"/>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12 col-lg-3">
-                                    <div class="workshop-checklist-section h-100">
-                                        <table class="workshop-checklist-table table table-sm mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th colspan="2" class="workshop-checklist-section-title text-center">INSPECCIÓN LLANTAS</th>
-                                                </tr>
-                                                <tr>
-                                                    <th>POS</th>
-                                                    <th>PROFUND.</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr t-foreach="tire_lines" t-as="tline">
-                                                    <td>
-                                                        <t t-if="is_editor">
-                                                            <select t-att-name="'tech_position_%s' % tline.id" class="form-select form-select-sm">
-                                                                <option value="DD" t-att-selected="'selected' if tline.position == 'DD' else None">DD</option>
-                                                                <option value="DI" t-att-selected="'selected' if tline.position == 'DI' else None">DI</option>
-                                                                <option value="TD" t-att-selected="'selected' if tline.position == 'TD' else None">TD</option>
-                                                                <option value="TI" t-att-selected="'selected' if tline.position == 'TI' else None">TI</option>
-                                                            </select>
-                                                        </t>
-                                                        <t t-else="" t-esc="tline.position or tline.name"/>
-                                                    </td>
-                                                    <td>
-                                                        <t t-if="is_editor">
-                                                            <input t-att-name="'tech_measure_left_%s' % tline.id" class="form-control form-control-sm text-end" t-att-value="tline.measurement_left or ''" placeholder="mm"/>
-                                                        </t>
-                                                        <t t-else="" t-esc="(tline.measurement_left or '') + ' mm'"/>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-end mt-3" t-if="is_editor">
-                                <button type="submit" class="btn btn-primary">Guardar checklist técnico</button>
-                            </div>
-                        </form>
-                    </t>
-                </div>
-
-                <div t-if="is_technician or is_internal_manager" class="border rounded p-3 mt-3">
-                    <h2 class="h5">Trabajo técnico</h2>
-                    <form t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post">
-                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <label class="form-label">Observación técnica / avance</label>
-                        <textarea name="technical_observation" class="form-control mb-3" rows="4"><t t-esc="repair.technical_observation or ''"/></textarea>
-                        <label class="form-label">Materiales o repuestos requeridos</label>
-                        <textarea name="requested_materials" class="form-control mb-3" rows="4"><t t-esc="repair.requested_materials or ''"/></textarea>
-                        <div class="d-flex flex-wrap gap-2">
-                            <button name="action" value="start" class="btn btn-primary" type="submit">Iniciar trabajo</button>
-                            <button name="action" value="save" class="btn btn-secondary" type="submit">Guardar avance</button>
-                            <button name="action" value="request_road_test" class="btn btn-warning" type="submit">Solicitar prueba de ruta</button>
-                            <button name="action" value="send_purchase" class="btn btn-success" type="submit">Remitir a compras/cotizaciones</button>
-                        </div>
-                    </form>
-
-                    <hr class="my-4"/>
-                    <h3 class="h6">Evidencias del técnico</h3>
-                    <p class="small text-muted">
-                        Sube fotos del diagnóstico o de la reparación. Se almacenan en Google Drive y aparecen en la galería inferior.
-                    </p>
-                    <form t-att-action="'/my/workshop/order/%s/technician/photos' % repair.id"
-                          method="post" enctype="multipart/form-data"
-                          class="js-workshop-technician-photos">
-                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label">Tipo de evidencia</label>
-                                <select name="evidence_type" class="form-select">
-                                    <option value="diagnostico" selected="selected">Diagnóstico</option>
-                                    <option value="reparacion">Reparación</option>
-                                    <option value="entrega">Entrega</option>
-                                    <option value="otro">Otro</option>
-                                </select>
-                            </div>
-                            <div class="col-md-9">
-                                <label class="form-label">Descripción del lote</label>
-                                <input name="photo_description" class="form-control"
-                                       placeholder="Observación común para estas fotos"
-                                       t-att-value="repair.service_detail or ''"/>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <label class="workshop-photo-dropzone" for="technician_photos">
-                                <i class="fa fa-camera" aria-hidden="true"></i>
-                                <span class="fw-semibold">Seleccionar fotos</span>
-                                <small>JPG, PNG o WEBP. Puedes elegir varias.</small>
-                            </label>
-                            <input id="technician_photos" name="technician_photos" type="file"
-                                   class="visually-hidden js-workshop-technician-photo-input" multiple="multiple"
-                                   accept="image/jpeg,image/png,image/webp"/>
-                            <div class="row g-3 mt-1 js-workshop-technician-photo-preview"></div>
-                            <div class="mt-2">
-                                <span class="badge text-bg-light js-workshop-technician-photo-count">0 fotos</span>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-end mt-3">
-                            <button type="submit" class="btn btn-primary">Subir evidencias</button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- ── Solicitud de repuestos ── -->
-                <div t-if="is_technician" class="border rounded p-3 mt-3" id="workshop-spare-request-section"
-                     t-att-data-repair-id="repair.id"
-                     t-att-data-catalog-url="'/my/workshop/spare-catalog'"
-                     t-att-data-submit-url="'/my/workshop/order/%s/spares/submit' % repair.id">
-
-                    <div class="d-flex align-items-center mb-3">
-                        <h2 class="h5 mb-0">Solicitud de repuestos para cotizar</h2>
-                        <button type="button"
-                                class="btn btn-outline-primary btn-sm ms-auto"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#spare-request-form-collapse"
-                                aria-expanded="false">
-                            <i class="fa fa-plus me-1"></i>Nueva solicitud
-                        </button>
-                    </div>
-
-                    <!-- Solicitudes anteriores -->
-                    <div t-if="repair.spare_request_ids">
-                        <p class="small text-muted mb-2">Solicitudes enviadas:</p>
-                        <div class="table-responsive mb-3">
-                            <table class="table table-sm table-bordered mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th class="text-center"># Repuestos</th>
-                                        <th>Estado</th>
-                                        <th>Obs. almacén</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr t-foreach="repair.spare_request_ids" t-as="sr">
-                                        <td><t t-esc="sr.request_date.strftime('%d/%m/%Y %H:%M') if sr.request_date else '—'"/></td>
-                                        <td class="text-center"><t t-esc="sr.line_count"/></td>
-                                        <td>
-                                            <span t-att-class="'badge ' + ('text-bg-info' if sr.state == 'requested' else 'text-bg-success' if sr.state == 'reviewed' else 'text-bg-secondary')"
-                                                  t-esc="dict(sr._fields['state'].selection).get(sr.state)"/>
-                                        </td>
-                                        <td class="small text-muted"><t t-esc="sr.warehouse_note or '—'"/></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <p t-if="not repair.spare_request_ids" class="small text-muted mb-3">
-                        Aún no hay solicitudes de repuestos para esta orden.
-                    </p>
-
-                    <!-- Formulario nueva solicitud (colapsable) -->
-                    <div class="collapse" id="spare-request-form-collapse">
-                        <input type="hidden" id="spare-csrf-token" t-att-value="request.csrf_token()"/>
-                        <hr class="my-3"/>
-                        <h3 class="h6 mb-3">Nueva solicitud de repuestos</h3>
-
-                        <!-- Buscador de catálogo -->
-                        <div class="row g-2 align-items-end mb-3">
-                            <div class="col-sm-8">
-                                <label class="form-label small">Buscar repuesto en catálogo</label>
-                                <div class="position-relative">
-                                    <input type="text"
-                                           id="spare-catalog-search"
-                                           class="form-control"
-                                           placeholder="Escribe al menos 2 letras..."
-                                           autocomplete="off"/>
-                                    <div id="spare-catalog-dropdown"
-                                         class="dropdown-menu w-100 workshop-spare-dropdown"
-                                         style="display:none;position:absolute;z-index:1000;max-height:220px;overflow-y:auto;"/>
-                                </div>
-                            </div>
-                            <div class="col-sm-2">
-                                <label class="form-label small">Cantidad</label>
-                                <input type="number" id="spare-catalog-qty" class="form-control"
-                                       value="1" min="0.01" step="0.01"/>
-                            </div>
-                            <div class="col-sm-2 d-flex align-items-end">
-                                <button type="button" id="spare-add-line-btn"
-                                        class="btn btn-secondary w-100"
-                                        disabled="disabled">
-                                    <i class="fa fa-plus me-1"></i>Agregar
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small">Observación (opcional)</label>
-                            <input type="text" id="spare-catalog-note" class="form-control form-control-sm"
-                                   placeholder="Especificación adicional del técnico"/>
-                        </div>
-
-                        <!-- Tabla de líneas agregadas -->
-                        <div id="spare-lines-container" class="table-responsive mb-3" style="display:none;">
-                            <table class="table table-sm table-bordered mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Repuesto</th>
-                                        <th class="text-center" style="width:90px;">Cantidad</th>
-                                        <th>Observación</th>
-                                        <th style="width:50px;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="spare-lines-tbody"></tbody>
-                            </table>
-                        </div>
-                        <p id="spare-lines-empty" class="small text-muted">
-                            Agregue repuestos usando el buscador de arriba.
-                        </p>
-
-                        <!-- Alertas -->
-                        <div id="spare-submit-error" class="alert alert-danger d-none small"></div>
-                        <div id="spare-submit-success" class="alert alert-success d-none small"></div>
-
-                        <!-- Botón enviar -->
-                        <div class="d-flex justify-content-end mt-3">
-                            <button type="button" id="spare-submit-btn" class="btn btn-primary" disabled="disabled">
-                                <i class="fa fa-send me-1"></i>Enviar solicitud al almacén
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div t-if="is_road_test or is_internal_manager" class="border rounded p-3 mt-3">
-                    <h2 class="h5">Prueba de ruta</h2>
-                    <form t-att-action="'/my/workshop/order/%s/road-test' % repair.id" method="post">
-                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <label class="form-label">Resultado</label>
-                        <textarea name="road_test_result" class="form-control mb-3" rows="4"><t t-esc="repair.road_test_result or ''"/></textarea>
-                        <div class="d-flex gap-2">
-                            <button name="action" value="start" class="btn btn-primary" type="submit">Iniciar prueba</button>
-                            <button name="action" value="finish" class="btn btn-success" type="submit">Finalizar prueba</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="border rounded p-3 mt-3">
-                    <h2 class="h5">Evidencias externas</h2>
-                    <div class="row g-3" t-if="repair.external_evidence_ids">
-                        <div class="col-6 col-md-3 col-xl-2" t-foreach="repair.external_evidence_ids" t-as="evidence">
-                            <div class="border rounded p-2 h-100 workshop-evidence-card">
-                                <a t-if="evidence.is_image" t-att-href="evidence.preview_url" target="_blank" class="d-block workshop-evidence-image mb-2">
-                                    <img t-att-src="evidence.preview_url" class="img-fluid" alt="Evidencia" loading="lazy"/>
-                                </a>
-                                <strong class="d-block text-truncate" t-att-title="evidence.name" t-esc="evidence.name"/>
-                                <div class="small text-muted">
-                                    <span t-esc="dict(evidence._fields['evidence_type'].selection).get(evidence.evidence_type)"/>
-                                    <span> · </span>
-                                    <span t-esc="dict(evidence._fields['evidence_category'].selection).get(evidence.evidence_category)"/>
-                                </div>
-                                <p t-if="evidence.description" class="small mt-2 mb-0" t-esc="evidence.description"/>
-                                <div class="small text-muted mt-1" t-field="evidence.uploaded_at"/>
+                                <p t-if="not repair.external_evidence_ids" class="text-muted mb-0">Sin evidencias externas.</p>
                             </div>
                         </div>
                     </div>
-                    <p t-if="not repair.external_evidence_ids" class="text-muted mb-0">Sin evidencias externas.</p>
-                </div>
+
+                </div><!-- /accordion-workshop-sections -->
             </div>
         </t>
+    </template>
+
+    <!-- Tarjeta de acceso al taller en /my -->
+    <template id="portal_my_home_workshop" inherit_id="portal.portal_my_home" priority="35">
+        <xpath expr="//div[@id='portal_common_category']" position="before">
+            <t t-if="is_workshop_user">
+                <div class="o_portal_category row g-2 mt-3">
+                    <t t-call="portal.portal_docs_entry">
+                        <t t-set="title">Taller de vehículos</t>
+                        <t t-set="text">Órdenes de servicio y recepción de vehículos</t>
+                        <t t-set="url" t-value="'/my/workshop'"/>
+                        <t t-set="config_card" t-value="True"/>
+                    </t>
+                </div>
+            </t>
+        </xpath>
     </template>
 </odoo>

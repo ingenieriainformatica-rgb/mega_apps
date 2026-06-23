@@ -1541,6 +1541,21 @@
 .workshop-col-svcs   { width: 70px; }
 .workshop-col-action { width: 46px; }
 
+/* ─── Validación checklist técnico ─────────────────────────── */
+
+#tecnico_checklist_form input.is-invalid,
+#tecnico_checklist_form select.is-invalid {
+    border-color: #dc3545 !important;
+    background-color: #fff8f8;
+}
+
+#tecnico_checklist_form input[type="radio"].is-invalid {
+    outline: 2px solid #dc3545;
+    outline-offset: 1px;
+    border-radius: 50%;
+    background-color: transparent;
+}
+
 /* ── Solicitud de repuestos ── */
 .workshop-spare-dropdown {
     border: 1px solid #dee2e6;

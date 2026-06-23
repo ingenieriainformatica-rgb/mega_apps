@@ -6,7 +6,7 @@ from pathlib import Path
 
 from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.http import request
-from odoo.addons.portal.controllers.portal import pager as portal_pager
+from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
 
 _WORKSHOP_REPAIRS_PER_PAGE = 20
 
@@ -39,15 +39,13 @@ class CarRepairPortalWorkshop(http.Controller):
 
     def _portal_domain(self):
         user = request.env.user
+        if self._is_internal_manager() or self._is_advisor():
+            return []
         domains = []
-        if self._is_advisor():
-            domains.append(('portal_advisor_id', '=', user.id))
         if self._is_technician():
             domains.append(('portal_technician_id', '=', user.id))
         if self._is_road_test():
             domains.append(('road_test_user_id', '=', user.id))
-        if self._is_internal_manager():
-            return []
         if not domains:
             return [('id', '=', 0)]
         if len(domains) == 1:
@@ -61,9 +59,8 @@ class CarRepairPortalWorkshop(http.Controller):
         repair = request.env['fleet.repair'].sudo().browse(repair_id)
         if not repair.exists():
             raise MissingError(_("La orden no existe."))
-        allowed = self._is_internal_manager()
+        allowed = self._is_internal_manager() or self._is_advisor()
         user = request.env.user
-        allowed = allowed or (self._is_advisor() and repair.portal_advisor_id.id == user.id)
         allowed = allowed or (self._is_technician() and repair.portal_technician_id.id == user.id)
         allowed = allowed or (self._is_road_test() and repair.road_test_user_id.id == user.id)
         if not allowed:
@@ -259,13 +256,30 @@ class CarRepairPortalWorkshop(http.Controller):
         delivered_by_phone = (post.get('delivered_by_phone') or '').strip()
 
         if customer_type == 'renting':
-            partner = Repair._get_renting_partner()
-            if not delivered_by_name or not delivered_by_phone:
-                raise UserError(_("Para Renting debe registrar nombre y celular de quien entrega el vehículo."))
-            client_phone = partner.phone or partner.mobile or ''
-            client_email = partner.email or ''
-            contact_name = delivered_by_name
-            contact_phone = delivered_by_phone
+            renting_mode = (post.get('renting_mode') or 'billing').strip()
+            if renting_mode == 'client':
+                if not client_name:
+                    raise UserError(_("Para Cliente de Renting debe registrar el nombre del conductor."))
+                partner = Partner.search(['|', ('phone', '=', client_phone), ('mobile', '=', client_phone)], limit=1) if client_phone else Partner.browse()
+                if not partner and client_email:
+                    partner = Partner.search([('email', '=', client_email)], limit=1)
+                if not partner:
+                    partner = Partner.create({
+                        'name': client_name,
+                        'phone': client_phone,
+                        'mobile': client_phone,
+                        'email': client_email,
+                    })
+                contact_name = delivered_by_name or client_name
+                contact_phone = delivered_by_phone or client_phone
+            else:
+                partner = Repair._get_renting_partner()
+                if not delivered_by_name or not delivered_by_phone:
+                    raise UserError(_("Para Renting debe registrar nombre y celular de quien entrega el vehículo."))
+                client_phone = partner.phone or partner.mobile or ''
+                client_email = partner.email or ''
+                contact_name = delivered_by_name
+                contact_phone = delivered_by_phone
         elif customer_type == 'corporate':
             company_name = (post.get('company_name') or '').strip()
             company_vat = (post.get('company_vat') or '').strip()
@@ -314,6 +328,20 @@ class CarRepairPortalWorkshop(http.Controller):
                 service_type_ids.append(int(raw))
             except (TypeError, ValueError):
                 continue
+
+        ServiceTypeModel = request.env['service.type'].sudo()
+        for raw_name in request.httprequest.form.getlist('new_service_names'):
+            name = (raw_name or '').strip()
+            if not name:
+                continue
+            existing = ServiceTypeModel.search([('name', '=ilike', name)], limit=1)
+            if existing:
+                if existing.id not in service_type_ids:
+                    service_type_ids.append(existing.id)
+            else:
+                new_st = ServiceTypeModel.create({'name': name})
+                service_type_ids.append(new_st.id)
+
         if not service_type_ids:
             raise UserError(_("Debe seleccionar al menos un servicio."))
         primary_service_type_id = service_type_ids[0]
@@ -557,7 +585,7 @@ class CarRepairPortalWorkshop(http.Controller):
     @http.route('/my/workshop/order/<int:repair_id>/road-test', type='http', auth='user', website=True, methods=['POST'])
     def workshop_road_test_update(self, repair_id, **post):
         repair = self._get_repair(repair_id)
-        if not (self._is_road_test() or self._is_internal_manager()):
+        if not self._is_road_test():
             return request.render('car_repair_industry.portal_workshop_forbidden', {})
         repair.sudo().write({'road_test_result': post.get('road_test_result')})
         if post.get('action') == 'start':
@@ -738,3 +766,23 @@ class CarRepairPortalWorkshop(http.Controller):
             json.dumps({'ok': True, 'request_id': spare_request.id}),
             headers=[('Content-Type', 'application/json')],
         )
+
+
+_WORKSHOP_PORTAL_GROUPS = [
+    'car_repair_industry.group_fleet_repair_portal_advisor',
+    'car_repair_industry.group_fleet_repair_portal_technician',
+    'car_repair_industry.group_fleet_repair_portal_road_test',
+    'car_repair_industry.group_fleet_repair_service_manager',
+    'car_repair_industry.group_fleet_repair_directeur_commercial',
+]
+
+
+class WorkshopPortalHome(CustomerPortal):
+
+    def _prepare_home_portal_values(self, counters):
+        values = super()._prepare_home_portal_values(counters)
+        if not counters:
+            # Solo al renderizar /my, nunca en la llamada AJAX /my/counters
+            user = request.env.user
+            values['is_workshop_user'] = any(user.has_group(g) for g in _WORKSHOP_PORTAL_GROUPS)
+        return values

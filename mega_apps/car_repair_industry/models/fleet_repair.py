@@ -865,6 +865,21 @@ class FleetRepair(models.Model):
             )
         return True
 
+    def action_reassign_technician(self):
+        """Opens the technician reassignment wizard from the repair order form."""
+        self.ensure_one()
+        if not self.diagnose_id:
+            raise UserError(_("Esta orden no tiene un diagnóstico relacionado."))
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'car_repair_industry.action_fleet_diagnose_assign_to_technician'
+        )
+        action['context'] = {
+            'is_reassignment': True,
+            'active_id': self.diagnose_id.id,
+            'active_model': 'fleet.diagnose',
+        }
+        return action
+
     def action_flow_start_technician(self):
         self.write({
             'service_flow_state': 'diagnosis',

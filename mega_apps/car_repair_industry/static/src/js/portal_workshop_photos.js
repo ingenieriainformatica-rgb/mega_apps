@@ -15,6 +15,7 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
     selector: ".js-workshop-reception-form",
     events: {
         "change .js-workshop-customer-type": "_onCustomerTypeChanged",
+        "change .js-workshop-renting-mode": "_onRentingModeChanged",
         "change .js-workshop-photo-input": "_onFilesSelected",
         "change .js-workshop-photo-category": "_onCategoryChanged",
         "click .js-workshop-photo-remove": "_onRemovePhoto",
@@ -37,41 +38,78 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         this._updateCustomerType();
     },
 
+    _onRentingModeChanged() {
+        this._updateRentingMode();
+    },
+
     _updateCustomerType() {
         const customerType = this.el.querySelector("[name='customer_type']:checked")?.value || "particular";
-        const isCompany = customerType === "renting" || customerType === "corporate";
+        const isRenting = customerType === "renting";
+        const isCorporate = customerType === "corporate";
+        const isCompany = isRenting || isCorporate;
+
         const particularFields = this.el.querySelector(".js-workshop-particular-fields");
         const rentingFields = this.el.querySelector(".js-workshop-renting-fields");
         const corporateFields = this.el.querySelector(".js-workshop-corporate-fields");
+        const rentingModeSection = this.el.querySelector(".js-workshop-renting-mode-section");
 
-        particularFields.classList.toggle("d-none", isCompany);
-        rentingFields.classList.toggle("d-none", customerType !== "renting");
-        if (corporateFields) {
-            corporateFields.classList.toggle("d-none", customerType !== "corporate");
-        }
-
-        for (const input of particularFields.querySelectorAll("input, select, textarea")) {
-            input.disabled = isCompany;
-        }
-        for (const input of rentingFields.querySelectorAll("input, select, textarea")) {
-            input.disabled = customerType !== "renting";
-        }
-        if (corporateFields) {
-            for (const input of corporateFields.querySelectorAll("input, select, textarea")) {
-                input.disabled = customerType !== "corporate";
+        if (rentingModeSection) {
+            rentingModeSection.classList.toggle("d-none", !isRenting);
+            for (const input of rentingModeSection.querySelectorAll("input, select, textarea")) {
+                input.disabled = !isRenting;
             }
         }
-        for (const input of particularFields.querySelectorAll(".js-workshop-particular-required")) {
-            input.required = !isCompany;
+
+        if (corporateFields) {
+            corporateFields.classList.toggle("d-none", !isCorporate);
+            for (const input of corporateFields.querySelectorAll("input, select, textarea")) {
+                input.disabled = !isCorporate;
+            }
+            for (const input of corporateFields.querySelectorAll(".js-workshop-corporate-required")) {
+                input.required = isCorporate;
+            }
         }
-        for (const input of (corporateFields?.querySelectorAll(".js-workshop-corporate-required") || [])) {
-            input.required = customerType === "corporate";
+
+        if (isRenting) {
+            this._updateRentingMode();
+        } else {
+            particularFields.classList.toggle("d-none", isCorporate);
+            rentingFields.classList.add("d-none");
+            for (const input of particularFields.querySelectorAll("input, select, textarea")) {
+                input.disabled = isCorporate;
+            }
+            for (const input of rentingFields.querySelectorAll("input, select, textarea")) {
+                input.disabled = true;
+            }
+            for (const input of particularFields.querySelectorAll(".js-workshop-particular-required")) {
+                input.required = !isCorporate;
+            }
         }
 
         const deliveredName = this.el.querySelector("[name='delivered_by_name']");
         const deliveredPhone = this.el.querySelector("[name='delivered_by_phone']");
         deliveredName.required = isCompany;
         deliveredPhone.required = isCompany;
+    },
+
+    _updateRentingMode() {
+        const rentingMode = this.el.querySelector("[name='renting_mode']:checked")?.value || "billing";
+        const isBilling = rentingMode === "billing";
+        const particularFields = this.el.querySelector(".js-workshop-particular-fields");
+        const rentingFields = this.el.querySelector(".js-workshop-renting-fields");
+
+        particularFields.classList.toggle("d-none", isBilling);
+        rentingFields.classList.toggle("d-none", !isBilling);
+
+        for (const input of particularFields.querySelectorAll("input, select, textarea")) {
+            input.disabled = isBilling;
+        }
+        for (const input of rentingFields.querySelectorAll("input, select, textarea")) {
+            input.disabled = isBilling;
+        }
+        for (const input of particularFields.querySelectorAll(".js-workshop-particular-required")) {
+            input.required = !isBilling;
+        }
     },
 
     _onVehicleBrandChanged() {
@@ -180,6 +218,63 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
             column.appendChild(card);
             this.preview.appendChild(column);
         });
+    },
+});
+
+publicWidget.registry.WorkshopServiceAdd = publicWidget.Widget.extend({
+    selector: ".js-workshop-reception-form",
+    events: {
+        "click #btn-add-service": "_onAddService",
+        "click .js-remove-new-service": "_onRemoveService",
+    },
+
+    _onAddService() {
+        const input = this.el.querySelector("#new-service-input");
+        const name = (input.value || "").trim();
+        if (!name) {
+            input.classList.add("is-invalid");
+            return;
+        }
+        input.classList.remove("is-invalid");
+
+        const container = this.el.querySelector("#new-services-container");
+        for (const hidden of container.querySelectorAll("[name='new_service_names']")) {
+            if (hidden.value.toLowerCase() === name.toLowerCase()) {
+                input.value = "";
+                return;
+            }
+        }
+
+        const label = document.createElement("label");
+        label.className = "workshop-service-card";
+
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = "new_service_names";
+        hidden.value = name;
+
+        const icon = document.createElement("i");
+        icon.className = "fa fa-plus-circle workshop-service-icon text-success";
+
+        const span = document.createElement("span");
+        span.className = "workshop-service-name";
+        span.textContent = name;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "js-remove-new-service btn btn-link text-danger p-0 mt-1";
+        btn.style.fontSize = "0.75rem";
+        btn.title = "Eliminar";
+        btn.innerHTML = '<i class="fa fa-times"></i> Quitar';
+
+        label.append(hidden, icon, span, btn);
+        container.appendChild(label);
+        input.value = "";
+    },
+
+    _onRemoveService(ev) {
+        ev.preventDefault();
+        ev.currentTarget.closest(".workshop-service-card").remove();
     },
 });
 
@@ -306,6 +401,10 @@ publicWidget.registry.WorkshopSpareRequest = publicWidget.Widget.extend({
 
         this._catalogUrl = this.el.dataset.catalogUrl;
         this._submitUrl = this.el.dataset.submitUrl;
+
+        if (!this._searchInput) {
+            return this._super(...arguments);
+        }
 
         this._searchInput.addEventListener("input", () => this._onSearchInput());
         this._searchInput.addEventListener("blur", () => {
@@ -468,6 +567,58 @@ publicWidget.registry.WorkshopSpareRequest = publicWidget.Widget.extend({
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;");
+    },
+});
+
+publicWidget.registry.WorkshopChecklistValidation = publicWidget.Widget.extend({
+    selector: "#tecnico_checklist_form",
+    events: {
+        "submit": "_onSubmit",
+    },
+
+    _onSubmit(ev) {
+        const form = this.el;
+        const errorBox = document.getElementById("checklist-error-msg");
+        let firstInvalid = null;
+
+        // Reset previous highlights
+        form.querySelectorAll(".is-invalid").forEach(el => el.classList.remove("is-invalid"));
+
+        // 1. Validate radio groups (general inspection items)
+        const radioGroups = {};
+        form.querySelectorAll("input[type='radio'][required]").forEach(radio => {
+            if (!(radio.name in radioGroups)) {
+                radioGroups[radio.name] = { checked: false, radios: [] };
+            }
+            radioGroups[radio.name].radios.push(radio);
+            if (radio.checked) radioGroups[radio.name].checked = true;
+        });
+
+        Object.values(radioGroups).forEach(group => {
+            if (!group.checked) {
+                group.radios.forEach(r => r.classList.add("is-invalid"));
+                if (!firstInvalid) firstInvalid = group.radios[0];
+            }
+        });
+
+        // 2. Validate required text inputs (measurements)
+        form.querySelectorAll("input[type='text'][required], input:not([type])[required]").forEach(input => {
+            if (!input.value.trim()) {
+                input.classList.add("is-invalid");
+                if (!firstInvalid) firstInvalid = input;
+            }
+        });
+
+        if (firstInvalid) {
+            ev.preventDefault();
+            if (errorBox) errorBox.classList.remove("d-none");
+            firstInvalid.closest("tr")
+                ? firstInvalid.closest("tr").scrollIntoView({ behavior: "smooth", block: "center" })
+                : firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+            return false;
+        }
+
+        if (errorBox) errorBox.classList.add("d-none");
     },
 });
 
