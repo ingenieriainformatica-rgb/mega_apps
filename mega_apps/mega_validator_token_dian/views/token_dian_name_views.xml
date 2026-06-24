@@ -27,13 +27,16 @@
         <field name="name">mega.dian.token.list</field>
         <field name="model">mega.dian.token</field>
         <field name="arch" type="xml">
-            <list string="Token DIAN" decoration-success="state == 'validated'" decoration-danger="state == 'error'" decoration-muted="state == 'draft'" decoration-info="state == 'loaded'">
+            <list string="Token DIAN">
                 <field name="name"/>
                 <field name="date_start"/>
                 <field name="date_end"/>
-                <field name="state"/>
-                <field name="create_date" optional="hide"/>
-                <field name="create_uid" optional="hide"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'validated'"
+                    decoration-danger="state == 'error'"
+                    decoration-info="state == 'loaded'"
+                    decoration-warning="state == 'processed'"
+                    decoration-muted="state == 'draft'"/>
             </list>
         </field>
     </record>
@@ -69,13 +72,12 @@
                             <field name="name" placeholder="Nombre del token DIAN" readonly="state != 'draft'"/>
                         </h1>
                     </div>
-                    <group>
-                        <group string="Fechas">
+                    <group col="4">
+                        <group col="2">
                             <field name="date_start" readonly="state != 'draft'"/>
-                            <field name="date_end" readonly="state != 'draft'"/>
                         </group>
-                        <group string="Observaciones">
-                            <field name="note" nolabel="1" placeholder="Comentarios u observaciones del token..." readonly="state in ['validated', 'error']"/>
+                        <group col="2">
+                            <field name="date_end" readonly="state != 'draft'"/>
                         </group>
                     </group>
                     <notebook>

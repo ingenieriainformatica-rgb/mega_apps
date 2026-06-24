@@ -80,6 +80,12 @@ class MegaDianTokenFile(models.Model):
         readonly=True,
     )
 
+    odoo_total_adjusted = fields.Float(
+        string="Total Odoo ajustado",
+        digits=(16, 2),
+        readonly=True,
+    )
+
     validation_status = fields.Selection([
         ("pending", "Pendiente"),
         ("matched", "Conciliado"),

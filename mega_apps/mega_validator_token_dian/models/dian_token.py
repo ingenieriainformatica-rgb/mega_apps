@@ -22,6 +22,12 @@ class MegaDianToken(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "id desc"
 
+    _DIAN_TIPO_TO_MOVE_TYPE = {
+        "Factura electrónica":                "in_invoice",
+        "Nota de crédito electrónica":        "in_refund",
+        "Documento soporte con no obligados": "in_invoice",
+    }
+
     name = fields.Char(
         string="Nombre del token",
         required=True,
@@ -115,6 +121,19 @@ class MegaDianToken(models.Model):
             self.state = "processed"
 
     def _process_single_token_line(self, line, move_model, partner_model):
+        # Determinar el tipo de movimiento Odoo según el tipo documental DIAN
+        move_type = self._get_move_type_for_document(line.tipo_documento)
+        if not move_type:
+            self._write_line_result(
+                line=line,
+                status="not_found",
+                note=_("Tipo de documento DIAN no soportado: %s") % (line.tipo_documento or ""),
+                is_reconciled=False,
+            )
+            return False
+
+        is_refund = (move_type == "in_refund")
+
         nit_emisor = self._normalize_text(line.nit_emisor)
         prefijo = self._normalize_text(line.prefijo)
         folio = self._normalize_text(line.folio)
@@ -125,13 +144,19 @@ class MegaDianToken(models.Model):
         partner = self._find_partner_by_vat(partner_model, nit_emisor)
 
         ref_candidates = self._build_reference_candidates(prefijo=prefijo, folio=folio)
-        candidate_moves = self._find_candidate_moves(move_model=move_model, partner=partner)
+        candidate_moves = self._find_candidate_moves(
+            move_model=move_model, partner=partner, move_type=move_type
+        )
 
         if not candidate_moves:
             self._write_line_result(
                 line=line,
                 status="not_found",
-                note=_("No se encontraron facturas proveedor para el NIT identificado."),
+                note=(
+                    _("No se encontraron notas crédito de proveedor para el NIT identificado.")
+                    if is_refund
+                    else _("No se encontraron facturas proveedor para el NIT identificado.")
+                ),
                 is_reconciled=False,
             )
             return FailedToDecompressContent
@@ -145,15 +170,19 @@ class MegaDianToken(models.Model):
             self._write_line_result(
                 line=line,
                 status="not_found",
-                note=_("No se encontró factura en Odoo con referencia coincidente."),
+                note=(
+                    _("No se encontró nota crédito en Odoo con referencia coincidente.")
+                    if is_refund
+                    else _("No se encontró factura en Odoo con referencia coincidente.")
+                ),
                 is_reconciled=False,
             )
             return False
 
-        # 2) Coincidencia exacta: referencia + IVA + total
+        # 2) Coincidencia exacta: referencia + IVA + total ajustado (sin retenciones)
         exact_matches = reference_matches.filtered(
             lambda m: self._amounts_equal(self._get_move_dian_iva(m), line_iva)
-            and self._amounts_equal(self._get_move_dian_total(m), line_total)
+            and self._amounts_equal_total(self._get_move_dian_total_adjusted(m), line_total)
         )
 
         if len(exact_matches) == 1:
@@ -161,7 +190,11 @@ class MegaDianToken(models.Model):
                 line=line,
                 move=exact_matches[0],
                 status="matched",
-                note=_("Coincidencia exacta por NIT, referencia, IVA y total."),
+                note=(
+                    _("Coincidencia exacta de nota crédito por NIT, referencia, IVA y total.")
+                    if is_refund
+                    else _("Coincidencia exacta por NIT, referencia, IVA y total antes de retenciones.")
+                ),
                 is_reconciled=True,
             )
             return True
@@ -170,7 +203,11 @@ class MegaDianToken(models.Model):
             self._write_line_result(
                 line=line,
                 status="multiple",
-                note=_("Se encontraron múltiples facturas con coincidencia exacta."),
+                note=(
+                    _("Se encontraron múltiples notas crédito con coincidencia exacta.")
+                    if is_refund
+                    else _("Se encontraron múltiples facturas con coincidencia exacta.")
+                ),
                 is_reconciled=False,
             )
             return False
@@ -185,7 +222,11 @@ class MegaDianToken(models.Model):
                 line=line,
                 move=partial_by_iva[0],
                 status="partial",
-                note=_("Coincide NIT, referencia e IVA, pero no el total."),
+                note=(
+                    _("La nota crédito coincide por NIT, referencia e IVA, pero no el total.")
+                    if is_refund
+                    else _("Coincide NIT, referencia e IVA, pero no el total.")
+                ),
                 is_reconciled=False,
             )
             return False
@@ -199,9 +240,9 @@ class MegaDianToken(models.Model):
             )
             return False
 
-        # 4) Coincidencia parcial por referencia + total
+        # 4) Coincidencia parcial por referencia + total ajustado (sin retenciones)
         partial_by_total = reference_matches.filtered(
-            lambda m: self._amounts_equal(self._get_move_dian_total(m), line_total)
+            lambda m: self._amounts_equal_total(self._get_move_dian_total_adjusted(m), line_total)
         )
 
         if len(partial_by_total) == 1:
@@ -209,7 +250,11 @@ class MegaDianToken(models.Model):
                 line=line,
                 move=partial_by_total[0],
                 status="partial",
-                note=_("Coincide NIT, referencia y total, pero no el IVA."),
+                note=(
+                    _("La nota crédito coincide por NIT, referencia y total, pero no el IVA.")
+                    if is_refund
+                    else _("Coincide NIT, referencia y total, pero no el IVA.")
+                ),
                 is_reconciled=False,
             )
             return False
@@ -223,14 +268,18 @@ class MegaDianToken(models.Model):
             )
             return False
 
-        # 5) Si encontró referencia, pero no montos, dejar parcial
+        # 5) Coincidencia solo por referencia — montos no coinciden
         move = reference_matches[:1]
         if move:
             self._write_line_match(
                 line=line,
                 move=move,
                 status="partial",
-                note=_("La referencia coincide, pero los valores de IVA y total no coinciden exactamente."),
+                note=(
+                    _("La nota crédito coincide por referencia, pero el IVA o el total no coincide.")
+                    if is_refund
+                    else _("La referencia coincide, pero los valores de IVA y total no coinciden exactamente.")
+                ),
                 is_reconciled=False,
             )
             return False
@@ -238,19 +287,26 @@ class MegaDianToken(models.Model):
         self._write_line_result(
             line=line,
             status="not_found",
-            note=_("No se encontró factura en Odoo con coincidencia suficiente."),
+            note=_("No se encontró documento en Odoo con coincidencia suficiente."),
             is_reconciled=False,
         )
         return False
+
+    def _get_move_type_for_document(self, tipo_documento):
+        """
+        Retorna el move_type de Odoo para el tipo DIAN.
+        Devuelve None si el tipo no está soportado para no conciliar silenciosamente.
+        """
+        return self._DIAN_TIPO_TO_MOVE_TYPE.get(tipo_documento)
 
     def _find_partner_by_vat(self, partner_model, vat):
         if not vat:
             return partner_model.browse()
         return partner_model.search([("vat", "ilike", vat)], limit=1)
 
-    def _find_candidate_moves(self, move_model, partner):
+    def _find_candidate_moves(self, move_model, partner, move_type="in_invoice"):
         domain = [
-            ("move_type", "=", "in_invoice"),
+            ("move_type", "=", move_type),
             ("state", "in", ["draft", "posted"]),
             ("invoice_date", ">=", self.date_start),
             ("invoice_date", "<=", self.date_end),
@@ -326,8 +382,8 @@ class MegaDianToken(models.Model):
                 "odoo_ref": move.ref or move.name,
                 "fecha_factura_odoo": move.invoice_date,
                 "odoo_total": self._get_move_dian_total(move),
+                "odoo_total_adjusted": self._get_move_dian_total_adjusted(move),
                 "odoo_iva": self._get_move_dian_iva(move),
-                # 🔥 NUEVO CAMPO
                 "impuestos_info": self._get_move_dian_other_taxes(move),
             },
         )
@@ -350,11 +406,21 @@ class MegaDianToken(models.Model):
 
     def _amounts_equal(self, left, right, precision="0.01"):
         """
-        Compara montos con redondeo decimal a 2 posiciones.
+        Compara montos con redondeo decimal a 2 posiciones (tolerancia 0.01).
+        Se usa para IVA y otras comparaciones de precisión estricta.
         """
         left_dec = Decimal(str(left or 0.0)).quantize(Decimal(precision), rounding=ROUND_HALF_UP)
         right_dec = Decimal(str(right or 0.0)).quantize(Decimal(precision), rounding=ROUND_HALF_UP)
         return left_dec == right_dec
+
+    def _amounts_equal_total(self, left, right):
+        """
+        Compara totales con tolerancia de 1 peso colombiano.
+        Cubre diferencias de redondeo normales entre DIAN y Odoo.
+        Solo se usa para comparar total ajustado vs total DIAN.
+        """
+        diff = abs(Decimal(str(left or 0.0)) - Decimal(str(right or 0.0)))
+        return diff <= Decimal("1.00")
 
     def _sanitize_reference(self, value):
         return (
@@ -389,6 +455,21 @@ class MegaDianToken(models.Model):
         if move_name_digits and move_name_digits in candidate_digits:
             return True
 
+        # 2b. El folio DIAN puede incluir dígitos de prefijo de resolución que el
+        #     proveedor no registra en su referencia interna.
+        #     Ej: DIAN folio "3027849" → Odoo ref "027849" ("3027849".endswith("027849")).
+        #     Protección: solo aplica si la ref Odoo tiene 5+ dígitos para evitar
+        #     coincidencias accidentales con sufijos cortos.
+        if move_ref_digits and len(move_ref_digits) >= 5:
+            for cand_digits in candidate_digits:
+                if cand_digits and cand_digits.endswith(move_ref_digits):
+                    return True
+
+        if move_name_digits and len(move_name_digits) >= 5:
+            for cand_digits in candidate_digits:
+                if cand_digits and cand_digits.endswith(move_name_digits):
+                    return True
+
         # 3. Coincidencia por folio numérico al final
         if folio_digits:
             if move_ref_digits.endswith(folio_digits):
@@ -400,16 +481,22 @@ class MegaDianToken(models.Model):
 
     def _get_move_dian_iva(self, move):
         """
-        Retorna solo el IVA positivo del documento.
-        Excluye retenciones y otros impuestos negativos.
+        Retorna el IVA del documento como valor absoluto.
+        Para in_invoice: líneas IVA tienen balance positivo (débito).
+        Para in_refund: líneas IVA tienen balance negativo (crédito, asiento inverso).
+        En ambos casos se retorna el valor absoluto para comparar contra DIAN.
         """
         iva_amount = 0.0
+        is_refund = move.move_type == "in_refund"
 
         for line in move.line_ids.filtered(lambda l: l.tax_line_id):
             tax_name = (line.tax_line_id.name or "").lower()
+            if "iva" not in tax_name:
+                continue
             amount = line.amount_currency if line.currency_id else line.balance
-
-            if "iva" in tax_name and (amount or 0.0) > 0:
+            if is_refund:
+                iva_amount += abs(amount or 0.0)
+            elif (amount or 0.0) > 0:
                 iva_amount += abs(amount or 0.0)
 
         return iva_amount
@@ -437,14 +524,54 @@ class MegaDianToken(models.Model):
 
     def _get_move_dian_total(self, move):
         """
-        Total Odoo = subtotal + IVA + otros impuestos.
-        Las retenciones vienen negativas, por eso se restan automáticamente.
+        Total Odoo = subtotal + IVA + otros impuestos (incluye retenciones negativas).
+        Se usa para mostrar el total real contable de Odoo, no para comparar contra DIAN.
         """
         untaxed = move.amount_untaxed or 0.0
         iva_amount = self._get_move_dian_iva(move)
         other_taxes_amount = self._get_move_dian_other_taxes_amount(move)
 
         return untaxed + iva_amount + other_taxes_amount
+
+    def _is_retention_line(self, line):
+        """
+        Determina si una línea de impuesto es una retención.
+        Criterio primario: porcentaje negativo en la definición del impuesto.
+        Criterio de respaldo: nombre del impuesto.
+        """
+        tax = line.tax_line_id
+        if not tax:
+            return False
+        if tax.amount_type in ('percent', 'fixed', 'division') and tax.amount < 0:
+            return True
+        name_lower = (tax.name or '').lower()
+        return any(kw in name_lower for kw in ('rete', 'rte', 'retención', 'retencion', 'withhold'))
+
+    def _get_move_dian_total_adjusted(self, move):
+        """
+        Total comparable con DIAN: base + IVA + impuestos no-IVA no-retención.
+        Excluye retenciones porque el total DIAN es el valor bruto antes de retenciones.
+        Para in_refund, las líneas de impuesto tienen signo inverso al de in_invoice;
+        se usa abs() para normalizar sin alterar los datos contables del movimiento.
+        """
+        untaxed = move.amount_untaxed or 0.0
+        iva_amount = self._get_move_dian_iva(move)
+        is_refund = move.move_type == "in_refund"
+
+        other_non_retention = 0.0
+        for line in move.line_ids.filtered(lambda l: l.tax_line_id):
+            if 'iva' in (line.tax_line_id.name or '').lower():
+                continue
+            if self._is_retention_line(line):
+                continue
+            amount = line.amount_currency if line.currency_id else line.balance
+            if amount:
+                if is_refund:
+                    other_non_retention += abs(amount)
+                else:
+                    other_non_retention += amount
+
+        return untaxed + iva_amount + other_non_retention
 
     # ============================================================
     # EXPORTACIÓN EXCEL
@@ -575,30 +702,31 @@ class MegaDianToken(models.Model):
 
     def _get_excel_headers(self):
         return [
-            ("Tipo documento", "header_dian"),
-            ("Folio", "header_dian"),
-            ("Prefijo", "header_dian"),
-            ("Fecha DIAN", "header_dian"),
-            ("NIT emisor", "header_dian"),
-            ("Nombre emisor", "header_dian"),
-            ("IVA DIAN", "header_dian"),
-            ("Total DIAN", "header_dian"),
-            ("CUFE", "header_dian"),
+            ("Tipo documento", "header_dian"),       # 0
+            ("Folio", "header_dian"),                # 1
+            ("Prefijo", "header_dian"),              # 2
+            ("Fecha DIAN", "header_dian"),           # 3
+            ("NIT emisor", "header_dian"),           # 4
+            ("Nombre emisor", "header_dian"),        # 5
+            ("IVA DIAN", "header_dian"),             # 6
+            ("Total DIAN", "header_dian"),           # 7
+            ("CUFE", "header_dian"),                 # 8
 
-            ("Proveedor encontrado", "header_odoo"),
-            ("Factura Odoo", "header_odoo"),
-            ("Referencia Odoo", "header_odoo"),
-            ("Fecha Odoo", "header_odoo"),
-            ("IVA Odoo", "header_odoo"),
-            ("Impuestos", "header_odoo"),
-            ("Total Odoo", "header_odoo"),
+            ("Proveedor encontrado", "header_odoo"), # 9
+            ("Factura Odoo", "header_odoo"),         # 10
+            ("Referencia Odoo", "header_odoo"),      # 11
+            ("Fecha Odoo", "header_odoo"),           # 12
+            ("IVA Odoo", "header_odoo"),             # 13
+            ("Impuestos", "header_odoo"),            # 14
+            ("Total Odoo", "header_odoo"),           # 15
+            ("Total Odoo ajustado", "header_odoo"),  # 16 — sin retenciones
 
-            ("Estado validación", "header_status"),
-            ("Observación", "header_status"),
-            ("Conciliado", "header_status"),
+            ("Estado validación", "header_status"),  # 17
+            ("Observación", "header_status"),        # 18
+            ("Conciliado", "header_status"),         # 19
 
-            ("Diferencia IVA", "header_diff"),
-            ("Diferencia Total", "header_diff"),
+            ("Diferencia IVA", "header_diff"),       # 20
+            ("Diferencia Total", "header_diff"),     # 21 — calculada sobre total ajustado
         ]
 
 
@@ -619,12 +747,13 @@ class MegaDianToken(models.Model):
             12: 14,
             13: 14,  # IVA Odoo
             14: 35,  # Impuestos
-            15: 14,  # Total Odoo
-            16: 18,
-            17: 40,
-            18: 12,
-            19: 16,
-            20: 16,
+            15: 14,  # Total Odoo (con retenciones)
+            16: 20,  # Total Odoo ajustado (sin retenciones)
+            17: 18,  # Estado validación
+            18: 40,  # Observación
+            19: 12,  # Conciliado
+            20: 16,  # Diferencia IVA
+            21: 16,  # Diferencia Total (sobre total ajustado)
         }
 
 
@@ -633,12 +762,13 @@ class MegaDianToken(models.Model):
         total_dian = self._to_amount(line.total)
         iva_odoo = self._to_amount(line.odoo_iva)
         total_odoo = self._to_amount(line.odoo_total)
+        total_odoo_adjusted = self._to_amount(line.odoo_total_adjusted)
 
         diff_iva = round(iva_dian - iva_odoo, 2)
-        diff_total = round(total_dian - total_odoo, 2)
+        diff_total = round(total_dian - total_odoo_adjusted, 2)
 
         has_iva_diff = abs(diff_iva) >= 0.01
-        has_total_diff = abs(diff_total) >= 0.01
+        has_total_diff = abs(diff_total) > 1.00
 
         fecha_dian = line.fecha_emision_dian
         fecha_odoo = line.fecha_factura_odoo
@@ -649,7 +779,8 @@ class MegaDianToken(models.Model):
         diff_iva_fmt = formats["warning_money"] if has_iva_diff else formats["money"]
 
         total_dian_fmt = formats["warning_money"] if has_total_diff else formats["money"]
-        total_odoo_fmt = formats["warning_money"] if has_total_diff else formats["money"]
+        total_odoo_fmt = formats["money"]
+        total_odoo_adj_fmt = formats["warning_money"] if has_total_diff else formats["money"]
         diff_total_fmt = formats["warning_money"] if has_total_diff else formats["money"]
 
         fecha_dian_fmt = formats["warning_date"] if has_date_diff else formats["date"]
@@ -685,13 +816,14 @@ class MegaDianToken(models.Model):
         sheet.write_number(row, 13, iva_odoo, iva_odoo_fmt)
         sheet.write(row, 14, line.impuestos_info or "", formats["text"])
         sheet.write_number(row, 15, total_odoo, total_odoo_fmt)
+        sheet.write_number(row, 16, total_odoo_adjusted, total_odoo_adj_fmt)
 
-        sheet.write(row, 16, line.validation_status or "", status_fmt)
-        sheet.write(row, 17, line.validation_note or "", status_fmt)
-        sheet.write(row, 18, "Sí" if line.is_reconciled else "No", formats["boolean"])
+        sheet.write(row, 17, line.validation_status or "", status_fmt)
+        sheet.write(row, 18, line.validation_note or "", status_fmt)
+        sheet.write(row, 19, "Sí" if line.is_reconciled else "No", formats["boolean"])
 
-        sheet.write_number(row, 19, diff_iva, diff_iva_fmt)
-        sheet.write_number(row, 20, diff_total, diff_total_fmt)
+        sheet.write_number(row, 20, diff_iva, diff_iva_fmt)
+        sheet.write_number(row, 21, diff_total, diff_total_fmt)
 
     # ============================================================
     # Validated and processed action (no vuelta atrás)
