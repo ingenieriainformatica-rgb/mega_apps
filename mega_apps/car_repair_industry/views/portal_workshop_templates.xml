@@ -169,7 +169,8 @@
                                 <th class="workshop-col-vehicle">Placa / Vehículo</th>
                                 <th class="workshop-col-client">Cliente</th>
                                 <th class="workshop-col-date">Fecha</th>
-                                <th class="workshop-col-people d-none d-md-table-cell">Asesor / Técnico</th>
+                                <th class="workshop-col-people d-none d-md-table-cell">Asesor</th>
+                                <th class="workshop-col-people d-none d-md-table-cell">Técnico mecánico</th>
                                 <th class="workshop-col-svcs text-center d-none d-sm-table-cell">Servicios</th>
                                 <th class="workshop-col-action"></th>
                             </tr>
@@ -209,16 +210,24 @@
                                     <t t-else="">—</t>
                                 </td>
 
-                                <!-- Asesor / Técnico -->
-                                <td class="workshop-col-people d-none d-md-table-cell">
-                                    <div t-if="repair.portal_advisor_id" class="small text-nowrap">
-                                        <i class="fa fa-id-badge text-muted me-1" aria-hidden="true"></i>
+                                <!-- Asesor -->
+                                <td class="workshop-col-people d-none d-md-table-cell small">
+                                    <t t-if="repair.portal_advisor_id">
+                                        <i class="fa fa-id-badge text-muted me-1"/>
                                         <t t-esc="repair.portal_advisor_id.display_name"/>
-                                    </div>
-                                    <div t-if="repair.portal_technician_id or repair.user_id" class="small text-nowrap">
-                                        <i class="fa fa-wrench text-muted me-1" aria-hidden="true"></i>
+                                    </t>
+                                    <span t-else="" class="text-muted">—</span>
+                                </td>
+
+                                <!-- Técnico -->
+                                <td class="workshop-col-people d-none d-md-table-cell small">
+                                    <t t-if="repair.portal_technician_id or repair.user_id">
+                                        <i class="fa fa-wrench text-muted me-1"/>
                                         <t t-esc="(repair.portal_technician_id or repair.user_id).display_name"/>
-                                    </div>
+                                    </t>
+                                    <span t-else="" class="text-warning">
+                                        <i class="fa fa-exclamation-circle me-1"/>Sin asignar
+                                    </span>
                                 </td>
 
                                 <!-- Servicios -->
@@ -692,7 +701,7 @@
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-2">
                         <div class="d-flex align-items-center gap-3">
                             <div class="workshop-detail-icon">
-                                <i class="fa fa-file-invoice"></i>
+                                <i class="fa fa-car"></i>
                             </div>
                             <div>
                                 <div class="workshop-detail-seq" t-esc="repair.sequence or repair.display_name"/>
