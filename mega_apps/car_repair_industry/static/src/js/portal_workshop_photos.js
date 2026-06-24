@@ -658,6 +658,241 @@ publicWidget.registry.WorkshopSpareRequest = publicWidget.Widget.extend({
     },
 });
 
+publicWidget.registry.WorkshopSpareEditLine = publicWidget.Widget.extend({
+    selector: "#workshop-spare-request-section",
+
+    start() {
+        this._catalogUrl = this.el.dataset.catalogUrl || "/my/workshop/spare-catalog";
+        this._activeForm = null;
+        this._debounce = null;
+
+        this.el.addEventListener("click", (e) => {
+            const toggle = e.target.closest(".js-spare-add-toggle");
+            const del = e.target.closest(".js-spare-delete-existing");
+            const cancel = e.target.closest(".js-spare-add-cancel");
+            const confirm = e.target.closest(".js-spare-add-confirm");
+            if (toggle) { e.preventDefault(); this._onToggleForm(toggle); }
+            else if (del) { e.preventDefault(); this._onDeleteLine(del); }
+            else if (cancel) { e.preventDefault(); this._onCancelForm(cancel); }
+            else if (confirm) { e.preventDefault(); this._onConfirmAdd(confirm); }
+        });
+
+        this.el.addEventListener("input", (e) => {
+            const search = e.target.closest(".js-spare-edit-search");
+            if (search) this._onSearchInput(search);
+        });
+
+        document.addEventListener("click", (e) => {
+            if (this._activeForm && !this._activeForm.contains(e.target)) {
+                const dd = this._activeForm.querySelector(".js-spare-edit-dropdown");
+                if (dd) dd.style.display = "none";
+            }
+        });
+
+        return this._super(...arguments);
+    },
+
+    _onToggleForm(btn) {
+        const reqId = btn.dataset.requestId;
+        const form = this.el.querySelector(`#spare-add-form-${reqId}`);
+        if (!form) return;
+        const hidden = form.classList.contains("d-none");
+        if (this._activeForm && this._activeForm !== form) {
+            this._closeForm(this._activeForm);
+        }
+        if (hidden) {
+            form.classList.remove("d-none");
+            this._activeForm = form;
+            form.querySelector(".js-spare-edit-search")?.focus();
+        } else {
+            this._closeForm(form);
+        }
+    },
+
+    _closeForm(form) {
+        form.classList.add("d-none");
+        const search = form.querySelector(".js-spare-edit-search");
+        const catId = form.querySelector(".js-spare-edit-catalog-id");
+        const dd = form.querySelector(".js-spare-edit-dropdown");
+        const confirm = form.querySelector(".js-spare-add-confirm");
+        const msg = form.querySelector(".js-spare-add-msg");
+        const qty = form.querySelector(".js-spare-edit-qty");
+        const note = form.querySelector(".js-spare-edit-note");
+        if (search) search.value = "";
+        if (catId) catId.value = "";
+        if (qty) qty.value = "1";
+        if (note) note.value = "";
+        if (dd) { dd.replaceChildren(); dd.style.display = "none"; }
+        if (confirm) confirm.disabled = true;
+        if (msg) { msg.classList.add("d-none"); msg.textContent = ""; }
+        this._activeForm = null;
+    },
+
+    _onCancelForm(cancelBtn) {
+        const form = cancelBtn.closest(".js-spare-add-form");
+        if (form) this._closeForm(form);
+    },
+
+    _onSearchInput(searchEl) {
+        clearTimeout(this._debounce);
+        const form = searchEl.closest(".js-spare-add-form");
+        if (!form) return;
+        const catId = form.querySelector(".js-spare-edit-catalog-id");
+        const confirm = form.querySelector(".js-spare-add-confirm");
+        if (catId) catId.value = "";
+        if (confirm) confirm.disabled = true;
+        const q = searchEl.value.trim();
+        if (q.length < 2) {
+            const dd = form.querySelector(".js-spare-edit-dropdown");
+            if (dd) dd.style.display = "none";
+            return;
+        }
+        this._debounce = setTimeout(() => this._fetchCatalog(q, form), 300);
+    },
+
+    async _fetchCatalog(q, form) {
+        try {
+            const resp = await fetch(`${this._catalogUrl}?q=${encodeURIComponent(q)}`, {
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+            });
+            if (!resp.ok) return;
+            const items = await resp.json();
+            this._renderDropdown(items, form);
+        } catch { /* silent */ }
+    },
+
+    _renderDropdown(items, form) {
+        const dd = form.querySelector(".js-spare-edit-dropdown");
+        if (!dd) return;
+        dd.replaceChildren();
+        if (!items || items.length === 0) { dd.style.display = "none"; return; }
+        for (const item of items) {
+            const a = document.createElement("a");
+            a.className = "dropdown-item small py-1";
+            a.href = "#";
+            a.textContent = item.name;
+            a.addEventListener("mousedown", (e) => { e.preventDefault(); this._selectItem(item, form); });
+            dd.appendChild(a);
+        }
+        dd.style.display = "block";
+    },
+
+    _selectItem(item, form) {
+        const search = form.querySelector(".js-spare-edit-search");
+        const catId = form.querySelector(".js-spare-edit-catalog-id");
+        const confirm = form.querySelector(".js-spare-add-confirm");
+        const dd = form.querySelector(".js-spare-edit-dropdown");
+        if (search) search.value = item.name;
+        if (catId) catId.value = item.id;
+        if (confirm) confirm.disabled = false;
+        if (dd) { dd.replaceChildren(); dd.style.display = "none"; }
+    },
+
+    async _onConfirmAdd(confirmBtn) {
+        const form = confirmBtn.closest(".js-spare-add-form");
+        if (!form) return;
+        const requestId = form.dataset.requestId;
+        const catalogId = form.querySelector(".js-spare-edit-catalog-id")?.value;
+        const qty = parseFloat(form.querySelector(".js-spare-edit-qty")?.value) || 0;
+        const note = form.querySelector(".js-spare-edit-note")?.value.trim() || "";
+        const msg = form.querySelector(".js-spare-add-msg");
+        const tbodyId = form.dataset.tbodyId;
+        if (!catalogId || qty <= 0) return;
+        confirmBtn.disabled = true;
+        try {
+            const resp = await fetch("/my/workshop/spares/line/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ jsonrpc: "2.0", method: "call",
+                    params: { request_id: requestId, catalog_id: catalogId, quantity: qty, note } }),
+            });
+            const data = await resp.json();
+            const result = data.result || {};
+            if (result.ok) {
+                this._appendRow(tbodyId, result, form);
+                const search = form.querySelector(".js-spare-edit-search");
+                const qtyEl = form.querySelector(".js-spare-edit-qty");
+                const noteEl = form.querySelector(".js-spare-edit-note");
+                const catEl = form.querySelector(".js-spare-edit-catalog-id");
+                if (search) search.value = "";
+                if (qtyEl) qtyEl.value = "1";
+                if (noteEl) noteEl.value = "";
+                if (catEl) catEl.value = "";
+                this._showMsg(msg, "Repuesto agregado.", "success");
+                setTimeout(() => this._clearMsg(msg), 3000);
+            } else {
+                this._showMsg(msg, result.msg || "Error al agregar.", "danger");
+                confirmBtn.disabled = false;
+            }
+        } catch {
+            this._showMsg(msg, "Error de red.", "danger");
+            confirmBtn.disabled = false;
+        }
+    },
+
+    _appendRow(tbodyId, result, form) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="fw-semibold">${this._esc(result.name)}</td>
+            <td class="text-center">${result.quantity}</td>
+            <td class="small text-muted">${this._esc(result.note || "—")}</td>
+            <td class="text-center p-1">
+                <button type="button" class="btn btn-sm btn-link text-danger p-0 js-spare-delete-existing"
+                        data-line-id="${result.line_id}" title="Quitar">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </td>`;
+        tbody.appendChild(tr);
+    },
+
+    async _onDeleteLine(delBtn) {
+        const lineId = delBtn.dataset.lineId;
+        if (!lineId) return;
+        delBtn.disabled = true;
+        try {
+            const resp = await fetch("/my/workshop/spares/line/remove", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ jsonrpc: "2.0", method: "call", params: { line_id: lineId } }),
+            });
+            const data = await resp.json();
+            const result = data.result || {};
+            if (result.ok) {
+                delBtn.closest("tr")?.remove();
+            } else {
+                alert(result.msg || "No se puede eliminar esta línea.");
+                delBtn.disabled = false;
+            }
+        } catch {
+            alert("Error de red.");
+            delBtn.disabled = false;
+        }
+    },
+
+    _showMsg(el, text, type) {
+        if (!el) return;
+        el.className = `small mt-1 text-${type}`;
+        el.textContent = text;
+        el.classList.remove("d-none");
+    },
+
+    _clearMsg(el) {
+        if (!el) return;
+        el.classList.add("d-none");
+        el.textContent = "";
+    },
+
+    _esc(str) {
+        return String(str || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    },
+});
+
 publicWidget.registry.WorkshopChecklistValidation = publicWidget.Widget.extend({
     selector: "#tecnico_checklist_form",
     events: {

@@ -503,6 +503,10 @@ class CarRepairPortalWorkshop(http.Controller):
                 write_vals['tecnico_notes'] = new_notes
             if write_vals:
                 line.write(write_vals)
+                # Sync to the diagnosis copy (created when diagnosis was opened from backend)
+                diag_copies = RepairLine.search([('source_line_id', '=', line.id)])
+                if diag_copies:
+                    diag_copies.write(write_vals)
 
         ChecklistLine = request.env['fleet.repair.reception.checklist.line'].sudo()
         tecnico_lines = ChecklistLine.search([
@@ -634,6 +638,7 @@ class CarRepairPortalWorkshop(http.Controller):
         line_state = repair.state if repair.state in ('draft', 'diagnosis', 'done') else 'diagnosis'
         line = RepairLine.create({
             'fleet_repair_id': repair.id,
+            'diagnose_id': repair.diagnose_id.id or False,
             'license_plate': repair.license_plate,
             'model_id': repair.model_id.id or False,
             'vehicle_brand_id': repair.vehicle_brand_id.id or False,
@@ -825,6 +830,67 @@ class CarRepairPortalWorkshop(http.Controller):
             json.dumps({'ok': True, 'request_id': spare_request.id}),
             headers=[('Content-Type', 'application/json')],
         )
+
+    @http.route('/my/workshop/spares/line/remove', type='json', auth='user', website=True, methods=['POST'])
+    def workshop_spare_line_remove(self, line_id=None, **kw):
+        if not self._is_technician():
+            return {'error': 'forbidden'}
+        try:
+            line_id = int(line_id or 0)
+        except (ValueError, TypeError):
+            return {'error': 'invalid'}
+        if line_id <= 0:
+            return {'error': 'invalid'}
+        line = request.env['fleet.repair.spare.request.line'].sudo().search(
+            [('id', '=', line_id)], limit=1
+        )
+        if not line:
+            return {'error': 'not_found'}
+        if line.request_id.state != 'requested':
+            return {'error': 'not_editable', 'msg': 'Esta solicitud ya fue procesada y no se puede modificar.'}
+        try:
+            self._get_repair(line.request_id.repair_id.id)
+        except Exception:
+            return {'error': 'forbidden'}
+        line.unlink()
+        return {'ok': True}
+
+    @http.route('/my/workshop/spares/line/add', type='json', auth='user', website=True, methods=['POST'])
+    def workshop_spare_line_add(self, request_id=None, catalog_id=None, quantity=None, note='', **kw):
+        if not self._is_technician():
+            return {'error': 'forbidden'}
+        try:
+            request_id = int(request_id or 0)
+            catalog_id = int(catalog_id or 0)
+            qty = float(quantity or 0)
+        except (ValueError, TypeError):
+            return {'error': 'invalid'}
+        if request_id <= 0 or catalog_id <= 0 or qty <= 0:
+            return {'error': 'invalid_data'}
+        spare_req = request.env['fleet.repair.spare.request'].sudo().search(
+            [('id', '=', request_id)], limit=1
+        )
+        if not spare_req:
+            return {'error': 'not_found'}
+        if spare_req.state != 'requested':
+            return {'error': 'not_editable', 'msg': 'Esta solicitud ya fue procesada.'}
+        try:
+            self._get_repair(spare_req.repair_id.id)
+        except Exception:
+            return {'error': 'forbidden'}
+        catalog = request.env['fleet.repair.spare.catalog'].sudo().search(
+            [('id', '=', catalog_id), ('active', '=', True)], limit=1
+        )
+        if not catalog:
+            return {'error': 'catalog_not_found'}
+        note_clean = (note or '').strip()[:500]
+        line = request.env['fleet.repair.spare.request.line'].sudo().create({
+            'request_id': spare_req.id,
+            'spare_catalog_id': catalog.id,
+            'quantity': qty,
+            'technician_note': note_clean or False,
+        })
+        return {'ok': True, 'line_id': line.id, 'name': catalog.name, 'quantity': qty, 'note': note_clean}
 
 
 _WORKSHOP_PORTAL_GROUPS = [

@@ -1340,31 +1340,101 @@
                                     </button>
                                 </div>
 
-                                <!-- Solicitudes anteriores -->
+                                <!-- Solicitudes enviadas con detalle -->
                                 <div t-if="repair.spare_request_ids">
-                                    <p class="small text-muted mb-2">Solicitudes enviadas:</p>
-                                    <div class="table-responsive mb-3">
-                                        <table class="table table-sm table-bordered mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Fecha</th>
-                                                    <th class="text-center"># Repuestos</th>
-                                                    <th>Estado</th>
-                                                    <th>Obs. almacén</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr t-foreach="repair.spare_request_ids" t-as="sr">
-                                                    <td><t t-esc="sr.request_date.strftime('%d/%m/%Y %H:%M') if sr.request_date else '—'"/></td>
-                                                    <td class="text-center"><t t-esc="sr.line_count"/></td>
-                                                    <td>
-                                                        <span t-att-class="'badge ' + ('text-bg-info' if sr.state == 'requested' else 'text-bg-success' if sr.state == 'reviewed' else 'text-bg-secondary')"
-                                                              t-esc="dict(sr._fields['state'].selection).get(sr.state)"/>
-                                                    </td>
-                                                    <td class="small text-muted"><t t-esc="sr.warehouse_note or '—'"/></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                    <div t-foreach="repair.spare_request_ids" t-as="sr" class="mb-4">
+                                        <!-- Cabecera de la solicitud -->
+                                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                            <span class="small text-muted">
+                                                <i class="fa fa-calendar me-1"/>
+                                                <t t-esc="sr.request_date.strftime('%d/%m/%Y %H:%M') if sr.request_date else '—'"/>
+                                            </span>
+                                            <span t-att-class="'badge ms-1 ' + ('text-bg-info' if sr.state == 'requested' else 'text-bg-success' if sr.state == 'reviewed' else 'text-bg-secondary')"
+                                                  t-esc="dict(sr._fields['state'].selection).get(sr.state)"/>
+                                            <span t-if="sr.warehouse_note" class="small text-muted ms-2">
+                                                <i class="fa fa-comment me-1"/>Almacén: <t t-esc="sr.warehouse_note"/>
+                                            </span>
+                                            <t t-if="is_technician and sr.state == 'requested'">
+                                                <button type="button"
+                                                        class="btn btn-outline-secondary btn-sm ms-auto js-spare-add-toggle"
+                                                        t-att-data-request-id="sr.id">
+                                                    <i class="fa fa-plus me-1"/>Agregar repuesto
+                                                </button>
+                                            </t>
+                                        </div>
+                                        <!-- Detalle de repuestos -->
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Repuesto</th>
+                                                        <th class="text-center" style="width:90px;">Cantidad</th>
+                                                        <th>Observación técnico</th>
+                                                        <th t-if="is_technician and sr.state == 'requested'" style="width:36px;"/>
+                                                    </tr>
+                                                </thead>
+                                                <tbody t-att-id="'spare-tbody-%s' % sr.id">
+                                                    <tr t-foreach="sr.line_ids" t-as="line">
+                                                        <td class="fw-semibold" t-esc="line.spare_catalog_id.name or '—'"/>
+                                                        <td class="text-center" t-esc="line.quantity"/>
+                                                        <td class="small text-muted" t-esc="line.technician_note or '—'"/>
+                                                        <t t-if="is_technician and sr.state == 'requested'">
+                                                            <td class="text-center p-1">
+                                                                <button type="button"
+                                                                        class="btn btn-sm btn-link text-danger p-0 js-spare-delete-existing"
+                                                                        t-att-data-line-id="line.id"
+                                                                        title="Quitar">
+                                                                    <i class="fa fa-trash"/>
+                                                                </button>
+                                                            </td>
+                                                        </t>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- Mini-formulario para agregar a esta solicitud -->
+                                        <t t-if="is_technician and sr.state == 'requested'">
+                                            <div class="js-spare-add-form d-none mt-2 p-2 border rounded bg-light"
+                                                 t-att-id="'spare-add-form-%s' % sr.id"
+                                                 t-att-data-request-id="sr.id"
+                                                 t-att-data-tbody-id="'spare-tbody-%s' % sr.id">
+                                                <div class="row g-2 align-items-end">
+                                                    <div class="col-sm-6">
+                                                        <label class="form-label small mb-1">Buscar repuesto</label>
+                                                        <div class="position-relative">
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm js-spare-edit-search"
+                                                                   placeholder="Escribe al menos 2 letras..."
+                                                                   autocomplete="off"/>
+                                                            <div class="dropdown-menu w-100 js-spare-edit-dropdown"
+                                                                 style="display:none;position:absolute;z-index:1050;max-height:180px;overflow-y:auto;"/>
+                                                            <input type="hidden" class="js-spare-edit-catalog-id"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <label class="form-label small mb-1">Cantidad</label>
+                                                        <input type="number"
+                                                               class="form-control form-control-sm js-spare-edit-qty"
+                                                               value="1" min="0.01" step="0.01"/>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <label class="form-label small mb-1">Nota (opcional)</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm js-spare-edit-note"
+                                                               placeholder="Especificación adicional"/>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-end gap-2 mt-2">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary js-spare-add-cancel">
+                                                        Cancelar
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-primary js-spare-add-confirm" disabled="disabled">
+                                                        <i class="fa fa-plus me-1"/>Agregar
+                                                    </button>
+                                                </div>
+                                                <div class="js-spare-add-msg small mt-1 d-none"/>
+                                            </div>
+                                        </t>
                                     </div>
                                 </div>
                                 <p t-if="not repair.spare_request_ids" class="small text-muted mb-3">
