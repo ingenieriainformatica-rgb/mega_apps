@@ -952,18 +952,32 @@
                                 <div t-if="repair.reception_checklist_line_ids" class="table-responsive">
                                     <table class="table table-sm mb-0">
                                         <thead class="table-light">
-                                            <tr><th>Ítem</th><th>Estado</th><th>Observación</th></tr>
+                                            <tr>
+                                                <th>Ítem</th>
+                                                <th style="width:100px;" class="text-center">Estado</th>
+                                                <th>Observación del asesor</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
                                             <tr t-foreach="repair.reception_checklist_line_ids" t-as="line">
-                                                <td t-esc="line.name"/>
-                                                <td>
-                                                    <span t-if="line.state == 'good'" class="badge bg-success" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
-                                                    <span t-if="line.state == 'regular'" class="badge bg-warning text-dark" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
-                                                    <span t-if="line.state == 'bad'" class="badge bg-danger" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
-                                                    <span t-if="line.state == 'not_apply'" class="badge bg-secondary" t-esc="dict(line._fields['state'].selection).get(line.state)"/>
+                                                <td class="small fw-semibold" t-esc="line.name"/>
+                                                <td class="text-center">
+                                                    <span t-if="line.state == 'good'" class="text-success fw-semibold small">
+                                                        <i class="fa fa-check-circle me-1"/>Sí
+                                                    </span>
+                                                    <span t-if="line.state == 'bad'" class="text-danger fw-semibold small">
+                                                        <i class="fa fa-times-circle me-1"/>No
+                                                    </span>
+                                                    <span t-if="line.state == 'regular'" class="text-warning fw-semibold small">
+                                                        <i class="fa fa-exclamation-circle me-1"/>Parcial
+                                                    </span>
+                                                    <span t-if="line.state == 'not_apply'" class="text-muted small">
+                                                        <i class="fa fa-minus-circle me-1"/>N/A
+                                                    </span>
                                                 </td>
-                                                <td t-att-class="line.state == 'bad' and 'text-danger fw-bold' or (line.observation and 'text-danger')" t-esc="line.observation or ''"/>
+                                                <td class="small text-muted fst-italic"
+                                                    t-att-class="line.state == 'bad' and 'text-danger fw-bold fst-normal' or ''"
+                                                    t-esc="line.observation or '—'"/>
                                             </tr>
                                         </tbody>
                                     </table>

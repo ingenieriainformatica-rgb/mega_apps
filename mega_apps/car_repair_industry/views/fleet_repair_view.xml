@@ -589,6 +589,13 @@
                     <field name="car_year"/>
                     <field name="guarantee" widget="radio"/>
                     <field name="service_type"/>
+                    <field name="tecnico_status"
+                        widget="badge"
+                        string="Avance técnico"
+                        decoration-muted="tecnico_status == 'pendiente'"
+                        decoration-warning="tecnico_status == 'en_progreso'"
+                        decoration-success="tecnico_status == 'completado'"/>
+                    <field name="tecnico_notes" string="Notas técnico" optional="show"/>
                     <field name="state"
                         widget="badge"
                         decoration-info="state == 'draft'"
