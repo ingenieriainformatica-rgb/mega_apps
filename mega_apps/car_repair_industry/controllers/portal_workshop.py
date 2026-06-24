@@ -782,7 +782,6 @@ class WorkshopPortalHome(CustomerPortal):
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
         if not counters:
-            # Solo al renderizar /my, nunca en la llamada AJAX /my/counters
-            user = request.env.user
-            values['is_workshop_user'] = any(user.has_group(g) for g in _WORKSHOP_PORTAL_GROUPS)
+            # La tarjeta del taller se muestra a todos los usuarios autenticados
+            values['is_workshop_user'] = True
         return values
