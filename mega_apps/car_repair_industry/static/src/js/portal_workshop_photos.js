@@ -379,6 +379,94 @@ publicWidget.registry.WorkshopTechnicianPhotos = publicWidget.Widget.extend({
         });
     },
 });
+publicWidget.registry.WorkshopAddServiceOrder = publicWidget.Widget.extend({
+    selector: ".js-add-service-order",
+
+    start() {
+        this._repairId = this.el.dataset.repairId;
+        this._csrf = this.el.dataset.csrf;
+        this._input = this.el.querySelector("#new-service-name");
+        this._btn = this.el.querySelector("#btn-add-service-order");
+        this._msg = this.el.querySelector("#add-service-msg");
+        this._tbody = document.querySelector("#workshop-services-form tbody");
+
+        this._btn.addEventListener("click", () => this._onAdd());
+        this._input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); this._onAdd(); }
+        });
+        return this._super(...arguments);
+    },
+
+    async _onAdd() {
+        const name = this._input.value.trim();
+        if (!name) return;
+
+        this._btn.disabled = true;
+        this._showMsg("", "");
+
+        try {
+            const resp = await fetch(
+                `/my/workshop/order/${this._repairId}/services/add`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ jsonrpc: "2.0", method: "call", params: { name } }),
+                }
+            );
+            const data = await resp.json();
+            const result = data.result || {};
+
+            if (result.error === "forbidden") {
+                this._showMsg("No tienes permiso para agregar servicios.", "danger");
+            } else if (result.already_exists) {
+                this._showMsg(
+                    `<i class="fa fa-info-circle me-1"></i>El servicio "<strong>${result.service_name}</strong>" ya está en esta orden.`,
+                    "warning"
+                );
+            } else if (result.success) {
+                this._appendRow(result);
+                this._input.value = "";
+                this._showMsg(
+                    `<i class="fa fa-check-circle me-1"></i>Servicio "<strong>${result.service_name}</strong>" agregado${result.is_new_type ? " (nuevo)" : ""}.`,
+                    "success"
+                );
+            }
+        } catch {
+            this._showMsg("Error de conexión. Intenta de nuevo.", "danger");
+        } finally {
+            this._btn.disabled = false;
+        }
+    },
+
+    _appendRow(result) {
+        if (!this._tbody) return;
+        const rowCount = this._tbody.querySelectorAll("tr").length + 1;
+        const tr = document.createElement("tr");
+        tr.className = "workshop-service-row workshop-service-row-pendiente";
+        tr.innerHTML = `
+            <td class="workshop-service-num">${result.seq || rowCount}</td>
+            <td><div class="fw-semibold">${result.service_name}</div></td>
+            <td>
+                <select name="svc_status_${result.line_id}" class="form-select form-select-sm workshop-service-status-select">
+                    <option value="pendiente" selected>⏳ Pendiente</option>
+                    <option value="en_progreso">⚙ En progreso</option>
+                    <option value="completado">✓ Completado</option>
+                </select>
+            </td>
+            <td>
+                <input name="svc_notes_${result.line_id}" class="form-control form-control-sm"
+                       placeholder="Notas sobre ${result.service_name}" value=""/>
+            </td>`;
+        this._tbody.appendChild(tr);
+    },
+
+    _showMsg(html, type) {
+        if (!html) { this._msg.classList.add("d-none"); return; }
+        this._msg.className = `small mt-2 text-${type}`;
+        this._msg.innerHTML = html;
+    },
+});
+
 publicWidget.registry.WorkshopSpareRequest = publicWidget.Widget.extend({
     selector: "#workshop-spare-request-section",
 

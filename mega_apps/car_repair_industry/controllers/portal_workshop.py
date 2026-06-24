@@ -594,6 +594,65 @@ class CarRepairPortalWorkshop(http.Controller):
             repair.sudo().action_flow_finish_road_test()
         return request.redirect('/my/workshop/order/%s' % repair.id)
 
+    @http.route('/my/workshop/order/<int:repair_id>/services/add', type='json', auth='user', website=True, methods=['POST'])
+    def workshop_add_service(self, repair_id, name='', **kw):
+        if not (self._is_technician() or self._is_internal_manager()):
+            return {'error': 'forbidden'}
+        name = (name or '').strip()
+        if not name:
+            return {'error': 'empty'}
+        repair = self._get_repair(repair_id)
+        if not repair:
+            return {'error': 'not_found'}
+
+        ServiceType = request.env['service.type'].sudo()
+        RepairLine = request.env['fleet.repair.line'].sudo()
+
+        # Buscar tipo de servicio existente (sin distinguir mayúsculas)
+        stype = ServiceType.search([('name', '=ilike', name)], limit=1)
+        if not stype:
+            stype = ServiceType.create({'name': name})
+            is_new_type = True
+        else:
+            is_new_type = False
+
+        # Verificar si ya está en la orden
+        existing_line = RepairLine.search([
+            ('fleet_repair_id', '=', repair.id),
+            ('service_type', '=', stype.id),
+        ], limit=1)
+        if existing_line:
+            return {
+                'already_exists': True,
+                'line_id': existing_line.id,
+                'service_name': stype.name,
+            }
+
+        # Calcular próximo número de secuencia
+        current_count = RepairLine.search_count([('fleet_repair_id', '=', repair.id)])
+
+        line_state = repair.state if repair.state in ('draft', 'diagnosis', 'done') else 'diagnosis'
+        line = RepairLine.create({
+            'fleet_repair_id': repair.id,
+            'license_plate': repair.license_plate,
+            'model_id': repair.model_id.id or False,
+            'vehicle_brand_id': repair.vehicle_brand_id.id or False,
+            'model_year': repair.model_year or False,
+            'engine_number': repair.engine_number or False,
+            'vin_sn': repair.vin_sn or False,
+            'fuel_type': repair.fuel_type or False,
+            'service_type': stype.id,
+            'tecnico_status': 'pendiente',
+            'state': line_state,
+        })
+        return {
+            'success': True,
+            'line_id': line.id,
+            'service_name': stype.name,
+            'seq': current_count + 1,
+            'is_new_type': is_new_type,
+        }
+
     @http.route('/my/workshop/order/<int:repair_id>/technician/photos', type='http', auth='user', website=True, methods=['POST'])
     def workshop_technician_photos(self, repair_id, **post):
         repair = self._get_repair(repair_id)
