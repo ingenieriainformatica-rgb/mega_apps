@@ -97,12 +97,12 @@
                         <group>
                             <group>
                                 <field name="name" readonly="state != 'draft'" string="Descripción"/>
-                                <field name="user_id" readonly="state != 'draft'"  options="{'no_create': True, 'no_open':True}"/>
+                                <field name="user_id" readonly="1"  options="{'no_create': True, 'no_open':True}"/>
                                 <field name="service_flow_state" readonly="1"/>
-                                <field name="portal_advisor_id" options="{'no_create': True, 'no_open': True}"/>
-                                <field name="portal_technician_id" options="{'no_create': True, 'no_open': True}"/>
-                                <field name="road_test_user_id" options="{'no_create': True, 'no_open': True}"/>
-                                <field name="purchase_quote_user_id" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="portal_advisor_id" options="{'no_create': True, 'no_open': True}" readonly="1"/>
+                                <field name="portal_technician_id" readonly="1" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="road_test_user_id" readonly="1" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="purchase_quote_user_id" readonly="1" options="{'no_create': True, 'no_open': True}"/>
                                 <field name="confirm_sale_order" invisible="True"/>
                             </group>
                             <group>
