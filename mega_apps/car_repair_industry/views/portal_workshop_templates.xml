@@ -1262,28 +1262,12 @@
                             <button class="accordion-button collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapse-trabajo-tecnico"
                                     aria-expanded="false" aria-controls="collapse-trabajo-tecnico">
-                                <i class="fa fa-tools me-2"></i> Trabajo técnico y evidencias
+                                <i class="fa fa-camera me-2"></i> Evidencias
                             </button>
                         </h2>
                         <div id="collapse-trabajo-tecnico" class="accordion-collapse collapse"
                              aria-labelledby="heading-trabajo-tecnico">
                             <div class="accordion-body">
-                                <h2 class="h5">Trabajo técnico</h2>
-                                <form t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post">
-                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                    <label class="form-label">Observación técnica / avance</label>
-                                    <textarea name="technical_observation" class="form-control mb-3" rows="4"><t t-esc="repair.technical_observation or ''"/></textarea>
-                                    <label class="form-label">Materiales o repuestos requeridos</label>
-                                    <textarea name="requested_materials" class="form-control mb-3" rows="4"><t t-esc="repair.requested_materials or ''"/></textarea>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <button name="action" value="start" class="btn btn-primary" type="submit">Iniciar trabajo</button>
-                                        <button name="action" value="save" class="btn btn-secondary" type="submit">Guardar avance</button>
-                                        <button name="action" value="request_road_test" class="btn btn-warning" type="submit">Solicitar prueba de ruta</button>
-                                        <button name="action" value="send_purchase" class="btn btn-success" type="submit">Remitir a compras/cotizaciones</button>
-                                    </div>
-                                </form>
-
-                                <hr class="my-4"/>
                                 <h3 class="h6">Evidencias del técnico</h3>
                                 <p class="small text-muted">
                                     Sube fotos del diagnóstico o de la reparación. Se almacenan en Google Drive y aparecen en la galería inferior.
