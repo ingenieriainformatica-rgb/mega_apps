@@ -167,11 +167,9 @@ class CarRepairPortalWorkshop(http.Controller):
             return request.render('car_repair_industry.portal_workshop_forbidden', {})
 
         Template = request.env['fleet.repair.reception.checklist.template'].sudo()
-        ServiceType = request.env['service.type'].sudo()
         VehicleModel = request.env['fleet.vehicle.model'].sudo()
         VehicleBrand = request.env['fleet.vehicle.model.brand'].sudo()
         templates = Template.search([('active', '=', True)], order='name')
-        service_types = ServiceType.search([], order='name')
         vehicle_models = VehicleModel.search([], order='name')
         vehicle_brands = VehicleBrand.search([], order='name')
         renting_partner = request.env['fleet.repair'].sudo()._find_renting_partner()
@@ -185,11 +183,28 @@ class CarRepairPortalWorkshop(http.Controller):
         return request.render('car_repair_industry.portal_workshop_order_form', {
             'templates': templates,
             'selected_template': selected_template,
-            'service_types': service_types,
             'vehicle_models': vehicle_models,
             'vehicle_brands': vehicle_brands,
             'renting_partner': renting_partner,
         })
+
+    @http.route('/my/workshop/service-search', type='http', auth='user', website=True, methods=['GET'])
+    def workshop_service_search(self, q='', **kwargs):
+        if not (self._is_advisor() or self._is_internal_manager()):
+            return request.make_response(
+                json.dumps([]),
+                headers=[('Content-Type', 'application/json')],
+            )
+        q = (q or '').strip()
+        domain = [('name', 'ilike', q)] if q else []
+        results = request.env['service.type'].sudo().search(
+            domain, order='name asc', limit=15
+        )
+        data = [{'id': r.id, 'name': r.name} for r in results]
+        return request.make_response(
+            json.dumps(data),
+            headers=[('Content-Type', 'application/json')],
+        )
 
     def _prepare_reception_photo_files(self):
         Repair = request.env['fleet.repair'].sudo()

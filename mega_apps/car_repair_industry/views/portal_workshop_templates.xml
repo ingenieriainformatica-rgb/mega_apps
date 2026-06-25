@@ -506,34 +506,52 @@
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label">Servicios solicitados <span class="text-danger">*</span></label>
-                                <p class="form-text small text-muted mb-2">Marca todos los servicios que el cliente solicita. El técnico marcará cada uno como vaya completándolo.</p>
-                                <div class="workshop-service-grid" id="service-grid-existing">
-                                    <t t-foreach="service_types" t-as="service">
-                                        <label class="workshop-service-card" t-att-for="'service_type_%s' % service.id">
-                                            <input type="checkbox" name="service_types" t-att-value="service.id" t-att-id="'service_type_%s' % service.id" class="form-check-input"/>
-                                            <i class="fa fa-wrench workshop-service-icon"></i>
-                                            <span class="workshop-service-name" t-esc="service.name"/>
-                                        </label>
-                                    </t>
-                                </div>
-                                <div class="mt-3">
-                                    <label class="form-label small text-muted">¿No encuentras el servicio que necesitas? Agrégalo:</label>
-                                    <div class="input-group input-group-sm" style="max-width: 420px;">
-                                        <input type="text" id="new-service-input" class="form-control" placeholder="Nombre del nuevo servicio..."/>
-                                        <button type="button" class="btn btn-outline-secondary" id="btn-add-service">
-                                            <i class="fa fa-plus"></i> Agregar
-                                        </button>
+                                <p class="form-text small text-muted mb-2">Busca y selecciona los servicios que el cliente solicita. El técnico marcará cada uno a medida que lo completa.</p>
+                                <div class="js-workshop-service-selector">
+                                    <div class="position-relative">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white border-end-0">
+                                                <i class="fa fa-search text-muted"/>
+                                            </span>
+                                            <input type="text" id="service-search-input"
+                                                   class="form-control border-start-0"
+                                                   placeholder="Buscar servicio (ej: cambio de aceite, frenos)..."
+                                                   autocomplete="off"/>
+                                        </div>
+                                        <div id="service-search-dropdown" class="dropdown-menu w-100 shadow-sm"
+                                             style="display:none;position:absolute;z-index:1050;max-height:240px;overflow-y:auto;"/>
                                     </div>
-                                    <div class="workshop-service-grid mt-2" id="new-services-container"></div>
+                                    <div id="service-selected-chips" class="d-flex flex-wrap gap-2 mt-2" style="min-height:34px;"/>
+                                    <p id="service-empty-msg" class="small text-muted mt-1 mb-0">
+                                        <i class="fa fa-info-circle me-1"/>Escribe para buscar y seleccionar uno o más servicios.
+                                    </p>
+                                    <div id="service-error-msg" class="text-danger small mt-1 d-none">
+                                        <i class="fa fa-exclamation-circle me-1"/>Debe seleccionar al menos un servicio.
+                                    </div>
+                                    <div id="service-hidden-inputs"/>
+                                    <div class="mt-2 pt-2 border-top">
+                                        <small class="text-muted">
+                                            <i class="fa fa-plus-circle me-1"/>¿No encuentras el servicio? Agrégalo:
+                                        </small>
+                                        <div class="input-group input-group-sm mt-1" style="max-width:440px;">
+                                            <input type="text" id="new-service-input" class="form-control"
+                                                   placeholder="Nombre del nuevo servicio..."/>
+                                            <button type="button" id="btn-add-new-service"
+                                                    class="btn btn-outline-secondary">
+                                                <i class="fa fa-plus me-1"/>Agregar
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Plantilla checklist</label>
-                                <select name="template_id" class="form-select">
+                                <select class="form-select" disabled="disabled">
                                     <option t-foreach="templates" t-as="template" t-att-value="template.id"
                                             t-att-selected="'selected' if selected_template and template.id == selected_template.id else None"
                                             t-esc="template.name"/>
                                 </select>
+                                <input type="hidden" name="template_id" t-att-value="selected_template.id if selected_template else ''"/>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Motivo de ingreso <span class="text-danger">*</span></label>

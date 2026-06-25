@@ -221,60 +221,213 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
     },
 });
 
-publicWidget.registry.WorkshopServiceAdd = publicWidget.Widget.extend({
-    selector: ".js-workshop-reception-form",
-    events: {
-        "click #btn-add-service": "_onAddService",
-        "click .js-remove-new-service": "_onRemoveService",
+publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
+    selector: ".js-workshop-service-selector",
+
+    start() {
+        this._selectedIds = [];   // [{id, name}]  — existing service.type records
+        this._newNames = [];      // [string]       — new names to create on submit
+        this._debounce = null;
+
+        this._searchInput  = this.el.querySelector("#service-search-input");
+        this._dropdown     = this.el.querySelector("#service-search-dropdown");
+        this._chipsEl      = this.el.querySelector("#service-selected-chips");
+        this._hiddenEl     = this.el.querySelector("#service-hidden-inputs");
+        this._emptyMsg     = this.el.querySelector("#service-empty-msg");
+        this._errorMsg     = this.el.querySelector("#service-error-msg");
+        this._newInput     = this.el.querySelector("#new-service-input");
+        this._newBtn       = this.el.querySelector("#btn-add-new-service");
+
+        this._searchInput.addEventListener("input",   () => this._onSearchInput());
+        this._searchInput.addEventListener("focus",   () => this._onSearchInput());
+        this._searchInput.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") this._closeDropdown();
+        });
+        this._newBtn.addEventListener("click", () => this._onAddNew());
+        this._newInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); this._onAddNew(); }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!this.el.contains(e.target)) this._closeDropdown();
+        });
+
+        const form = this.el.closest("form");
+        if (form) {
+            form.addEventListener("submit", (e) => {
+                if (this._selectedIds.length === 0 && this._newNames.length === 0) {
+                    e.preventDefault();
+                    this._errorMsg.classList.remove("d-none");
+                    this.el.scrollIntoView({ behavior: "smooth", block: "center" });
+                } else {
+                    this._errorMsg.classList.add("d-none");
+                }
+            });
+        }
+
+        return this._super(...arguments);
     },
 
-    _onAddService() {
-        const input = this.el.querySelector("#new-service-input");
-        const name = (input.value || "").trim();
-        if (!name) {
-            input.classList.add("is-invalid");
-            return;
-        }
-        input.classList.remove("is-invalid");
+    _onSearchInput() {
+        clearTimeout(this._debounce);
+        const q = this._searchInput.value.trim();
+        this._debounce = setTimeout(() => this._fetchServices(q), q ? 250 : 0);
+    },
 
-        const container = this.el.querySelector("#new-services-container");
-        for (const hidden of container.querySelectorAll("[name='new_service_names']")) {
-            if (hidden.value.toLowerCase() === name.toLowerCase()) {
-                input.value = "";
-                return;
+    async _fetchServices(q) {
+        try {
+            const resp = await fetch(
+                `/my/workshop/service-search?q=${encodeURIComponent(q)}`,
+                { headers: { "X-Requested-With": "XMLHttpRequest" } }
+            );
+            if (!resp.ok) return;
+            const items = await resp.json();
+            this._renderDropdown(items);
+        } catch { /* silent */ }
+    },
+
+    _renderDropdown(items) {
+        this._dropdown.replaceChildren();
+        if (!items || items.length === 0) {
+            const el = document.createElement("div");
+            el.className = "dropdown-item text-muted small disabled py-2";
+            el.textContent = "Sin resultados";
+            this._dropdown.appendChild(el);
+        } else {
+            for (const item of items) {
+                const isSelected = this._selectedIds.some(s => s.id === item.id);
+                const a = document.createElement("a");
+                a.className = "dropdown-item py-2" + (isSelected ? " text-muted" : "");
+                a.href = "#";
+                a.innerHTML = `<i class="fa fa-wrench me-1 text-secondary"></i>${this._esc(item.name)}`
+                    + (isSelected ? ` <i class="fa fa-check text-success ms-1 float-end"></i>` : "");
+                a.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                    this._selectExisting(item.id, item.name);
+                });
+                this._dropdown.appendChild(a);
             }
         }
-
-        const label = document.createElement("label");
-        label.className = "workshop-service-card";
-
-        const hidden = document.createElement("input");
-        hidden.type = "hidden";
-        hidden.name = "new_service_names";
-        hidden.value = name;
-
-        const icon = document.createElement("i");
-        icon.className = "fa fa-plus-circle workshop-service-icon text-success";
-
-        const span = document.createElement("span");
-        span.className = "workshop-service-name";
-        span.textContent = name;
-
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "js-remove-new-service btn btn-link text-danger p-0 mt-1";
-        btn.style.fontSize = "0.75rem";
-        btn.title = "Eliminar";
-        btn.innerHTML = '<i class="fa fa-times"></i> Quitar';
-
-        label.append(hidden, icon, span, btn);
-        container.appendChild(label);
-        input.value = "";
+        this._dropdown.style.display = "block";
     },
 
-    _onRemoveService(ev) {
-        ev.preventDefault();
-        ev.currentTarget.closest(".workshop-service-card").remove();
+    _closeDropdown() {
+        this._dropdown.style.display = "none";
+        this._dropdown.replaceChildren();
+    },
+
+    _selectExisting(id, name) {
+        if (!this._selectedIds.some(s => s.id === id)) {
+            this._selectedIds.push({ id, name });
+            this._sync();
+        }
+        this._searchInput.value = "";
+        this._closeDropdown();
+    },
+
+    _removeExisting(id) {
+        this._selectedIds = this._selectedIds.filter(s => s.id !== id);
+        this._sync();
+    },
+
+    _removeNew(name) {
+        this._newNames = this._newNames.filter(n => n !== name);
+        this._sync();
+    },
+
+    _sync() {
+        this._renderChips();
+        this._renderHiddenInputs();
+        const total = this._selectedIds.length + this._newNames.length;
+        this._emptyMsg.style.display = total ? "none" : "";
+        if (total > 0) this._errorMsg.classList.add("d-none");
+    },
+
+    _renderChips() {
+        this._chipsEl.replaceChildren();
+        for (const { id, name } of this._selectedIds) {
+            this._chipsEl.appendChild(this._buildChip(name, false, () => this._removeExisting(id)));
+        }
+        for (const name of this._newNames) {
+            this._chipsEl.appendChild(this._buildChip(name, true, () => this._removeNew(name)));
+        }
+    },
+
+    _buildChip(label, isNew, onRemove) {
+        const chip = document.createElement("span");
+        chip.className = `badge rounded-pill d-inline-flex align-items-center gap-1 py-2 px-3 ${isNew ? "bg-success" : "bg-primary"}`;
+        chip.style.fontSize = "0.82rem";
+        const icon = document.createElement("i");
+        icon.className = "fa fa-wrench";
+        const text = document.createElement("span");
+        text.textContent = label + (isNew ? " ✦" : "");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-close btn-close-white ms-1";
+        btn.style.cssText = "font-size:0.55rem;opacity:0.8;";
+        btn.setAttribute("aria-label", "Quitar");
+        btn.addEventListener("click", onRemove);
+        chip.append(icon, text, btn);
+        return chip;
+    },
+
+    _renderHiddenInputs() {
+        this._hiddenEl.replaceChildren();
+        for (const { id } of this._selectedIds) {
+            const inp = document.createElement("input");
+            inp.type = "hidden";
+            inp.name = "service_types";
+            inp.value = id;
+            this._hiddenEl.appendChild(inp);
+        }
+        for (const name of this._newNames) {
+            const inp = document.createElement("input");
+            inp.type = "hidden";
+            inp.name = "new_service_names";
+            inp.value = name;
+            this._hiddenEl.appendChild(inp);
+        }
+    },
+
+    async _onAddNew() {
+        const name = (this._newInput.value || "").trim();
+        if (!name) { this._newInput.classList.add("is-invalid"); return; }
+        this._newInput.classList.remove("is-invalid");
+        this._newBtn.disabled = true;
+        try {
+            // Duplicate check among already selected
+            const lc = name.toLowerCase();
+            if (this._selectedIds.some(s => s.name.toLowerCase() === lc) ||
+                this._newNames.some(n => n.toLowerCase() === lc)) {
+                this._newInput.value = "";
+                return;
+            }
+            // Try exact match in catalog first
+            const resp = await fetch(
+                `/my/workshop/service-search?q=${encodeURIComponent(name)}`,
+                { headers: { "X-Requested-With": "XMLHttpRequest" } }
+            );
+            if (resp.ok) {
+                const items = await resp.json();
+                const match = items.find(i => i.name.toLowerCase() === lc);
+                if (match) {
+                    this._selectExisting(match.id, match.name);
+                    this._newInput.value = "";
+                    return;
+                }
+            }
+            // No exact match → mark as new (created server-side on submit)
+            this._newNames.push(name);
+            this._sync();
+            this._newInput.value = "";
+        } catch { /* silent */ }
+        finally { this._newBtn.disabled = false; }
+    },
+
+    _esc(str) {
+        return String(str || "")
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     },
 });
 
