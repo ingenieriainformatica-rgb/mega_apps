@@ -560,100 +560,9 @@
                         </div>
                     </div>
 
-                    <div class="workshop-form-section">
-                        <div class="workshop-form-section-header">
-                            <div class="workshop-form-section-number">5</div>
-                            <div>
-                                <h2 class="workshop-form-section-title">Persona que entrega el vehículo</h2>
-                                <p class="workshop-form-section-subtitle">Datos de quien hace la entrega física</p>
-                            </div>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Nombre</label>
-                                <input name="delivered_by_name" class="form-control" placeholder="Nombre completo"/>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Celular</label>
-                                <input name="delivered_by_phone" class="form-control" placeholder="300 123 4567"/>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Documento</label>
-                                <input name="delivered_by_document" class="form-control" placeholder="CC / NIT"/>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Correo</label>
-                                <input name="delivered_by_email" type="email" class="form-control" placeholder="correo@ejemplo.com"/>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Observaciones de quien entrega</label>
-                                <textarea name="delivered_by_observation" class="form-control" rows="2" placeholder="Información adicional relevante..."></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="workshop-form-section">
-                        <div class="workshop-form-section-header">
-                            <div class="workshop-form-section-number">6</div>
-                            <div>
-                                <h2 class="workshop-form-section-title">Pertenencias y documentos</h2>
-                                <p class="workshop-form-section-subtitle">Objetos de valor y documentos recibidos</p>
-                            </div>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">¿Tiene objetos de valor?</label>
-                                <select name="valuables_inside" class="form-select">
-                                    <option value="">Seleccione...</option>
-                                    <option value="no">No</option>
-                                    <option value="yes">Sí</option>
-                                </select>
-                            </div>
-                            <div class="col-md-8">
-                                <label class="form-label">Pertenencias / objetos de valor</label>
-                                <input name="valuables_description" class="form-control" placeholder="Ej. Celular, billetera, documentos..."/>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Documentos recibidos</label>
-                                <textarea name="received_documents" class="form-control" rows="2" placeholder="Tarjeta de propiedad, SOAT, etc."></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Observaciones generales de recepción</label>
-                                <textarea name="reception_general_observations" class="form-control" rows="2" placeholder="Novedad al recibir el vehículo..."></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="workshop-form-section">
-                        <div class="workshop-form-section-header">
-                            <div class="workshop-form-section-number">7</div>
-                            <div>
-                                <h2 class="workshop-form-section-title">Evidencias fotográficas</h2>
-                                <p class="workshop-form-section-subtitle">Las imágenes se almacenan en Google Drive</p>
-                            </div>
-                            <span class="badge text-bg-light js-workshop-photo-count ms-auto align-self-center">0 fotos</span>
-                        </div>
-                        <section class="workshop-photo-uploader">
-                            <label class="workshop-photo-dropzone" for="reception_photos">
-                                <i class="fa fa-camera" aria-hidden="true"></i>
-                                <span class="fw-semibold">Seleccionar fotos</span>
-                                <small>JPG, PNG o WEBP. Puedes elegir varias.</small>
-                            </label>
-                            <input id="reception_photos" name="reception_photos" type="file"
-                                   class="visually-hidden js-workshop-photo-input" multiple="multiple"
-                                   accept="image/jpeg,image/png,image/webp"/>
-                            <div class="row g-3 mt-1 js-workshop-photo-preview"></div>
-                            <div class="mt-3">
-                                <label class="form-label" for="photo_description">Descripción del lote</label>
-                                <textarea id="photo_description" name="photo_description" class="form-control"
-                                          rows="2" placeholder="Observación común para estas evidencias"></textarea>
-                            </div>
-                        </section>
-                    </div>
-
                     <div t-if="selected_template" class="workshop-form-section">
                         <div class="workshop-form-section-header">
-                            <div class="workshop-form-section-number">8</div>
+                            <div class="workshop-form-section-number">5</div>
                             <div>
                                 <h2 class="workshop-form-section-title">Checklist de diagnóstico / recepción</h2>
                                 <p class="workshop-form-section-subtitle">Plantilla: <strong t-esc="selected_template.name"/></p>
@@ -696,6 +605,65 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+
+                    <div class="workshop-form-section">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">6</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Persona que entrega el vehículo</h2>
+                                <p class="workshop-form-section-subtitle">Datos de quien hace la entrega física</p>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Nombre</label>
+                                <input name="delivered_by_name" class="form-control" placeholder="Nombre completo"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Celular</label>
+                                <input name="delivered_by_phone" class="form-control" placeholder="300 123 4567"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Documento</label>
+                                <input name="delivered_by_document" class="form-control" placeholder="CC / NIT"/>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Correo</label>
+                                <input name="delivered_by_email" type="email" class="form-control" placeholder="correo@ejemplo.com"/>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Observaciones de quien entrega</label>
+                                <textarea name="delivered_by_observation" class="form-control" rows="2" placeholder="Información adicional relevante..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workshop-form-section">
+                        <div class="workshop-form-section-header">
+                            <div class="workshop-form-section-number">7</div>
+                            <div>
+                                <h2 class="workshop-form-section-title">Evidencias fotográficas</h2>
+                                <p class="workshop-form-section-subtitle">Las imágenes se almacenan en Google Drive</p>
+                            </div>
+                            <span class="badge text-bg-light js-workshop-photo-count ms-auto align-self-center">0 fotos</span>
+                        </div>
+                        <section class="workshop-photo-uploader">
+                            <label class="workshop-photo-dropzone" for="reception_photos">
+                                <i class="fa fa-camera" aria-hidden="true"></i>
+                                <span class="fw-semibold">Seleccionar fotos</span>
+                                <small>JPG, PNG o WEBP. Puedes elegir varias.</small>
+                            </label>
+                            <input id="reception_photos" name="reception_photos" type="file"
+                                   class="visually-hidden js-workshop-photo-input" multiple="multiple"
+                                   accept="image/jpeg,image/png,image/webp"/>
+                            <div class="row g-3 mt-1 js-workshop-photo-preview"></div>
+                            <div class="mt-3">
+                                <label class="form-label" for="photo_description">Descripción del lote</label>
+                                <textarea id="photo_description" name="photo_description" class="form-control"
+                                          rows="2" placeholder="Observación común para estas evidencias"></textarea>
+                            </div>
+                        </section>
                     </div>
 
                     <div class="workshop-form-actionbar">

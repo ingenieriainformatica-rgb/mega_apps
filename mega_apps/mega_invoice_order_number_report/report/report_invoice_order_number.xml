@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Hereda account.report_invoice_document para mostrar N° orden en el PDF.
+        Se inserta antes de la tabla de líneas (o_main_table), en la misma zona
+        visual donde mega_sale_invoice_vehicle_map muestra el campo Vehículo.
+        Solo se renderiza cuando x_order_number tiene valor.
+    -->
+    <template id="report_invoice_order_number"
+              inherit_id="account.report_invoice_document">
+        <xpath expr="//table[contains(@class, 'o_main_table')]" position="before">
+            <div t-if="o.customer_order_ref" style="margin-bottom: 5px;">
+                <strong>N° orden: </strong>
+                <span t-esc="o.customer_order_ref"/>
+            </div>
+        </xpath>
+    </template>
+</odoo>

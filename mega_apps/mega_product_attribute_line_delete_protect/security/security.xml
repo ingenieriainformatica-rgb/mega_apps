@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="group_product_attribute_line_manager" model="res.groups">
+        <field name="name">Administrador de atributos de producto</field>
+        <field name="category_id" ref="base.module_category_inventory"/>
+        <field name="comment">
+            Permite eliminar líneas de atributos desde la pestaña
+            "Atributos y variantes" del producto.
+        </field>
+    </record>
+
+</odoo>

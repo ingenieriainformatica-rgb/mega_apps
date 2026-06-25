@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Vista única heredada:
+        1. Desactiva la caneca nativa (delete="0") para TODOS los usuarios.
+        2. Agrega un botón trash explícito con groups="...manager" dentro del arch.
+           El servidor filtra este elemento: solo lo incluye para usuarios del grupo.
+        Nota: las vistas heredadas (mode='extension') NO pueden tener groups_id en el
+        registro ir.ui.view; el atributo groups debe ir dentro del arch del elemento.
+    -->
+    <record id="view_product_template_attribute_line_protect_delete"
+            model="ir.ui.view">
+        <field name="name">product.template.attribute.line.protect.delete</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+
+            <!-- Desactiva la caneca nativa para todos -->
+            <xpath expr="//field[@name='attribute_line_ids']/list"
+                   position="attributes">
+                <attribute name="delete">0</attribute>
+            </xpath>
+
+            <!-- Agrega botón trash solo visible para administradores de atributos.
+                 El atributo groups en el elemento hace que el servidor lo elimine
+                 del arch antes de enviarlo a usuarios sin ese grupo. -->
+            <xpath expr="//field[@name='attribute_line_ids']/list"
+                   position="inside">
+                <button name="action_unlink_protected"
+                        type="object"
+                        icon="fa-trash"
+                        string=""
+                        title="Eliminar línea de atributo"
+                        class="btn-link text-danger"
+                        groups="mega_product_attribute_line_delete_protect.group_product_attribute_line_manager"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

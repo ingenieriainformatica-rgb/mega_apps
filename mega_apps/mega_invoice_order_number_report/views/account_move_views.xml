@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Agrega el campo N° orden en el formulario de factura.
+        Se ancla en invoice_date del grupo derecho del encabezado,
+        igual que el campo Vehículo de mega_sale_invoice_vehicle_map.
+        Solo visible para facturas de cliente.
+    -->
+    <record id="view_move_form_inherit_order_number" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.order.number</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_date']" position="after">
+                <label for="customer_order_ref" string="N° orden"
+                       invisible="move_type not in ('out_invoice', 'out_refund', 'out_receipt')"/>
+                <field name="customer_order_ref" nolabel="1"
+                       invisible="move_type not in ('out_invoice', 'out_refund', 'out_receipt')"
+                       placeholder="Ej: OC-2025-001"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
