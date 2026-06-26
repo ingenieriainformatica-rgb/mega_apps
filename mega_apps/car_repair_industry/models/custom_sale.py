@@ -156,7 +156,7 @@ class AccountInvoice(models.Model):
 
                 if sale_obj and sale_obj.workorder_id and sale_obj.workorder_id.fleet_repair_id:
                     vals.update({'create_form_fleet': True})
-                    repair_obj = self.env['fleet.repair.line'].browse(sale_obj.workorder_id.fleet_repair_line.id)
+                    repair_obj = sale_obj.workorder_id.fleet_repair_id
                     for line_vals in invoice_line_ids:
                         car_model = line_vals[2].get('car_model')
                         license_plate = line_vals[2].get('license_plate')
