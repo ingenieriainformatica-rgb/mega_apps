@@ -6,15 +6,8 @@
         <field name="inherit_id" ref="base.view_users_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='access_rights']" position="inside">
-                <group string="Tipo de usuario (Taller)" name="car_repair_user_type_group"
-                       invisible="context.get('default_share') == False and id == uid">
-                    <field name="car_repair_user_type" widget="radio"/>
-                    <div class="text-muted" colspan="2">
-                        <p>Reemplaza al selector USER TYPE de Odoo (visible solo para superusuarios).
-                           Define si el usuario es interno (acceso al backend) o portal (acceso al portal frontend).</p>
-                    </div>
-                </group>
-                <group string="Taller de autos" groups="base.group_system" name="car_repair_portal_profile_group">
+                <group string="Taller de autos" name="car_repair_portal_profile_group"
+                       invisible="not share">
                     <field name="car_repair_portal_profile" widget="radio"/>
                 </group>
             </xpath>
