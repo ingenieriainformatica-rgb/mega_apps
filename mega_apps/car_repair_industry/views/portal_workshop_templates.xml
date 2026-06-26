@@ -76,7 +76,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-6 col-md-4 col-xl-2 d-none">
                         <a t-att-href="'/my/workshop?filter=purchase'" t-att-class="'workshop-stat-card workshop-stat-purchase h-100' + (' is-active' if active_filter == 'purchase' else '')">
                             <div class="workshop-stat-icon"><i class="fa fa-shopping-cart"></i></div>
                             <div>
@@ -109,7 +109,7 @@
                         <i class="fa fa-road"></i> Ruta
                     </a>
                     <a t-att-href="'/my/workshop?filter=purchase'"
-                       t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'purchase' else '')">
+                       t-att-class="'workshop-filter-pill d-none' + (' is-active' if active_filter == 'purchase' else '')">
                         <i class="fa fa-shopping-cart"></i> Compras
                     </a>
                 </div>

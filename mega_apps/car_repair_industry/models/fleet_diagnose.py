@@ -217,29 +217,52 @@ class FleetDiagnose(models.Model):
         """Crear cotización desde el diagnóstico de taller."""
         self.ensure_one()
 
-        act_obj = self.env['ir.actions.act_window']
-
         # ------------------------
         # 1) Validaciones previas
         # ------------------------
         lines = self.fleet_repair_line
 
-        # Debe existir al menos una línea con productos
         if not any(line.spare_part_ids for line in lines):
             raise UserError(_(
                 "No es posible crear una cotización porque ninguna línea de "
                 "diagnóstico tiene productos asociados."
             ))
 
-        # Tomamos el almacén de la primera línea
         warehouse = lines[:1].warehouse_id
         if not warehouse:
             raise UserError(_("Debes seleccionar el almacén."))
 
+        # -------------------------------------------------------
+        # 2) Recolectar líneas válidas ANTES de crear la SO
+        #    - Requiere product_id y quantity > 0
+        #    - No depende del campo guarantee
+        # -------------------------------------------------------
+        valid_parts = []
+        has_zero_qty = False
+
+        for fleet_line in lines:
+            for part_line in fleet_line.spare_part_ids:
+                if not part_line.product_id:
+                    continue
+                if part_line.quantity <= 0:
+                    has_zero_qty = True
+                    continue
+                valid_parts.append(part_line)
+
+        if not valid_parts and has_zero_qty:
+            raise UserError(_(
+                "No es posible crear la cotización porque los repuestos/servicios "
+                "tienen cantidad 0. Debe ingresar una cantidad mayor a cero."
+            ))
+
+        if not valid_parts:
+            raise UserError(_(
+                "No es posible crear la cotización: no se encontraron productos "
+                "con cantidad mayor a cero en las líneas de diagnóstico."
+            ))
+
         # ------------------------------------------------
-        # 2) Datos del vehículo y descripción de la orden
-        #    - Descripción: [Placa - Modelo] | ... - Concepto
-        #    - Campos estructurados: vehicle_plate / vehicle_model_id
+        # 3) Datos del vehículo y descripción de la orden
         # ------------------------------------------------
         vehicle_parts = []
         vehicle_plate = ''
@@ -248,24 +271,17 @@ class FleetDiagnose(models.Model):
         for idx, line in enumerate(lines):
             placa = line.license_plate or ''
             modelo_name = line.model_id.display_name if line.model_id else ''
-
-            # Para la descripción (puede haber varios vehículos)
             if placa or modelo_name:
                 vehicle_parts.append("%s - %s" % (placa, modelo_name))
-
-            # Para los campos de la orden tomamos el primer vehículo
             if idx == 0:
                 vehicle_plate = placa
                 vehicle_model = line.model_id
 
         vehicle_desc = " | ".join(vehicle_parts)
-        if vehicle_desc:
-            description = "%s - %s" % (vehicle_desc, self.name or '')
-        else:
-            description = self.name or ''
+        description = ("%s - %s" % (vehicle_desc, self.name or '')) if vehicle_desc else (self.name or '')
 
         # ------------------------------
-        # 3) Crear la orden de venta
+        # 4) Crear la orden de venta
         # ------------------------------
         quote_vals = {
             'partner_id': self.client_id.id or False,
@@ -280,7 +296,6 @@ class FleetDiagnose(models.Model):
 
         order = self.env['sale.order'].create(quote_vals)
 
-        # Vincular orden de reparación con la SO
         if self.fleet_repair_id:
             self.fleet_repair_id.write({
                 'state': 'diagnosis_complete',
@@ -288,36 +303,29 @@ class FleetDiagnose(models.Model):
             })
 
         # -----------------------------------------
-        # 4) Crear líneas de venta desde repuestos
+        # 5) Crear líneas de venta desde repuestos
         # -----------------------------------------
-        service_hour = 0.0
-
-        for fleet_line in lines:
-            # Sumar horas solamente para líneas relevantes
-            if fleet_line.guarantee in ('yes', 'no'):
-                service_hour += fleet_line.est_ser_hour or 0.0
-
-                for part_line in fleet_line.spare_part_ids:
-                    line_vals = {
-                        'product_id': part_line.product_id.id,
-                        'name': part_line.product_id.display_name,
-                        'product_uom_qty': part_line.quantity,
-                        'product_uom': part_line.product_id.uom_id.id,
-                        # 'price_unit': part_line.price_unit,
-                        'order_id': order.id,
-                        # Si luego quieres, aquí puedes volver a usar
-                        # placa / modelo por línea en campos x_*
-                    }
-                    self.env['sale.order.line'].create(line_vals)
+        for part_line in valid_parts:
+            uom_id = (part_line.uom_id.id if part_line.uom_id
+                      else part_line.product_id.uom_id.id)
+            line_vals = {
+                'product_id': part_line.product_id.id,
+                'name': part_line.product_id.display_name,
+                'product_uom_qty': part_line.quantity,
+                'product_uom': uom_id,
+                'order_id': order.id,
+            }
+            if part_line.price_unit:
+                line_vals['price_unit'] = part_line.price_unit
+            self.env['sale.order.line'].create(line_vals)
 
         # -----------------------------------
-        # 5) Abrir la SO en vista formulario
+        # 6) Abrir la SO en vista formulario
         # -----------------------------------
         action = self.env.ref('sale.action_orders').read()[0]
         action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
         action['res_id'] = order.id
 
-        # Marcar diagnóstico como finalizado y enlazar SO
         self.write({
             'sale_order_id': order.id,
             'state': 'done',

@@ -178,7 +178,7 @@ class CarRepairPortalWorkshop(http.Controller):
         if request.httprequest.method == 'POST':
             validated_files = self._prepare_reception_photo_files()
             repair = self._create_portal_repair(post, selected_template, validated_files)
-            return request.redirect('/my/workshop/order/%s' % repair.id)
+            return request.redirect('/my/workshop')
 
         return request.render('car_repair_industry.portal_workshop_order_form', {
             'templates': templates,
@@ -354,8 +354,20 @@ class CarRepairPortalWorkshop(http.Controller):
                 if existing.id not in service_type_ids:
                     service_type_ids.append(existing.id)
             else:
-                new_st = ServiceTypeModel.create({'name': name})
-                service_type_ids.append(new_st.id)
+                try:
+                    with request.env.cr.savepoint():
+                        new_st = ServiceTypeModel.create({'name': name})
+                    service_type_ids.append(new_st.id)
+                except Exception:
+                    # Race condition: another concurrent request created the same
+                    # service type between our search and our insert.
+                    # Re-search and reuse the existing record.
+                    fallback = ServiceTypeModel.search([('name', '=ilike', name)], limit=1)
+                    if fallback:
+                        if fallback.id not in service_type_ids:
+                            service_type_ids.append(fallback.id)
+                    else:
+                        raise
 
         if not service_type_ids:
             raise UserError(_("Debe seleccionar al menos un servicio."))

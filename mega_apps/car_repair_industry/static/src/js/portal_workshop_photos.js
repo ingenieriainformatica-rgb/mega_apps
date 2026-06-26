@@ -261,6 +261,11 @@ publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
                     this.el.scrollIntoView({ behavior: "smooth", block: "center" });
                 } else {
                     this._errorMsg.classList.add("d-none");
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Creando orden...';
+                    }
                 }
             });
         }
