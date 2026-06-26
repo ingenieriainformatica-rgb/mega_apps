@@ -5,7 +5,7 @@
     "name": "Mega - Taller",
     "version": "1.0",
     "depends": ['base', 'sale', 'purchase', 'account', 'sale_stock', 'mail', 'product', 'stock', 'fleet','sale_management', 'website', 'calendar', 'hr_timesheet','web'],
-    "author": "BROWSEINFO",
+    "author": "Jorge Alberto Quiroz Sierra",
     "summary": "Fleet repair vehicle repair car Maintenance auto-fleet service repair Car Maintenance Repair workshop automobile repair Automotive Service repair Automotive repair machine repair workshop equipment repair service Repair auto repair shop Auto Shop repair",
     "description": """
         Repairs Management
@@ -22,8 +22,8 @@
     """,
     'category': 'MegaTecnicentro/Taller',
     'price': 129,
-    'currency': "EUR",
-    "website": "https://www.browseinfo.com/demo-request?app=car_repair_industry&version=19&edition=Community",
+    'currency': "COP",
+    "website": "https://megatecnicentro.com/",
     "data": [
         'security/fleet_repair_security.xml',
         'security/security.xml',
@@ -89,5 +89,5 @@
     'live_test_url': 'https://www.browseinfo.com/demo-request?app=car_repair_industry&version=19&edition=Community',
     "images": ['static/description/Banner.gif'],
     "license": 'OPL-1',
-}
+} # type:ignore
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

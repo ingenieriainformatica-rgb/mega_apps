@@ -10,7 +10,7 @@
               inherit_id="account.report_invoice_document">
         <xpath expr="//table[contains(@class, 'o_main_table')]" position="before">
             <div t-if="o.customer_order_ref" style="margin-bottom: 5px;">
-                <strong>N° orden: </strong>
+                <strong>N°: </strong>
                 <span t-esc="o.customer_order_ref"/>
             </div>
         </xpath>
