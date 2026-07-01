@@ -133,6 +133,28 @@
                             color: #adb5bd;
                             font-size: 10px;
                         }
+                        .cl-estado {
+                            text-align: center;
+                            font-size: 8px;
+                            font-weight: 700;
+                            width: 14%;
+                        }
+                        .cl-estado.is-good {
+                            background: #d1e7dd;
+                            color: #0f5132;
+                        }
+                        .cl-estado.is-regular {
+                            background: #fff3cd;
+                            color: #664d03;
+                        }
+                        .cl-estado.is-bad {
+                            background: #f8d7da;
+                            color: #842029;
+                        }
+                        .cl-estado.is-na {
+                            background: #f8f9fa;
+                            color: #6c757d;
+                        }
                         .cl-obs {
                             font-size: 8px;
                             color: #495057;
@@ -246,9 +268,8 @@
                                         <thead>
                                             <tr>
                                                 <th class="cl-num">N°</th>
-                                                <th style="text-align:left; width:42%;">Ítem</th>
-                                                <th class="cl-status-bb">✓ Bueno</th>
-                                                <th class="cl-status-bb">✗ Malo</th>
+                                                <th style="text-align:left; width:48%;">Ítem</th>
+                                                <th class="cl-estado">Estado</th>
                                                 <th style="text-align:left;">Observaciones</th>
                                             </tr>
                                         </thead>
@@ -256,11 +277,11 @@
                                             <tr t-foreach="sec1_lines" t-as="tline">
                                                 <td class="cl-num" t-esc="tline.sequence // 10"/>
                                                 <td t-esc="tline.name"/>
-                                                <td class="cl-status-bb" t-att-class="tline.state == 'good' and 'cl-status-bb is-good' or 'cl-status-bb'">
-                                                    <t t-out="'✓' if tline.state == 'good' else ''"/>
-                                                </td>
-                                                <td class="cl-status-bb" t-att-class="tline.state == 'bad' and 'cl-status-bb is-bad' or 'cl-status-bb'">
-                                                    <t t-out="'✗' if tline.state == 'bad' else ''"/>
+                                                <td t-att-class="'cl-estado is-good' if tline.state == 'good' else 'cl-estado is-regular' if tline.state == 'regular' else 'cl-estado is-bad' if tline.state == 'bad' else 'cl-estado is-na'">
+                                                    <t t-if="tline.state == 'good'">✓ Bueno</t>
+                                                    <t t-elif="tline.state == 'regular'">~ Regular</t>
+                                                    <t t-elif="tline.state == 'bad'">✗ Malo</t>
+                                                    <t t-else="">N/A</t>
                                                 </td>
                                                 <td class="cl-obs" t-esc="tline.observation or ''"/>
                                             </tr>
@@ -274,9 +295,8 @@
                                         <thead>
                                             <tr>
                                                 <th class="cl-num">N°</th>
-                                                <th style="text-align:left; width:42%;">Ítem</th>
-                                                <th class="cl-status-bb">✓ Bueno</th>
-                                                <th class="cl-status-bb">✗ Malo</th>
+                                                <th style="text-align:left; width:48%;">Ítem</th>
+                                                <th class="cl-estado">Estado</th>
                                                 <th style="text-align:left;">Observaciones</th>
                                             </tr>
                                         </thead>
@@ -284,11 +304,11 @@
                                             <tr t-foreach="sec2_lines" t-as="tline">
                                                 <td class="cl-num" t-esc="tline.sequence // 10"/>
                                                 <td t-esc="tline.name"/>
-                                                <td class="cl-status-bb" t-att-class="tline.state == 'good' and 'cl-status-bb is-good' or 'cl-status-bb'">
-                                                    <t t-out="'✓' if tline.state == 'good' else ''"/>
-                                                </td>
-                                                <td class="cl-status-bb" t-att-class="tline.state == 'bad' and 'cl-status-bb is-bad' or 'cl-status-bb'">
-                                                    <t t-out="'✗' if tline.state == 'bad' else ''"/>
+                                                <td t-att-class="'cl-estado is-good' if tline.state == 'good' else 'cl-estado is-regular' if tline.state == 'regular' else 'cl-estado is-bad' if tline.state == 'bad' else 'cl-estado is-na'">
+                                                    <t t-if="tline.state == 'good'">✓ Bueno</t>
+                                                    <t t-elif="tline.state == 'regular'">~ Regular</t>
+                                                    <t t-elif="tline.state == 'bad'">✗ Malo</t>
+                                                    <t t-else="">N/A</t>
                                                 </td>
                                                 <td class="cl-obs" t-esc="tline.observation or ''"/>
                                             </tr>
@@ -305,9 +325,10 @@
                             <thead>
                                 <tr>
                                     <th class="cl-num">N°</th>
-                                    <th style="text-align:left; width:32%;">Parte</th>
-                                    <th style="width:11%;">Prof. IZQ (mm)</th>
-                                    <th style="width:11%;">Prof. DER (mm)</th>
+                                    <th style="text-align:left; width:28%;">Parte</th>
+                                    <th style="width:10%;">IZQ (mm)</th>
+                                    <th style="width:10%;">DER (mm)</th>
+                                    <th class="cl-estado">Estado</th>
                                     <th style="text-align:left;">Observaciones</th>
                                 </tr>
                             </thead>
@@ -317,6 +338,12 @@
                                     <td t-esc="tline.name"/>
                                     <td class="cl-measure" t-esc="tline.measurement_left or '—'"/>
                                     <td class="cl-measure" t-esc="tline.measurement_right or '—'"/>
+                                    <td t-att-class="'cl-estado is-good' if tline.state == 'good' else 'cl-estado is-regular' if tline.state == 'regular' else 'cl-estado is-bad' if tline.state == 'bad' else 'cl-estado is-na'">
+                                        <t t-if="tline.state == 'good'">Bueno</t>
+                                        <t t-elif="tline.state == 'regular'">Regular</t>
+                                        <t t-elif="tline.state == 'bad'">Malo</t>
+                                        <t t-else="">N/A</t>
+                                    </td>
                                     <td class="cl-obs" t-esc="tline.observation or ''"/>
                                 </tr>
                             </tbody>

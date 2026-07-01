@@ -20,6 +20,11 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         "change .js-workshop-photo-category": "_onCategoryChanged",
         "click .js-workshop-photo-remove": "_onRemovePhoto",
         "change .js-workshop-vehicle-brand": "_onVehicleBrandChanged",
+        "input .workshop-input-uppercase": "_onUppercaseInput",
+        "input .js-partner-vat-lookup": "_onVatInput",
+        "input .js-plate-lookup": "_onPlateInput",
+        "change .js-same-person-check": "_onSamePersonCheck",
+        "input [name='client_name'], input [name='client_phone'], input [name='client_email'], input [name='client_vat']": "_onClientFieldChange",
     },
 
     start() {
@@ -114,6 +119,155 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
 
     _onVehicleBrandChanged() {
         this._updateVehicleModels();
+    },
+
+    _onUppercaseInput(ev) {
+        const el = ev.target;
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        el.value = el.value.toUpperCase();
+        if (el.setSelectionRange) {
+            el.setSelectionRange(start, end);
+        }
+    },
+
+    _onSamePersonCheck(ev) {
+        this._syncSamePerson(ev.target.checked);
+    },
+
+    _onClientFieldChange() {
+        const checkbox = this.el.querySelector('.js-same-person-check');
+        if (checkbox && checkbox.checked) {
+            this._syncSamePerson(true);
+        }
+    },
+
+    _syncSamePerson(checked) {
+        const nameEl    = this.el.querySelector('[name="delivered_by_name"]');
+        const phoneEl   = this.el.querySelector('[name="delivered_by_phone"]');
+        const emailEl   = this.el.querySelector('[name="delivered_by_email"]');
+        const docEl     = this.el.querySelector('[name="delivered_by_document"]');
+        const fieldsRow = this.el.querySelector('.js-delivered-by-fields');
+
+        if (checked) {
+            const clientName  = (this.el.querySelector('[name="client_name"]')?.value || '').toUpperCase();
+            const clientPhone = this.el.querySelector('[name="client_phone"]')?.value || '';
+            const clientEmail = this.el.querySelector('[name="client_email"]')?.value || '';
+            const clientVat   = (this.el.querySelector('[name="client_vat"]')?.value || '').toUpperCase();
+
+            if (nameEl)  { nameEl.value  = clientName;  nameEl.readOnly  = true; }
+            if (phoneEl) { phoneEl.value = clientPhone; phoneEl.readOnly = true; }
+            if (emailEl) { emailEl.value = clientEmail; emailEl.readOnly = true; }
+            if (docEl)   { docEl.value   = clientVat;   docEl.readOnly   = true; }
+            if (fieldsRow) fieldsRow.style.opacity = '0.7';
+        } else {
+            if (nameEl)  { nameEl.value  = ''; nameEl.readOnly  = false; }
+            if (phoneEl) { phoneEl.value = ''; phoneEl.readOnly = false; }
+            if (emailEl) { emailEl.value = ''; emailEl.readOnly = false; }
+            if (docEl)   { docEl.value   = ''; docEl.readOnly   = false; }
+            if (fieldsRow) fieldsRow.style.opacity = '1';
+        }
+    },
+
+    _onVatInput(ev) {
+        clearTimeout(this._vatLookupTimer);
+        this._vatLookupTimer = setTimeout(() => this._doVatLookup(ev.target.value), 500);
+    },
+
+    _onPlateInput(ev) {
+        clearTimeout(this._plateLookupTimer);
+        this._plateLookupTimer = setTimeout(() => this._doVehicleLookup(ev.target.value), 600);
+    },
+
+    async _doVehicleLookup(rawPlate) {
+        const plate = (rawPlate || '').trim().toUpperCase();
+        const section = this.el.querySelector('[name="license_plate"]').closest('.workshop-form-section');
+        const statusEl = section && section.querySelector('.js-vehicle-lookup-status');
+        const iconEl = section && section.querySelector('.js-plate-lookup-icon');
+
+        if (plate.length < 4) {
+            if (statusEl) statusEl.innerHTML = '';
+            return;
+        }
+
+        if (iconEl) iconEl.className = 'fa fa-spinner fa-spin';
+        try {
+            const resp = await fetch(`/my/workshop/vehicle-lookup?plate=${encodeURIComponent(plate)}`);
+            const data = await resp.json();
+            if (iconEl) iconEl.className = 'fa fa-search';
+
+            if (data.found) {
+                // Campos de texto simples
+                const textFields = {
+                    model_year: data.model_year,
+                    engine_displacement: data.engine_displacement,
+                    engine_number: data.engine_number,
+                    vin_sn: data.vin_sn,
+                };
+                for (const [name, val] of Object.entries(textFields)) {
+                    const el = this.el.querySelector(`[name="${name}"]`);
+                    if (el && val) el.value = val;
+                }
+
+                // Marca → actualiza opciones de modelo → selecciona modelo
+                if (data.brand_id && this.brandSelect) {
+                    this.brandSelect.value = String(data.brand_id);
+                    this._updateVehicleModels();
+                }
+                if (data.model_id && this.modelSelect) {
+                    this.modelSelect.value = String(data.model_id);
+                }
+
+                // Tipo de combustible
+                if (data.fuel_type) {
+                    const fuelEl = this.el.querySelector('[name="fuel_type"]');
+                    if (fuelEl) fuelEl.value = data.fuel_type;
+                }
+
+                if (statusEl) statusEl.innerHTML =
+                    '<span class="badge bg-success"><i class="fa fa-check me-1"></i>Vehículo encontrado</span>';
+            } else {
+                if (statusEl) statusEl.innerHTML =
+                    '<span class="badge bg-secondary"><i class="fa fa-car me-1"></i>Vehículo nuevo</span>';
+            }
+        } catch (_) {
+            if (iconEl) iconEl.className = 'fa fa-search';
+        }
+    },
+
+    async _doVatLookup(rawVat) {
+        const vat = (rawVat || '').trim().toUpperCase();
+        const section = this.el.querySelector('.js-workshop-particular-fields');
+        const statusEl = section && section.querySelector('.js-vat-lookup-status');
+        const iconEl = section && section.querySelector('.js-vat-lookup-icon');
+
+        if (vat.length < 3) {
+            if (statusEl) statusEl.innerHTML = '';
+            return;
+        }
+
+        if (iconEl) iconEl.className = 'fa fa-spinner fa-spin';
+        try {
+            const resp = await fetch(`/my/workshop/partner-lookup?vat=${encodeURIComponent(vat)}`);
+            const data = await resp.json();
+            if (iconEl) iconEl.className = 'fa fa-search';
+
+            if (data.found) {
+                const nameEl = section.querySelector('[name="client_name"]');
+                const phoneEl = section.querySelector('[name="client_phone"]');
+                const emailEl = section.querySelector('[name="client_email"]');
+                if (nameEl) nameEl.value = (data.name || '').toUpperCase();
+                if (phoneEl && data.phone) phoneEl.value = data.phone;
+                if (emailEl && data.email) emailEl.value = data.email;
+                if (statusEl) statusEl.innerHTML =
+                    '<span class="badge bg-success"><i class="fa fa-check me-1"></i>Cliente encontrado — datos cargados</span>';
+            } else {
+                if (statusEl) statusEl.innerHTML =
+                    '<span class="badge bg-warning text-dark"><i class="fa fa-user-plus me-1"></i>Nuevo cliente — se registrará al guardar</span>';
+            }
+        } catch (_) {
+            if (iconEl) iconEl.className = 'fa fa-search';
+        }
     },
 
     _updateVehicleModels() {

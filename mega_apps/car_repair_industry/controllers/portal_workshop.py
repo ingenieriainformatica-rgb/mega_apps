@@ -185,6 +185,104 @@ class CarRepairPortalWorkshop(http.Controller):
             'renting_partner': renting_partner,
         })
 
+    @http.route('/my/workshop/partner-lookup', type='http', auth='user', website=True, methods=['GET'])
+    def workshop_partner_lookup(self, vat='', **kwargs):
+        if not (self._is_advisor() or self._is_internal_manager()):
+            return request.make_response(
+                json.dumps({'found': False}),
+                headers=[('Content-Type', 'application/json')],
+            )
+        vat = (vat or '').strip().upper()
+        if len(vat) < 3:
+            return request.make_response(
+                json.dumps({'found': False}),
+                headers=[('Content-Type', 'application/json')],
+            )
+        partner = request.env['res.partner'].sudo().search(
+            [('vat', '=ilike', vat), ('is_company', '=', False)],
+            limit=1,
+        )
+        if not partner:
+            return request.make_response(
+                json.dumps({'found': False}),
+                headers=[('Content-Type', 'application/json')],
+            )
+        return request.make_response(
+            json.dumps({
+                'found': True,
+                'name': partner.name or '',
+                'phone': partner.phone or partner.mobile or '',
+                'email': partner.email or '',
+            }),
+            headers=[('Content-Type', 'application/json')],
+        )
+
+    @http.route('/my/workshop/vehicle-lookup', type='http', auth='user', website=True, methods=['GET'])
+    def workshop_vehicle_lookup(self, plate='', **kwargs):
+        if not (self._is_advisor() or self._is_internal_manager()):
+            return request.make_response(
+                json.dumps({'found': False}),
+                headers=[('Content-Type', 'application/json')],
+            )
+        plate = (plate or '').strip().upper()
+        if len(plate) < 4:
+            return request.make_response(
+                json.dumps({'found': False}),
+                headers=[('Content-Type', 'application/json')],
+            )
+
+        # Buscar en órdenes anteriores (fuente más completa para este taller)
+        repair = request.env['fleet.repair'].sudo().search(
+            [('license_plate', '=ilike', plate)],
+            order='create_date desc',
+            limit=1,
+        )
+        if repair:
+            return request.make_response(
+                json.dumps({
+                    'found': True,
+                    'source': 'repair',
+                    'brand_id': repair.vehicle_brand_id.id or 0,
+                    'brand_name': repair.vehicle_brand_id.name or '',
+                    'model_id': repair.model_id.id or 0,
+                    'model_name': repair.model_id.name or '',
+                    'model_year': repair.model_year or '',
+                    'engine_displacement': repair.engine_displacement or '',
+                    'engine_number': repair.engine_number or '',
+                    'vin_sn': repair.vin_sn or '',
+                    'fuel_type': repair.fuel_type or '',
+                }),
+                headers=[('Content-Type', 'application/json')],
+            )
+
+        # Buscar en flota de vehículos
+        vehicle = request.env['fleet.vehicle'].sudo().search(
+            [('license_plate', '=ilike', plate)],
+            limit=1,
+        )
+        if vehicle:
+            return request.make_response(
+                json.dumps({
+                    'found': True,
+                    'source': 'fleet',
+                    'brand_id': vehicle.model_id.brand_id.id or 0,
+                    'brand_name': vehicle.model_id.brand_id.name or '',
+                    'model_id': vehicle.model_id.id or 0,
+                    'model_name': vehicle.model_id.name or '',
+                    'model_year': vehicle.model_year or '',
+                    'engine_displacement': '',
+                    'engine_number': getattr(vehicle, 'engine_number', '') or '',
+                    'vin_sn': vehicle.vin_sn or '',
+                    'fuel_type': vehicle.fuel_type or '',
+                }),
+                headers=[('Content-Type', 'application/json')],
+            )
+
+        return request.make_response(
+            json.dumps({'found': False}),
+            headers=[('Content-Type', 'application/json')],
+        )
+
     @http.route('/my/workshop/service-search', type='http', auth='user', website=True, methods=['GET'])
     def workshop_service_search(self, q='', **kwargs):
         if not (self._is_advisor() or self._is_internal_manager()):
@@ -266,22 +364,31 @@ class CarRepairPortalWorkshop(http.Controller):
         client_email = (post.get('client_email') or '').strip()
         delivered_by_name = (post.get('delivered_by_name') or '').strip()
         delivered_by_phone = (post.get('delivered_by_phone') or '').strip()
+        delivered_by_email = (post.get('delivered_by_email') or '').strip()
 
         if customer_type == 'renting':
             renting_mode = (post.get('renting_mode') or 'billing').strip()
             if renting_mode == 'client':
                 if not client_name:
                     raise UserError(_("Para Cliente de Renting debe registrar el nombre del conductor."))
-                partner = Partner.search(['|', ('phone', '=', client_phone), ('mobile', '=', client_phone)], limit=1) if client_phone else Partner.browse()
+                client_vat = (post.get('client_vat') or '').strip().upper()
+                partner = Partner.browse()
+                if client_vat:
+                    partner = Partner.search([('vat', '=ilike', client_vat), ('is_company', '=', False)], limit=1)
+                if not partner and client_phone:
+                    partner = Partner.search(['|', ('phone', '=', client_phone), ('mobile', '=', client_phone)], limit=1)
                 if not partner and client_email:
                     partner = Partner.search([('email', '=', client_email)], limit=1)
                 if not partner:
                     partner = Partner.create({
                         'name': client_name,
+                        'vat': client_vat or False,
                         'phone': client_phone,
                         'mobile': client_phone,
                         'email': client_email,
                     })
+                elif client_vat and not partner.vat:
+                    partner.write({'vat': client_vat})
                 contact_name = delivered_by_name or client_name
                 contact_phone = delivered_by_phone or client_phone
             else:
@@ -320,16 +427,24 @@ class CarRepairPortalWorkshop(http.Controller):
         else:
             if not client_name:
                 raise UserError(_("Debe registrar el nombre del cliente particular."))
-            partner = Partner.search(['|', ('phone', '=', client_phone), ('mobile', '=', client_phone)], limit=1) if client_phone else Partner.browse()
+            client_vat = (post.get('client_vat') or '').strip().upper()
+            partner = Partner.browse()
+            if client_vat:
+                partner = Partner.search([('vat', '=ilike', client_vat), ('is_company', '=', False)], limit=1)
+            if not partner and client_phone:
+                partner = Partner.search(['|', ('phone', '=', client_phone), ('mobile', '=', client_phone)], limit=1)
             if not partner and client_email:
                 partner = Partner.search([('email', '=', client_email)], limit=1)
             if not partner:
                 partner = Partner.create({
                     'name': client_name,
+                    'vat': client_vat or False,
                     'phone': client_phone,
                     'mobile': client_phone,
                     'email': client_email,
                 })
+            elif client_vat and not partner.vat:
+                partner.write({'vat': client_vat})
             contact_name = delivered_by_name or client_name
             contact_phone = delivered_by_phone or client_phone
 

@@ -234,28 +234,33 @@
                         <div class="workshop-form-section-header">
                             <div class="workshop-form-section-number">1</div>
                             <div>
-                                <h2 class="workshop-form-section-title">Categoría del cliente</h2>
-                                <p class="workshop-form-section-subtitle">Selecciona el origen del cliente que entrega el vehículo</p>
+                                <h2 class="workshop-form-section-title">Sede</h2>
                             </div>
                         </div>
                         <div class="workshop-customer-type-grid">
                             <label class="workshop-customer-type-card" for="customer_type_renting">
                                 <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_renting" value="renting"/>
                                 <div class="workshop-customer-type-icon workshop-customer-type-renting"><i class="fa fa-building"></i></div>
-                                <div class="workshop-customer-type-name">Sede renting</div>
-                                <div class="workshop-customer-type-desc">Flotas de empresas de alquiler</div>
+                                <div>
+                                    <div class="workshop-customer-type-name">Renting</div>
+                                    <div class="workshop-customer-type-desc">Flotas de empresas de alquiler</div>
+                                </div>
                             </label>
                             <label class="workshop-customer-type-card" for="customer_type_particular">
                                 <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_particular" value="particular" checked="checked"/>
                                 <div class="workshop-customer-type-icon workshop-customer-type-particular"><i class="fa fa-user"></i></div>
-                                <div class="workshop-customer-type-name">Sede 1a1</div>
-                                <div class="workshop-customer-type-desc">Persona natural</div>
+                                <div>
+                                    <div class="workshop-customer-type-name">1a1</div>
+                                    <div class="workshop-customer-type-desc">Persona natural</div>
+                                </div>
                             </label>
                             <label class="workshop-customer-type-card" for="customer_type_corporate">
                                 <input class="form-check-input js-workshop-customer-type" type="radio" name="customer_type" id="customer_type_corporate" value="corporate"/>
                                 <div class="workshop-customer-type-icon workshop-customer-type-corporate"><i class="fa fa-briefcase"></i></div>
-                                <div class="workshop-customer-type-name">Sede MegaSur</div>
-                                <div class="workshop-customer-type-desc">Empresa con flota propia</div>
+                                <div>
+                                    <div class="workshop-customer-type-name">MegaSur</div>
+                                    <div class="workshop-customer-type-desc">Empresa con flota propia</div>
+                                </div>
                             </label>
                         </div>
 
@@ -291,15 +296,29 @@
                             </div>
                         </div>
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Nombre del cliente <span class="text-danger">*</span></label>
-                                <input name="client_name" class="form-control js-workshop-particular-required" required="required" placeholder="Nombre completo"/>
-                            </div>
                             <div class="col-md-3">
+                                <label class="form-label">Cédula / NIT</label>
+                                <div class="input-group">
+                                    <input name="client_vat"
+                                           class="form-control workshop-input-uppercase js-partner-vat-lookup"
+                                           placeholder="CC / NIT"
+                                           maxlength="20"
+                                           autocomplete="off"/>
+                                    <span class="input-group-text">
+                                        <i class="fa fa-search js-vat-lookup-icon"></i>
+                                    </span>
+                                </div>
+                                <div class="js-vat-lookup-status mt-1" style="min-height:20px;"></div>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Nombre del cliente <span class="text-danger">*</span></label>
+                                <input name="client_name" class="form-control js-workshop-particular-required workshop-input-uppercase" required="required" placeholder="NOMBRE COMPLETO"/>
+                            </div>
+                            <div class="col-md-2">
                                 <label class="form-label">Celular</label>
                                 <input name="client_phone" type="tel" class="form-control" placeholder="300 123 4567"/>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="form-label">Correo</label>
                                 <input name="client_email" type="email" class="form-control" placeholder="correo@ejemplo.com"/>
                             </div>
@@ -343,7 +362,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Razón social <span class="text-danger">*</span></label>
-                                <input name="company_name" class="form-control js-workshop-corporate-input js-workshop-corporate-required" placeholder="Nombre de la empresa" disabled="disabled"/>
+                                <input name="company_name" class="form-control js-workshop-corporate-input js-workshop-corporate-required workshop-input-uppercase" placeholder="Nombre de la empresa" disabled="disabled"/>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">NIT</label>
@@ -371,7 +390,18 @@
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label">Placa <span class="text-danger">*</span></label>
-                                <input name="license_plate" class="form-control text-uppercase workshop-input-uppercase" required="required" placeholder="ABC123"/>
+                                <div class="input-group">
+                                    <input name="license_plate"
+                                           class="form-control workshop-input-uppercase js-plate-lookup"
+                                           required="required"
+                                           placeholder="ABC123"
+                                           maxlength="10"
+                                           autocomplete="off"/>
+                                    <span class="input-group-text">
+                                        <i class="fa fa-search js-plate-lookup-icon"></i>
+                                    </span>
+                                </div>
+                                <div class="js-vehicle-lookup-status mt-1" style="min-height:20px;"></div>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Marca</label>
@@ -484,8 +514,8 @@
                                             <i class="fa fa-plus-circle me-1"/>¿No encuentras el servicio? Agrégalo:
                                         </small>
                                         <div class="input-group input-group-sm mt-1" style="max-width:440px;">
-                                            <input type="text" id="new-service-input" class="form-control"
-                                                   placeholder="Nombre del nuevo servicio..."/>
+                                            <input type="text" id="new-service-input" class="form-control workshop-input-uppercase"
+                                                   placeholder="NOMBRE DEL NUEVO SERVICIO..."/>
                                             <button type="button" id="btn-add-new-service"
                                                     class="btn btn-outline-secondary">
                                                 <i class="fa fa-plus me-1"/>Agregar
@@ -505,7 +535,11 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Motivo de ingreso <span class="text-danger">*</span></label>
-                                <input name="reason" class="form-control" required="required" placeholder="Ej. Mantenimiento preventivo"/>
+                                <select name="reason" class="form-select" required="required">
+                                    <option value="MANTENIMIENTO PREVENTIVO" selected="selected">MANTENIMIENTO PREVENTIVO</option>
+                                    <option value="MEGA COMBO">MEGA COMBO</option>
+                                    <option value="CORRECTIVO">CORRECTIVO</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -549,7 +583,7 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <input t-att-name="'check_obs_%s' % item.id" class="form-control"/>
+                                            <input t-att-name="'check_obs_%s' % item.id" class="form-control workshop-input-uppercase"/>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -565,10 +599,17 @@
                                 <p class="workshop-form-section-subtitle">Datos de quien hace la entrega física</p>
                             </div>
                         </div>
-                        <div class="row g-3">
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input js-same-person-check" id="same_person_check"/>
+                            <label class="form-check-label fw-semibold" for="same_person_check">
+                                <i class="fa fa-user-check me-1 text-success"></i>
+                                El cliente es quien entrega el vehículo personalmente
+                            </label>
+                        </div>
+                        <div class="row g-3 js-delivered-by-fields">
                             <div class="col-md-4">
                                 <label class="form-label">Nombre</label>
-                                <input name="delivered_by_name" class="form-control" placeholder="Nombre completo"/>
+                                <input name="delivered_by_name" class="form-control workshop-input-uppercase" placeholder="NOMBRE COMPLETO"/>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Celular</label>
@@ -576,7 +617,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Documento</label>
-                                <input name="delivered_by_document" class="form-control" placeholder="CC / NIT"/>
+                                <input name="delivered_by_document" class="form-control workshop-input-uppercase" placeholder="CC / NIT"/>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Correo</label>
@@ -584,7 +625,7 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Observaciones de quien entrega</label>
-                                <textarea name="delivered_by_observation" class="form-control" rows="2" placeholder="Información adicional relevante..."></textarea>
+                                <textarea name="delivered_by_observation" class="form-control workshop-input-uppercase" rows="2" placeholder="INFORMACIÓN ADICIONAL RELEVANTE..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -974,19 +1015,11 @@
                              aria-labelledby="heading-checklist-tecnico">
                             <div class="accordion-body">
                                 <t t-set="tecnico_lines" t-value="repair.technical_checklist_line_ids"/>
-                                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                                    <div>
-                                        <h2 class="h5 mb-0">Checklist técnico</h2>
-                                        <p class="small text-muted mb-0">
-                                            Checklist detallado que el técnico llena durante la inspección / diagnóstico del vehículo.
-                                        </p>
-                                    </div>
-                                    <div class="ms-auto" t-if="tecnico_lines and (repair.portal_technician_id or repair.user_id)">
-                                        <a t-att-href="'/my/workshop/order/%s/checklist/pdf' % repair.id"
-                                           class="btn btn-danger btn-sm" target="_blank" rel="noopener">
-                                            <i class="fa fa-file-pdf-o me-1"></i> Descargar PDF
-                                        </a>
-                                    </div>
+                                <div class="mb-3">
+                                    <h2 class="h5 mb-0">Checklist técnico</h2>
+                                    <p class="small text-muted mb-0">
+                                        Checklist detallado que el técnico llena durante la inspección / diagnóstico del vehículo.
+                                    </p>
                                 </div>
                                 <t t-if="not tecnico_lines">
                                     <p class="text-muted mb-0">Aún no hay líneas de checklist técnico registradas para esta orden.</p>
@@ -1013,32 +1046,27 @@
                                                             <tr>
                                                                 <th class="workshop-checklist-num">N°</th>
                                                                 <th>INSPECCIÓN</th>
-                                                                <th class="workshop-checklist-estado" colspan="2">ESTADO</th>
+                                                                <th class="workshop-checklist-estado">ESTADO</th>
                                                                 <th>OBSERVACIONES</th>
-                                                            </tr>
-                                                            <tr class="workshop-checklist-subheader">
-                                                                <th></th>
-                                                                <th></th>
-                                                                <th><i class="fa fa-check text-success"></i> Bueno</th>
-                                                                <th><i class="fa fa-times text-danger"></i> Malo</th>
-                                                                <th></th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             <tr t-foreach="sec1_lines" t-as="tline">
                                                                 <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
                                                                 <td t-esc="tline.name"/>
-                                                                <td class="workshop-checklist-tick" t-att-class="tline.state == 'good' and 'is-good' or ''">
-                                                                    <t t-if="is_editor">
-                                                                        <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="good" required="required" t-att-checked="'checked' if tline.state == 'good' else None" class="form-check-input"/>
+                                                                <td class="workshop-checklist-estado-cell">
+                                                                    <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select form-select-sm">
+                                                                        <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">Bueno</option>
+                                                                        <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">Regular</option>
+                                                                        <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">Malo</option>
+                                                                        <option value="not_apply" t-att-selected="'selected' if (not tline.state or tline.state == 'not_apply') else None">N/A</option>
+                                                                    </select>
+                                                                    <t t-else="">
+                                                                        <span t-if="tline.state == 'good'" class="badge bg-success">Bueno</span>
+                                                                        <span t-if="tline.state == 'regular'" class="badge bg-warning text-dark">Regular</span>
+                                                                        <span t-if="tline.state == 'bad'" class="badge bg-danger">Malo</span>
+                                                                        <span t-if="not tline.state or tline.state == 'not_apply'" class="badge bg-secondary">N/A</span>
                                                                     </t>
-                                                                    <i t-else="" t-if="tline.state == 'good'" class="fa fa-check text-success"/>
-                                                                </td>
-                                                                <td class="workshop-checklist-tick" t-att-class="tline.state == 'bad' and 'is-bad' or ''">
-                                                                    <t t-if="is_editor">
-                                                                        <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="bad" required="required" t-att-checked="'checked' if tline.state == 'bad' else None" class="form-check-input"/>
-                                                                    </t>
-                                                                    <i t-else="" t-if="tline.state == 'bad'" class="fa fa-times text-danger"/>
                                                                 </td>
                                                                 <td>
                                                                     <t t-if="is_editor">
@@ -1058,32 +1086,27 @@
                                                             <tr>
                                                                 <th class="workshop-checklist-num">N°</th>
                                                                 <th>INSPECCIÓN</th>
-                                                                <th class="workshop-checklist-estado" colspan="2">ESTADO</th>
+                                                                <th class="workshop-checklist-estado">ESTADO</th>
                                                                 <th>OBSERVACIONES</th>
-                                                            </tr>
-                                                            <tr class="workshop-checklist-subheader">
-                                                                <th></th>
-                                                                <th></th>
-                                                                <th><i class="fa fa-check text-success"></i> Bueno</th>
-                                                                <th><i class="fa fa-times text-danger"></i> Malo</th>
-                                                                <th></th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             <tr t-foreach="sec2_lines" t-as="tline">
                                                                 <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
                                                                 <td t-esc="tline.name"/>
-                                                                <td class="workshop-checklist-tick" t-att-class="tline.state == 'good' and 'is-good' or ''">
-                                                                    <t t-if="is_editor">
-                                                                        <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="good" required="required" t-att-checked="'checked' if tline.state == 'good' else None" class="form-check-input"/>
+                                                                <td class="workshop-checklist-estado-cell">
+                                                                    <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select form-select-sm">
+                                                                        <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">Bueno</option>
+                                                                        <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">Regular</option>
+                                                                        <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">Malo</option>
+                                                                        <option value="not_apply" t-att-selected="'selected' if (not tline.state or tline.state == 'not_apply') else None">N/A</option>
+                                                                    </select>
+                                                                    <t t-else="">
+                                                                        <span t-if="tline.state == 'good'" class="badge bg-success">Bueno</span>
+                                                                        <span t-if="tline.state == 'regular'" class="badge bg-warning text-dark">Regular</span>
+                                                                        <span t-if="tline.state == 'bad'" class="badge bg-danger">Malo</span>
+                                                                        <span t-if="not tline.state or tline.state == 'not_apply'" class="badge bg-secondary">N/A</span>
                                                                     </t>
-                                                                    <i t-else="" t-if="tline.state == 'good'" class="fa fa-check text-success"/>
-                                                                </td>
-                                                                <td class="workshop-checklist-tick" t-att-class="tline.state == 'bad' and 'is-bad' or ''">
-                                                                    <t t-if="is_editor">
-                                                                        <input type="radio" t-att-name="'tech_state_%s' % tline.id" value="bad" required="required" t-att-checked="'checked' if tline.state == 'bad' else None" class="form-check-input"/>
-                                                                    </t>
-                                                                    <i t-else="" t-if="tline.state == 'bad'" class="fa fa-times text-danger"/>
                                                                 </td>
                                                                 <td>
                                                                     <t t-if="is_editor">
@@ -1139,8 +1162,9 @@
                                                                 <td>
                                                                     <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select form-select-sm">
                                                                         <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">Bueno</option>
+                                                                        <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">Regular</option>
                                                                         <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">Malo</option>
-                                                                        <option value="not_apply" t-att-selected="'selected' if tline.state == 'not_apply' else None">N/A</option>
+                                                                        <option value="not_apply" t-att-selected="'selected' if (not tline.state or tline.state == 'not_apply') else None">N/A</option>
                                                                     </select>
                                                                     <span t-else="" t-if="tline.state == 'good'" class="badge bg-success">Bueno</span>
                                                                     <span t-else="" t-if="tline.state == 'bad'" class="badge bg-danger">Malo</span>
@@ -1194,13 +1218,18 @@
                                             </div>
                                         </div>
 
-                                        <div t-if="is_editor" class="mt-3">
-                                            <div id="checklist-error-msg" class="alert alert-danger d-none" role="alert">
+                                        <div class="mt-3">
+                                            <div t-if="is_editor" id="checklist-error-msg" class="alert alert-danger d-none" role="alert">
                                                 <i class="fa fa-exclamation-triangle me-2"></i>
-                                                <strong>Formulario incompleto.</strong> Por favor selecciona el estado (Bueno / Malo) de cada ítem de inspección y completa todas las medidas de frenos y llantas antes de guardar.
+                                                <strong>Formulario incompleto.</strong> Completa todas las medidas de frenos y llantas antes de guardar.
                                             </div>
-                                            <div class="d-flex justify-content-end">
-                                                <button type="submit" class="btn btn-primary" id="btn-save-checklist">
+                                            <div class="d-flex flex-wrap gap-2 justify-content-end align-items-center">
+                                                <a t-if="tecnico_lines and (repair.portal_technician_id or repair.user_id)"
+                                                   t-att-href="'/my/workshop/order/%s/checklist/pdf' % repair.id"
+                                                   class="btn btn-outline-danger" target="_blank" rel="noopener">
+                                                    <i class="fa fa-file-pdf-o me-1"></i> Descargar PDF
+                                                </a>
+                                                <button t-if="is_editor" type="submit" class="btn btn-primary" id="btn-save-checklist">
                                                     <i class="fa fa-save me-1"></i> Guardar checklist técnico
                                                 </button>
                                             </div>

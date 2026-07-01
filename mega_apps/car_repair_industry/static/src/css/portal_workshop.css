@@ -434,37 +434,37 @@
 
 .workshop-customer-type-grid {
     display: grid;
-    gap: 14px;
+    gap: 10px;
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 575.98px) {
     .workshop-customer-type-grid {
         grid-template-columns: 1fr;
     }
 }
 
 .workshop-customer-type-card {
+    align-items: center;
     background: #fff;
     border: 2px solid #e9ecef;
     border-radius: 10px;
     cursor: pointer;
-    padding: 18px 16px;
+    display: flex;
+    gap: 14px;
+    padding: 16px 18px;
     position: relative;
-    text-align: center;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .workshop-customer-type-card .form-check-input {
-    left: 12px;
+    flex-shrink: 0;
     margin: 0;
-    position: absolute;
-    top: 12px;
+    position: static;
 }
 
 .workshop-customer-type-card:hover {
     border-color: #adb5bd;
-    transform: translateY(-1px);
 }
 
 .workshop-customer-type-card:has(.form-check-input:checked) {
@@ -477,10 +477,12 @@
     border-radius: 50%;
     color: #fff;
     display: flex;
-    font-size: 22px;
-    height: 48px;
-    margin: 0 auto 10px;
-    width: 48px;
+    flex-shrink: 0;
+    font-size: 20px;
+    height: 44px;
+    justify-content: center;
+    margin: 0;
+    width: 44px;
 }
 
 .workshop-customer-type-renting { background: #4a6cf7; }
@@ -490,13 +492,15 @@
 .workshop-customer-type-name {
     color: #212529;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
+    line-height: 1.2;
     margin-bottom: 2px;
 }
 
 .workshop-customer-type-desc {
     color: #6c757d;
     font-size: 0.8rem;
+    line-height: 1.3;
 }
 
 .workshop-photo-uploader {
@@ -1824,4 +1828,34 @@
 #accordion-workshop-sections input[type="checkbox"] {
     height: 20px;
     width: 20px;
+}
+
+/* ── Checklist técnico — mejoras móvil ─────────────────────────── */
+
+/* Ancho fijo para la columna ESTADO con select */
+.workshop-checklist-estado {
+    min-width: 90px;
+    width: 110px;
+}
+
+@media (max-width: 767.98px) {
+    /* Selects e inputs de la tabla checklist más altos y legibles al tacto */
+    .workshop-checklist-table .form-select,
+    .workshop-checklist-table .form-control {
+        font-size: 1rem;
+        min-height: 44px;
+        padding: 8px 10px;
+    }
+
+    /* Más espacio en las celdas para dedos grandes */
+    .workshop-checklist-table tbody td {
+        font-size: 0.9rem;
+        padding: 10px 6px;
+        vertical-align: middle;
+    }
+
+    /* El número de ítem no necesita tanto espacio */
+    .workshop-checklist-table .workshop-checklist-num {
+        width: 28px;
+    }
 }
