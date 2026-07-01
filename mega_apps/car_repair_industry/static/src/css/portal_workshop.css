@@ -1861,12 +1861,64 @@
 
 }
 
-/* ── Secciones del mecánico: inputs, selects y botones grandes ── */
+/* ── Secciones del mecánico: misma estética que workshop-info-card ── */
 
-/* Encabezado del acordeón — título más grande y área de toque mayor */
+#accordion-workshop-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#accordion-workshop-sections .accordion-item {
+    background: #fff;
+    border: 1px solid #e9ecef !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
 #accordion-workshop-sections .accordion-button {
+    align-items: center;
+    background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #212529 !important;
+    font-size: 1rem;
+    font-weight: 600;
+    gap: 10px;
+    padding: 14px 20px;
+    transition: background 0.15s ease;
+}
+
+#accordion-workshop-sections .accordion-button:hover {
+    background: linear-gradient(180deg, #eef6f6 0%, #f5fbfb 100%) !important;
+}
+
+#accordion-workshop-sections .accordion-button:not(.collapsed) {
+    background: linear-gradient(180deg, #eef6f6 0%, #f5fbfb 100%) !important;
+    border-bottom: 1px solid #e9ecef;
+}
+
+#accordion-workshop-sections .accordion-button .fa,
+#accordion-workshop-sections .accordion-button i {
+    color: #017e84;
     font-size: 1.1rem;
-    padding: 18px 20px;
+}
+
+/* Ocultar el ::after nativo de Bootstrap — usamos el fa-chevron-down del HTML */
+#accordion-workshop-sections .accordion-button::after {
+    display: none;
+}
+
+/* El chevron FA se rota igual que workshop-collapse-chevron cuando está abierto */
+#accordion-workshop-sections .accordion-button:not(.collapsed) .workshop-collapse-chevron {
+    transform: rotate(180deg);
+    color: #017e84;
+}
+
+#accordion-workshop-sections .accordion-body {
+    border-top: 1px solid #e9ecef;
+    padding: 16px 20px;
 }
 
 /* Inputs de texto y número */

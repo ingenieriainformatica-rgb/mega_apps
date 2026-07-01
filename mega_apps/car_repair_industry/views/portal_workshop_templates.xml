@@ -924,13 +924,14 @@
                     <!-- 1. Servicios solicitados -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading-services">
-                            <button class="accordion-button collapsed" type="button"
+                            <button class="accordion-button" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapse-services"
-                                    aria-expanded="false" aria-controls="collapse-services">
+                                    aria-expanded="true" aria-controls="collapse-services">
                                 <i class="fa fa-wrench me-2"></i> Servicios solicitados
+                                <i class="fa fa-chevron-down ms-auto workshop-collapse-chevron"></i>
                             </button>
                         </h2>
-                        <div id="collapse-services" class="accordion-collapse collapse"
+                        <div id="collapse-services" class="accordion-collapse collapse show"
                              aria-labelledby="heading-services">
                             <div class="accordion-body">
                                 <p class="small text-muted mb-3">Servicios registrados en la orden. El técnico marca cada uno a medida que lo completa.</p>
@@ -1033,10 +1034,12 @@
                             <button class="accordion-button collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapse-checklist-recepcion"
                                     aria-expanded="false" aria-controls="collapse-checklist-recepcion">
-                                <span class="fw-semibold me-2">Checklist de recepción</span>
-                                <span t-if="repair.reception_checklist_template_id" class="small text-muted fw-normal">
+                                <i class="fa fa-check-square-o me-2"></i>
+                                <span class="fw-semibold">Checklist de recepción</span>
+                                <span t-if="repair.reception_checklist_template_id" class="small text-muted fw-normal ms-2">
                                     · <t t-esc="repair.reception_checklist_template_id.name"/>
                                 </span>
+                                <i class="fa fa-chevron-down ms-auto workshop-collapse-chevron"></i>
                             </button>
                         </h2>
                         <div id="collapse-checklist-recepcion" class="accordion-collapse collapse"
@@ -1088,6 +1091,7 @@
                                     data-bs-toggle="collapse" data-bs-target="#collapse-checklist-tecnico"
                                     aria-expanded="false" aria-controls="collapse-checklist-tecnico">
                                 <i class="fa fa-clipboard me-2"></i> Checklist técnico
+                                <i class="fa fa-chevron-down ms-auto workshop-collapse-chevron"></i>
                             </button>
                         </h2>
                         <div id="collapse-checklist-tecnico" class="accordion-collapse collapse"
@@ -1326,6 +1330,7 @@
                                     data-bs-toggle="collapse" data-bs-target="#collapse-trabajo-tecnico"
                                     aria-expanded="false" aria-controls="collapse-trabajo-tecnico">
                                 <i class="fa fa-camera me-2"></i> Evidencias
+                                <i class="fa fa-chevron-down ms-auto workshop-collapse-chevron"></i>
                             </button>
                         </h2>
                         <div id="collapse-trabajo-tecnico" class="accordion-collapse collapse"
@@ -1388,6 +1393,7 @@
                                     data-bs-toggle="collapse" data-bs-target="#collapse-repuestos"
                                     aria-expanded="false" aria-controls="collapse-repuestos">
                                 <i class="fa fa-cogs me-2"></i> Solicitud de repuestos para cotizar
+                                <i class="fa fa-chevron-down ms-auto workshop-collapse-chevron"></i>
                             </button>
                         </h2>
                         <div id="collapse-repuestos" class="accordion-collapse collapse"
@@ -1584,6 +1590,7 @@
                                     data-bs-toggle="collapse" data-bs-target="#collapse-prueba-ruta"
                                     aria-expanded="false" aria-controls="collapse-prueba-ruta">
                                 <i class="fa fa-road me-2"></i> Prueba de ruta
+                                <i class="fa fa-chevron-down ms-auto workshop-collapse-chevron"></i>
                             </button>
                         </h2>
                         <div id="collapse-prueba-ruta" class="accordion-collapse collapse"
@@ -1618,6 +1625,7 @@
                                     data-bs-toggle="collapse" data-bs-target="#collapse-evidencias"
                                     aria-expanded="false" aria-controls="collapse-evidencias">
                                 <i class="fa fa-picture-o me-2"></i> Evidencias externas
+                                <i class="fa fa-chevron-down ms-auto workshop-collapse-chevron"></i>
                             </button>
                         </h2>
                         <div id="collapse-evidencias" class="accordion-collapse collapse"
