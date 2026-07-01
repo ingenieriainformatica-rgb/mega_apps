@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_fleet_repair_branch_list" model="ir.ui.view">
+        <field name="name">fleet.repair.branch.list</field>
+        <field name="model">fleet.repair.branch</field>
+        <field name="arch" type="xml">
+            <list string="Secuencias por Sede" editable="bottom">
+                <field name="name"/>
+                <field name="customer_type"/>
+                <field name="sequence_prefix"/>
+                <field name="sequence_padding"/>
+                <field name="next_number"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fleet_repair_branch_form" model="ir.ui.view">
+        <field name="name">fleet.repair.branch.form</field>
+        <field name="model">fleet.repair.branch</field>
+        <field name="arch" type="xml">
+            <form string="Configuración de Sede">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nombre de la sede"/></h1>
+                    </div>
+                    <group>
+                        <group string="Sede">
+                            <field name="customer_type"/>
+                        </group>
+                        <group string="Secuencia de OT">
+                            <field name="sequence_prefix"/>
+                            <field name="sequence_padding"/>
+                            <field name="next_number"
+                                   help="Puede editar este valor para ajustar el próximo número de OT"/>
+                            <field name="sequence_id" readonly="1"
+                                   help="Secuencia generada automáticamente"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fleet_repair_branch" model="ir.actions.act_window">
+        <field name="name">Secuencias por Sede</field>
+        <field name="res_model">fleet.repair.branch</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_fleet_repair_branch"
+              name="Secuencias por Sede"
+              parent="car_repair_industry.menu_sub_car_repair"
+              action="action_fleet_repair_branch"
+              sequence="99"
+              groups="car_repair_industry.group_fleet_repair_directeur_commercial"/>
+
+</odoo>

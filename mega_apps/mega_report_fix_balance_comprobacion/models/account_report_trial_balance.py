@@ -2,9 +2,9 @@
 import io
 from collections import defaultdict
 
-from odoo import models, fields, _
-from odoo.tools import SQL
-from odoo.tools.misc import xlsxwriter, format_date
+from odoo import models, fields, _  #type: ignore
+from odoo.tools import SQL  #type: ignore
+from odoo.tools.misc import xlsxwriter, format_date  #type: ignore
 
 
 class MegaTrialBalanceCustomHandler(models.AbstractModel):
@@ -494,7 +494,7 @@ class MegaTrialBalanceCustomHandler(models.AbstractModel):
         if doc_code in doc_type_map:
             label = doc_type_map[doc_code]
         elif id_type and getattr(id_type, 'name', ''):
-            label = (id_type.name or '')[:6].upper()
+            label = (id_type.name or '')[:6].upper()  #type: ignore
         elif partner.is_company:
             label = 'NIT'
         else:

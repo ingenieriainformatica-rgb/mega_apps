@@ -278,9 +278,9 @@ class FleetRepair(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            vals['sequence'] = self.env['ir.sequence'].next_by_code('fleet.repair') or 'New'
-            result = super(FleetRepair, self).create(vals)
-            return result
+            customer_type = vals.get('customer_type', 'particular')
+            vals['sequence'] = self.env['fleet.repair.branch'].get_next_for_customer_type(customer_type)
+        return super(FleetRepair, self).create(vals_list)
 
     @api.depends('child_ids.planned_hours')
     def _compute_subtask_planned_hours(self):
