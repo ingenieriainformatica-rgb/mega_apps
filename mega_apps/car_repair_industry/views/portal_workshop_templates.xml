@@ -82,25 +82,53 @@
                     </div>
                 </div>
 
-                <!-- Filtros — scroll horizontal en móvil -->
+                <!-- Filtro por Sede -->
+                <t t-set="sede_sep" t-value="'&amp;' if active_filter != 'all' else '?'"/>
+                <t t-set="filter_qs" t-value="'?filter=' + active_filter if active_filter != 'all' else ''"/>
+                <t t-set="sede_qs" t-value="'&amp;sede=' + active_sede if active_sede != 'all' else ''"/>
+                <div class="workshop-filter-bar workshop-sede-bar mb-2">
+                    <span class="workshop-filter-label text-muted small me-2">Sede:</span>
+                    <a t-att-href="'/my/workshop' + filter_qs + sede_sep + 'sede=all'"
+                       t-att-class="'workshop-filter-pill workshop-sede-pill' + (' is-active' if active_sede == 'all' else '')"
+                       data-sede-save="all">
+                        <i class="fa fa-th-large me-1"></i>Todas
+                    </a>
+                    <a t-att-href="'/my/workshop' + filter_qs + sede_sep + 'sede=renting'"
+                       t-att-class="'workshop-filter-pill workshop-sede-pill workshop-sede-renting' + (' is-active' if active_sede == 'renting' else '')"
+                       data-sede-save="renting">
+                        <i class="fa fa-building me-1"></i>Renting
+                    </a>
+                    <a t-att-href="'/my/workshop' + filter_qs + sede_sep + 'sede=particular'"
+                       t-att-class="'workshop-filter-pill workshop-sede-pill workshop-sede-particular' + (' is-active' if active_sede == 'particular' else '')"
+                       data-sede-save="particular">
+                        <i class="fa fa-user me-1"></i>1a1
+                    </a>
+                    <a t-att-href="'/my/workshop' + filter_qs + sede_sep + 'sede=corporate'"
+                       t-att-class="'workshop-filter-pill workshop-sede-pill workshop-sede-corporate' + (' is-active' if active_sede == 'corporate' else '')"
+                       data-sede-save="corporate">
+                        <i class="fa fa-briefcase me-1"></i>MegaSur
+                    </a>
+                </div>
+
+                <!-- Filtros de estado — scroll horizontal en móvil -->
                 <div class="workshop-filter-bar mb-3">
-                    <a t-att-href="'/my/workshop'"
+                    <a t-att-href="'/my/workshop' + ('?sede=' + active_sede if active_sede != 'all' else '')"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'all' else '')">
                         Todas <span class="badge text-bg-light ms-1" t-esc="stats['total']"/>
                     </a>
-                    <a t-att-href="'/my/workshop?filter=to_assign'"
+                    <a t-att-href="'/my/workshop?filter=to_assign' + sede_qs"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'to_assign' else '')">
                         <i class="fa fa-hourglass-half me-1"></i>Por asignar
                     </a>
-                    <a t-att-href="'/my/workshop?filter=assigned'"
+                    <a t-att-href="'/my/workshop?filter=assigned' + sede_qs"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'assigned' else '')">
                         <i class="fa fa-users me-1"></i>Asignadas
                     </a>
-                    <a t-att-href="'/my/workshop?filter=diagnosis'"
+                    <a t-att-href="'/my/workshop?filter=diagnosis' + sede_qs"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'diagnosis' else '')">
                         <i class="fa fa-stethoscope me-1"></i>Diagnóstico
                     </a>
-                    <a t-att-href="'/my/workshop?filter=road_test'"
+                    <a t-att-href="'/my/workshop?filter=road_test' + sede_qs"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'road_test' else '')">
                         <i class="fa fa-road me-1"></i>Ruta
                     </a>
@@ -110,6 +138,9 @@
                 <form class="workshop-search-bar mb-3" method="get" action="/my/workshop">
                     <t t-if="active_filter != 'all'">
                         <input type="hidden" name="filter" t-att-value="active_filter"/>
+                    </t>
+                    <t t-if="active_sede != 'all'">
+                        <input type="hidden" name="sede" t-att-value="active_sede"/>
                     </t>
                     <div class="input-group">
                         <span class="input-group-text bg-white border-end-0">
@@ -123,7 +154,7 @@
                             <i class="fa fa-search d-sm-none"></i>
                         </button>
                         <a t-if="search"
-                           t-att-href="'/my/workshop' + ('?filter=' + active_filter if active_filter != 'all' else '')"
+                           t-att-href="'/my/workshop' + filter_qs + sede_qs"
                            class="btn btn-outline-secondary px-2" title="Limpiar" aria-label="Limpiar búsqueda">
                             <i class="fa fa-times"></i>
                         </a>
@@ -135,8 +166,11 @@
                 <div class="workshop-results-header mb-3">
                     <div class="workshop-results-title">
                         <i class="fa fa-list text-muted"></i>
-                        <t t-if="active_filter == 'all'">Todas las órdenes</t>
-                        <t t-else="">Órdenes filtradas</t>
+                        <t t-if="active_sede == 'renting'">Renting</t>
+                        <t t-elif="active_sede == 'particular'">1a1</t>
+                        <t t-elif="active_sede == 'corporate'">MegaSur</t>
+                        <t t-else="">Todas las sedes</t>
+                        <t t-if="active_filter != 'all'"> — Filtradas</t>
                         <span class="badge text-bg-secondary ms-1" t-esc="repair_count"/>
                     </div>
                     <div t-if="search" class="workshop-results-meta text-muted small">
@@ -158,45 +192,70 @@
                 </div>
 
                 <!-- Tabla de órdenes -->
-                <div t-else="" class="table-responsive">
-                    <table class="table table-hover workshop-orders-table align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="workshop-col-seq">Orden</th>
-                                <th class="workshop-col-vehicle">Placa</th>
-                                <th class="workshop-col-state">Estado</th>
-                                <th style="width:1%;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr t-foreach="repairs" t-as="repair"
-                                t-attf-class="workshop-table-row workshop-row-state-#{repair.state or 'draft'}"
-                                t-attf-onclick="window.location.href='/my/workshop/order/#{repair.id}'"
-                                style="cursor:pointer;">
+                <div t-else="" class="workshop-orders-card">
+                    <div class="table-responsive">
+                        <table class="table workshop-orders-table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="workshop-col-seq">Orden</th>
+                                    <th class="workshop-col-date d-none d-md-table-cell">Fecha</th>
+                                    <th class="workshop-col-client d-none d-sm-table-cell">Cliente</th>
+                                    <th class="workshop-col-vehicle">Placa</th>
+                                    <th class="workshop-col-sede d-none d-lg-table-cell">Sede</th>
+                                    <th class="workshop-col-state">Estado</th>
+                                    <th style="width:1%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="repairs" t-as="repair"
+                                    t-attf-class="workshop-table-row workshop-row-state-#{repair.state or 'draft'}"
+                                    t-attf-onclick="window.location.href='/my/workshop/order/#{repair.id}'"
+                                    style="cursor:pointer;">
 
-                                <!-- Orden -->
-                                <td class="workshop-col-seq fw-semibold text-nowrap">
-                                    <t t-esc="repair.sequence or repair.display_name"/>
-                                </td>
+                                    <!-- Orden -->
+                                    <td class="workshop-col-seq">
+                                        <span class="workshop-seq-number" t-esc="repair.sequence or repair.display_name"/>
+                                    </td>
 
-                                <!-- Placa -->
-                                <td class="workshop-col-vehicle">
-                                    <span class="fw-semibold" t-esc="repair.license_plate or '—'"/>
-                                </td>
+                                    <!-- Fecha -->
+                                    <td class="workshop-col-date d-none d-md-table-cell text-muted">
+                                        <t t-if="repair.receipt_date">
+                                            <t t-esc="repair.receipt_date.strftime('%d/%m/%Y')"/>
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </td>
 
-                                <!-- Estado -->
-                                <td class="workshop-col-state">
-                                    <span t-attf-class="workshop-badge-sm workshop-badge-#{repair.state or 'draft'}"
-                                          t-esc="repair.get_state_label()"/>
-                                </td>
+                                    <!-- Cliente -->
+                                    <td class="workshop-col-client d-none d-sm-table-cell">
+                                        <span class="workshop-client-name" t-esc="repair.client_id.name or '—'"/>
+                                    </td>
 
-                                <!-- Chevron -->
-                                <td class="text-end text-muted pe-3">
-                                    <i class="fa fa-chevron-right"/>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    <!-- Placa -->
+                                    <td class="workshop-col-vehicle">
+                                        <span class="badge workshop-plate-badge" t-esc="repair.license_plate or '—'"/>
+                                    </td>
+
+                                    <!-- Sede -->
+                                    <td class="workshop-col-sede d-none d-lg-table-cell">
+                                        <span t-if="repair.customer_type == 'renting'"   class="workshop-sede-tag workshop-sede-tag-renting">Renting</span>
+                                        <span t-elif="repair.customer_type == 'particular'" class="workshop-sede-tag workshop-sede-tag-particular">1a1</span>
+                                        <span t-elif="repair.customer_type == 'corporate'"  class="workshop-sede-tag workshop-sede-tag-corporate">MegaSur</span>
+                                    </td>
+
+                                    <!-- Estado -->
+                                    <td class="workshop-col-state">
+                                        <span t-attf-class="workshop-badge-sm workshop-badge-#{repair.state or 'draft'}"
+                                              t-esc="repair.get_state_label()"/>
+                                    </td>
+
+                                    <!-- Chevron -->
+                                    <td class="text-end text-muted pe-2">
+                                        <i class="fa fa-chevron-right"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Paginador -->
@@ -207,6 +266,26 @@
                 </div>
             </div>
         </t>
+
+        <!-- localStorage: recordar sede seleccionada -->
+        <script>
+        (function () {
+            var STORAGE_KEY = 'ws_sede_pref';
+            var params = new URLSearchParams(window.location.search);
+
+            if (params.has('sede')) {
+                // El usuario eligió sede explícitamente → guardar preferencia
+                localStorage.setItem(STORAGE_KEY, params.get('sede'));
+            } else {
+                // Sin sede en URL → aplicar preferencia guardada
+                var saved = localStorage.getItem(STORAGE_KEY);
+                if (saved &amp;&amp; saved !== 'all') {
+                    params.set('sede', saved);
+                    window.location.replace(window.location.pathname + '?' + params.toString());
+                }
+            }
+        })();
+        </script>
     </template>
 
     <template id="portal_workshop_order_form" name="Portal taller nueva orden">

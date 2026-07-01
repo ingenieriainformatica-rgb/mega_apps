@@ -808,6 +808,32 @@
     color: #fff !important;
 }
 
+/* Sede filter bar */
+.workshop-sede-bar {
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+.workshop-filter-label {
+    flex-shrink: 0;
+    font-weight: 500;
+}
+
+.workshop-sede-pill {
+    font-size: 0.8rem;
+    padding: 4px 12px;
+}
+
+.workshop-sede-renting.is-active    { background: #4a6cf7; border-color: #4a6cf7; }
+.workshop-sede-particular.is-active { background: #198754; border-color: #198754; }
+.workshop-sede-corporate.is-active  { background: #f6a609; border-color: #f6a609; color: #212529; }
+
+.workshop-sede-renting:hover    { border-color: #4a6cf7; color: #4a6cf7; }
+.workshop-sede-particular:hover { border-color: #198754; color: #198754; }
+.workshop-sede-corporate:hover  { border-color: #f6a609; color: #f6a609; }
+
 .workshop-list-card {
     background: #fff;
     border: 1px solid #e9ecef;
@@ -1509,33 +1535,95 @@
 
 /* ─── Tabla de órdenes /my/workshop ────────────────────────── */
 
+/* Card contenedor de la tabla */
+.workshop-orders-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
 .workshop-orders-table {
     font-size: 0.875rem;
+    margin-bottom: 0;
 }
 
 .workshop-orders-table thead th {
-    background: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
+    background: #f4f6f8;
+    border-bottom: 1px solid #e2e6ea;
+    border-top: none;
     color: #6c757d;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 10px 12px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 10px 14px;
     text-transform: uppercase;
     white-space: nowrap;
 }
 
 .workshop-orders-table tbody td {
     border-color: #f1f3f5;
-    padding: 9px 12px;
+    padding: 11px 14px;
     vertical-align: middle;
 }
 
+.workshop-orders-table tbody tr:nth-child(even) td {
+    background: #fafbfc;
+}
+
 .workshop-orders-table tbody tr:hover td {
-    background: #edf7f7;
+    background: #edf7f7 !important;
 }
 .workshop-orders-table tbody tr:active td {
-    background: #d4eef0;
+    background: #d4eef0 !important;
 }
+
+/* Número de orden — monospace destacado */
+.workshop-seq-number {
+    background: #eef2ff;
+    border-radius: 6px;
+    color: #3730a3;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    white-space: nowrap;
+}
+
+/* Nombre de cliente truncado */
+.workshop-client-name {
+    display: inline-block;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Badge de placa */
+.workshop-plate-badge {
+    background: #212529;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 8px;
+}
+
+/* Badge de sede en tabla */
+.workshop-sede-tag {
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.workshop-sede-tag-renting    { background: #e8ecfc; color: #3730a3; }
+.workshop-sede-tag-particular { background: #d1fae5; color: #065f46; }
+.workshop-sede-tag-corporate  { background: #fef3c7; color: #92400e; }
 
 /* Franja de color izquierda según estado */
 .workshop-table-row { border-left: 4px solid transparent; }

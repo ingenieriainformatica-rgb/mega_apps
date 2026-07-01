@@ -76,16 +76,27 @@ class CarRepairPortalWorkshop(http.Controller):
         'purchase':  ('service_flow_state', '=',  'purchase_requested'),
     }
 
-    def _dashboard_values(self, active_filter='all', search='', page=1):
+    SEDE_MAP = {
+        'renting':    ('customer_type', '=', 'renting'),
+        'particular': ('customer_type', '=', 'particular'),
+        'corporate':  ('customer_type', '=', 'corporate'),
+    }
+
+    def _dashboard_values(self, active_filter='all', search='', page=1, active_sede='all'):
         Repair = request.env['fleet.repair'].sudo()
         base_domain = self._portal_domain()
 
-        # Filter domain applied on top of base access domain
-        filter_domain = list(base_domain)
+        # Sede filter narrows the base domain for both stats and results
+        sede_domain = list(base_domain)
+        if active_sede in self.SEDE_MAP:
+            sede_domain.append(self.SEDE_MAP[active_sede])
+
+        # State filter applied on top of sede domain
+        filter_domain = list(sede_domain)
         if active_filter in self.FILTER_STATE_MAP:
             filter_domain.append(self.FILTER_STATE_MAP[active_filter])
 
-        # Search domain applied on top of filter domain
+        # Search applied on top of filter domain
         search_domain = list(filter_domain)
         if search:
             search_domain += ['|', '|', '|',
@@ -100,6 +111,8 @@ class CarRepairPortalWorkshop(http.Controller):
         url_args = {}
         if active_filter != 'all':
             url_args['filter'] = active_filter
+        if active_sede != 'all':
+            url_args['sede'] = active_sede
         if search:
             url_args['search'] = search
 
@@ -119,14 +132,14 @@ class CarRepairPortalWorkshop(http.Controller):
             offset=pager_values['offset'],
         )
 
-        # Stats always reflect all accessible repairs (no search/filter applied)
+        # Stats reflect sede filter but not state filter (so counts update per sede)
         stats = {
-            'total':     Repair.search_count(base_domain),
-            'to_assign': Repair.search_count(base_domain + [('service_flow_state', '=', 'to_assign')]),
-            'assigned':  Repair.search_count(base_domain + [('service_flow_state', '=', 'assigned')]),
-            'diagnosis': Repair.search_count(base_domain + [('state', '=', 'diagnosis')]),
-            'road_test': Repair.search_count(base_domain + [('service_flow_state', 'in', ['road_test_requested', 'road_test'])]),
-            'purchase':  Repair.search_count(base_domain + [('service_flow_state', '=', 'purchase_requested')]),
+            'total':     Repair.search_count(sede_domain),
+            'to_assign': Repair.search_count(sede_domain + [('service_flow_state', '=', 'to_assign')]),
+            'assigned':  Repair.search_count(sede_domain + [('service_flow_state', '=', 'assigned')]),
+            'diagnosis': Repair.search_count(sede_domain + [('state', '=', 'diagnosis')]),
+            'road_test': Repair.search_count(sede_domain + [('service_flow_state', 'in', ['road_test_requested', 'road_test'])]),
+            'purchase':  Repair.search_count(sede_domain + [('service_flow_state', '=', 'purchase_requested')]),
         }
 
         return {
@@ -139,6 +152,7 @@ class CarRepairPortalWorkshop(http.Controller):
             'is_road_test': self._is_road_test(),
             'is_internal_manager': self._is_internal_manager(),
             'active_filter': active_filter,
+            'active_sede': active_sede,
             'stats': stats,
         }
 
@@ -146,8 +160,9 @@ class CarRepairPortalWorkshop(http.Controller):
         ['/my/workshop', '/my/workshop/orders', '/my/workshop/page/<int:page>'],
         type='http', auth='user', website=True,
     )
-    def workshop_dashboard(self, filter=None, search='', page=1, **kwargs):
+    def workshop_dashboard(self, filter=None, search='', page=1, sede=None, **kwargs):
         active_filter = filter if filter in self.FILTER_STATE_MAP else 'all'
+        active_sede = sede if sede in self.SEDE_MAP else 'all'
         search = (search or '').strip()
         try:
             page = max(1, int(page))
@@ -155,7 +170,7 @@ class CarRepairPortalWorkshop(http.Controller):
             page = 1
         return request.render(
             'car_repair_industry.portal_workshop_dashboard',
-            self._dashboard_values(active_filter, search, page),
+            self._dashboard_values(active_filter, search, page, active_sede),
         )
 
     @http.route('/my/workshop/order/new', type='http', auth='user', website=True, methods=['GET', 'POST'])
