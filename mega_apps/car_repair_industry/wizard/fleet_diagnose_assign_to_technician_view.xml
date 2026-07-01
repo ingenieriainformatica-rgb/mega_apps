@@ -9,6 +9,7 @@
                 <form string="Asignación de técnico">
                     <group>
                         <field name="is_reassignment" invisible="1"/>
+                        <field name="available_technician_ids" invisible="1"/>
                         <field name="current_user_id"
                                string="Técnico actual"
                                readonly="1"
@@ -16,7 +17,7 @@
                         <field name="user_id"
                                string="Nuevo técnico"
                                options="{'no_create': True, 'no_open': True}"
-                               domain="[('active', '=', True), ('share', '=', True)]"/>
+                               domain="[('id', 'in', available_technician_ids)]"/>
                         <field name="reassign_reason"
                                string="Motivo de reasignación"
                                invisible="not is_reassignment"

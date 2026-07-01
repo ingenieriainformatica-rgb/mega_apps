@@ -12,26 +12,30 @@
 
     <template id="portal_workshop_dashboard" name="Portal taller">
         <t t-call="website.layout">
-            <div class="container my-4">
-                <div class="workshop-dashboard-header mb-4">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-                        <div class="d-flex align-items-center gap-3">
+            <div class="container my-3 my-md-4">
+
+                <!-- Header -->
+                <div class="workshop-dashboard-header mb-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-2">
+                        <div class="d-flex align-items-center gap-2">
                             <div class="workshop-dashboard-icon">
                                 <i class="fa fa-wrench"></i>
                             </div>
                             <div>
-                                <h1 class="h2 mb-1">Taller de autos</h1>
-                                <p class="text-muted mb-0">Panel operativo · Órdenes de servicio</p>
+                                <h1 class="h4 h2-md mb-0">Taller de autos</h1>
+                                <p class="text-muted mb-0 small d-none d-md-block">Panel operativo · Órdenes de servicio</p>
                             </div>
                         </div>
-                        <a t-if="is_advisor or is_internal_manager" href="/my/workshop/order/new" class="btn btn-primary btn-lg">
+                        <a t-if="is_advisor or is_internal_manager" href="/my/workshop/order/new"
+                           class="btn btn-primary d-flex align-items-center justify-content-center gap-1 workshop-header-new-order-btn">
                             <i class="fa fa-plus-circle"></i> Nueva orden de servicio
                         </a>
                     </div>
                 </div>
 
-                <div class="row g-2 mb-4">
-                    <div class="col-6 col-md-4 col-xl-2">
+                <!-- Stats cards -->
+                <div class="row g-3 g-md-2 mb-3">
+                    <div class="col-12 col-md-4 col-xl-2">
                         <a t-att-href="'/my/workshop'" t-att-class="'workshop-stat-card workshop-stat-total h-100' + (' is-active' if active_filter == 'all' else '')">
                             <div class="workshop-stat-icon"><i class="fa fa-list-alt"></i></div>
                             <div>
@@ -40,7 +44,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-12 col-md-4 col-xl-2">
                         <a t-att-href="'/my/workshop?filter=to_assign'" t-att-class="'workshop-stat-card workshop-stat-to-assign h-100' + (' is-active' if active_filter == 'to_assign' else '')">
                             <div class="workshop-stat-icon"><i class="fa fa-hourglass-half"></i></div>
                             <div>
@@ -49,7 +53,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-12 col-md-4 col-xl-2">
                         <a t-att-href="'/my/workshop?filter=assigned'" t-att-class="'workshop-stat-card workshop-stat-assigned h-100' + (' is-active' if active_filter == 'assigned' else '')">
                             <div class="workshop-stat-icon"><i class="fa fa-users"></i></div>
                             <div>
@@ -58,7 +62,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-12 col-md-4 col-xl-2">
                         <a t-att-href="'/my/workshop?filter=diagnosis'" t-att-class="'workshop-stat-card workshop-stat-diagnosis h-100' + (' is-active' if active_filter == 'diagnosis' else '')">
                             <div class="workshop-stat-icon"><i class="fa fa-stethoscope"></i></div>
                             <div>
@@ -67,7 +71,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-12 col-md-4 col-xl-2">
                         <a t-att-href="'/my/workshop?filter=road_test'" t-att-class="'workshop-stat-card workshop-stat-road h-100' + (' is-active' if active_filter == 'road_test' else '')">
                             <div class="workshop-stat-icon"><i class="fa fa-road"></i></div>
                             <div>
@@ -76,41 +80,29 @@
                             </div>
                         </a>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2 d-none">
-                        <a t-att-href="'/my/workshop?filter=purchase'" t-att-class="'workshop-stat-card workshop-stat-purchase h-100' + (' is-active' if active_filter == 'purchase' else '')">
-                            <div class="workshop-stat-icon"><i class="fa fa-shopping-cart"></i></div>
-                            <div>
-                                <div class="workshop-stat-label">Compras</div>
-                                <div class="workshop-stat-value" t-esc="stats['purchase']"/>
-                            </div>
-                        </a>
-                    </div>
                 </div>
 
+                <!-- Filtros — scroll horizontal en móvil -->
                 <div class="workshop-filter-bar mb-3">
                     <a t-att-href="'/my/workshop'"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'all' else '')">
-                        Todas <span class="badge text-bg-light" t-esc="stats['total']"/>
+                        Todas <span class="badge text-bg-light ms-1" t-esc="stats['total']"/>
                     </a>
                     <a t-att-href="'/my/workshop?filter=to_assign'"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'to_assign' else '')">
-                        <i class="fa fa-hourglass-half"></i> Por asignar
+                        <i class="fa fa-hourglass-half me-1"></i>Por asignar
                     </a>
                     <a t-att-href="'/my/workshop?filter=assigned'"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'assigned' else '')">
-                        <i class="fa fa-user-check"></i> Asignadas
+                        <i class="fa fa-users me-1"></i>Asignadas
                     </a>
                     <a t-att-href="'/my/workshop?filter=diagnosis'"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'diagnosis' else '')">
-                        <i class="fa fa-stethoscope"></i> Diagnóstico
+                        <i class="fa fa-stethoscope me-1"></i>Diagnóstico
                     </a>
                     <a t-att-href="'/my/workshop?filter=road_test'"
                        t-att-class="'workshop-filter-pill' + (' is-active' if active_filter == 'road_test' else '')">
-                        <i class="fa fa-road"></i> Ruta
-                    </a>
-                    <a t-att-href="'/my/workshop?filter=purchase'"
-                       t-att-class="'workshop-filter-pill d-none' + (' is-active' if active_filter == 'purchase' else '')">
-                        <i class="fa fa-shopping-cart"></i> Compras
+                        <i class="fa fa-road me-1"></i>Ruta
                     </a>
                 </div>
 
@@ -120,18 +112,24 @@
                         <input type="hidden" name="filter" t-att-value="active_filter"/>
                     </t>
                     <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="fa fa-search text-muted"></i></span>
-                        <input type="text" name="search" class="form-control border-start-0"
-                               placeholder="Buscar por orden, placa o cliente..."
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fa fa-search text-muted"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control border-start-0 border-end-0"
+                               placeholder="Orden, placa o cliente..."
                                t-att-value="search"/>
-                        <button class="btn btn-primary" type="submit">Buscar</button>
+                        <button class="btn btn-primary px-3" type="submit">
+                            <span class="d-none d-sm-inline">Buscar</span>
+                            <i class="fa fa-search d-sm-none"></i>
+                        </button>
                         <a t-if="search"
                            t-att-href="'/my/workshop' + ('?filter=' + active_filter if active_filter != 'all' else '')"
-                           class="btn btn-outline-secondary" title="Limpiar búsqueda" aria-label="Limpiar búsqueda">
+                           class="btn btn-outline-secondary px-2" title="Limpiar" aria-label="Limpiar búsqueda">
                             <i class="fa fa-times"></i>
                         </a>
                     </div>
                 </form>
+
 
                 <!-- Encabezado de resultados -->
                 <div class="workshop-results-header mb-3">
@@ -161,27 +159,29 @@
 
                 <!-- Tabla de órdenes -->
                 <div t-else="" class="table-responsive">
-                    <table class="table table-sm table-hover workshop-orders-table align-middle mb-0">
+                    <table class="table table-hover workshop-orders-table align-middle mb-0">
                         <thead class="table-light">
                             <tr>
                                 <th class="workshop-col-seq">Orden</th>
+                                <th class="workshop-col-vehicle">Placa</th>
                                 <th class="workshop-col-state">Estado</th>
-                                <th class="workshop-col-vehicle">Placa / Vehículo</th>
-                                <th class="workshop-col-client">Cliente</th>
-                                <th class="workshop-col-date">Fecha</th>
-                                <th class="workshop-col-people d-none d-md-table-cell">Asesor</th>
-                                <th class="workshop-col-people d-none d-md-table-cell">Técnico mecánico</th>
-                                <th class="workshop-col-svcs text-center d-none d-sm-table-cell">Servicios</th>
-                                <th class="workshop-col-action"></th>
+                                <th style="width:1%;"></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr t-foreach="repairs" t-as="repair"
-                                t-attf-class="workshop-table-row workshop-row-state-#{repair.state or 'draft'}">
+                                t-attf-class="workshop-table-row workshop-row-state-#{repair.state or 'draft'}"
+                                t-attf-onclick="window.location.href='/my/workshop/order/#{repair.id}'"
+                                style="cursor:pointer;">
 
                                 <!-- Orden -->
                                 <td class="workshop-col-seq fw-semibold text-nowrap">
                                     <t t-esc="repair.sequence or repair.display_name"/>
+                                </td>
+
+                                <!-- Placa -->
+                                <td class="workshop-col-vehicle">
+                                    <span class="fw-semibold" t-esc="repair.license_plate or '—'"/>
                                 </td>
 
                                 <!-- Estado -->
@@ -190,59 +190,9 @@
                                           t-esc="repair.get_state_label()"/>
                                 </td>
 
-                                <!-- Placa / Vehículo -->
-                                <td class="workshop-col-vehicle">
-                                    <span class="fw-semibold text-nowrap" t-esc="repair.license_plate or '—'"/>
-                                    <t t-set="vparts" t-value="[x for x in [repair.vehicle_brand_id.name, repair.model_id.name, repair.model_year] if x]"/>
-                                    <div t-if="vparts" class="text-muted small" t-esc="' · '.join(vparts)"/>
-                                </td>
-
-                                <!-- Cliente -->
-                                <td class="workshop-col-client">
-                                    <t t-esc="repair.client_id.display_name or '—'"/>
-                                </td>
-
-                                <!-- Fecha -->
-                                <td class="workshop-col-date text-nowrap text-muted small">
-                                    <t t-if="repair.receipt_date">
-                                        <t t-esc="repair.receipt_date.strftime('%d/%m/%Y')"/>
-                                    </t>
-                                    <t t-else="">—</t>
-                                </td>
-
-                                <!-- Asesor -->
-                                <td class="workshop-col-people d-none d-md-table-cell small">
-                                    <t t-if="repair.portal_advisor_id">
-                                        <i class="fa fa-id-badge text-muted me-1"/>
-                                        <t t-esc="repair.portal_advisor_id.display_name"/>
-                                    </t>
-                                    <span t-else="" class="text-muted">—</span>
-                                </td>
-
-                                <!-- Técnico -->
-                                <td class="workshop-col-people d-none d-md-table-cell small">
-                                    <t t-if="repair.portal_technician_id or repair.user_id">
-                                        <i class="fa fa-wrench text-muted me-1"/>
-                                        <t t-esc="(repair.portal_technician_id or repair.user_id).display_name"/>
-                                    </t>
-                                    <span t-else="" class="text-warning">
-                                        <i class="fa fa-exclamation-circle me-1"/>Sin asignar
-                                    </span>
-                                </td>
-
-                                <!-- Servicios -->
-                                <td class="workshop-col-svcs text-center d-none d-sm-table-cell">
-                                    <t t-set="svc_count" t-value="len([l for l in repair.fleet_repair_line if l.service_type])"/>
-                                    <span t-if="svc_count" class="badge text-bg-secondary" t-esc="svc_count"/>
-                                    <span t-else="" class="text-muted small">—</span>
-                                </td>
-
-                                <!-- Acción -->
-                                <td class="workshop-col-action text-end text-nowrap">
-                                    <a t-att-href="'/my/workshop/order/%s' % repair.id"
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                                    </a>
+                                <!-- Chevron -->
+                                <td class="text-end text-muted pe-3">
+                                    <i class="fa fa-chevron-right"/>
                                 </td>
                             </tr>
                         </tbody>
@@ -724,110 +674,124 @@
 
                 <div class="row g-3">
                     <div class="col-lg-5">
-                        <div class="workshop-info-card h-100">
-                            <div class="workshop-info-card-header">
+                        <div class="workshop-info-card">
+                            <div class="workshop-info-card-header workshop-collapsible-header"
+                                 data-bs-toggle="collapse"
+                                 data-bs-target="#collapse-vehicle-data"
+                                 aria-expanded="false"
+                                 aria-controls="collapse-vehicle-data">
                                 <i class="fa fa-car"></i>
                                 <h2 class="workshop-info-card-title">Datos del vehículo</h2>
+                                <i class="fa fa-chevron-down ms-auto workshop-collapse-chevron"></i>
                             </div>
-                            <div class="workshop-info-card-body">
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Placa</span>
-                                    <span class="workshop-info-value" t-esc="repair.license_plate or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Marca</span>
-                                    <span class="workshop-info-value" t-esc="repair.vehicle_brand_id.name or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Línea</span>
-                                    <span class="workshop-info-value" t-esc="repair.model_id.name or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Modelo (año)</span>
-                                    <span class="workshop-info-value" t-esc="repair.model_year or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Cilindraje (cc)</span>
-                                    <span class="workshop-info-value" t-esc="repair.engine_displacement or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Combustible</span>
-                                    <span class="workshop-info-value" t-esc="dict(repair._fields['fuel_type'].selection).get(repair.fuel_type) or repair.fuel_type or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Nº de chasis (VIN)</span>
-                                    <span class="workshop-info-value text-truncate" t-esc="repair.vin_sn or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Nº de motor</span>
-                                    <span class="workshop-info-value text-truncate" t-esc="repair.engine_number or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Kilometraje</span>
-                                    <span class="workshop-info-value" t-esc="repair.reception_mileage or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Nivel combustible</span>
-                                    <span class="workshop-info-value" t-esc="dict(repair._fields['reception_fuel_level'].selection).get(repair.reception_fuel_level) or '—'"/>
+                            <div class="collapse" id="collapse-vehicle-data">
+                                <div class="workshop-info-card-body">
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Placa</span>
+                                        <span class="workshop-info-value" t-esc="repair.license_plate or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Marca</span>
+                                        <span class="workshop-info-value" t-esc="repair.vehicle_brand_id.name or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Línea</span>
+                                        <span class="workshop-info-value" t-esc="repair.model_id.name or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Modelo (año)</span>
+                                        <span class="workshop-info-value" t-esc="repair.model_year or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Cilindraje (cc)</span>
+                                        <span class="workshop-info-value" t-esc="repair.engine_displacement or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Combustible</span>
+                                        <span class="workshop-info-value" t-esc="dict(repair._fields['fuel_type'].selection).get(repair.fuel_type) or repair.fuel_type or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Nº de chasis (VIN)</span>
+                                        <span class="workshop-info-value text-truncate" t-esc="repair.vin_sn or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Nº de motor</span>
+                                        <span class="workshop-info-value text-truncate" t-esc="repair.engine_number or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Kilometraje</span>
+                                        <span class="workshop-info-value" t-esc="repair.reception_mileage or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Nivel combustible</span>
+                                        <span class="workshop-info-value" t-esc="dict(repair._fields['reception_fuel_level'].selection).get(repair.reception_fuel_level) or '—'"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-7">
-                        <div class="workshop-info-card h-100">
-                            <div class="workshop-info-card-header">
+                        <div class="workshop-info-card">
+                            <div class="workshop-info-card-header workshop-collapsible-header"
+                                 data-bs-toggle="collapse"
+                                 data-bs-target="#collapse-order-data"
+                                 aria-expanded="false"
+                                 aria-controls="collapse-order-data">
                                 <i class="fa fa-clipboard-list"></i>
                                 <h2 class="workshop-info-card-title">Datos de la orden</h2>
+                                <i class="fa fa-chevron-down ms-auto workshop-collapse-chevron"></i>
                             </div>
-                            <div class="workshop-info-card-body">
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Cliente</span>
-                                    <span class="workshop-info-value text-truncate" t-esc="repair.client_id.display_name or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Tipo</span>
-                                    <span class="workshop-info-value" t-esc="dict(repair._fields['customer_type'].selection).get(repair.customer_type)"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Teléfono</span>
-                                    <span class="workshop-info-value" t-esc="repair.client_phone or repair.phone or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Persona que entrega</span>
-                                    <span class="workshop-info-value text-truncate" t-esc="repair.delivered_by_name or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Celular entrega</span>
-                                    <span class="workshop-info-value" t-esc="repair.delivered_by_phone or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Documento</span>
-                                    <span class="workshop-info-value" t-esc="repair.delivered_by_document or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">CI Renting</span>
-                                    <span class="workshop-info-value" t-esc="repair.renting_reference or '—'"/>
-                                </div>
-                                <div class="workshop-info-row workshop-info-row-multiline">
-                                    <span class="workshop-info-label">Servicios</span>
-                                    <div class="workshop-info-value workshop-info-services">
-                                        <t t-set="service_records" t-value="repair.fleet_repair_line.filtered(lambda l: l.service_type)"/>
-                                        <t t-if="service_records">
-                                            <span t-foreach="service_records" t-as="svc" class="workshop-service-chip">
-                                                <i class="fa fa-wrench"></i>
-                                                <span t-esc="svc.service_type.name"/>
-                                            </span>
-                                        </t>
-                                        <span t-else="" class="text-muted">—</span>
+                            <div class="collapse" id="collapse-order-data">
+                                <div class="workshop-info-card-body">
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Cliente</span>
+                                        <span class="workshop-info-value text-truncate" t-esc="repair.client_id.display_name or '—'"/>
                                     </div>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Técnico</span>
-                                    <span class="workshop-info-value text-truncate" t-esc="repair.portal_technician_id.display_name or repair.user_id.display_name or '—'"/>
-                                </div>
-                                <div class="workshop-info-row">
-                                    <span class="workshop-info-label">Prueba ruta</span>
-                                    <span class="workshop-info-value text-truncate" t-esc="repair.road_test_user_id.display_name or '—'"/>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Tipo</span>
+                                        <span class="workshop-info-value" t-esc="dict(repair._fields['customer_type'].selection).get(repair.customer_type)"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Teléfono</span>
+                                        <span class="workshop-info-value" t-esc="repair.client_phone or repair.phone or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Persona que entrega</span>
+                                        <span class="workshop-info-value text-truncate" t-esc="repair.delivered_by_name or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Celular entrega</span>
+                                        <span class="workshop-info-value" t-esc="repair.delivered_by_phone or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Documento</span>
+                                        <span class="workshop-info-value" t-esc="repair.delivered_by_document or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">CI Renting</span>
+                                        <span class="workshop-info-value" t-esc="repair.renting_reference or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row workshop-info-row-multiline">
+                                        <span class="workshop-info-label">Servicios</span>
+                                        <div class="workshop-info-value workshop-info-services">
+                                            <t t-set="service_records" t-value="repair.fleet_repair_line.filtered(lambda l: l.service_type)"/>
+                                            <t t-if="service_records">
+                                                <span t-foreach="service_records" t-as="svc" class="workshop-service-chip">
+                                                    <i class="fa fa-wrench"></i>
+                                                    <span t-esc="svc.service_type.name"/>
+                                                </span>
+                                            </t>
+                                            <span t-else="" class="text-muted">—</span>
+                                        </div>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Técnico</span>
+                                        <span class="workshop-info-value text-truncate" t-esc="repair.portal_technician_id.display_name or repair.user_id.display_name or '—'"/>
+                                    </div>
+                                    <div class="workshop-info-row">
+                                        <span class="workshop-info-label">Prueba ruta</span>
+                                        <span class="workshop-info-value text-truncate" t-esc="repair.road_test_user_id.display_name or '—'"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -840,13 +804,13 @@
                     <!-- 1. Servicios solicitados -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading-services">
-                            <button class="accordion-button" type="button"
+                            <button class="accordion-button collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapse-services"
-                                    aria-expanded="true" aria-controls="collapse-services">
+                                    aria-expanded="false" aria-controls="collapse-services">
                                 <i class="fa fa-wrench me-2"></i> Servicios solicitados
                             </button>
                         </h2>
-                        <div id="collapse-services" class="accordion-collapse collapse show"
+                        <div id="collapse-services" class="accordion-collapse collapse"
                              aria-labelledby="heading-services">
                             <div class="accordion-body">
                                 <p class="small text-muted mb-3">Servicios registrados en la orden. El técnico marca cada uno a medida que lo completa.</p>
@@ -862,7 +826,8 @@
                                 </div>
                                 <div t-if="not service_lines" class="text-muted">No hay servicios registrados para esta orden.</div>
                                 <form t-if="service_lines" id="workshop-services-form"
-                                      t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post">
+                                      t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post"
+                                      t-att-data-repair-id="repair.id">
                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                     <input type="hidden" name="action" value="save"/>
                                     <div class="table-responsive">
@@ -941,7 +906,8 @@
                         </div>
                     </div>
 
-                    <!-- 2. Checklist de recepción -->
+                    <!-- 2. Checklist de recepción — solo visible para asesores/managers -->
+                    <t t-if="is_advisor or is_internal_manager">
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading-checklist-recepcion">
                             <button class="accordion-button collapsed" type="button"
@@ -993,6 +959,7 @@
                             </div>
                         </div>
                     </div>
+                    </t>
 
                     <!-- 3. Checklist técnico -->
                     <div id="workshop-checklist-tecnico" class="accordion-item">
@@ -1032,7 +999,9 @@
                                     <t t-set="tire_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'tires')"/>
                                     <t t-set="doc_lines" t-value="tecnico_lines.filtered(lambda l: l.template_line_id.section == 'documents')"/>
 
-                                    <form t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post" id="tecnico_checklist_form">
+                                    <form t-att-action="'/my/workshop/order/%s/technician' % repair.id" method="post"
+                                          id="tecnico_checklist_form"
+                                          t-att-data-repair-id="repair.id">
                                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                         <input type="hidden" name="action" value="save"/>
 
@@ -1513,7 +1482,9 @@
                              aria-labelledby="heading-prueba-ruta">
                             <div class="accordion-body">
                                 <t t-if="is_road_test">
-                                    <form t-att-action="'/my/workshop/order/%s/road-test' % repair.id" method="post">
+                                    <form t-att-action="'/my/workshop/order/%s/road-test' % repair.id" method="post"
+                                          id="workshop-road-test-form"
+                                          t-att-data-repair-id="repair.id">
                                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                         <label class="form-label">Resultado</label>
                                         <textarea name="road_test_result" class="form-control mb-3" rows="4"><t t-esc="repair.road_test_result or ''"/></textarea>

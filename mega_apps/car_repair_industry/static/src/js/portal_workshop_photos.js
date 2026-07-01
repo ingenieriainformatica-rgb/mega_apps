@@ -1051,55 +1051,101 @@ publicWidget.registry.WorkshopSpareEditLine = publicWidget.Widget.extend({
     },
 });
 
-publicWidget.registry.WorkshopChecklistValidation = publicWidget.Widget.extend({
-    selector: "#tecnico_checklist_form",
-    events: {
-        "submit": "_onSubmit",
+publicWidget.registry.WorkshopChecklistSave = publicWidget.Widget.extend({
+    selector: '#tecnico_checklist_form',
+    events: { 'submit': '_onSubmit' },
+    start() {
+        this._repairId = this.el.dataset.repairId;
+        return this._super(...arguments);
     },
-
-    _onSubmit(ev) {
+    async _onSubmit(ev) {
+        ev.preventDefault();
         const form = this.el;
-        const errorBox = document.getElementById("checklist-error-msg");
+        const errorBox = document.getElementById('checklist-error-msg');
         let firstInvalid = null;
 
-        // Reset previous highlights
-        form.querySelectorAll(".is-invalid").forEach(el => el.classList.remove("is-invalid"));
+        form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
-        // 1. Validate radio groups (general inspection items)
         const radioGroups = {};
         form.querySelectorAll("input[type='radio'][required]").forEach(radio => {
-            if (!(radio.name in radioGroups)) {
-                radioGroups[radio.name] = { checked: false, radios: [] };
-            }
+            if (!(radio.name in radioGroups)) radioGroups[radio.name] = { checked: false, radios: [] };
             radioGroups[radio.name].radios.push(radio);
             if (radio.checked) radioGroups[radio.name].checked = true;
         });
-
         Object.values(radioGroups).forEach(group => {
             if (!group.checked) {
-                group.radios.forEach(r => r.classList.add("is-invalid"));
+                group.radios.forEach(r => r.classList.add('is-invalid'));
                 if (!firstInvalid) firstInvalid = group.radios[0];
             }
         });
 
-        // 2. Validate required text inputs (measurements)
         form.querySelectorAll("input[type='text'][required], input:not([type])[required]").forEach(input => {
             if (!input.value.trim()) {
-                input.classList.add("is-invalid");
+                input.classList.add('is-invalid');
                 if (!firstInvalid) firstInvalid = input;
             }
         });
 
         if (firstInvalid) {
-            ev.preventDefault();
-            if (errorBox) errorBox.classList.remove("d-none");
-            firstInvalid.closest("tr")
-                ? firstInvalid.closest("tr").scrollIntoView({ behavior: "smooth", block: "center" })
-                : firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
-            return false;
+            if (errorBox) errorBox.classList.remove('d-none');
+            firstInvalid.closest('tr')
+                ? firstInvalid.closest('tr').scrollIntoView({ behavior: 'smooth', block: 'center' })
+                : firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
         }
+        if (errorBox) errorBox.classList.add('d-none');
 
-        if (errorBox) errorBox.classList.add("d-none");
+        const lineMap = {};
+        const getLine = id => { if (!lineMap[id]) lineMap[id] = { id: parseInt(id, 10) }; return lineMap[id]; };
+
+        const seenState = new Set();
+        form.querySelectorAll('[name^="tech_state_"]').forEach(el => {
+            const id = el.name.replace('tech_state_', '');
+            if (seenState.has(id)) return;
+            seenState.add(id);
+            if (el.tagName === 'SELECT') {
+                getLine(id).state = el.value;
+            } else {
+                const checked = form.querySelector(`input[name="${el.name}"]:checked`);
+                if (checked) getLine(id).state = checked.value;
+            }
+        });
+        form.querySelectorAll('[name^="tech_obs_"]').forEach(el => {
+            getLine(el.name.replace('tech_obs_', '')).observation = el.value || '';
+        });
+        form.querySelectorAll('[name^="tech_measure_left_"]').forEach(el => {
+            getLine(el.name.replace('tech_measure_left_', '')).measurement_left = el.value || '';
+        });
+        form.querySelectorAll('[name^="tech_measure_right_"]').forEach(el => {
+            getLine(el.name.replace('tech_measure_right_', '')).measurement_right = el.value || '';
+        });
+        form.querySelectorAll('[name^="tech_position_"]').forEach(el => {
+            getLine(el.name.replace('tech_position_', '')).position = el.value || '';
+        });
+
+        const btn = form.querySelector('[type="submit"]');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Guardando...';
+
+        try {
+            const result = await _rpc(`/my/workshop/order/${this._repairId}/checklist/save`, {
+                lines: Object.values(lineMap),
+            });
+            if (result.ok) {
+                _showWorkshopToast('Checklist guardado correctamente');
+                btn.innerHTML = '<i class="fa fa-check me-1"></i> Guardado';
+                setTimeout(() => { btn.innerHTML = original; btn.disabled = false; }, 2500);
+            } else {
+                _showWorkshopToast(result.error || 'Error al guardar', 'danger');
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            _showWorkshopToast(err.message || 'Error de red.', 'danger');
+            btn.innerHTML = original;
+            btn.disabled = false;
+        }
     },
 });
 
@@ -1129,5 +1175,121 @@ publicWidget.registry.WorkshopPrintChecklist = publicWidget.Widget.extend({
         };
         setTimeout(restore, 1500);
         window.print();
+    },
+});
+
+function _showWorkshopToast(message, type = 'success') {
+    let container = document.getElementById('workshop-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'workshop-toast-container';
+        container.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} shadow mb-0 py-2 px-3`;
+    toast.style.cssText = 'min-width:220px;max-width:360px;animation:fadeIn .2s ease;';
+    toast.innerHTML = `<i class="fa fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+async function _rpc(route, params) {
+    const resp = await fetch(route, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'call', id: 1, params }),
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.data?.message || data.error.message || 'Error del servidor');
+    return data.result;
+}
+
+publicWidget.registry.WorkshopServicesSave = publicWidget.Widget.extend({
+    selector: '#workshop-services-form',
+    events: { 'submit': '_onSubmit' },
+    start() {
+        this._repairId = this.el.dataset.repairId;
+        return this._super(...arguments);
+    },
+    async _onSubmit(ev) {
+        ev.preventDefault();
+        const form = this.el;
+        const btn = form.querySelector('[type="submit"]');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Guardando...';
+
+        const params = { services: [] };
+        const seen = new Set();
+        form.querySelectorAll('[name^="svc_status_"]').forEach(el => {
+            const lineId = el.name.replace('svc_status_', '');
+            if (seen.has(lineId)) return;
+            seen.add(lineId);
+            params.services.push({
+                id: parseInt(lineId, 10),
+                status: el.value,
+                notes: form.querySelector(`[name="svc_notes_${lineId}"]`)?.value || '',
+            });
+        });
+
+        try {
+            const result = await _rpc(`/my/workshop/order/${this._repairId}/technician/save`, params);
+            if (result.ok) {
+                _showWorkshopToast('Guardado correctamente');
+                btn.innerHTML = '<i class="fa fa-check me-1"></i> Guardado';
+                setTimeout(() => { btn.innerHTML = original; btn.disabled = false; }, 2500);
+            } else {
+                _showWorkshopToast(result.error || 'Error al guardar', 'danger');
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            _showWorkshopToast(err.message || 'Error de red.', 'danger');
+            btn.innerHTML = original;
+            btn.disabled = false;
+        }
+    },
+});
+
+publicWidget.registry.WorkshopRoadTestSave = publicWidget.Widget.extend({
+    selector: '#workshop-road-test-form',
+    events: { 'submit': '_onSubmit' },
+    start() {
+        this._repairId = this.el.dataset.repairId;
+        return this._super(...arguments);
+    },
+    async _onSubmit(ev) {
+        ev.preventDefault();
+        const form = this.el;
+        const action = ev.submitter?.value || 'finish';
+        const btn = ev.submitter || form.querySelector('[type="submit"]');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Guardando...';
+
+        try {
+            const result = await _rpc(`/my/workshop/order/${this._repairId}/road-test/save`, {
+                road_test_result: form.querySelector('[name="road_test_result"]')?.value || '',
+                action,
+            });
+            if (result.ok) {
+                _showWorkshopToast(action === 'start' ? 'Prueba de ruta iniciada' : 'Prueba de ruta finalizada');
+                if (result.reload) {
+                    setTimeout(() => window.location.reload(), 1200);
+                } else {
+                    btn.innerHTML = original;
+                    btn.disabled = false;
+                }
+            } else {
+                _showWorkshopToast(result.error || 'Error al guardar', 'danger');
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            _showWorkshopToast(err.message || 'Error de red.', 'danger');
+            btn.innerHTML = original;
+            btn.disabled = false;
+        }
     },
 });

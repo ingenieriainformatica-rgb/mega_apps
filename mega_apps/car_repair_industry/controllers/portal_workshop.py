@@ -67,12 +67,13 @@ class CarRepairPortalWorkshop(http.Controller):
             raise AccessError(_("No tiene acceso a esta orden."))
         return repair
 
+    # Each entry: (field, operator, value)
     FILTER_STATE_MAP = {
-        'to_assign': ('==', 'to_assign'),
-        'assigned': ('==', 'assigned'),
-        'diagnosis': ('==', 'diagnosis'),
-        'road_test': ('in', ('road_test_requested', 'road_test')),
-        'purchase': ('==', 'purchase_requested'),
+        'to_assign': ('service_flow_state', '=',  'to_assign'),
+        'assigned':  ('service_flow_state', '=',  'assigned'),
+        'diagnosis': ('state',              '=',  'diagnosis'),
+        'road_test': ('service_flow_state', 'in', ('road_test_requested', 'road_test')),
+        'purchase':  ('service_flow_state', '=',  'purchase_requested'),
     }
 
     def _dashboard_values(self, active_filter='all', search='', page=1):
@@ -82,11 +83,7 @@ class CarRepairPortalWorkshop(http.Controller):
         # Filter domain applied on top of base access domain
         filter_domain = list(base_domain)
         if active_filter in self.FILTER_STATE_MAP:
-            op, val = self.FILTER_STATE_MAP[active_filter]
-            if op == '==':
-                filter_domain.append(('service_flow_state', '=', val))
-            else:
-                filter_domain.append(('service_flow_state', 'in', list(val)))
+            filter_domain.append(self.FILTER_STATE_MAP[active_filter])
 
         # Search domain applied on top of filter domain
         search_domain = list(filter_domain)
@@ -124,12 +121,12 @@ class CarRepairPortalWorkshop(http.Controller):
 
         # Stats always reflect all accessible repairs (no search/filter applied)
         stats = {
-            'total': Repair.search_count(base_domain),
+            'total':     Repair.search_count(base_domain),
             'to_assign': Repair.search_count(base_domain + [('service_flow_state', '=', 'to_assign')]),
-            'assigned': Repair.search_count(base_domain + [('service_flow_state', '=', 'assigned')]),
-            'diagnosis': Repair.search_count(base_domain + [('service_flow_state', '=', 'diagnosis')]),
+            'assigned':  Repair.search_count(base_domain + [('service_flow_state', '=', 'assigned')]),
+            'diagnosis': Repair.search_count(base_domain + [('state', '=', 'diagnosis')]),
             'road_test': Repair.search_count(base_domain + [('service_flow_state', 'in', ['road_test_requested', 'road_test'])]),
-            'purchase': Repair.search_count(base_domain + [('service_flow_state', '=', 'purchase_requested')]),
+            'purchase':  Repair.search_count(base_domain + [('service_flow_state', '=', 'purchase_requested')]),
         }
 
         return {
@@ -579,8 +576,110 @@ class CarRepairPortalWorkshop(http.Controller):
         elif action == 'send_purchase':
             repair.sudo().action_flow_send_to_purchase()
         else:
-            repair.message_post(body=_("Avance técnico guardado por %s.") % request.env.user.display_name)
+            try:
+                with request.env.cr.savepoint():
+                    repair.message_post(body=_("Avance técnico guardado por %s.") % request.env.user.display_name)
+            except Exception:
+                pass
         return request.redirect('/my/workshop/order/%s' % repair.id)
+
+    # ── Rutas JSON-RPC (sin recarga de página) ─────────────────────────────
+
+    @http.route('/my/workshop/order/<int:repair_id>/technician/save', type='json', auth='user', website=True)
+    def workshop_technician_save(self, repair_id, technical_observation='', requested_materials='', services=None, **kw):
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError):
+            return {'error': 'forbidden'}
+        if not (self._is_technician() or self._is_internal_manager()):
+            return {'error': 'forbidden'}
+
+        repair.sudo().write({
+            'technical_observation': technical_observation or False,
+            'requested_materials': requested_materials or False,
+        })
+
+        RepairLine = request.env['fleet.repair.line'].sudo()
+        allowed_statuses = {'pendiente', 'en_progreso', 'completado'}
+        for svc in (services or []):
+            try:
+                line = RepairLine.browse(int(svc.get('id') or 0))
+            except (TypeError, ValueError):
+                continue
+            if not line.exists() or line.fleet_repair_id.id != repair.id:
+                continue
+            write_vals = {}
+            if svc.get('status') in allowed_statuses:
+                write_vals['tecnico_status'] = svc['status']
+            if 'notes' in svc:
+                write_vals['tecnico_notes'] = svc.get('notes') or False
+            if write_vals:
+                line.write(write_vals)
+                diag_copies = RepairLine.search([('source_line_id', '=', line.id)])
+                if diag_copies:
+                    diag_copies.write(write_vals)
+
+        return {'ok': True}
+
+    @http.route('/my/workshop/order/<int:repair_id>/checklist/save', type='json', auth='user', website=True)
+    def workshop_checklist_save(self, repair_id, lines=None, **kw):
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError):
+            return {'error': 'forbidden'}
+        if not (self._is_technician() or self._is_internal_manager()):
+            return {'error': 'forbidden'}
+
+        ChecklistLine = request.env['fleet.repair.reception.checklist.line'].sudo()
+        allowed_states = {'good', 'regular', 'bad', 'not_apply'}
+        allowed_repaired = {'yes', 'no', 'pending'}
+        for item in (lines or []):
+            try:
+                line = ChecklistLine.browse(int(item.get('id') or 0))
+            except (TypeError, ValueError):
+                continue
+            if not line.exists() or line.repair_id.id != repair.id:
+                continue
+            write_vals = {}
+            if item.get('state') in allowed_states:
+                write_vals['state'] = item['state']
+            if 'observation' in item:
+                write_vals['observation'] = item.get('observation') or False
+            if item.get('repaired') in allowed_repaired:
+                write_vals['repaired'] = item['repaired']
+            if 'measurement_left' in item:
+                write_vals['measurement_left'] = item.get('measurement_left') or False
+            if 'measurement_right' in item:
+                write_vals['measurement_right'] = item.get('measurement_right') or False
+            if 'position' in item:
+                write_vals['position'] = item.get('position') or False
+            if item.get('expiration_date'):
+                try:
+                    from datetime import datetime
+                    write_vals['expiration_date'] = datetime.strptime(item['expiration_date'], '%Y-%m-%d').date()
+                except (ValueError, TypeError):
+                    pass
+            if write_vals:
+                line.write(write_vals)
+
+        return {'ok': True}
+
+    @http.route('/my/workshop/order/<int:repair_id>/road-test/save', type='json', auth='user', website=True)
+    def workshop_road_test_save(self, repair_id, road_test_result='', action='finish', **kw):
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError):
+            return {'error': 'forbidden'}
+        if not self._is_road_test():
+            return {'error': 'forbidden'}
+
+        repair.sudo().write({'road_test_result': road_test_result or False})
+        if action == 'start':
+            repair.sudo().action_flow_start_road_test()
+        else:
+            repair.sudo().action_flow_finish_road_test()
+
+        return {'ok': True, 'reload': True}
 
     @http.route('/my/workshop/order/<int:repair_id>/checklist/pdf', type='http', auth='user', website=True)
     def workshop_checklist_pdf(self, repair_id, **kwargs):

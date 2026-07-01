@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from markupsafe import Markup
 
-from odoo import fields, models, _
-from odoo.exceptions import UserError
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError, ValidationError
 
 _ALLOWED_GROUPS = [
     'car_repair_industry.group_fleet_repair_head_technician',
@@ -23,13 +23,28 @@ class FleetDiagnoseAssigntoTechnician(models.TransientModel):
         string='Técnico actual',
         readonly=True,
     )
+    available_technician_ids = fields.Many2many(
+        'res.users',
+        compute='_compute_available_technicians',
+        string='Técnicos disponibles',
+    )
     user_id = fields.Many2one(
         'res.users',
         string='Técnico',
         required=True,
-        domain=[('active', '=', True), ('share', '=', True)],
+        domain="[('id', 'in', available_technician_ids)]",
     )
     reassign_reason = fields.Char(string='Motivo de reasignación')
+
+    @api.depends('is_reassignment')
+    def _compute_available_technicians(self):
+        group = self.env.ref(_TECHNICIAN_GROUP)
+        users = self.env['res.users'].search([
+            ('active', '=', True),
+            ('groups_id', 'in', [group.id]),
+        ])
+        for rec in self:
+            rec.available_technician_ids = users
 
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
@@ -83,11 +98,12 @@ class FleetDiagnoseAssigntoTechnician(models.TransientModel):
         if not new_user:
             raise UserError(_("Debe seleccionar un técnico."))
         if not new_user.active:
-            raise UserError(_("El técnico seleccionado está inactivo."))
+            raise ValidationError(_("El técnico seleccionado está inactivo."))
         if not new_user.has_group(_TECHNICIAN_GROUP):
-            raise UserError(_(
-                "El usuario seleccionado no pertenece al grupo de técnicos del portal."
-            ))
+            raise ValidationError(_(
+                "El usuario «%s» no tiene el rol «Portal - Técnico». "
+                "Solo pueden asignarse usuarios portal con ese rol."
+            ) % new_user.display_name)
 
         previous_user = diagnose.user_id
         is_reassignment = bool(previous_user)
