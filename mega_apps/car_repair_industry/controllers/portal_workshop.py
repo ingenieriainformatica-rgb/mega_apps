@@ -46,10 +46,15 @@ class CarRepairPortalWorkshop(http.Controller):
             domains.append(('portal_technician_id', '=', user.id))
         if self._is_road_test():
             domains.append(('road_test_user_id', '=', user.id))
+            road_test_repair_ids = request.env['fleet.road.test'].sudo().search(
+                [('driver_id', '=', user.id)]
+            ).mapped('repair_id.id')
+            if road_test_repair_ids:
+                domains.append(('id', 'in', road_test_repair_ids))
         if not domains:
             return [('id', '=', 0)]
         if len(domains) == 1:
-            return domains
+            return domains[0:1]
         domain = ['|'] * (len(domains) - 1)
         for item in domains:
             domain.append(item)
@@ -63,6 +68,8 @@ class CarRepairPortalWorkshop(http.Controller):
         user = request.env.user
         allowed = allowed or (self._is_technician() and repair.portal_technician_id.id == user.id)
         allowed = allowed or (self._is_road_test() and repair.road_test_user_id.id == user.id)
+        if not allowed and self._is_road_test():
+            allowed = bool(repair.road_test_ids.filtered(lambda rt: rt.driver_id.id == user.id))
         if not allowed:
             raise AccessError(_("No tiene acceso a esta orden."))
         return repair
@@ -793,6 +800,72 @@ class CarRepairPortalWorkshop(http.Controller):
                 line.write(write_vals)
 
         return {'ok': True}
+
+    @http.route('/my/workshop/order/<int:repair_id>/road-test/request', type='http', auth='user', website=True, methods=['POST'])
+    def workshop_road_test_request(self, repair_id, **post):
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        if not (self._is_advisor() or self._is_technician() or self._is_internal_manager()):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        test_type = post.get('test_type', 'after')
+        if test_type not in ('before', 'during', 'after'):
+            test_type = 'after'
+        request.env['fleet.road.test'].sudo().create({
+            'repair_id': repair.id,
+            'test_type': test_type,
+            'request_observation': (post.get('request_observation') or '').strip() or False,
+            'requested_by_id': request.env.user.id,
+        })
+        return request.redirect('/my/workshop/order/%s' % repair_id)
+
+    @http.route('/my/workshop/order/<int:repair_id>/road-test/<int:test_id>/update', type='http', auth='user', website=True, methods=['POST'])
+    def workshop_road_test_test_update(self, repair_id, test_id, **post):
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        if not (self._is_road_test() or self._is_internal_manager()):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        road_test = request.env['fleet.road.test'].sudo().browse(test_id)
+        if not road_test.exists() or road_test.repair_id.id != repair_id:
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        user = request.env.user
+        if not (self._is_internal_manager() or road_test.driver_id.id == user.id):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+
+        vals = {}
+        result_val = (post.get('result') or '').strip()
+        if result_val:
+            vals['result'] = result_val
+        final_obs = (post.get('final_observations') or '').strip()
+        if final_obs:
+            vals['final_observations'] = final_obs
+        try:
+            km_start = float(post.get('km_start') or 0)
+            if km_start > 0:
+                vals['km_start'] = km_start
+        except (ValueError, TypeError):
+            pass
+        try:
+            km_end = float(post.get('km_end') or 0)
+            if km_end > 0:
+                vals['km_end'] = km_end
+        except (ValueError, TypeError):
+            pass
+
+        action = post.get('action')
+        if action == 'start' and road_test.state == 'assigned':
+            vals['state'] = 'in_progress'
+        elif action == 'done' and road_test.state == 'in_progress':
+            vals['state'] = 'done'
+            vals['completed_at'] = fields.Datetime.now()
+
+        if vals:
+            road_test.sudo().write(vals)
+
+        return request.redirect('/my/workshop/order/%s' % repair_id)
 
     @http.route('/my/workshop/order/<int:repair_id>/road-test/save', type='json', auth='user', website=True)
     def workshop_road_test_save(self, repair_id, road_test_result='', action='finish', **kw):

@@ -2,6 +2,7 @@
 # Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
 
 from . import fleet_repair_branch
+from . import fleet_road_test
 from . import fleet_repair
 from . import fleet_diagnose
 from . import fleet_workorder

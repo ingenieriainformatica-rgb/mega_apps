@@ -74,7 +74,7 @@
             <field name="sequence">100</field>
             <field name="section">general_2</field>
             <field name="template_id" ref="reception_checklist_template_light_vehicles"/>
-            <field name="name">Emergencia</field>
+            <field name="name">Frenos de emergencia</field>
         </record>
 
         <record id="reception_checklist_light_item_espejos" model="fleet.repair.reception.checklist.template.line">
@@ -95,7 +95,7 @@
             <field name="sequence">130</field>
             <field name="section">general_2</field>
             <field name="template_id" ref="reception_checklist_template_light_vehicles"/>
-            <field name="name">Testigos</field>
+            <field name="name">Testigos a bordo</field>
         </record>
 
         <record id="reception_checklist_light_item_cinturones" model="fleet.repair.reception.checklist.template.line">

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_fleet_road_test_list" model="ir.ui.view">
+        <field name="name">fleet.road.test.list</field>
+        <field name="model">fleet.road.test</field>
+        <field name="arch" type="xml">
+            <list string="Pruebas de Ruta"
+                  decoration-success="state == 'done'"
+                  decoration-info="state == 'assigned'"
+                  decoration-warning="state == 'in_progress'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="repair_id"/>
+                <field name="test_type"/>
+                <field name="requested_by_id"/>
+                <field name="requested_at"/>
+                <field name="driver_id"/>
+                <field name="state" widget="badge"
+                       decoration-muted="state == 'requested'"
+                       decoration-info="state == 'assigned'"
+                       decoration-warning="state == 'in_progress'"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state == 'cancelled'"/>
+                <field name="km_start" optional="hide"/>
+                <field name="km_end" optional="hide"/>
+                <field name="completed_at" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_fleet_road_test_form" model="ir.ui.view">
+        <field name="name">fleet.road.test.form</field>
+        <field name="model">fleet.road.test</field>
+        <field name="arch" type="xml">
+            <form string="Prueba de Ruta">
+                <header>
+                    <button name="action_assign" string="Asignar" type="object"
+                            invisible="state != 'requested'"
+                            class="oe_highlight"
+                            groups="car_repair_industry.group_fleet_repair_service_manager,car_repair_industry.group_fleet_repair_directeur_commercial"/>
+                    <button name="action_start" string="Iniciar prueba" type="object"
+                            invisible="state != 'assigned'"
+                            class="oe_highlight"/>
+                    <button name="action_done" string="Finalizar prueba" type="object"
+                            invisible="state != 'in_progress'"
+                            class="oe_highlight"/>
+                    <button name="action_cancel" string="Cancelar" type="object"
+                            invisible="state in ('done', 'cancelled')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="requested,assigned,in_progress,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Solicitud">
+                            <field name="repair_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="test_type"/>
+                            <field name="requested_by_id" readonly="1"/>
+                            <field name="requested_at" readonly="1"/>
+                        </group>
+                        <group string="Asignación y ejecución">
+                            <field name="driver_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="km_start"/>
+                            <field name="km_end"/>
+                            <field name="completed_at" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="request_observation" string="Observación de solicitud" colspan="2"/>
+                        <field name="result" string="Resultado" colspan="2"/>
+                        <field name="final_observations" string="Observaciones finales" colspan="2"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fleet_road_test" model="ir.actions.act_window">
+        <field name="name">Pruebas de Ruta</field>
+        <field name="res_model">fleet.road.test</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_fleet_road_test"
+              name="Pruebas de Ruta"
+              parent="car_repair_industry.menu_sub_car_repair"
+              action="action_fleet_road_test"
+              sequence="50"
+              groups="car_repair_industry.group_fleet_repair_service_manager,car_repair_industry.group_fleet_repair_directeur_commercial"/>
+
+</odoo>

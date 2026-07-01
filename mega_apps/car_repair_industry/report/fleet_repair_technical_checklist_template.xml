@@ -44,64 +44,64 @@
                         .cl-info-table {
                             width: 100%;
                             border-collapse: collapse;
-                            margin-bottom: 8px;
-                            font-size: 8.5px;
+                            margin-bottom: 10px;
+                            font-size: 10px;
                         }
                         .cl-info-table td {
-                            padding: 3px 6px;
+                            padding: 4px 8px;
                             border: 1px solid #d0d7de;
                             vertical-align: top;
-                            line-height: 1.2;
+                            line-height: 1.3;
                         }
                         .cl-info-table .cl-label {
                             background: #f4f6f8;
                             color: #495057;
                             font-weight: 600;
                             text-transform: uppercase;
-                            font-size: 7.5px;
+                            font-size: 9px;
                             letter-spacing: 0.3px;
                             width: 16%;
                         }
                         .cl-info-table .cl-value {
                             color: #212529;
-                            font-size: 8.5px;
+                            font-size: 10px;
                         }
                         .cl-section-title {
                             background: #017e84;
                             color: #fff;
-                            padding: 4px 10px;
-                            font-size: 9.5px;
+                            padding: 5px 12px;
+                            font-size: 11px;
                             font-weight: 700;
                             text-transform: uppercase;
                             letter-spacing: 0.5px;
                             border-radius: 3px 3px 0 0;
-                            margin: 8px 0 0 0;
+                            margin: 10px 0 0 0;
                         }
                         .cl-table {
                             width: 100%;
                             border-collapse: collapse;
-                            font-size: 8.5px;
+                            font-size: 10px;
                             margin-bottom: 0;
-                            line-height: 1.2;
+                            line-height: 1.3;
                         }
                         .cl-table thead th {
                             background: #e9ecef;
                             color: #495057;
                             font-weight: 600;
                             text-transform: uppercase;
-                            font-size: 7.5px;
-                            padding: 3px 4px;
+                            font-size: 9px;
+                            padding: 4px 6px;
                             border: 1px solid #adb5bd;
                             text-align: center;
                             letter-spacing: 0.2px;
-                            line-height: 1.1;
+                            line-height: 1.2;
                         }
                         .cl-table tbody td {
-                            padding: 2px 4px;
+                            padding: 3px 6px;
                             border: 1px solid #dee2e6;
                             color: #212529;
                             vertical-align: middle;
-                            line-height: 1.2;
+                            line-height: 1.3;
                         }
                         .cl-table tbody tr:nth-child(even) td {
                             background: #f8f9fa;
@@ -135,7 +135,7 @@
                         }
                         .cl-estado {
                             text-align: center;
-                            font-size: 8px;
+                            font-size: 9.5px;
                             font-weight: 700;
                             width: 14%;
                         }
@@ -156,7 +156,7 @@
                             color: #6c757d;
                         }
                         .cl-obs {
-                            font-size: 8px;
+                            font-size: 9.5px;
                             color: #495057;
                         }
                         .cl-measure {
@@ -196,18 +196,19 @@
                             border-collapse: collapse;
                         }
                         .cl-signatures td {
-                            width: 50%;
-                            padding: 0 10px;
+                            width: 33.33%;
+                            padding: 0 14px;
                             vertical-align: bottom;
                         }
                         .cl-signatures .cl-line {
                             border-top: 1.5px solid #212529;
-                            padding-top: 4px;
+                            padding-top: 5px;
                             text-align: center;
-                            font-size: 8.5px;
+                            font-size: 10px;
                             color: #495057;
                             text-transform: uppercase;
                             letter-spacing: 0.5px;
+                            font-weight: 600;
                         }
                         .cl-footer-meta {
                             margin-top: 8px;
@@ -370,34 +371,21 @@
                         </table>
                     </t>
 
-                    <t t-if="doc_lines">
-                        <div class="cl-section-title">4. ESTADO DE DOCUMENTOS</div>
-                        <table class="cl-table">
-                            <thead>
-                                <tr>
-                                    <th class="cl-num">N°</th>
-                                    <th style="width:50%;">Documento</th>
-                                    <th style="width:50%;">Vencimiento</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr t-foreach="doc_lines" t-as="tline">
-                                    <td class="cl-num" t-esc="tline.sequence // 10"/>
-                                    <td t-esc="tline.name"/>
-                                    <td style="text-align:center;" t-esc="tline.expiration_date and tline.expiration_date.strftime('%d/%m/%Y') or '—'"/>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </t>
 
                     <div class="cl-signatures">
                         <table>
                             <tr>
                                 <td>
-                                    <div class="cl-line">Firma del técnico</div>
+                                    <div style="height:36px;"/>
+                                    <div class="cl-line">FIRMA DEL TÉCNICO</div>
                                 </td>
                                 <td>
-                                    <div class="cl-line">Firma del supervisor</div>
+                                    <div style="height:36px;"/>
+                                    <div class="cl-line">CONTROL DE CALIDAD</div>
+                                </td>
+                                <td>
+                                    <div style="height:36px;"/>
+                                    <div class="cl-line">FIRMA DEL CLIENTE</div>
                                 </td>
                             </tr>
                         </table>

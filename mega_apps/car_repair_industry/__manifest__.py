@@ -43,6 +43,7 @@
         'views/fleet_repair_service_type_data.xml',
         'views/fleet_repair_sequence.xml',
         'views/fleet_repair_branch_views.xml',
+        'views/fleet_road_test_views.xml',
         'views/fleet_diagnose_view.xml',
         'views/fleet_workorder_sequence.xml',
         'views/fleet_vehicle_model_views_inherit.xml',

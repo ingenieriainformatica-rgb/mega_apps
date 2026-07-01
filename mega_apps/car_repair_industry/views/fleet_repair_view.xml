@@ -330,6 +330,39 @@
                                 </field>
                             </page>
 
+                            <page name="road_tests" string="Pruebas de ruta"
+                                  groups="car_repair_industry.group_fleet_repair_service_manager,car_repair_industry.group_fleet_repair_directeur_commercial,car_repair_industry.group_fleet_repair_portal_road_test">
+                                <field name="road_test_ids">
+                                    <list string="Pruebas de ruta"
+                                          decoration-success="state == 'done'"
+                                          decoration-info="state == 'assigned'"
+                                          decoration-warning="state == 'in_progress'"
+                                          decoration-muted="state == 'cancelled'">
+                                        <field name="test_type"/>
+                                        <field name="requested_by_id"/>
+                                        <field name="requested_at"/>
+                                        <field name="driver_id" options="{'no_create': True, 'no_open': True}"/>
+                                        <field name="state" widget="badge"
+                                               decoration-muted="state == 'requested'"
+                                               decoration-info="state == 'assigned'"
+                                               decoration-warning="state == 'in_progress'"
+                                               decoration-success="state == 'done'"
+                                               decoration-danger="state == 'cancelled'"/>
+                                        <field name="km_start" optional="hide"/>
+                                        <field name="km_end" optional="hide"/>
+                                        <field name="completed_at" optional="show"/>
+                                        <button name="action_assign" string="Asignar" type="object"
+                                                icon="fa-user-plus" class="btn-sm btn-info"
+                                                invisible="state != 'requested'"
+                                                groups="car_repair_industry.group_fleet_repair_service_manager,car_repair_industry.group_fleet_repair_directeur_commercial"/>
+                                        <button name="action_done" string="Finalizar" type="object"
+                                                icon="fa-check" class="btn-sm btn-success"
+                                                invisible="state != 'in_progress'"
+                                                groups="car_repair_industry.group_fleet_repair_service_manager,car_repair_industry.group_fleet_repair_directeur_commercial"/>
+                                    </list>
+                                </field>
+                            </page>
+
                             <page name="spare_requests" string="Repuestos solicitados"
                                   groups="car_repair_industry.group_fleet_repair_spare_warehouse,car_repair_industry.group_fleet_repair_service_manager,base.group_system">
                                 <field name="spare_request_ids" readonly="1">

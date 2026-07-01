@@ -919,7 +919,7 @@
                 <div class="accordion mt-3" id="accordion-workshop-sections">
 
                     <!-- 1. Servicios solicitados -->
-                    <div class="accordion-item">
+                    <div class="accordion-item" t-if="is_advisor or is_technician or is_internal_manager">
                         <h2 class="accordion-header" id="heading-services">
                             <button class="accordion-button" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapse-services"
@@ -1082,7 +1082,7 @@
                     </t>
 
                     <!-- 3. Checklist técnico -->
-                    <div id="workshop-checklist-tecnico" class="accordion-item">
+                    <div id="workshop-checklist-tecnico" class="accordion-item" t-if="is_technician or is_internal_manager">
                         <h2 class="accordion-header" id="heading-checklist-tecnico">
                             <button class="accordion-button collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapse-checklist-tecnico"
@@ -1381,7 +1381,7 @@
                     </div>
 
                     <!-- 5. Solicitud de repuestos -->
-                    <div class="accordion-item" id="workshop-spare-request-section"
+                    <div class="accordion-item" id="workshop-spare-request-section" t-if="is_technician or is_internal_manager"
                          t-att-data-repair-id="repair.id"
                          t-att-data-catalog-url="'/my/workshop/spare-catalog'"
                          t-att-data-submit-url="'/my/workshop/order/%s/spares/submit' % repair.id">
@@ -1580,43 +1580,154 @@
                         </div>
                     </div>
 
-                    <!-- 6. Prueba de ruta -->
+                    <!-- 6. Pruebas de ruta -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading-prueba-ruta">
                             <button class="accordion-button collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapse-prueba-ruta"
                                     aria-expanded="false" aria-controls="collapse-prueba-ruta">
-                                <i class="fa fa-road me-2"></i> Prueba de ruta
+                                <i class="fa fa-road me-2"></i> Pruebas de ruta
+                                <t t-if="repair.road_test_ids">
+                                    <span class="badge bg-primary rounded-pill ms-2 small" t-esc="len(repair.road_test_ids)"/>
+                                </t>
                                 <i class="fa fa-chevron-down ms-auto workshop-collapse-chevron"></i>
                             </button>
                         </h2>
                         <div id="collapse-prueba-ruta" class="accordion-collapse collapse"
                              aria-labelledby="heading-prueba-ruta">
                             <div class="accordion-body">
-                                <t t-if="is_road_test">
-                                    <form t-att-action="'/my/workshop/order/%s/road-test' % repair.id" method="post"
-                                          id="workshop-road-test-form"
-                                          t-att-data-repair-id="repair.id">
-                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                        <label class="form-label">Resultado</label>
-                                        <textarea name="road_test_result" class="form-control mb-3" rows="4"><t t-esc="repair.road_test_result or ''"/></textarea>
-                                        <div class="d-flex gap-2">
-                                            <button name="action" value="start" class="btn btn-primary" type="submit">Iniciar prueba</button>
-                                            <button name="action" value="finish" class="btn btn-success" type="submit">Finalizar prueba</button>
-                                        </div>
-                                    </form>
+
+                                <!-- Tabla de pruebas existentes -->
+                                <t t-if="repair.road_test_ids">
+                                    <div class="table-responsive mb-3">
+                                        <table class="table table-sm workshop-road-test-table mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tipo</th>
+                                                    <th>Solicitado por</th>
+                                                    <th>Fecha solicitud</th>
+                                                    <th>Conductor</th>
+                                                    <th>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="repair.road_test_ids" t-as="rt">
+                                                    <td class="small"><t t-esc="rt.get_type_label()"/></td>
+                                                    <td class="small"><t t-esc="rt.requested_by_id.name"/></td>
+                                                    <td class="small"><t t-esc="rt.requested_at.strftime('%d/%m/%Y %H:%M') if rt.requested_at else '—'"/></td>
+                                                    <td class="small"><t t-esc="rt.driver_id.name or '—'"/></td>
+                                                    <td>
+                                                        <span t-attf-class="badge road-test-state-#{rt.state}" t-esc="rt.get_state_label()"/>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </t>
                                 <t t-else="">
-                                    <label class="form-label text-muted small">Resultado</label>
-                                    <p t-if="repair.road_test_result" class="mb-0" t-esc="repair.road_test_result"/>
-                                    <p t-else="" class="text-muted mb-0 fst-italic">Sin resultado registrado.</p>
+                                    <p class="text-muted fst-italic small mb-3">Sin pruebas de ruta registradas.</p>
                                 </t>
+
+                                <!-- Formulario de actualización para el conductor asignado -->
+                                <t t-foreach="repair.road_test_ids" t-as="rt">
+                                    <t t-if="rt.driver_id and rt.driver_id.id == request.env.user.id and rt.state in ('assigned', 'in_progress')">
+                                        <div class="card border-warning mb-3">
+                                            <div class="card-header bg-warning bg-opacity-10 fw-semibold small">
+                                                <i class="fa fa-car me-1 text-warning"></i>
+                                                Tu prueba — <t t-esc="rt.get_type_label()"/>
+                                            </div>
+                                            <div class="card-body">
+                                                <form t-attf-action="/my/workshop/order/#{repair.id}/road-test/#{rt.id}/update"
+                                                      method="post">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-6">
+                                                            <label class="form-label small fw-semibold">Km inicial</label>
+                                                            <input type="number" name="km_start" class="form-control form-control-sm"
+                                                                   t-att-value="rt.km_start if rt.km_start else ''"
+                                                                   step="0.1" min="0" placeholder="0.0"/>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label class="form-label small fw-semibold">Km final</label>
+                                                            <input type="number" name="km_end" class="form-control form-control-sm"
+                                                                   t-att-value="rt.km_end if rt.km_end else ''"
+                                                                   step="0.1" min="0" placeholder="0.0"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="form-label small fw-semibold">Resultado / Observaciones</label>
+                                                        <textarea name="result" class="form-control form-control-sm" rows="3"><t t-esc="rt.result or ''"/></textarea>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Observaciones finales</label>
+                                                        <textarea name="final_observations" class="form-control form-control-sm" rows="2"><t t-esc="rt.final_observations or ''"/></textarea>
+                                                    </div>
+                                                    <div class="d-flex gap-2 flex-wrap">
+                                                        <t t-if="rt.state == 'assigned'">
+                                                            <button name="action" value="start" type="submit" class="btn btn-primary btn-sm">
+                                                                <i class="fa fa-play me-1"></i> Iniciar prueba
+                                                            </button>
+                                                        </t>
+                                                        <t t-if="rt.state == 'in_progress'">
+                                                            <button name="action" value="done" type="submit" class="btn btn-success btn-sm">
+                                                                <i class="fa fa-check me-1"></i> Finalizar prueba
+                                                            </button>
+                                                        </t>
+                                                        <button name="action" value="save" type="submit" class="btn btn-outline-secondary btn-sm">
+                                                            <i class="fa fa-save me-1"></i> Guardar
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+
+                                <!-- Solicitar nueva prueba (asesores / técnicos / managers) -->
+                                <t t-if="is_advisor or is_technician or is_internal_manager">
+                                    <button class="btn btn-outline-primary btn-sm" type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#road-test-request-form"
+                                            aria-expanded="false">
+                                        <i class="fa fa-plus me-1"></i> Solicitar prueba de ruta
+                                    </button>
+                                    <div id="road-test-request-form" class="collapse mt-3">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary bg-opacity-10 text-primary fw-semibold small">
+                                                Nueva solicitud de prueba de ruta
+                                            </div>
+                                            <div class="card-body">
+                                                <form t-attf-action="/my/workshop/order/#{repair.id}/road-test/request"
+                                                      method="post">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Tipo de prueba</label>
+                                                        <select name="test_type" class="form-select form-select-sm">
+                                                            <option value="before">Antes de la reparación</option>
+                                                            <option value="during">Durante la reparación</option>
+                                                            <option value="after" selected="selected">Después de la reparación</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-semibold">Observación de solicitud</label>
+                                                        <textarea name="request_observation" class="form-control form-control-sm"
+                                                                  rows="3" placeholder="Describa las condiciones o motivo de la prueba..."></textarea>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                        <i class="fa fa-paper-plane me-1"></i> Enviar solicitud
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+
                             </div>
                         </div>
                     </div>
 
                     <!-- 7. Evidencias externas -->
-                    <div class="accordion-item">
+                    <div class="accordion-item" t-if="is_advisor or is_technician or is_internal_manager">
                         <h2 class="accordion-header" id="heading-evidencias">
                             <button class="accordion-button collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapse-evidencias"

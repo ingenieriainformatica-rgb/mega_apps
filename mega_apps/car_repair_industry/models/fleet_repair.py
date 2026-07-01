@@ -236,6 +236,7 @@ class FleetRepair(models.Model):
     parent_id = fields.Many2one('fleet.repair', string='Parent Repair', index=True)
 
     child_ids = fields.One2many('fleet.repair', 'parent_id', string="Sub-Repair")
+    road_test_ids = fields.One2many('fleet.road.test', 'repair_id', string='Pruebas de ruta')
 
     repair_checklist_ids = fields.Many2many('fleet.repair.checklist', 'checkbox_checklist_rel',
                                             'id', 'checklist_id',

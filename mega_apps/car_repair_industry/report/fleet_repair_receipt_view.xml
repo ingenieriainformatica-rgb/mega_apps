@@ -188,6 +188,49 @@
                             </tr>
                         </table>
                     </div>
+                    <!-- Pruebas de ruta -->
+                    <t t-if="o.road_test_ids">
+                        <div class="row" style="margin-top: 30px;">
+                            <span style="font-size: 16px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 4px; display: block; width: 100%;">PRUEBAS DE RUTA</span>
+                        </div>
+                        <div class="row" style="margin-top: 10px;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                                <thead>
+                                    <tr style="background: #f0f0f0;">
+                                        <th style="border: 1px solid #ccc; padding: 5px;">Tipo</th>
+                                        <th style="border: 1px solid #ccc; padding: 5px;">Solicitado por</th>
+                                        <th style="border: 1px solid #ccc; padding: 5px;">Fecha solicitud</th>
+                                        <th style="border: 1px solid #ccc; padding: 5px;">Conductor</th>
+                                        <th style="border: 1px solid #ccc; padding: 5px;">Km inicial</th>
+                                        <th style="border: 1px solid #ccc; padding: 5px;">Km final</th>
+                                        <th style="border: 1px solid #ccc; padding: 5px;">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.road_test_ids" t-as="rt">
+                                        <tr>
+                                            <td style="border: 1px solid #ccc; padding: 5px;"><t t-esc="rt.get_type_label()"/></td>
+                                            <td style="border: 1px solid #ccc; padding: 5px;"><t t-esc="rt.requested_by_id.name or '—'"/></td>
+                                            <td style="border: 1px solid #ccc; padding: 5px;"><t t-esc="rt.requested_at.strftime('%d/%m/%Y') if rt.requested_at else '—'"/></td>
+                                            <td style="border: 1px solid #ccc; padding: 5px;"><t t-esc="rt.driver_id.name or '—'"/></td>
+                                            <td style="border: 1px solid #ccc; padding: 5px; text-align: right;"><t t-esc="'%.1f' % rt.km_start if rt.km_start else '—'"/></td>
+                                            <td style="border: 1px solid #ccc; padding: 5px; text-align: right;"><t t-esc="'%.1f' % rt.km_end if rt.km_end else '—'"/></td>
+                                            <td style="border: 1px solid #ccc; padding: 5px;"><t t-esc="rt.get_state_label()"/></td>
+                                        </tr>
+                                        <t t-if="rt.result or rt.final_observations">
+                                            <tr>
+                                                <td colspan="7" style="border: 1px solid #ccc; padding: 5px; background: #fafafa;">
+                                                    <t t-if="rt.result"><b>Resultado:</b> <t t-esc="rt.result"/><br/></t>
+                                                    <t t-if="rt.final_observations"><b>Observaciones finales:</b> <t t-esc="rt.final_observations"/></t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+
                     <div class="col-xs-12" style="width:100%; margin-top: 300px;">
                         <table style="width: 100%;border:white;">
                             <tr>
