@@ -686,11 +686,11 @@
                             </label>
                         </div>
                         <div class="row g-3 js-delivered-by-fields">
-                            <div class="col-md-4">
+                            <div class="col-md-5">
                                 <label class="form-label">Nombre</label>
                                 <input name="delivered_by_name" class="form-control workshop-input-uppercase" placeholder="NOMBRE COMPLETO"/>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label class="form-label">Celular</label>
                                 <input name="delivered_by_phone" class="form-control" placeholder="300 123 4567"/>
                             </div>
@@ -698,10 +698,7 @@
                                 <label class="form-label">Documento</label>
                                 <input name="delivered_by_document" class="form-control workshop-input-uppercase" placeholder="CC / NIT"/>
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Correo</label>
-                                <input name="delivered_by_email" type="email" class="form-control" placeholder="correo@ejemplo.com"/>
-                            </div>
+                            <input type="hidden" name="delivered_by_email" value=""/>
                             <div class="col-12">
                                 <label class="form-label">Observaciones de quien entrega</label>
                                 <textarea name="delivered_by_observation" class="form-control workshop-input-uppercase" rows="2" placeholder="INFORMACIÓN ADICIONAL RELEVANTE..."></textarea>
