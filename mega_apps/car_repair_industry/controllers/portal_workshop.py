@@ -1236,6 +1236,13 @@ class WorkshopPortalHome(CustomerPortal):
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
         if not counters:
-            # La tarjeta del taller se muestra a todos los usuarios autenticados
             values['is_workshop_user'] = True
         return values
+
+    @http.route(['/my', '/my/home'], type='http', auth='user', website=True)
+    def home(self, **kw):
+        user = request.env.user
+        is_workshop = any(user.has_group(g) for g in _WORKSHOP_PORTAL_GROUPS)
+        if is_workshop:
+            return request.redirect('/my/workshop')
+        return super().home(**kw)
