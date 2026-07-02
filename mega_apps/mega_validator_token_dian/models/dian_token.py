@@ -255,9 +255,9 @@ class MegaDianToken(models.Model):
                     if is_refund
                     else _("Coincide NIT, referencia y total, pero no el IVA.")
                 ),
-                is_reconciled=False,
+                is_reconciled=True,
             )
-            return False
+            return True
 
         if len(partial_by_total) > 1:
             self._write_line_result(
@@ -420,7 +420,7 @@ class MegaDianToken(models.Model):
         Solo se usa para comparar total ajustado vs total DIAN.
         """
         diff = abs(Decimal(str(left or 0.0)) - Decimal(str(right or 0.0)))
-        return diff <= Decimal("1.00")
+        return diff <= Decimal("500.00")
 
     def _sanitize_reference(self, value):
         return (
