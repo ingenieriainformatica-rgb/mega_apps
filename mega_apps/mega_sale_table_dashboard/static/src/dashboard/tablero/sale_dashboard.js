@@ -7,7 +7,6 @@ import { useService } from "@web/core/utils/hooks";
 import { rpc } from "@web/core/network/rpc";
 
 // ── Componentes existentes (sin cambios) ─────────────────────────
-import { DashboardHero } from "../hero/hero";
 import { DateFilterBar } from "../filter/filter";
 import { Informe } from "../informe/informe";
 import { InvoiceList } from "../InvoiceList/invoice_list";
@@ -23,7 +22,6 @@ export default class MegaSaleDashboard extends Component {
     static template = "mega_dashboard.SaleDashboard";
     static components = {
         Layout,
-        DashboardHero,
         DateFilterBar,
         Informe,
         InvoiceList,

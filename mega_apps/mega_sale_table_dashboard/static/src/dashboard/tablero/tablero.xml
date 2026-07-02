@@ -3,9 +3,6 @@
   <t t-name="mega_dashboard.SaleDashboard">
     <Layout display="display" className="'o_dashboard h-100 overflow-y-auto'">
 
-      <!-- ── Hero (se mantiene; se reemplazará en Sprint 2) ────── -->
-      <DashboardHero />
-
       <!-- ── FilterBar v2 (onchange, sin botón Filtrar) ─────────── -->
       <DateFilterBar
         warehouses="state.warehouses"

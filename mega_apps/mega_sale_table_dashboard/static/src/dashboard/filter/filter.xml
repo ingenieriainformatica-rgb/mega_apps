@@ -4,11 +4,18 @@
 
     <div class="mega-filter-bar">
 
-      <!-- ── Fila 1: Shortcuts de período + inputs de fecha ── -->
-      <div class="mega-filter-row d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <!-- ══ Fila 1: Período ══════════════════════════════════════ -->
+      <div class="mega-filter-row d-flex align-items-center gap-3 flex-wrap">
+
+        <!-- Etiqueta de sección -->
+        <span class="mega-filter-section-label">
+          <i class="fa fa-calendar-o me-1"/>Período
+        </span>
+
+        <div class="mega-filter-divider"/>
 
         <!-- Shortcuts de período -->
-        <div class="d-flex align-items-center gap-1">
+        <div class="d-flex align-items-center gap-2">
           <t t-foreach="shortcuts" t-as="sc" t-key="sc.key">
             <button
               t-att-class="state.activeShortcut === sc.key
@@ -20,40 +27,52 @@
           </t>
         </div>
 
-        <!-- Inputs de fecha (siempre visibles) -->
-        <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="mega-filter-divider"/>
 
-          <div class="d-flex align-items-center gap-1">
-            <label class="mega-filter-label">Desde</label>
-            <input
-              type="date"
-              class="mega-date-input form-control form-control-sm"
-              t-att-value="state.date_from"
-              t-on-change="onChangeDateFrom"
-            />
+        <!-- Rango de fechas con Odoo DatePicker nativo -->
+        <div class="d-flex align-items-center gap-3">
+
+          <!-- Desde -->
+          <div class="d-flex align-items-center gap-2">
+            <span class="mega-filter-label">Desde</span>
+            <div t-ref="dateFromAnchor">
+              <button class="mega-date-btn" t-on-click="openDateFrom">
+                <i class="fa fa-calendar-o"/>
+                <span t-esc="formatDateDisplay(state.date_from)"/>
+              </button>
+            </div>
           </div>
 
-          <div class="d-flex align-items-center gap-1">
-            <label class="mega-filter-label">Hasta</label>
-            <input
-              type="date"
-              class="mega-date-input form-control form-control-sm"
-              t-att-value="state.date_to"
-              t-on-change="onChangeDateTo"
-            />
+          <span style="color:rgba(33,37,41,.20); font-size:16px;">→</span>
+
+          <!-- Hasta -->
+          <div class="d-flex align-items-center gap-2">
+            <span class="mega-filter-label">Hasta</span>
+            <div t-ref="dateToAnchor">
+              <button class="mega-date-btn" t-on-click="openDateTo">
+                <i class="fa fa-calendar-o"/>
+                <span t-esc="formatDateDisplay(state.date_to)"/>
+              </button>
+            </div>
           </div>
 
         </div>
       </div>
 
-      <!-- ── Fila 2: Selectores de sede y diario ── -->
-      <div class="d-flex align-items-center gap-3 flex-wrap mt-2">
+      <!-- ══ Fila 2: Sede y Diario ════════════════════════════════ -->
+      <div class="d-flex align-items-center gap-4 flex-wrap mt-3">
+
+        <span class="mega-filter-section-label">
+          <i class="fa fa-filter me-1"/>Vista
+        </span>
+
+        <div class="mega-filter-divider"/>
 
         <!-- Sede -->
         <div class="d-flex align-items-center gap-2">
           <span class="mega-filter-icon"><i class="fa fa-building-o"/></span>
           <select
-            class="form-select form-select-sm mega-select"
+            class="form-select mega-select"
             t-on-change="onChangeWarehouse"
             t-att-disabled="!props.loadingWarehouses">
             <option value="allHeadquarters">Todas las sedes</option>
@@ -70,7 +89,7 @@
         <div class="d-flex align-items-center gap-2">
           <span class="mega-filter-icon"><i class="fa fa-book"/></span>
           <select
-            class="form-select form-select-sm mega-select"
+            class="form-select mega-select"
             t-on-change="onChangeJournal"
             t-att-disabled="!props.loadingWarehouses">
             <option value="allJournal"
@@ -86,11 +105,11 @@
           </select>
         </div>
 
-        <!-- Spinner inicial (solo mientras carga la lista de sedes) -->
+        <!-- Spinner inicial -->
         <t t-if="!props.loadingWarehouses">
-          <span class="text-muted" style="font-size:12px;">
-            <i class="fa fa-circle-o-notch fa-spin me-1"/>
-            Cargando sedes...
+          <span class="text-muted d-flex align-items-center gap-1" style="font-size:13px;">
+            <i class="fa fa-circle-o-notch fa-spin"/>
+            Cargando sedes…
           </span>
         </t>
 

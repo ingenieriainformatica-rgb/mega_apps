@@ -7,7 +7,7 @@
         <div class="row g-3">
 
           <t t-foreach="metrics" t-as="metric" t-key="metric.id">
-            <div class="col-6 col-md-4 col-lg-2">
+            <div class="col-6 col-md-4 col-lg">
 
               <div class="mega-kpi-card h-100">
                 <!-- Barra de color superior (distinta por KPI) -->
@@ -25,22 +25,10 @@
                     <t t-esc="metric.display"/>
                   </div>
 
-                  <!-- Delta vs período anterior -->
-                  <t t-set="isGood" t-value="isGoodDelta(metric)"/>
-                  <t t-set="deltaStr" t-value="formatDelta(metric.delta)"/>
-
-                  <t t-if="deltaStr !== null">
-                    <div class="mega-kpi-delta mt-1 d-flex align-items-center gap-1"
-                         t-att-class="isGood ? 'text-success' : 'text-danger'">
-                      <i t-att-class="metric.delta > 0 ? 'fa fa-arrow-up' : 'fa fa-arrow-down'"/>
-                      <span><t t-esc="deltaStr"/></span>
-                      <span class="mega-kpi-delta-label">vs anterior</span>
-                    </div>
-                  </t>
-
-                  <t t-else="">
-                    <div class="mega-kpi-delta mt-1 text-muted">
-                      <span class="mega-kpi-delta-label">Sin período previo</span>
+                  <!-- Conteo opcional (p.ej. NC) -->
+                  <t t-if="metric.subDisplay">
+                    <div class="mega-kpi-sub mt-1">
+                      <t t-esc="metric.subDisplay"/>
                     </div>
                   </t>
 

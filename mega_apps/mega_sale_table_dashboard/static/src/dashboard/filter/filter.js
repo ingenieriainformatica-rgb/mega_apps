@@ -1,22 +1,18 @@
 /** @odoo-module */
 
 import { Component, useState } from "@odoo/owl";
+import { useDateTimePicker } from "@web/core/datetime/datetime_hook";
 import {
-    formatYMD,
     getCurrentMonthRange,
     getCurrentWeekRange,
     getTodayRange,
 } from "../utils/format";
 
+const { DateTime } = luxon;
+
 /**
- * FilterBarV2 — Barra de filtros inteligente del Dashboard Comercial v2.0.
- *
- * Cambios vs v1:
- * - Sin botón "Filtrar": cada cambio aplica inmediatamente (onchange).
- * - Shortcuts de período: Hoy / Esta semana / Este mes / Personalizado.
- * - Default: mes actual (no los últimos 7 días).
- * - Unificada la clave enviada al padre: siempre "journal_id" (no "journal").
- * - Corrección del bug last30Days() (fecha_from = fecha_to − 0 días).
+ * FilterBarV2 — Barra de filtros del Dashboard Comercial v2.0.
+ * Usa el DatePicker nativo de Odoo 18 para selección de fechas.
  */
 export class DateFilterBar extends Component {
     static template = "mega_dashboard.DateFilterBar";
@@ -40,7 +36,60 @@ export class DateFilterBar extends Component {
             journal_id:     "allJournal",
             activeShortcut: "month",
         });
+
+        const state = this.state;
+
+        // ── Odoo DatePicker nativo para "Desde" ──────────────────
+        this.dateFromPicker = useDateTimePicker({
+            target: "dateFromAnchor",
+            onApply: (date) => {
+                this.state.date_from      = date.toFormat("yyyy-MM-dd");
+                this.state.activeShortcut = "custom";
+                if (this.state.date_from && this.state.date_to) this._emit();
+            },
+            get pickerProps() {
+                return {
+                    type:              "date",
+                    value:             DateTime.fromISO(state.date_from),
+                    showWeekNumbers:   false,
+                    daysOfWeekFormat:  "narrow",
+                };
+            },
+        });
+
+        // ── Odoo DatePicker nativo para "Hasta" ──────────────────
+        this.dateToPicker = useDateTimePicker({
+            target: "dateToAnchor",
+            onApply: (date) => {
+                this.state.date_to        = date.toFormat("yyyy-MM-dd");
+                this.state.activeShortcut = "custom";
+                if (this.state.date_from && this.state.date_to) this._emit();
+            },
+            get pickerProps() {
+                return {
+                    type:              "date",
+                    value:             DateTime.fromISO(state.date_to),
+                    showWeekNumbers:   false,
+                    daysOfWeekFormat:  "narrow",
+                };
+            },
+        });
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // Formatea ISO "2026-07-02" → "02/07/2026" para mostrar en botón
+    // ─────────────────────────────────────────────────────────────
+    formatDateDisplay(isoDate) {
+        if (!isoDate) return "Seleccionar…";
+        try {
+            return DateTime.fromISO(isoDate).toFormat("dd/MM/yyyy");
+        } catch {
+            return isoDate;
+        }
+    }
+
+    openDateFrom() { this.dateFromPicker.open(); }
+    openDateTo()   { this.dateToPicker.open();   }
 
     // ─────────────────────────────────────────────────────────────
     // Shortcuts de período
@@ -56,8 +105,6 @@ export class DateFilterBar extends Component {
 
     applyShortcut(key) {
         if (key === "custom") {
-            // Solo activa el modo fecha libre; no recarga hasta que el usuario
-            // termine de ingresar ambas fechas.
             this.state.activeShortcut = "custom";
             return;
         }
@@ -82,7 +129,6 @@ export class DateFilterBar extends Component {
         const val = ev.target.value || "allHeadquarters";
         this.state.warehouse_id = val;
         this.state.journal_id   = "allJournal";
-
         if (this.props.onChangeWarehouse) {
             this.props.onChangeWarehouse(val);
         }
@@ -98,22 +144,7 @@ export class DateFilterBar extends Component {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // Cambio de fecha → recarga solo si ambas fechas están completas
-    // ─────────────────────────────────────────────────────────────
-    onChangeDateFrom(ev) {
-        this.state.date_from      = ev.target.value;
-        this.state.activeShortcut = "custom";
-        if (this.state.date_from && this.state.date_to) this._emit();
-    }
-
-    onChangeDateTo(ev) {
-        this.state.date_to        = ev.target.value;
-        this.state.activeShortcut = "custom";
-        if (this.state.date_from && this.state.date_to) this._emit();
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // Emite el filtro al componente padre
+    // Emite el filtro actualizado al componente padre
     // ─────────────────────────────────────────────────────────────
     _emit() {
         this.props.onClickFilter({

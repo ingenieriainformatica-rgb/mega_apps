@@ -18,7 +18,7 @@ class MegaTrialBalanceCustomHandler(models.AbstractModel):
         super()._custom_options_initializer(report, options, previous_options)
 
         options.setdefault('buttons', []).append({
-            'name': _('XLSX Mega por tercero'),
+            'name': _('XLSX por tercero (W.O)'),
             'sequence': 35,
             'action': 'export_file',
             'action_param': 'export_to_xlsx_mega_by_partner',
