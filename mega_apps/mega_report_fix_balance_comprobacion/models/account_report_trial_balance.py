@@ -293,19 +293,27 @@ class MegaTrialBalanceCustomHandler(models.AbstractModel):
         partner_map = {p.id: p for p in partners}
 
         # ---- Compute individual account totals -----------------------------
+        # Cuentas 2, 3, 4 (Pasivos/Patrimonio/Ingresos) son de naturaleza crédito:
+        # su saldo = Haber - Debe. Las demás (1, 5, 6, 7...) = Debe - Haber.
         account_totals = {}
         for account in accounts:
             acc_data = by_account[account.id]
-            acc_init = sum(v['balance'] for v in acc_data['init'].values())
+            acc_init_raw = sum(v['balance'] for v in acc_data['init'].values())
             acc_debit = sum(v['debit'] for v in acc_data['period'].values())
             acc_credit = sum(v['credit'] for v in acc_data['period'].values())
+            if self._mega_is_credit_nature(account.code):
+                acc_init = -acc_init_raw
+                acc_final = acc_init + acc_credit - acc_debit
+            else:
+                acc_init = acc_init_raw
+                acc_final = acc_init + acc_debit - acc_credit
             account_totals[account.code] = {
                 'name': account.name,
                 'account': account,
                 'init': acc_init,
                 'debit': acc_debit,
                 'credit': acc_credit,
-                'final': acc_init + acc_debit - acc_credit,
+                'final': acc_final,
             }
 
         # ---- Load account.group map ----------------------------------------
@@ -327,10 +335,11 @@ class MegaTrialBalanceCustomHandler(models.AbstractModel):
                         parent_group_prefixes[prefix] = gname
 
         # ---- Compute group totals (sum of all child accounts) --------------
+        # final se suma directamente desde account_totals (ya con signo correcto)
         group_totals = {}
         for prefix, gname in parent_group_prefixes.items():
             plen = len(prefix)
-            g_init = g_debit = g_credit = 0.0
+            g_init = g_debit = g_credit = g_final = 0.0
             for acc_code, totals in account_totals.items():
                 truncated = acc_code[:plen]
                 prefix_end = group_map[prefix][1]
@@ -338,12 +347,13 @@ class MegaTrialBalanceCustomHandler(models.AbstractModel):
                     g_init += totals['init']
                     g_debit += totals['debit']
                     g_credit += totals['credit']
+                    g_final += totals['final']
             group_totals[prefix] = {
                 'name': gname,
                 'init': g_init,
                 'debit': g_debit,
                 'credit': g_credit,
-                'final': g_init + g_debit - g_credit,
+                'final': g_final,
             }
 
         # ---- Build unified sorted list of entries --------------------------
@@ -405,10 +415,15 @@ class MegaTrialBalanceCustomHandler(models.AbstractModel):
                 for pid in sorted_pids:
                     p_init = init_by_pid.get(pid, {'balance': 0.0})
                     p_period = period_by_pid.get(pid, {'debit': 0.0, 'credit': 0.0})
-                    p_init_bal = p_init['balance']
+                    p_init_raw = p_init['balance']
                     p_debit = p_period['debit']
                     p_credit = p_period['credit']
-                    p_final = p_init_bal + p_debit - p_credit
+                    if self._mega_is_credit_nature(code):
+                        p_init_bal = -p_init_raw
+                        p_final = p_init_bal + p_credit - p_debit
+                    else:
+                        p_init_bal = p_init_raw
+                        p_final = p_init_bal + p_debit - p_credit
 
                     partner = partner_map.get(pid) if pid else None
                     if partner:
@@ -501,6 +516,10 @@ class MegaTrialBalanceCustomHandler(models.AbstractModel):
             label = 'CC'
 
         return (label, vat, '')
+
+    def _mega_is_credit_nature(self, code):
+        """Cuentas 2, 3, 4 son de naturaleza crédito: su saldo = Haber - Debe."""
+        return bool(code) and code[0] in ('2', '3', '4')
 
     def _mega_nit_split(self, vat_raw):
         """

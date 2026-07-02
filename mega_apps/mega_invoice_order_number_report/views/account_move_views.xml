@@ -12,7 +12,7 @@
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='invoice_date']" position="after">
-                <label for="customer_order_ref" string="N° orden"
+                <label for="customer_order_ref" string="Orden de compra / pedido:"
                        invisible="move_type not in ('out_invoice', 'out_refund', 'out_receipt')"/>
                 <field name="customer_order_ref" nolabel="1"
                        invisible="move_type not in ('out_invoice', 'out_refund', 'out_receipt')"
