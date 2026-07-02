@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="mega_dashboard.KpiBannerSkeleton">
+
+    <div class="mega-kpi-banner">
+      <div class="container-fluid py-3 px-4">
+        <div class="row g-3">
+
+          <t t-foreach="skeletonItems" t-as="i" t-key="i">
+            <div class="col-6 col-md-4 col-lg-2">
+              <div class="mega-kpi-card h-100 mega-skeleton-card">
+
+                <!-- Barra superior skeleton -->
+                <div class="mega-kpi-topbar mega-skeleton-shimmer"/>
+
+                <div class="p-3">
+                  <!-- Label skeleton -->
+                  <div class="mega-skeleton-shimmer rounded mb-2"
+                       style="width: 65%; height: 11px;"/>
+
+                  <!-- Valor skeleton -->
+                  <div class="mega-skeleton-shimmer rounded mb-2"
+                       style="width: 85%; height: 26px;"/>
+
+                  <!-- Delta skeleton -->
+                  <div class="mega-skeleton-shimmer rounded"
+                       style="width: 50%; height: 11px;"/>
+                </div>
+
+              </div>
+            </div>
+          </t>
+
+        </div>
+      </div>
+    </div>
+
+  </t>
+</templates>

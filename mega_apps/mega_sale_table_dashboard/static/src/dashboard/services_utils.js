@@ -3,129 +3,119 @@
 import { registry } from "@web/core/registry";
 import { reactive } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
+import { formatYMD, getCurrentMonthRange } from "./utils/format";
 
-function formatYMD(dateObj) {
-  const y = dateObj.getFullYear();
-  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const d = String(dateObj.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-// Default: últimos 7 días (puedes cambiar a inicio de mes)
-function getDefaultRange() {
-  const today = new Date();
-  const from = new Date(today);
-  from.setDate(today.getDate() - 7);
-  return { date_from: formatYMD(from), date_to: formatYMD(today) };
-}
-
-// Normaliza (evita null, corrige from/to)
-function normalizeRange(range) {
-  const def = getDefaultRange();
-  let date_from = range?.date_from || def.date_from;
-  let date_to = range?.date_to || def.date_to;
-
-  // Si quedan invertidas
-  if (date_to < date_from) {
-    date_from = date_to;
-  }
-  return { date_from, date_to };
-}
-
+// ─────────────────────────────────────────────────────────────────
+// Normalización de IDs — mantiene tokens "all*" tal cual,
+// convierte números string a número, null/0/"" → null.
+// ─────────────────────────────────────────────────────────────────
 function parseIdOrAll(value) {
-  if (value === null || value === undefined || value === "") return null;
-
-  // si viene un "all..." lo dejamos tal cual
-  if (typeof value === "string" && value.startsWith("all")) return value;
-
-  // si viene número en string ("12") o número (12)
-  const n = Number(value);
-  return Number.isFinite(n) ? n : value; // fallback: deja el string si no es número
+    if (value === null || value === undefined || value === "" || value === 0) return null;
+    if (typeof value === "string" && value.startsWith("all")) return value;
+    const n = Number(value);
+    return Number.isFinite(n) && n !== 0 ? n : value;
 }
 
+// ─────────────────────────────────────────────────────────────────
+// Normaliza el rango de fechas: completa con defaults y corrige
+// inversiones (date_from > date_to).
+// ─────────────────────────────────────────────────────────────────
+function normalizeRange(range, fallback) {
+    let date_from = (range && range.date_from) || fallback.date_from;
+    let date_to = (range && range.date_to) || fallback.date_to;
+    if (date_to < date_from) date_from = date_to;
+    return { date_from, date_to };
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Servicio reactivo "sales.statistics"
+// ─────────────────────────────────────────────────────────────────
 const statisticsService = {
-  start() {
-    const def = getDefaultRange();
+    start() {
+        const def = getCurrentMonthRange();
 
-    const statistics = reactive({
-      isReady: false,
-      isReadyWarehouse: false,
-      date_from: def.date_from,
-      date_to: def.date_to,
-      warehouse_id: null,
-      journal_id: null,
+        const statistics = reactive({
+            // ── Estado de carga ──────────────────────────────────
+            isReady: false,      // true una vez que los datos cargaron al menos una vez
+            isLoading: false,    // true durante cualquier recarga (inicial o por filtro)
 
-      // aquí quedarán tus datos del endpoint
-      kpis: {},
-      sedes: [],
-      top_customers: [],
-      top_products: [],
-      conversion: {},
+            // ── Rango y filtros activos ───────────────────────────
+            isReadyWarehouse: false,
+            date_from: def.date_from,
+            date_to: def.date_to,
+            warehouse_id: null,
+            journal_id: null,
 
-      _timer: null,
+            // ── Timer para auto-refresh (desactivado por defecto) ─
+            _timer: null,
 
-      async reload() {
-        try {
-          const { date_from, date_to } = normalizeRange({
-            date_from: this.date_from,
-            date_to: this.date_to,
-          });
+            // ─────────────────────────────────────────────────────
+            // reload(): ejecuta el RPC con los parámetros actuales.
+            // Si ya hay datos (isReady=true), los mantiene visibles
+            // durante la recarga mostrando solo la barra de progreso.
+            // ─────────────────────────────────────────────────────
+            async reload() {
+                this.isLoading = true;
+                try {
+                    const { date_from, date_to } = normalizeRange(
+                        { date_from: this.date_from, date_to: this.date_to },
+                        getCurrentMonthRange()
+                    );
+                    const warehouse_id = this.warehouse_id;
+                    const journal_id = this.journal_id;
 
-          const warehouse_id = this.warehouse_id
-          const journal_id =  this.journal_id
+                    this.date_from = date_from;
+                    this.date_to = date_to;
 
-          // Persistimos el rango normalizado
-          this.date_from = date_from;
-          this.date_to = date_to;
+                    const updates = await rpc("/mega_dashboard/sales/statistics", {
+                        date_from,
+                        date_to,
+                        warehouse_id,
+                        journal_id,
+                    });
 
-          const updates = await rpc("/mega_dashboard/sales/statistics", {date_from, date_to, warehouse_id, journal_id});
+                    Object.assign(this, updates, {
+                        isReady: true,
+                        isLoading: false,
+                        isReadyWarehouse: !!warehouse_id && warehouse_id !== 0,
+                    });
+                } catch (e) {
+                    console.error("sales.statistics reload error:", e);
+                    this.isLoading = false;
+                }
+            },
 
-          // console.log("UPDATES -> ", updates)
+            // ─────────────────────────────────────────────────────
+            // setRange(): actualiza filtros y dispara recarga.
+            // ─────────────────────────────────────────────────────
+            async setRange({ date_from, date_to, warehouse_id, journal_id }) {
+                const norm = normalizeRange(
+                    { date_from, date_to },
+                    getCurrentMonthRange()
+                );
+                this.date_from = norm.date_from;
+                this.date_to = norm.date_to;
+                this.warehouse_id = parseIdOrAll(warehouse_id);
+                this.journal_id = parseIdOrAll(journal_id);
+                await this.reload();
+            },
 
-          Object.assign(this, updates, {
-            isReady: true,
-            isReadyWarehouse: warehouse_id != 0,
-          });
+            // ─────────────────────────────────────────────────────
+            // Auto-refresh (opcional, activar desde el componente)
+            // ─────────────────────────────────────────────────────
+            startAutoRefresh(ms = 60 * 1000) {
+                if (this._timer) clearInterval(this._timer);
+                this._timer = setInterval(() => this.reload(), ms);
+            },
 
-        } catch (e) {
-          console.error("sales.statistics reload error:", e);
-        }
-      },
+            stopAutoRefresh() {
+                if (this._timer) clearInterval(this._timer);
+                this._timer = null;
+            },
+        });
 
-      async setRange({ date_from, date_to, warehouse_id, journal_id }) {
-        const norm = normalizeRange({ date_from, date_to });
-        this.date_from = norm.date_from;
-        this.date_to = norm.date_to;
-
-        // Normaliza IDs (si viene "0" -> null)
-        const wh = parseIdOrAll(warehouse_id);
-        const jr = parseIdOrAll(journal_id);
-
-        this.warehouse_id = (wh === 0) ? null : wh;
-        this.journal_id = (jr === 0) ? null : jr;
-
-        await this.reload();
-      },
-
-
-      startAutoRefresh(ms = 60 * 1000) {
-        if (this._timer) clearInterval(this._timer);
-          this._timer = setInterval(() => this.reload(), ms);
-      },
-
-      stopAutoRefresh() {
-        if (this._timer) clearInterval(this._timer);
-        this._timer = null;
-      },
-    });
-
-    // Primera carga
-    // statistics.reload();
-    // Auto refresh (recarga con el rango ACTUAL)
-    // statistics.startAutoRefresh(60 * 1000);
-
-    return statistics;
-  },
+        return statistics;
+    },
 };
 
 registry.category("services").add("sales.statistics", statisticsService);

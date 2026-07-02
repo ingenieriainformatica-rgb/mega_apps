@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="mega_dashboard.KpiBanner">
+
+    <div class="mega-kpi-banner">
+      <div class="container-fluid py-3 px-4">
+        <div class="row g-3">
+
+          <t t-foreach="metrics" t-as="metric" t-key="metric.id">
+            <div class="col-6 col-md-4 col-lg-2">
+
+              <div class="mega-kpi-card h-100">
+                <!-- Barra de color superior (distinta por KPI) -->
+                <div class="mega-kpi-topbar" t-att-style="'background:' + metric.color"/>
+
+                <div class="p-3">
+                  <!-- Label -->
+                  <div class="mega-kpi-label">
+                    <i t-att-class="'fa ' + metric.icon + ' me-1'"/>
+                    <t t-esc="metric.label"/>
+                  </div>
+
+                  <!-- Valor principal -->
+                  <div class="mega-kpi-value mt-1">
+                    <t t-esc="metric.display"/>
+                  </div>
+
+                  <!-- Delta vs período anterior -->
+                  <t t-set="isGood" t-value="isGoodDelta(metric)"/>
+                  <t t-set="deltaStr" t-value="formatDelta(metric.delta)"/>
+
+                  <t t-if="deltaStr !== null">
+                    <div class="mega-kpi-delta mt-1 d-flex align-items-center gap-1"
+                         t-att-class="isGood ? 'text-success' : 'text-danger'">
+                      <i t-att-class="metric.delta > 0 ? 'fa fa-arrow-up' : 'fa fa-arrow-down'"/>
+                      <span><t t-esc="deltaStr"/></span>
+                      <span class="mega-kpi-delta-label">vs anterior</span>
+                    </div>
+                  </t>
+
+                  <t t-else="">
+                    <div class="mega-kpi-delta mt-1 text-muted">
+                      <span class="mega-kpi-delta-label">Sin período previo</span>
+                    </div>
+                  </t>
+
+                </div>
+              </div>
+
+            </div>
+          </t>
+
+        </div>
+      </div>
+    </div>
+
+  </t>
+</templates>

@@ -1,5 +1,6 @@
 import logging
 from collections import defaultdict
+from datetime import date as date_cls, timedelta
 from odoo.http import request  # type: ignore
 from .utils import get_active_warehouses  # type: ignore
 
@@ -10,12 +11,38 @@ ALL_HEADQUARTERS = "allHeadquarters"
 ALL_JOURNAL = "allJournal"
 
 
+# ─────────────────────────────────────────────────────────────────
+# Helpers de normalización
+# ─────────────────────────────────────────────────────────────────
+
 def _norm_id(value, all_token):
     """Devuelve None si es vacío o token ALL, si no int()."""
     if value in ("", None, False, all_token):
         return None
     return int(value)
 
+
+def _get_previous_period_dates(date_from, date_to):
+    """
+    Calcula el período anterior de la misma duración, inmediatamente antes.
+    Ejemplo: jul 1–31 (31 días) → jun 1–30 (31 días previos).
+    """
+    if not date_from or not date_to:
+        return None, None
+    try:
+        d_from = date_cls.fromisoformat(str(date_from))
+        d_to = date_cls.fromisoformat(str(date_to))
+        delta = (d_to - d_from).days + 1          # duración del período actual
+        prev_date_to = d_from - timedelta(days=1)  # día anterior al inicio actual
+        prev_date_from = prev_date_to - timedelta(days=delta - 1)
+        return str(prev_date_from), str(prev_date_to)
+    except (ValueError, TypeError):
+        return None, None
+
+
+# ─────────────────────────────────────────────────────────────────
+# Consultas de diarios
+# ─────────────────────────────────────────────────────────────────
 
 def _get_journals_for_warehouses(warehouses, journal_id=None):
     """Trae diarios de venta mapeados a las bodegas dadas (y opcional filtra 1 diario)."""
@@ -32,6 +59,10 @@ def _get_journals_for_warehouses(warehouses, journal_id=None):
 
     return Journal.search(domain, order="name")
 
+
+# ─────────────────────────────────────────────────────────────────
+# KPIs agrupados — versión detallada (período actual, con moves)
+# ─────────────────────────────────────────────────────────────────
 
 def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_type=None, negate=False):
     """
@@ -93,6 +124,10 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
     return kpi, detail
 
 
+# ─────────────────────────────────────────────────────────────────
+# Totales por concepto (asesor)
+# ─────────────────────────────────────────────────────────────────
+
 def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_type=None, negate=False):
     """
     Totales agrupados por (warehouse_id, journal_id, concepto).
@@ -152,26 +187,72 @@ def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_typ
     return out
 
 
+# ─────────────────────────────────────────────────────────────────
+# Totales globales rápidos — read_group sin cargar recordsets
+# Usados para calcular el período anterior de forma eficiente.
+# ─────────────────────────────────────────────────────────────────
+
+def _get_grand_totals_fast(journals, date_from=None, date_to=None, move_type=None, negate=False):
+    """
+    Retorna totales globales usando read_group agrupado por journal_id.
+    Eficiente: no carga registros individuales en memoria Python.
+    """
+    Move = request.env["account.move"].sudo()
+
+    if not journals:
+        return {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
+
+    domain = [
+        ("company_id", "=", request.env.company.id),
+        ("state", "not in", ("draft", "cancel")),
+        ("journal_id", "in", journals.ids),
+    ]
+    if move_type:
+        domain.append(("move_type", "=", move_type))
+    if date_from:
+        domain.append(("invoice_date", ">=", date_from))
+    if date_to:
+        domain.append(("invoice_date", "<=", date_to))
+
+    rows = Move.read_group(
+        domain=domain,
+        fields=["amount_untaxed:sum", "amount_total:sum"],
+        groupby=["journal_id"],
+        lazy=False,
+    )
+
+    sign = -1.0 if negate else 1.0
+    cnt = sum(int(r.get("__count", 0) or 0) for r in rows)
+    untaxed = sum(float(r.get("amount_untaxed", 0.0) or 0.0) for r in rows) * sign
+    total = sum(float(r.get("amount_total", 0.0) or 0.0) for r in rows) * sign
+
+    return {"count_invoices": cnt, "subtotal_untaxed": untaxed, "total_sales": total}
+
+
+# ─────────────────────────────────────────────────────────────────
+# Función principal pública
+# ─────────────────────────────────────────────────────────────────
+
 def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=None):
     # 1) Normalizar tokens ALL
     wh_id = _norm_id(warehouse_id, ALL_HEADQUARTERS)   # None => todas sedes
     j_id = _norm_id(journal_id, ALL_JOURNAL)           # None => todos diarios
 
-    # 2) Traer bodegas activas
+    # 2) Bodegas activas
     warehouses = get_active_warehouses(wh_id)
 
     # 3) Diarios por bodegas
     journals = _get_journals_for_warehouses(warehouses, journal_id=j_id)
 
-    # 4) KPIs por (warehouse, journal)
+    # 4) KPIs detallados por (warehouse, journal) — período actual
     inv_kpi, inv_detail = _get_kpis_grouped(warehouses, journals, date_from, date_to, "out_invoice", negate=False)
     ref_kpi, ref_detail = _get_kpis_grouped(warehouses, journals, date_from, date_to, "out_refund", negate=True)
 
-    # ✅ 5) Totales por concepto (FACTURAS y NC)
+    # 5) Totales por concepto (facturas + NC)
     inv_concept = _get_concept_totals_grouped(journals, date_from, date_to, "out_invoice", negate=False)
     ref_concept = _get_concept_totals_grouped(journals, date_from, date_to, "out_refund", negate=True)
 
-    # 6) Armar respuesta por sede -> diarios
+    # 6) Armar respuesta por sede → diarios
     groups = []
     grand = {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
     grand_refunds = {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
@@ -186,7 +267,6 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
             f = inv_kpi.get(key, {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0})
             r = ref_kpi.get(key, {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0})
 
-            # sumar grands
             grand["count_invoices"] += int(f["count_invoices"])
             grand["subtotal_untaxed"] += float(f["subtotal_untaxed"])
             grand["total_sales"] += float(f["total_sales"])
@@ -195,23 +275,19 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
             grand_refunds["subtotal_untaxed"] += float(r["subtotal_untaxed"])
             grand_refunds["total_sales"] += float(r["total_sales"])
 
-            # detalle
-            moves = (inv_detail.get(key, []) + ref_detail.get(key, []))
+            moves = inv_detail.get(key, []) + ref_detail.get(key, [])
             moves.sort(key=lambda x: x["invoice_date"] or "", reverse=True)
 
             has_invoices = int(f["count_invoices"]) > 0
             has_credit_notes = int(r["count_invoices"]) > 0
 
-            # ✅ merge de conceptos (facturas + NC)
             conceptos = {}
-
             for name, v in inv_concept.get(key, {}).items():
                 conceptos[name] = {
                     "count": int(v["count"]),
                     "subtotal_untaxed": float(v["subtotal_untaxed"]),
                     "total_sales": float(v["total_sales"]),
                 }
-
             for name, v in ref_concept.get(key, {}).items():
                 if name not in conceptos:
                     conceptos[name] = {"count": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
@@ -225,7 +301,6 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
             wh_block["journals"].append({
                 "journal": {"id": j.id, "name": j.name},
                 "is_credit_note_journal": has_credit_notes and not has_invoices,
-
                 "facturado": {
                     "count_invoices": int(f["count_invoices"]),
                     "subtotal_untaxed": float(f["subtotal_untaxed"]),
@@ -236,16 +311,31 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
                     "subtotal_untaxed": float(r["subtotal_untaxed"]),
                     "total_sales": float(r["total_sales"]),
                 },
-
-                # ✅ NUEVO: totales por concepto (asesor)
                 "conceptos_totales": conceptos_list,
-
                 "moves": moves,
             })
 
         if wh_block["journals"]:
             groups.append(wh_block)
 
+    # 7) Neto del período actual (ventas brutas + NC negativas)
+    grand_net = {
+        "count_invoices": grand["count_invoices"] + grand_refunds["count_invoices"],
+        "subtotal_untaxed": grand["subtotal_untaxed"] + grand_refunds["subtotal_untaxed"],
+        "total_sales": grand["total_sales"] + grand_refunds["total_sales"],
+    }
+
+    # 8) Período anterior — misma duración, desplazado atrás
+    prev_from, prev_to = _get_previous_period_dates(date_from, date_to)
+    prev_inv = _get_grand_totals_fast(journals, prev_from, prev_to, "out_invoice", negate=False)
+    prev_ref = _get_grand_totals_fast(journals, prev_from, prev_to, "out_refund", negate=True)
+    prev_net = {
+        "count_invoices": prev_inv["count_invoices"] + prev_ref["count_invoices"],
+        "subtotal_untaxed": prev_inv["subtotal_untaxed"] + prev_ref["subtotal_untaxed"],
+        "total_sales": prev_inv["total_sales"] + prev_ref["total_sales"],
+    }
+
+    # 9) Diario seleccionado (para UI)
     selected_journal = None
     if j_id:
         j = request.env["account.journal"].sudo().browse(j_id)
@@ -261,5 +351,13 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
         "journals": [{"id": j.id, "name": j.name} for j in journals],
         "grand": grand,
         "grand_refunds": grand_refunds,
+        "grand_net": grand_net,
+        "previous_period": {
+            "date_from": prev_from,
+            "date_to": prev_to,
+            "grand": prev_inv,
+            "grand_refunds": prev_ref,
+            "grand_net": prev_net,
+        },
         "groups": groups,
     }

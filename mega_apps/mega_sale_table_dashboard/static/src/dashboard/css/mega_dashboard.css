@@ -1,16 +1,20 @@
-.mega_kpi_card2{
+/* =============================================================
+   MEGA DASHBOARD — Estilos originales (no modificar)
+   ============================================================= */
+
+.mega_kpi_card2 {
   border-radius: 14px;
   background: #fff;
 }
 
-.mega_kpi_topbar{
+.mega_kpi_topbar {
   height: 6px;
   border-top-left-radius: 14px;
   border-top-right-radius: 14px;
   background: linear-gradient(90deg, rgba(155, 184, 228, 0.55), rgba(56, 124, 235, 0.55));
 }
 
-.mega_kpi_title2{
+.mega_kpi_title2 {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: .2px;
@@ -18,23 +22,247 @@
   text-transform: uppercase;
 }
 
-.mega_kpi_value2{
+.mega_kpi_value2 {
   font-size: 22px;
   font-weight: 800;
   color: rgba(33,37,41,.92);
   line-height: 1.1;
 }
 
-.mega_kpi_sub2{
+.mega_kpi_sub2 {
   font-size: 12px;
   color: rgba(33,37,41,.60);
 }
 
-.mega_kpi_badge{
+.mega_kpi_badge {
   font-size: 11px;
   padding: 3px 8px;
   border-radius: 999px;
   background: rgba(33,37,41,.06);
   color: rgba(33,37,41,.65);
   white-space: nowrap;
+}
+
+
+/* =============================================================
+   MEGA DASHBOARD v2.0 — Sprint 1
+   KPI Banner · Skeleton · Filter Bar · Refresh
+   ============================================================= */
+
+
+/* ──────────────────────────────────────────────
+   KPI Banner — contenedor de fondo
+   ────────────────────────────────────────────── */
+
+.mega-kpi-banner {
+  background: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, .06);
+}
+
+
+/* ──────────────────────────────────────────────
+   KPI Card — tarjeta individual
+   ────────────────────────────────────────────── */
+
+.mega-kpi-card {
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, .07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+  overflow: hidden;
+  transition: box-shadow .2s ease, transform .15s ease;
+}
+
+.mega-kpi-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .10);
+  transform: translateY(-1px);
+}
+
+/* Barra de color superior (color se inyecta inline por JS) */
+.mega-kpi-topbar {
+  height: 4px;
+  display: block;
+}
+
+.mega-kpi-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: rgba(33, 37, 41, .50);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mega-kpi-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1A3C6B;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mega-kpi-delta {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.mega-kpi-delta-label {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(33, 37, 41, .45);
+}
+
+
+/* ──────────────────────────────────────────────
+   Skeleton Loading — tarjetas de placeholder
+   ────────────────────────────────────────────── */
+
+.mega-skeleton-card {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Efecto shimmer animado */
+.mega-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #ececec 25%,
+    #d8d8d8 50%,
+    #ececec 75%
+  );
+  background-size: 200% 100%;
+  animation: mega-shimmer 1.4s ease-in-out infinite;
+  display: block;
+}
+
+@keyframes mega-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+
+/* ──────────────────────────────────────────────
+   Barra de progreso al refiltrar
+   (visible solo cuando isReady=true & isLoading=true)
+   ────────────────────────────────────────────── */
+
+.mega-refresh-bar {
+  height: 3px;
+  background: rgba(127, 179, 66, .18);
+  overflow: hidden;
+}
+
+.mega-refresh-progress {
+  height: 100%;
+  width: 0;
+  background: #7FB342;
+  animation: mega-progress 1.6s ease-in-out infinite;
+}
+
+@keyframes mega-progress {
+  0%   { width: 0%;   opacity: 1; }
+  65%  { width: 80%;  opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+
+
+/* ──────────────────────────────────────────────
+   Filter Bar v2
+   ────────────────────────────────────────────── */
+
+.mega-filter-bar {
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, .08);
+  padding: 10px 24px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.mega-filter-row {
+  min-height: 36px;
+}
+
+/* Botones de shortcuts de período */
+.mega-shortcut-btn {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 60, 107, .20);
+  background: transparent;
+  color: rgba(33, 37, 41, .65);
+  cursor: pointer;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+
+.mega-shortcut-btn:hover {
+  border-color: #1A3C6B;
+  color: #1A3C6B;
+  background: rgba(26, 60, 107, .05);
+}
+
+.mega-shortcut-active {
+  background: #1A3C6B !important;
+  border-color: #1A3C6B !important;
+  color: #fff !important;
+}
+
+/* Inputs de fecha compactos */
+.mega-date-input {
+  width: 148px !important;
+  font-size: 13px;
+}
+
+/* Label de fecha */
+.mega-filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(33, 37, 41, .50);
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+/* Ícono antes del select */
+.mega-filter-icon {
+  font-size: 14px;
+  color: rgba(33, 37, 41, .40);
+  flex-shrink: 0;
+}
+
+/* Selects del filtro */
+.mega-select {
+  min-width: 180px;
+  max-width: 260px;
+  font-size: 13px;
+}
+
+
+/* ──────────────────────────────────────────────
+   Estado vacío inicial
+   ────────────────────────────────────────────── */
+
+.mega-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  color: rgba(33, 37, 41, .30);
+}
+
+.mega-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.mega-empty-text {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
 }

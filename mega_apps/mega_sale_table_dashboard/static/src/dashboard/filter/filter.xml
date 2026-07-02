@@ -1,103 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
   <t t-name="mega_dashboard.DateFilterBar">
-    <section class="container-fluid px-3 px-lg-4 pb-2">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body py-3">
 
-          <div class="row align-items-center g-3">
-            <div class="col-12">
-              <!-- IMPORTANTE: quité justify-content-lg-end porque ya no hace falta -->
-              <div class="row g-2">
+    <div class="mega-filter-bar">
 
-                <!-- Sede -->
-                <div class="col-12 col-md-6 col-lg-3">
-                  <label class="form-label text-muted small mb-1">Sede</label>
-                  <div class="input-group input-group-lg">
-                    <span class="input-group-text">
-                      <i class="fa fa-folder-open-o"/>
-                    </span>
+      <!-- ── Fila 1: Shortcuts de período + inputs de fecha ── -->
+      <div class="mega-filter-row d-flex align-items-center justify-content-between flex-wrap gap-2">
 
-                    <select class="form-select"
-                            t-ref="input_warehouse_id"
-                            t-on-change="onChangeWarehouse">
-                      <t t-if="!props.loadingWarehouses">
-                        <option disabled="disabled">No tiene sedes mapeadas...</option>
-                      </t>
+        <!-- Shortcuts de período -->
+        <div class="d-flex align-items-center gap-1">
+          <t t-foreach="shortcuts" t-as="sc" t-key="sc.key">
+            <button
+              t-att-class="state.activeShortcut === sc.key
+                            ? 'mega-shortcut-btn mega-shortcut-active'
+                            : 'mega-shortcut-btn'"
+              t-on-click="() => this.applyShortcut(sc.key)">
+              <t t-esc="sc.label"/>
+            </button>
+          </t>
+        </div>
 
-                      <t t-else="">
-                        <option value="allHeadquarters">Todos las sedes</option>
-                        <t t-foreach="(props.warehouses || [])" t-as="wh" t-key="wh.id">
-                          <option t-att-value="wh.id"><t t-esc="wh.name"/></option>
-                        </t>
-                      </t>
-                    </select>
-                  </div>
-                </div>
+        <!-- Inputs de fecha (siempre visibles) -->
+        <div class="d-flex align-items-center gap-3 flex-wrap">
 
-                <!-- Diario -->
-                <div class="col-12 col-md-6 col-lg-3">
-                  <label class="form-label text-muted small mb-1">Diario</label>
-                  <div class="input-group input-group-lg">
-                    <span class="input-group-text">
-                      <i class="fa fa-list-alt"/>
-                    </span>
+          <div class="d-flex align-items-center gap-1">
+            <label class="mega-filter-label">Desde</label>
+            <input
+              type="date"
+              class="mega-date-input form-control form-control-sm"
+              t-att-value="state.date_from"
+              t-on-change="onChangeDateFrom"
+            />
+          </div>
 
-                    <select class="form-select" t-ref="input_journal_id">
-                      <t t-if="!props.loadingJournals">
-                        <option disabled="disabled">Cargando diarios...</option>
-                      </t>
-                      <t t-else="">
-                        <option value="allJournal">Todos los diarios</option>
-                        <t t-foreach="(props.journals || [])" t-as="jour" t-key="jour.id">
-                          <option t-att-value="jour.id"><t t-esc="jour.name"/></option>
-                        </t>
-                      </t>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Desde -->
-                <div class="col-6 col-md-3 col-lg-2">
-                  <label class="form-label text-muted small mb-1">Desde</label>
-                  <div class="input-group input-group-lg">
-                    <input type="date"
-                           class="form-control"
-                           t-att-value="state.date_from"
-                           t-ref="input_date_from"/>
-                    <span class="input-group-text">
-                      <i class="fa fa-calendar"/>
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Hasta -->
-                <div class="col-6 col-md-3 col-lg-2">
-                  <label class="form-label text-muted small mb-1">Hasta</label>
-                  <div class="input-group input-group-lg">
-                    <input type="date"
-                           class="form-control"
-                           t-att-value="state.date_to"
-                           t-ref="input_date_to"/>
-                    <span class="input-group-text">
-                      <i class="fa fa-calendar"/>
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Botón -->
-                <div class="col-12 col-lg-2 d-grid align-self-end col-lg-auto">
-                  <button class="btn btn-primary btn-lg" t-on-click="onClickFilter">
-                    <i class="fa fa-filter me-1"/>
-                    Filtrar
-                  </button>
-                </div>
-
-              </div>
-            </div>
+          <div class="d-flex align-items-center gap-1">
+            <label class="mega-filter-label">Hasta</label>
+            <input
+              type="date"
+              class="mega-date-input form-control form-control-sm"
+              t-att-value="state.date_to"
+              t-on-change="onChangeDateTo"
+            />
           </div>
 
         </div>
       </div>
-    </section>
+
+      <!-- ── Fila 2: Selectores de sede y diario ── -->
+      <div class="d-flex align-items-center gap-3 flex-wrap mt-2">
+
+        <!-- Sede -->
+        <div class="d-flex align-items-center gap-2">
+          <span class="mega-filter-icon"><i class="fa fa-building-o"/></span>
+          <select
+            class="form-select form-select-sm mega-select"
+            t-on-change="onChangeWarehouse"
+            t-att-disabled="!props.loadingWarehouses">
+            <option value="allHeadquarters">Todas las sedes</option>
+            <t t-foreach="props.warehouses or []" t-as="wh" t-key="wh.id">
+              <option t-att-value="wh.id"
+                      t-att-selected="state.warehouse_id == wh.id">
+                <t t-esc="wh.name"/>
+              </option>
+            </t>
+          </select>
+        </div>
+
+        <!-- Diario -->
+        <div class="d-flex align-items-center gap-2">
+          <span class="mega-filter-icon"><i class="fa fa-book"/></span>
+          <select
+            class="form-select form-select-sm mega-select"
+            t-on-change="onChangeJournal"
+            t-att-disabled="!props.loadingWarehouses">
+            <option value="allJournal"
+                    t-att-selected="state.journal_id === 'allJournal'">
+              Todos los diarios
+            </option>
+            <t t-foreach="props.journals or []" t-as="j" t-key="j.id">
+              <option t-att-value="j.id"
+                      t-att-selected="state.journal_id == j.id">
+                <t t-esc="j.name"/>
+              </option>
+            </t>
+          </select>
+        </div>
+
+        <!-- Spinner inicial (solo mientras carga la lista de sedes) -->
+        <t t-if="!props.loadingWarehouses">
+          <span class="text-muted" style="font-size:12px;">
+            <i class="fa fa-circle-o-notch fa-spin me-1"/>
+            Cargando sedes...
+          </span>
+        </t>
+
+      </div>
+
+    </div>
+
   </t>
 </templates>

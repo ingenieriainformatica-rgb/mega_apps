@@ -3,8 +3,10 @@
   <t t-name="mega_dashboard.SaleDashboard">
     <Layout display="display" className="'o_dashboard h-100 overflow-y-auto'">
 
+      <!-- ── Hero (se mantiene; se reemplazará en Sprint 2) ────── -->
       <DashboardHero />
 
+      <!-- ── FilterBar v2 (onchange, sin botón Filtrar) ─────────── -->
       <DateFilterBar
         warehouses="state.warehouses"
         loadingWarehouses="state.loadingWarehouses"
@@ -14,28 +16,69 @@
         loadingJournals="state.loadingJournals"
       />
 
-      <!-- Layout principal -->
-      <div class="container-fluid mb-5 mt-5" t-if="statistics.isReady">
-        <div class="row g-3">
+      <!-- ══════════════════════════════════════════════════════════
+           SPRINT 1: KPI Banner con skeleton loading
+           ══════════════════════════════════════════════════════════ -->
 
-          <!-- Columna 1 -->
-          <div class="col-12 col-lg-3">
-            <Informe data="statistics.sales.groups" grand="statistics.sales.grand" option="statistics.isReadyWarehouse"/>
-          </div>
+      <!-- Skeleton: primera carga (isReady=false mientras isLoading=true) -->
+      <t t-if="!statistics.isReady and statistics.isLoading">
+        <KpiBannerSkeleton />
+      </t>
 
-          <!-- Columna 2 -->
-          <div class="col-12 col-lg-4">
-            <Advisor data="statistics.sales.groups"/>
-          </div>
-
-          <!-- Columna 3 -->
-          <div class="col-12 col-lg-5">
-            <InvoiceList invoicesList="statistics.sales.groups"/>
-          </div>
-
+      <!-- Estado vacío inicial (antes de que _autoLoad dispare) -->
+      <t t-if="!statistics.isReady and !statistics.isLoading">
+        <div class="mega-empty-state">
+          <i class="fa fa-bar-chart mega-empty-icon"/>
+          <p class="mega-empty-text">Cargando datos del dashboard…</p>
         </div>
-      </div>
+      </t>
 
+      <!-- Contenido principal (visible en cuanto llegan los primeros datos) -->
+      <t t-if="statistics.isReady">
+
+        <!-- Barra de progreso discreta al refiltrar (isLoading=true con datos ya presentes) -->
+        <t t-if="statistics.isLoading">
+          <div class="mega-refresh-bar">
+            <div class="mega-refresh-progress"/>
+          </div>
+        </t>
+
+        <!-- KPI Banner v2 -->
+        <KpiBanner
+          grand="statistics.sales.grand"
+          grandRefunds="statistics.sales.grand_refunds"
+          grandNet="statistics.sales.grand_net"
+          previousPeriod="statistics.sales.previous_period"
+          isLoading="statistics.isLoading"
+        />
+
+        <!-- ── Layout de 3 columnas (existente, sin cambios) ───── -->
+        <div class="container-fluid mb-5 mt-3">
+          <div class="row g-3">
+
+            <!-- Columna 1: KPI por sede/diario -->
+            <div class="col-12 col-lg-3">
+              <Informe
+                data="statistics.sales.groups"
+                grand="statistics.sales.grand"
+                option="statistics.isReadyWarehouse"
+              />
+            </div>
+
+            <!-- Columna 2: Asesores -->
+            <div class="col-12 col-lg-4">
+              <Advisor data="statistics.sales.groups"/>
+            </div>
+
+            <!-- Columna 3: Listado de movimientos -->
+            <div class="col-12 col-lg-5">
+              <InvoiceList invoicesList="statistics.sales.groups"/>
+            </div>
+
+          </div>
+        </div>
+
+      </t>
 
     </Layout>
   </t>
