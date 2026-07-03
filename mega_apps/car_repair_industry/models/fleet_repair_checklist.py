@@ -148,3 +148,14 @@ class FleetRepairReceptionChecklistLine(models.Model):
         string="Reparado",
         default='pending',
     )
+
+    def get_pdf_state_label(self):
+        self.ensure_one()
+        opts_str = self.template_line_id.display_options if self.template_line_id else ''
+        if opts_str:
+            opts = [o.strip() for o in opts_str.split(',')]
+            idx_map = {'good': 0, 'bad': 1, 'regular': 2, 'not_apply': 3}
+            idx = idx_map.get(self.state, 3)
+            if idx < len(opts):
+                return opts[idx]
+        return dict(self._fields['state'].selection).get(self.state, self.state or '')

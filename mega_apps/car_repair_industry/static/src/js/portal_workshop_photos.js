@@ -601,17 +601,10 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
             removeButton.setAttribute("aria-label", "Quitar foto");
             removeButton.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
 
-            const category = document.createElement("select");
+            const category = document.createElement("input");
+            category.type = "hidden";
             category.name = "photo_category";
-            category.className = "form-select form-select-sm js-workshop-photo-category";
-            category.dataset.index = index;
-            for (const [value, label] of PHOTO_CATEGORIES) {
-                const option = document.createElement("option");
-                option.value = value;
-                option.textContent = label;
-                option.selected = value === photo.category;
-                category.appendChild(option);
-            }
+            category.value = photo.category || "externa";
 
             topRow.append(filename, removeButton);
             body.append(topRow, category);

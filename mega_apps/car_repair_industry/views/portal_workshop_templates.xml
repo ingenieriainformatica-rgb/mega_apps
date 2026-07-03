@@ -10,6 +10,41 @@
         </t>
     </template>
 
+    <template id="portal_workshop_order_created" name="Orden de taller creada">
+        <t t-call="website.layout">
+            <div class="container my-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-7 col-md-9">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center p-5">
+                                <i class="fa fa-check-circle fa-4x text-success mb-3"></i>
+                                <h2 class="mb-2">¡Orden creada correctamente!</h2>
+                                <p class="text-muted mb-4">
+                                    OT <strong><t t-esc="repair.sequence or '#%s' % repair.id"/></strong>
+                                    registrada exitosamente el
+                                    <t t-esc="repair.receipt_date.strftime('%d/%m/%Y') if repair.receipt_date else ''"/>.
+                                </p>
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    <a t-att-href="'/my/workshop/order/%s' % repair.id"
+                                       class="btn btn-outline-primary">
+                                        <i class="fa fa-eye me-1"/> Ver orden
+                                    </a>
+                                    <a t-att-href="'/my/workshop/order/%s/reception-pdf' % repair.id"
+                                       class="btn btn-success" target="_blank">
+                                        <i class="fa fa-file-pdf-o me-1"/> Descargar PDF de recepción
+                                    </a>
+                                    <a href="/my/workshop" class="btn btn-outline-secondary">
+                                        <i class="fa fa-arrow-left me-1"/> Volver al panel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
     <template id="portal_workshop_dashboard" name="Portal taller">
         <t t-call="website.layout">
             <div class="container my-3 my-md-4">
@@ -384,13 +419,14 @@
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">Número de documento</label>
+                                <label class="form-label">Número de documento <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input name="client_vat"
                                            class="form-control js-partner-vat-lookup"
                                            placeholder="Número"
                                            maxlength="20"
-                                           autocomplete="off"/>
+                                           autocomplete="off"
+                                           required="required"/>
                                     <span class="input-group-text">
                                         <i class="fa fa-search js-vat-lookup-icon"></i>
                                     </span>
@@ -402,8 +438,8 @@
                                 <input name="client_name" class="form-control js-workshop-particular-required workshop-input-uppercase" required="required" placeholder="NOMBRE COMPLETO"/>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">Celular</label>
-                                <input name="client_phone" type="tel" class="form-control" placeholder="300 123 4567"/>
+                                <label class="form-label">Celular <span class="text-danger">*</span></label>
+                                <input name="client_phone" type="tel" class="form-control" placeholder="300 123 4567" required="required"/>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Correo</label>
@@ -635,7 +671,8 @@
                             <div class="col-md-6">
                                 <label class="form-label">Motivo de ingreso <span class="text-danger">*</span></label>
                                 <select name="reason" class="form-select" required="required">
-                                    <option value="MANTENIMIENTO PREVENTIVO" selected="selected">MANTENIMIENTO PREVENTIVO</option>
+                                    <option value="">Seleccione un motivo...</option>
+                                    <option value="MANTENIMIENTO PREVENTIVO">MANTENIMIENTO PREVENTIVO</option>
                                     <option value="MEGA COMBO">MEGA COMBO</option>
                                     <option value="CORRECTIVO">CORRECTIVO</option>
                                 </select>
@@ -664,12 +701,12 @@
                                     <tr t-foreach="selected_template.line_ids.filtered('active')" t-as="item">
                                         <td t-esc="item.name"/>
                                         <td>
-                                            <select t-att-name="'check_state_%s' % item.id" class="form-select">
+                                            <select t-att-name="'check_state_%s' % item.id" class="form-select" required="required">
+                                                <option value="">—</option>
                                                 <t t-if="item.display_options">
                                                     <t t-set="state_values" t-value="['good', 'bad', 'regular', 'not_apply']"/>
                                                     <t t-foreach="item.display_options.split(',')" t-as="opt_label">
                                                         <option t-att-value="state_values[opt_label_index]"
-                                                                t-att-selected="'selected' if opt_label_index == 0 else None"
                                                                 t-esc="opt_label.strip()"/>
                                                     </t>
                                                 </t>
@@ -677,7 +714,7 @@
                                                     <option value="good">Bueno</option>
                                                     <option value="regular">Regular</option>
                                                     <option value="bad">Malo</option>
-                                                    <option value="not_apply" selected="selected">No aplica</option>
+                                                    <option value="not_apply">No aplica</option>
                                                 </t>
                                             </select>
                                         </td>
@@ -792,7 +829,15 @@
                                 <h1 class="h3 mb-0" t-esc="repair.name"/>
                             </div>
                         </div>
-                        <span class="workshop-detail-state" t-esc="repair.get_state_label()"/>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="workshop-detail-state" t-esc="repair.get_state_label()"/>
+                            <a t-if="is_advisor or is_internal_manager"
+                               t-att-href="'/my/workshop/order/%s/reception-pdf' % repair.id"
+                               class="btn btn-success px-3 py-2" target="_blank">
+                                <i class="fa fa-file-pdf-o me-2"/>
+                                <strong>Descargar Acta PDF</strong>
+                            </a>
+                        </div>
                     </div>
                     <div class="workshop-detail-quickinfo">
                         <div class="workshop-detail-quickinfo-cell">

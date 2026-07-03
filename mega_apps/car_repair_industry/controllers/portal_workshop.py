@@ -220,7 +220,7 @@ class CarRepairPortalWorkshop(http.Controller):
         if request.httprequest.method == 'POST':
             validated_files = self._prepare_reception_photo_files()
             repair = self._create_portal_repair(post, selected_template, validated_files)
-            return request.redirect('/my/workshop')
+            return request.redirect('/my/workshop/order/%s/created' % repair.id)
 
         return request.render('car_repair_industry.portal_workshop_order_form', {
             'templates': templates,
@@ -625,6 +625,38 @@ class CarRepairPortalWorkshop(http.Controller):
         repair.message_post(body=_("Orden creada desde portal por %s.") % request.env.user.display_name)
         repair.action_flow_mark_to_assign()
         return repair
+
+    @http.route('/my/workshop/order/<int:repair_id>/created', type='http', auth='user', website=True)
+    def workshop_order_created(self, repair_id, **kwargs):
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        if not (self._is_advisor() or self._is_internal_manager()):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        return request.render('car_repair_industry.portal_workshop_order_created', {
+            'repair': repair,
+        })
+
+    @http.route('/my/workshop/order/<int:repair_id>/reception-pdf', type='http', auth='user', website=True)
+    def workshop_order_reception_pdf(self, repair_id, **kwargs):
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        if not (self._is_advisor() or self._is_internal_manager()):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        pdf_content, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf(
+            'car_repair_industry.report_car_repair_reception_act', [repair.id]
+        )
+        filename = 'Acta_Recepcion_%s.pdf' % (repair.sequence or str(repair.id))
+        return request.make_response(
+            pdf_content,
+            headers=[
+                ('Content-Type', 'application/pdf'),
+                ('Content-Disposition', 'attachment; filename="%s"' % filename),
+            ],
+        )
 
     @http.route('/my/workshop/order/<int:repair_id>', type='http', auth='user', website=True)
     def workshop_order_detail(self, repair_id, **kwargs):

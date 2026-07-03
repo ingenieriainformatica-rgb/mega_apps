@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="report_car_repair_reception_document">
+            <t t-call="web.external_layout">
+                <div class="page">
+
+                    <!-- Título principal -->
+                    <div style="text-align:center; margin-bottom:14px; border-bottom:2px solid #333; padding-bottom:8px;">
+                        <h2 style="margin:0; font-size:16px; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">
+                            Acta de Recepción / Orden de Trabajo
+                        </h2>
+                    </div>
+
+                    <!-- Sección 1: Información de la OT -->
+                    <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
+                        <tr style="background:#f5f5f5;">
+                            <td colspan="4" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
+                                Información de la Orden
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">N° OT</td>
+                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.sequence or str(o.id)"/>
+                            </td>
+                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Fecha recepción</td>
+                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.receipt_date.strftime('%d/%m/%Y') if o.receipt_date else '—'"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Sede</td>
+                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="dict(o._fields['customer_type'].selection).get(o.customer_type, '—')"/>
+                            </td>
+                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Asesor recepción</td>
+                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.portal_advisor_id.name or '—'"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Concepto</td>
+                            <td colspan="3" style="padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.name or '—'"/>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Sección 2: Datos del Cliente -->
+                    <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
+                        <tr style="background:#f5f5f5;">
+                            <td colspan="4" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
+                                Datos del Cliente
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Cliente</td>
+                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.client_id.name or '—'"/>
+                            </td>
+                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Tipo documento</td>
+                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.client_id.l10n_latam_identification_type_id.name or '—'"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">N° documento</td>
+                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.client_id.vat or '—'"/>
+                            </td>
+                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Teléfono</td>
+                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.client_phone or o.client_mobile or '—'"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Correo</td>
+                            <td colspan="3" style="padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.client_email or '—'"/>
+                            </td>
+                        </tr>
+                        <t t-if="o.delivered_by_name">
+                            <tr>
+                                <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Entrega vehículo</td>
+                                <td style="padding:4px 6px; border:1px solid #ddd;">
+                                    <t t-esc="o.delivered_by_name"/>
+                                </td>
+                                <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Cel. quien entrega</td>
+                                <td style="padding:4px 6px; border:1px solid #ddd;">
+                                    <t t-esc="o.delivered_by_phone or '—'"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </table>
+
+                    <!-- Sección 3: Datos del Vehículo -->
+                    <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
+                        <tr style="background:#f5f5f5;">
+                            <td colspan="4" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
+                                Datos del Vehículo
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Placa</td>
+                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.license_plate or '—'"/>
+                            </td>
+                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Marca</td>
+                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.vehicle_brand_id.name or '—'"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Línea / Modelo</td>
+                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.model_id.name or '—'"/>
+                            </td>
+                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Año modelo</td>
+                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="o.model_year or '—'"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Kilometraje</td>
+                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="'%.0f km' % o.reception_mileage if o.reception_mileage else '—'"/>
+                            </td>
+                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Nivel combustible</td>
+                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                                <t t-esc="dict(o._fields['reception_fuel_level'].selection).get(o.reception_fuel_level, '—')"/>
+                            </td>
+                        </tr>
+                        <t t-if="o.engine_displacement or o.vin_sn">
+                            <tr>
+                                <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Cilindraje</td>
+                                <td style="padding:4px 6px; border:1px solid #ddd;">
+                                    <t t-esc="o.engine_displacement or '—'"/>
+                                </td>
+                                <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">VIN / Chasis</td>
+                                <td style="padding:4px 6px; border:1px solid #ddd;">
+                                    <t t-esc="o.vin_sn or '—'"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </table>
+
+                    <!-- Sección 4: Servicios Solicitados -->
+                    <t t-set="service_lines" t-value="o.fleet_repair_line"/>
+                    <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
+                        <tr style="background:#f5f5f5;">
+                            <td colspan="2" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
+                                Servicios Solicitados
+                            </td>
+                        </tr>
+                        <t t-if="service_lines">
+                            <tr style="background:#fafafa;">
+                                <th style="padding:4px 6px; border:1px solid #ddd; width:40%;">Servicio</th>
+                                <th style="padding:4px 6px; border:1px solid #ddd;">Detalle / Motivo</th>
+                            </tr>
+                            <t t-foreach="service_lines" t-as="line">
+                                <tr>
+                                    <td style="padding:4px 6px; border:1px solid #ddd; vertical-align:top;">
+                                        <t t-esc="line.service_type.name or '—'"/>
+                                    </td>
+                                    <td style="padding:4px 6px; border:1px solid #ddd; vertical-align:top;">
+                                        <t t-esc="line.service_detail or '—'"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </t>
+                        <t t-else="">
+                            <tr>
+                                <td colspan="2" style="padding:6px; border:1px solid #ddd; color:#777;">Sin servicios registrados.</td>
+                            </tr>
+                        </t>
+                    </table>
+
+                    <!-- Sección 5: Observaciones -->
+                    <t t-if="o.reception_general_observations or o.description or o.valuables_description">
+                        <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
+                            <tr style="background:#f5f5f5;">
+                                <td colspan="2" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
+                                    Observaciones
+                                </td>
+                            </tr>
+                            <t t-if="o.description">
+                                <tr>
+                                    <td style="width:25%; padding:4px 6px; border:1px solid #ddd; font-weight:bold; vertical-align:top;">Motivo de ingreso</td>
+                                    <td style="padding:4px 6px; border:1px solid #ddd; white-space:pre-line;"><t t-esc="o.description"/></td>
+                                </tr>
+                            </t>
+                            <t t-if="o.reception_general_observations">
+                                <tr>
+                                    <td style="width:25%; padding:4px 6px; border:1px solid #ddd; font-weight:bold; vertical-align:top;">Obs. generales</td>
+                                    <td style="padding:4px 6px; border:1px solid #ddd; white-space:pre-line;"><t t-esc="o.reception_general_observations"/></td>
+                                </tr>
+                            </t>
+                            <t t-if="o.valuables_description">
+                                <tr>
+                                    <td style="width:25%; padding:4px 6px; border:1px solid #ddd; font-weight:bold; vertical-align:top;">Objetos de valor</td>
+                                    <td style="padding:4px 6px; border:1px solid #ddd; white-space:pre-line;"><t t-esc="o.valuables_description"/></td>
+                                </tr>
+                            </t>
+                        </table>
+                    </t>
+
+                    <!-- Sección 6: Checklist de Recepción -->
+                    <t t-set="checklist_lines" t-value="o.reception_checklist_line_ids"/>
+                    <t t-if="checklist_lines">
+                        <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
+                            <tr style="background:#f5f5f5;">
+                                <td colspan="3" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
+                                    Checklist de Recepción
+                                    <t t-if="o.reception_checklist_template_id">
+                                        — <span style="font-weight:normal; font-style:italic;"><t t-esc="o.reception_checklist_template_id.name"/></span>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr style="background:#fafafa;">
+                                <th style="padding:4px 6px; border:1px solid #ddd; width:50%;">Ítem</th>
+                                <th style="padding:4px 6px; border:1px solid #ddd; width:15%; text-align:center;">Estado</th>
+                                <th style="padding:4px 6px; border:1px solid #ddd;">Observación</th>
+                            </tr>
+                            <t t-foreach="checklist_lines" t-as="line">
+                                <tr>
+                                    <td style="padding:4px 6px; border:1px solid #ddd;"><t t-esc="line.name"/></td>
+                                    <td style="padding:4px 6px; border:1px solid #ddd; text-align:center; font-weight:bold;">
+                                        <t t-esc="line.get_pdf_state_label()"/>
+                                    </td>
+                                    <td style="padding:4px 6px; border:1px solid #ddd; color:#555;">
+                                        <t t-esc="line.observation or ''"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </table>
+                    </t>
+
+                    <!-- Sección 7: Evidencias fotográficas -->
+                    <t t-set="reception_evidences" t-value="o.external_evidence_ids.filtered(lambda e: e.evidence_type == 'recepcion' and e.active)"/>
+                    <t t-if="reception_evidences">
+                        <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
+                            <tr style="background:#f5f5f5;">
+                                <td colspan="3" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
+                                    Evidencias Fotográficas de Recepción
+                                </td>
+                            </tr>
+                            <tr style="background:#fafafa;">
+                                <th style="padding:4px 6px; border:1px solid #ddd; width:35%;">Archivo</th>
+                                <th style="padding:4px 6px; border:1px solid #ddd; width:20%;">Categoría</th>
+                                <th style="padding:4px 6px; border:1px solid #ddd;">Descripción</th>
+                            </tr>
+                            <t t-foreach="reception_evidences" t-as="ev">
+                                <tr>
+                                    <td style="padding:4px 6px; border:1px solid #ddd; word-break:break-all;"><t t-esc="ev.name"/></td>
+                                    <td style="padding:4px 6px; border:1px solid #ddd;">
+                                        <t t-esc="dict(ev._fields['evidence_category'].selection).get(ev.evidence_category, '—')"/>
+                                    </td>
+                                    <td style="padding:4px 6px; border:1px solid #ddd; color:#555;">
+                                        <t t-esc="ev.description or ''"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </table>
+                    </t>
+
+                    <!-- Sección 8: Firmas -->
+                    <div style="margin-top:40px;">
+                        <table style="width:100%; border-collapse:collapse;">
+                            <tr>
+                                <td style="width:45%; text-align:center; padding-top:50px; border-top:1px solid #333;">
+                                    <div style="font-size:11px; font-weight:bold;">Firma del Asesor</div>
+                                    <div style="font-size:10px; color:#555; margin-top:4px;">
+                                        <t t-esc="o.portal_advisor_id.name or ''"/>
+                                    </div>
+                                </td>
+                                <td style="width:10%;"></td>
+                                <td style="width:45%; text-align:center; padding-top:50px; border-top:1px solid #333;">
+                                    <div style="font-size:11px; font-weight:bold;">Firma del Cliente</div>
+                                    <div style="font-size:10px; color:#555; margin-top:4px;">
+                                        <t t-esc="o.client_id.name or ''"/>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+            </t>
+        </template>
+
+        <template id="report_car_repair_reception_wrapper">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="car_repair_industry.report_car_repair_reception_document"/>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</odoo>

@@ -71,6 +71,8 @@
         'report/fleet_diagnostic_result_report_menu.xml',
         'report/fleet_workorder_report_view.xml',
         'report/fleet_workorder_report_menu.xml',
+        'report/fleet_repair_reception_report_view.xml',
+        'report/fleet_repair_reception_report_menu.xml',
     ],
     'assets': {
         'web.assets_frontend': [
