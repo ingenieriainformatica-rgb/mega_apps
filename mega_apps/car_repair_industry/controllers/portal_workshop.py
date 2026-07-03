@@ -348,6 +348,12 @@ class CarRepairPortalWorkshop(http.Controller):
                 'phone': partner.phone or partner.mobile or '',
                 'email': partner.email or '',
                 'dv': stored_dv,
+                'street': partner.street or '',
+                'city': partner.city or '',
+                'state_id': partner.state_id.id if partner.state_id else False,
+                'state_name': partner.state_id.name or '',
+                'country_id': partner.country_id.id if partner.country_id else False,
+                'country_name': partner.country_id.name or '',
             }),
             headers=[('Content-Type', 'application/json')],
         )
@@ -523,11 +529,12 @@ class CarRepairPortalWorkshop(http.Controller):
                             ('is_company', '=', False),
                         ], limit=1)
                 co_defaults = self._get_colombia_partner_defaults(co_doc_code)
+                addr_mode = (post.get('addr_mode') or 'new').strip()
                 dian_street = self._build_dian_street(post)
-                if not dian_street:
-                    raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
                 if not partner:
-                    partner = Partner.create({
+                    if not dian_street:
+                        raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
+                    partner = Partner.with_context(no_vat_validation=True).create({
                         'name': client_name,
                         'vat': client_vat or False,
                         'phone': client_phone,
@@ -538,8 +545,11 @@ class CarRepairPortalWorkshop(http.Controller):
                         'street': dian_street,
                         **co_defaults,
                     })
-                elif not partner.street:
-                    partner.write({'street': dian_street})
+                elif addr_mode == 'edit':
+                    if not dian_street:
+                        raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
+                    partner.with_context(no_vat_validation=True).write({'street': dian_street})
+                # addr_mode == 'keep': partner existente, no tocar street
                 contact_name = delivered_by_name or client_name
                 contact_phone = delivered_by_phone or client_phone
             else:
@@ -571,11 +581,12 @@ class CarRepairPortalWorkshop(http.Controller):
                         ('is_company', '=', False),
                     ], limit=1)
             co_defaults = self._get_colombia_partner_defaults(co_doc_code)
+            addr_mode = (post.get('addr_mode') or 'new').strip()
             dian_street = self._build_dian_street(post)
-            if not dian_street:
-                raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
             if not partner:
-                partner = Partner.create({
+                if not dian_street:
+                    raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
+                partner = Partner.with_context(no_vat_validation=True).create({
                     'name': client_name,
                     'vat': client_vat or False,
                     'phone': client_phone,
@@ -586,8 +597,11 @@ class CarRepairPortalWorkshop(http.Controller):
                     'street': dian_street,
                     **co_defaults,
                 })
-            elif not partner.street:
-                partner.write({'street': dian_street})
+            elif addr_mode == 'edit':
+                if not dian_street:
+                    raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
+                partner.with_context(no_vat_validation=True).write({'street': dian_street})
+            # addr_mode == 'keep': partner existente, no tocar street
             contact_name = delivered_by_name or client_name
             contact_phone = delivered_by_phone or client_phone
         else:
@@ -610,11 +624,12 @@ class CarRepairPortalWorkshop(http.Controller):
                         ('is_company', '=', False),
                     ], limit=1)
             co_defaults = self._get_colombia_partner_defaults(co_doc_code)
+            addr_mode = (post.get('addr_mode') or 'new').strip()
             dian_street = self._build_dian_street(post)
-            if not dian_street:
-                raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
             if not partner:
-                partner = Partner.create({
+                if not dian_street:
+                    raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
+                partner = Partner.with_context(no_vat_validation=True).create({
                     'name': client_name,
                     'vat': client_vat or False,
                     'phone': client_phone,
@@ -625,8 +640,11 @@ class CarRepairPortalWorkshop(http.Controller):
                     'street': dian_street,
                     **co_defaults,
                 })
-            elif not partner.street:
-                partner.write({'street': dian_street})
+            elif addr_mode == 'edit':
+                if not dian_street:
+                    raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
+                partner.with_context(no_vat_validation=True).write({'street': dian_street})
+            # addr_mode == 'keep': partner existente, no tocar street
             contact_name = delivered_by_name or client_name
             contact_phone = delivered_by_phone or client_phone
 

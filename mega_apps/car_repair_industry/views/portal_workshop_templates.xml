@@ -460,6 +460,25 @@
                         </div>
                         <!-- Dirección DIAN -->
                         <div class="mt-3 pt-3 border-top">
+                            <!-- Señal para el controller: 'new' | 'keep' | 'edit' -->
+                            <input type="hidden" name="addr_mode" class="js-addr-mode" value="new"/>
+
+                            <!-- MODO: contacto existente con dirección registrada -->
+                            <div class="js-addr-existing-block d-none mb-2">
+                                <p class="fw-semibold small mb-1 text-muted">
+                                    <i class="fa fa-map-marker me-1"></i> Dirección registrada
+                                </p>
+                                <div class="d-flex align-items-center gap-3 p-3 rounded" style="background:rgba(13,110,253,.06);border:1px solid rgba(13,110,253,.18);">
+                                    <i class="fa fa-map-marker text-primary"></i>
+                                    <span class="js-addr-existing-text fw-semibold text-dark flex-fill">—</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary js-addr-edit-btn">
+                                        <i class="fa fa-pencil me-1"></i>Editar dirección
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- MODO: nuevo contacto o edición explícita (campos DIAN) -->
+                            <div class="js-addr-new-block">
                             <p class="fw-semibold small mb-2 text-muted">
                                 <i class="fa fa-map-marker me-1 text-danger"></i>
                                 Dirección <span class="text-danger">*</span>
@@ -546,6 +565,7 @@
                                 <span class="small text-muted me-2">Dirección DIAN:</span>
                                 <span class="js-addr-preview fw-bold text-dark" style="letter-spacing:.4px;">—</span>
                             </div>
+                            </div><!-- /js-addr-new-block -->
                         </div>
 
                         <div class="js-nit-company-banner alert alert-info d-flex align-items-center gap-2 py-2 mt-3 mb-0 d-none">

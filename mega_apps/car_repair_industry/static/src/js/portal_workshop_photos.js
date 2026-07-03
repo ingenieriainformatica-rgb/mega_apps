@@ -28,6 +28,7 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         "keydown .js-nit-numeric": "_onNitNumericKeydown",
         "input .js-addr-field": "_onAddrFieldChange",
         "change .js-addr-field": "_onAddrFieldChange",
+        "click .js-addr-edit-btn": "_onAddrEditClicked",
         "change .js-same-person-check": "_onSamePersonCheck",
         "change .js-client-doc-type": "_onDocTypeChange",
         "input [name='client_name'], input [name='client_phone'], input [name='client_email'], input [name='client_vat']": "_onClientFieldChange",
@@ -450,6 +451,46 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         preview.textContent = parts.length ? parts.join(' ') : '—';
     },
 
+    // ── Dirección: modos 'new' | 'keep' | 'edit' ───────────────────────────
+    // new  = contacto nuevo, mostrar campos DIAN (required)
+    // keep = contacto existente con street, mostrar banner de solo lectura
+    // edit = asesor presionó "Editar dirección", mostrar campos DIAN (required)
+
+    _setAddrMode(section, mode, street) {
+        const existingBlock = section.querySelector('.js-addr-existing-block');
+        const newBlock      = section.querySelector('.js-addr-new-block');
+        const modeInput     = section.querySelector('.js-addr-mode');
+        const addrFields    = newBlock ? newBlock.querySelectorAll('.js-workshop-particular-required') : [];
+
+        if (mode === 'keep') {
+            // Contacto existente con dirección — mostrar solo banner
+            if (existingBlock) {
+                existingBlock.classList.remove('d-none');
+                const textEl = existingBlock.querySelector('.js-addr-existing-text');
+                if (textEl) textEl.textContent = street || '—';
+            }
+            if (newBlock) newBlock.classList.add('d-none');
+            for (const f of addrFields) f.required = false;
+        } else {
+            // 'new' o 'edit' — mostrar campos DIAN
+            if (existingBlock) existingBlock.classList.add('d-none');
+            if (newBlock) newBlock.classList.remove('d-none');
+            for (const f of addrFields) f.required = true;
+        }
+        if (modeInput) modeInput.value = mode;
+    },
+
+    _onAddrEditClicked() {
+        const section = this.el.querySelector('.js-workshop-particular-fields');
+        if (!section) return;
+        this._setAddrMode(section, 'edit', '');
+        // Limpiar preview y enfocar primer campo DIAN
+        const preview = section.querySelector('.js-addr-preview');
+        if (preview) preview.textContent = '—';
+        const firstField = section.querySelector('[name="addr_via_tipo"]');
+        if (firstField) firstField.focus();
+    },
+
     _onSamePersonCheck(ev) {
         this._syncSamePerson(ev.target.checked);
     },
@@ -599,9 +640,16 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
                         setTimeout(() => { dvBlock.style.boxShadow = ''; }, 1400);
                     }
                 }
+                // Dirección: si ya tiene street → banner read-only; si no → campos DIAN
+                if (data.street) {
+                    this._setAddrMode(section, 'keep', data.street);
+                } else {
+                    this._setAddrMode(section, 'edit', '');
+                }
                 if (statusEl) statusEl.innerHTML =
                     '<span class="badge bg-success"><i class="fa fa-check me-1"></i>Cliente encontrado — datos cargados</span>';
             } else {
+                this._setAddrMode(section, 'new', '');
                 if (statusEl) statusEl.innerHTML =
                     '<span class="badge bg-warning text-dark"><i class="fa fa-user-plus me-1"></i>Nuevo cliente — se registrará al guardar</span>';
             }
