@@ -619,32 +619,23 @@ publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
     selector: ".js-workshop-service-selector",
 
     start() {
-        this._selectedIds = [];   // [{id, name}]  — existing service.type records
-        this._newNames = [];      // [string]       — new names to create on submit
-        this._debounce = null;
+        this._items = [];   // [{name}] — all items typed by the advisor
 
-        this._searchInput  = this.el.querySelector("#service-search-input");
-        this._dropdown     = this.el.querySelector("#service-search-dropdown");
-        this._chipsEl      = this.el.querySelector("#service-selected-chips");
-        this._hiddenEl     = this.el.querySelector("#service-hidden-inputs");
-        this._emptyMsg     = this.el.querySelector("#service-empty-msg");
-        this._errorMsg     = this.el.querySelector("#service-error-msg");
+        this._input    = this.el.querySelector("#service-search-input");
+        this._addBtn   = this.el.querySelector("#js-service-add-btn");
+        this._chipsEl  = this.el.querySelector("#service-selected-chips");
+        this._hiddenEl = this.el.querySelector("#service-hidden-inputs");
+        this._errorMsg = this.el.querySelector("#service-error-msg");
 
-        this._searchInput.addEventListener("input",   () => this._onSearchInput());
-        this._searchInput.addEventListener("focus",   () => this._onSearchInput());
-        this._searchInput.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") this._closeDropdown();
+        this._input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); this._addItem(); }
         });
-        this._initCreateModal();
-
-        document.addEventListener("click", (e) => {
-            if (!this.el.contains(e.target)) this._closeDropdown();
-        });
+        this._addBtn.addEventListener("click", () => this._addItem());
 
         const form = this.el.closest("form");
         if (form) {
             form.addEventListener("submit", (e) => {
-                if (this._selectedIds.length === 0 && this._newNames.length === 0) {
+                if (this._items.length === 0) {
                     e.preventDefault();
                     this._errorMsg.classList.remove("d-none");
                     this.el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -662,273 +653,62 @@ publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
         return this._super(...arguments);
     },
 
-    _onSearchInput() {
-        clearTimeout(this._debounce);
-        const q = this._searchInput.value.trim();
-        this._debounce = setTimeout(() => this._fetchServices(q), q ? 250 : 0);
-    },
-
-    async _fetchServices(q) {
-        try {
-            const resp = await fetch(
-                `/my/workshop/service-search?q=${encodeURIComponent(q)}`,
-                { headers: { "X-Requested-With": "XMLHttpRequest" } }
-            );
-            if (!resp.ok) return;
-            const items = await resp.json();
-            this._renderDropdown(items);
-        } catch { /* silent */ }
-    },
-
-    _renderDropdown(items) {
-        this._dropdown.replaceChildren();
-        const q = (this._searchInput.value || "").trim();
-        if (!items || items.length === 0) {
-            const el = document.createElement("div");
-            el.className = "dropdown-item text-muted small disabled py-2";
-            el.textContent = "Sin resultados";
-            this._dropdown.appendChild(el);
-        } else {
-            for (const item of items) {
-                const isSelected = this._selectedIds.some(s => s.id === item.id);
-                const a = document.createElement("a");
-                a.className = "dropdown-item py-2" + (isSelected ? " text-muted" : "");
-                a.href = "#";
-                a.innerHTML = `<i class="fa fa-wrench me-1 text-secondary"></i>${this._esc(item.name)}`
-                    + (isSelected ? ` <i class="fa fa-check text-success ms-1 float-end"></i>` : "");
-                a.addEventListener("mousedown", (e) => {
-                    e.preventDefault();
-                    this._selectExisting(item.id, item.name);
-                });
-                this._dropdown.appendChild(a);
-            }
+    _addItem() {
+        const name = (this._input.value || "").trim().toUpperCase();
+        if (!name) return;
+        const already = this._items.some(n => n === name);
+        if (already) {
+            this._input.value = "";
+            this._input.focus();
+            return;
         }
-        if (q) {
-            this._appendCreateOption(q);
-        }
-        this._dropdown.style.display = "block";
-    },
-
-    _appendCreateOption(name) {
-        const divider = document.createElement("div");
-        divider.className = "dropdown-divider";
-        this._dropdown.appendChild(divider);
-        const a = document.createElement("a");
-        a.className = "dropdown-item py-2 fw-semibold ws-create-service-option";
-        a.href = "#";
-        a.innerHTML = `<i class="fa fa-plus-circle me-1 text-success"></i>Crear nuevo servicio: <strong>"${this._esc(name)}"</strong>`;
-        a.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-            this._closeDropdown();
-            this._openCreateModal(name);
-        });
-        this._dropdown.appendChild(a);
-    },
-
-    _closeDropdown() {
-        this._dropdown.style.display = "none";
-        this._dropdown.replaceChildren();
-    },
-
-    _selectExisting(id, name) {
-        if (!this._selectedIds.some(s => s.id === id)) {
-            this._selectedIds.push({ id, name });
-            this._sync();
-        }
-        this._searchInput.value = "";
-        this._closeDropdown();
-        this._searchInput.focus();
-        this._fetchServices("");
-    },
-
-    _removeExisting(id) {
-        this._selectedIds = this._selectedIds.filter(s => s.id !== id);
+        this._items.push(name);
+        this._input.value = "";
+        this._input.focus();
         this._sync();
     },
 
-    _removeNew(name) {
-        this._newNames = this._newNames.filter(n => n !== name);
+    _removeItem(name) {
+        this._items = this._items.filter(n => n !== name);
         this._sync();
     },
 
     _sync() {
         this._renderChips();
         this._renderHiddenInputs();
-        const total = this._selectedIds.length + this._newNames.length;
-        this._emptyMsg.style.display = total ? "none" : "";
-        if (total > 0) this._errorMsg.classList.add("d-none");
+        if (this._items.length > 0) this._errorMsg.classList.add("d-none");
     },
 
     _renderChips() {
         this._chipsEl.replaceChildren();
-        for (const { id, name } of this._selectedIds) {
-            this._chipsEl.appendChild(this._buildChip(name, false, () => this._removeExisting(id)));
+        for (const name of this._items) {
+            const chip = document.createElement("span");
+            chip.className = "badge rounded-pill d-inline-flex align-items-center gap-1 py-2 px-3 bg-primary";
+            chip.style.fontSize = "0.82rem";
+            const icon = document.createElement("i");
+            icon.className = "fa fa-wrench";
+            const text = document.createElement("span");
+            text.textContent = name;
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn-close btn-close-white ms-1";
+            btn.style.cssText = "font-size:0.55rem;opacity:0.8;";
+            btn.setAttribute("aria-label", "Quitar");
+            btn.addEventListener("click", () => this._removeItem(name));
+            chip.append(icon, text, btn);
+            this._chipsEl.appendChild(chip);
         }
-        for (const name of this._newNames) {
-            this._chipsEl.appendChild(this._buildChip(name, true, () => this._removeNew(name)));
-        }
-    },
-
-    _buildChip(label, isNew, onRemove) {
-        const chip = document.createElement("span");
-        chip.className = `badge rounded-pill d-inline-flex align-items-center gap-1 py-2 px-3 ${isNew ? "bg-success" : "bg-primary"}`;
-        chip.style.fontSize = "0.82rem";
-        const icon = document.createElement("i");
-        icon.className = "fa fa-wrench";
-        const text = document.createElement("span");
-        text.textContent = label + (isNew ? " ✦" : "");
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "btn-close btn-close-white ms-1";
-        btn.style.cssText = "font-size:0.55rem;opacity:0.8;";
-        btn.setAttribute("aria-label", "Quitar");
-        btn.addEventListener("click", onRemove);
-        chip.append(icon, text, btn);
-        return chip;
     },
 
     _renderHiddenInputs() {
         this._hiddenEl.replaceChildren();
-        for (const { id } of this._selectedIds) {
-            const inp = document.createElement("input");
-            inp.type = "hidden";
-            inp.name = "service_types";
-            inp.value = id;
-            this._hiddenEl.appendChild(inp);
-        }
-        for (const name of this._newNames) {
+        for (const name of this._items) {
             const inp = document.createElement("input");
             inp.type = "hidden";
             inp.name = "new_service_names";
             inp.value = name;
             this._hiddenEl.appendChild(inp);
         }
-    },
-
-    _initCreateModal() {
-        const MODAL_ID = "ws-create-service-modal";
-        if (document.getElementById(MODAL_ID)) {
-            this._modal = document.getElementById(MODAL_ID);
-        } else {
-            const el = document.createElement("div");
-            el.id = MODAL_ID;
-            el.className = "ws-service-modal";
-            el.innerHTML = `
-  <div class="ws-service-modal-dialog">
-    <div class="ws-service-modal-header">
-      <span class="fw-semibold"><i class="fa fa-plus-circle me-2 text-success"></i>Nuevo servicio</span>
-      <button type="button" class="ws-modal-close-btn" aria-label="Cerrar">&times;</button>
-    </div>
-    <div class="ws-service-modal-body">
-      <label class="form-label small fw-semibold mb-1">Nombre del servicio</label>
-      <input type="text" class="form-control workshop-input-uppercase ws-modal-name-input"
-             placeholder="NOMBRE DEL SERVICIO..." autocomplete="off" spellcheck="false"/>
-      <div class="ws-modal-error text-danger small mt-1 d-none"></div>
-      <p class="text-muted small mt-2 mb-0">
-        <i class="fa fa-info-circle me-1"></i>Si ya existe en el catálogo se enlazará automáticamente.
-      </p>
-    </div>
-    <div class="ws-service-modal-footer">
-      <button type="button" class="btn btn-sm btn-light ws-modal-cancel-btn">Cancelar</button>
-      <button type="button" class="btn btn-sm btn-success ws-modal-save-btn">
-        <i class="fa fa-check me-1"></i>Crear y seleccionar
-      </button>
-    </div>
-  </div>`;
-            document.body.appendChild(el);
-            this._modal = el;
-        }
-        const nameInput = this._modal.querySelector(".ws-modal-name-input");
-        this._modal.querySelector(".ws-modal-save-btn")
-            .addEventListener("click", () => this._onModalSave());
-        this._modal.querySelector(".ws-modal-cancel-btn")
-            .addEventListener("click", () => this._closeCreateModal());
-        this._modal.querySelector(".ws-modal-close-btn")
-            .addEventListener("click", () => this._closeCreateModal());
-        nameInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter")  { e.preventDefault(); this._onModalSave(); }
-            if (e.key === "Escape") { this._closeCreateModal(); }
-        });
-        this._modal.addEventListener("click", (e) => {
-            if (e.target === this._modal) this._closeCreateModal();
-        });
-    },
-
-    _openCreateModal(searchText) {
-        const nameInput = this._modal.querySelector(".ws-modal-name-input");
-        const errorEl   = this._modal.querySelector(".ws-modal-error");
-        const saveBtn   = this._modal.querySelector(".ws-modal-save-btn");
-        nameInput.value = (searchText || "").toUpperCase();
-        errorEl.classList.add("d-none");
-        errorEl.textContent = "";
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fa fa-check me-1"></i>Crear y seleccionar';
-        this._modal.style.display = "flex";
-        document.body.style.overflow = "hidden";
-        requestAnimationFrame(() => {
-            this._modal.classList.add("ws-modal-visible");
-            nameInput.select();
-            nameInput.focus();
-        });
-    },
-
-    _closeCreateModal() {
-        this._modal.classList.remove("ws-modal-visible");
-        document.body.style.overflow = "";
-        setTimeout(() => { this._modal.style.display = "none"; }, 200);
-    },
-
-    async _onModalSave() {
-        const nameInput = this._modal.querySelector(".ws-modal-name-input");
-        const errorEl   = this._modal.querySelector(".ws-modal-error");
-        const saveBtn   = this._modal.querySelector(".ws-modal-save-btn");
-        const name = (nameInput.value || "").trim();
-        if (!name) {
-            errorEl.textContent = "Ingresa el nombre del servicio.";
-            errorEl.classList.remove("d-none");
-            nameInput.focus();
-            return;
-        }
-        const lc = name.toLowerCase();
-        if (this._selectedIds.some(s => s.name.toLowerCase() === lc) ||
-            this._newNames.some(n => n.toLowerCase() === lc)) {
-            this._closeCreateModal();
-            this._searchInput.value = "";
-            return;
-        }
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Verificando...';
-        try {
-            const resp = await fetch(
-                `/my/workshop/service-search?q=${encodeURIComponent(name)}`,
-                { headers: { "X-Requested-With": "XMLHttpRequest" } }
-            );
-            if (resp.ok) {
-                const items = await resp.json();
-                const match = items.find(i => i.name.toLowerCase() === lc);
-                if (match) {
-                    this._selectExisting(match.id, match.name);
-                    this._closeCreateModal();
-                    this._searchInput.value = "";
-                    return;
-                }
-            }
-            this._newNames.push(name);
-            this._sync();
-            this._closeCreateModal();
-            this._searchInput.value = "";
-        } catch {
-            errorEl.textContent = "Error de conexión. Intenta de nuevo.";
-            errorEl.classList.remove("d-none");
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fa fa-check me-1"></i>Crear y seleccionar';
-        }
-    },
-
-    _esc(str) {
-        return String(str || "")
-            .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     },
 });
 

@@ -634,27 +634,20 @@
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label">Servicios solicitados <span class="text-danger">*</span></label>
-                                <p class="form-text small text-muted mb-2">Busca y selecciona los servicios que el cliente solicita. El técnico marcará cada uno a medida que lo completa.</p>
+                                <p class="form-text small text-muted mb-2">Escribe cada servicio que solicita el cliente y presiona <strong>Enter</strong> o <strong>Agregar</strong>.</p>
                                 <div class="js-workshop-service-selector">
-                                    <div class="position-relative">
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white border-end-0">
-                                                <i class="fa fa-search text-muted"/>
-                                            </span>
-                                            <input type="text" id="service-search-input"
-                                                   class="form-control border-start-0"
-                                                   placeholder="Buscar servicio (ej: cambio de aceite, frenos)..."
-                                                   autocomplete="off"/>
-                                        </div>
-                                        <div id="service-search-dropdown" class="dropdown-menu w-100 shadow-sm"
-                                             style="display:none;position:absolute;z-index:1050;max-height:240px;overflow-y:auto;"/>
+                                    <div class="input-group">
+                                        <input type="text" id="service-search-input"
+                                               class="form-control workshop-input-uppercase"
+                                               placeholder="Ej: CAMBIO DE ACEITE, FRENOS, REVISIÓN..."
+                                               autocomplete="off" maxlength="120"/>
+                                        <button type="button" id="js-service-add-btn" class="btn btn-outline-primary">
+                                            <i class="fa fa-plus me-1"/>Agregar
+                                        </button>
                                     </div>
                                     <div id="service-selected-chips" class="d-flex flex-wrap gap-2 mt-2" style="min-height:34px;"/>
-                                    <p id="service-empty-msg" class="small text-muted mt-1 mb-0">
-                                        <i class="fa fa-info-circle me-1"/>Escribe para buscar y seleccionar uno o más servicios.
-                                    </p>
                                     <div id="service-error-msg" class="text-danger small mt-1 d-none">
-                                        <i class="fa fa-exclamation-circle me-1"/>Debe seleccionar al menos un servicio.
+                                        <i class="fa fa-exclamation-circle me-1"/>Debe agregar al menos un servicio.
                                     </div>
                                     <div id="service-hidden-inputs"/>
                                 </div>
@@ -670,12 +663,10 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Motivo de ingreso <span class="text-danger">*</span></label>
-                                <select name="reason" class="form-select" required="required">
-                                    <option value="">Seleccione un motivo...</option>
-                                    <option value="MANTENIMIENTO PREVENTIVO">MANTENIMIENTO PREVENTIVO</option>
-                                    <option value="MEGA COMBO">MEGA COMBO</option>
-                                    <option value="CORRECTIVO">CORRECTIVO</option>
-                                </select>
+                                <input name="reason" class="form-control workshop-input-uppercase"
+                                       required="required"
+                                       placeholder="Ej: CAMBIO DE FRENOS, FALLA MOTOR, MANTENIMIENTO..."
+                                       maxlength="200"/>
                             </div>
                         </div>
                     </div>
