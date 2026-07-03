@@ -27,6 +27,84 @@
     pointer-events: none;
 }
 
+.ws-create-service-option {
+    color: #157347;
+}
+
+.ws-create-service-option:hover,
+.ws-create-service-option:focus {
+    color: #fff;
+    background-color: #157347;
+}
+
+.ws-create-service-option:hover strong,
+.ws-create-service-option:focus strong {
+    color: inherit;
+}
+
+/* ── Vanilla JS modal for new service ─────────────────────────────────────── */
+.ws-service-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+}
+
+.ws-service-modal.ws-modal-visible {
+    opacity: 1;
+}
+
+.ws-service-modal-dialog {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+    width: 100%;
+    max-width: 400px;
+    overflow: hidden;
+}
+
+.ws-service-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.95rem;
+}
+
+.ws-modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0 0.25rem;
+}
+
+.ws-modal-close-btn:hover {
+    color: #212529;
+}
+
+.ws-service-modal-body {
+    padding: 1rem;
+}
+
+.ws-service-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
 /* ── Photos ──────────────────────────────────────────────────────────────── */
 .workshop-photo-uploader {
     border: 1px solid #d8dde3;
@@ -34,6 +112,52 @@
     padding: 16px;
 }
 
+.workshop-photo-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.workshop-photo-btn {
+    flex: 1;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 20px 16px;
+    border: 2px dashed #b0bec5;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    background: #fff;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    user-select: none;
+}
+
+.workshop-photo-btn:hover,
+.workshop-photo-btn:focus-within {
+    border-color: #017e84;
+    background: #f0fafa;
+}
+
+.workshop-photo-btn .fa {
+    color: #017e84;
+    font-size: 26px;
+}
+
+.workshop-photo-btn-camera {
+    border-color: #017e84;
+    background: #f5fdfd;
+}
+
+.workshop-photo-btn small {
+    color: #6c757d;
+    font-size: 0.78rem;
+}
+
+/* Compatibility: keep dropzone for any other template that still uses it */
 .workshop-photo-dropzone {
     align-items: center;
     border: 1px dashed #7b8794;

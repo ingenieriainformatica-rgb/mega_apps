@@ -17,6 +17,7 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         "change .js-workshop-customer-type": "_onCustomerTypeChanged",
         "change .js-workshop-renting-mode": "_onRentingModeChanged",
         "change .js-workshop-photo-input": "_onFilesSelected",
+        "change .js-workshop-camera-input": "_onCameraFileSelected",
         "change .js-workshop-photo-category": "_onCategoryChanged",
         "click .js-workshop-photo-remove": "_onRemovePhoto",
         "change .js-workshop-vehicle-brand": "_onVehicleBrandChanged",
@@ -504,6 +505,14 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         this._renderPreviews();
     },
 
+    _onCameraFileSelected(event) {
+        const selectedFiles = Array.from(event.currentTarget.files || []);
+        this.photos.push(...selectedFiles.map((file) => ({file, category: "externa"})));
+        this._syncInputFiles();
+        this._renderPreviews();
+        event.currentTarget.value = "";
+    },
+
     _onCategoryChanged(event) {
         const index = Number.parseInt(event.currentTarget.dataset.index, 10);
         if (this.photos[index]) {
@@ -597,18 +606,13 @@ publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
         this._hiddenEl     = this.el.querySelector("#service-hidden-inputs");
         this._emptyMsg     = this.el.querySelector("#service-empty-msg");
         this._errorMsg     = this.el.querySelector("#service-error-msg");
-        this._newInput     = this.el.querySelector("#new-service-input");
-        this._newBtn       = this.el.querySelector("#btn-add-new-service");
 
         this._searchInput.addEventListener("input",   () => this._onSearchInput());
         this._searchInput.addEventListener("focus",   () => this._onSearchInput());
         this._searchInput.addEventListener("keydown", (e) => {
             if (e.key === "Escape") this._closeDropdown();
         });
-        this._newBtn.addEventListener("click", () => this._onAddNew());
-        this._newInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") { e.preventDefault(); this._onAddNew(); }
-        });
+        this._initCreateModal();
 
         document.addEventListener("click", (e) => {
             if (!this.el.contains(e.target)) this._closeDropdown();
@@ -655,6 +659,7 @@ publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
 
     _renderDropdown(items) {
         this._dropdown.replaceChildren();
+        const q = (this._searchInput.value || "").trim();
         if (!items || items.length === 0) {
             const el = document.createElement("div");
             el.className = "dropdown-item text-muted small disabled py-2";
@@ -675,7 +680,26 @@ publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
                 this._dropdown.appendChild(a);
             }
         }
+        if (q) {
+            this._appendCreateOption(q);
+        }
         this._dropdown.style.display = "block";
+    },
+
+    _appendCreateOption(name) {
+        const divider = document.createElement("div");
+        divider.className = "dropdown-divider";
+        this._dropdown.appendChild(divider);
+        const a = document.createElement("a");
+        a.className = "dropdown-item py-2 fw-semibold ws-create-service-option";
+        a.href = "#";
+        a.innerHTML = `<i class="fa fa-plus-circle me-1 text-success"></i>Crear nuevo servicio: <strong>"${this._esc(name)}"</strong>`;
+        a.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            this._closeDropdown();
+            this._openCreateModal(name);
+        });
+        this._dropdown.appendChild(a);
     },
 
     _closeDropdown() {
@@ -756,20 +780,100 @@ publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
         }
     },
 
-    async _onAddNew() {
-        const name = (this._newInput.value || "").trim();
-        if (!name) { this._newInput.classList.add("is-invalid"); return; }
-        this._newInput.classList.remove("is-invalid");
-        this._newBtn.disabled = true;
+    _initCreateModal() {
+        const MODAL_ID = "ws-create-service-modal";
+        if (document.getElementById(MODAL_ID)) {
+            this._modal = document.getElementById(MODAL_ID);
+        } else {
+            const el = document.createElement("div");
+            el.id = MODAL_ID;
+            el.className = "ws-service-modal";
+            el.innerHTML = `
+  <div class="ws-service-modal-dialog">
+    <div class="ws-service-modal-header">
+      <span class="fw-semibold"><i class="fa fa-plus-circle me-2 text-success"></i>Nuevo servicio</span>
+      <button type="button" class="ws-modal-close-btn" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="ws-service-modal-body">
+      <label class="form-label small fw-semibold mb-1">Nombre del servicio</label>
+      <input type="text" class="form-control workshop-input-uppercase ws-modal-name-input"
+             placeholder="NOMBRE DEL SERVICIO..." autocomplete="off" spellcheck="false"/>
+      <div class="ws-modal-error text-danger small mt-1 d-none"></div>
+      <p class="text-muted small mt-2 mb-0">
+        <i class="fa fa-info-circle me-1"></i>Si ya existe en el catálogo se enlazará automáticamente.
+      </p>
+    </div>
+    <div class="ws-service-modal-footer">
+      <button type="button" class="btn btn-sm btn-light ws-modal-cancel-btn">Cancelar</button>
+      <button type="button" class="btn btn-sm btn-success ws-modal-save-btn">
+        <i class="fa fa-check me-1"></i>Crear y seleccionar
+      </button>
+    </div>
+  </div>`;
+            document.body.appendChild(el);
+            this._modal = el;
+        }
+        const nameInput = this._modal.querySelector(".ws-modal-name-input");
+        this._modal.querySelector(".ws-modal-save-btn")
+            .addEventListener("click", () => this._onModalSave());
+        this._modal.querySelector(".ws-modal-cancel-btn")
+            .addEventListener("click", () => this._closeCreateModal());
+        this._modal.querySelector(".ws-modal-close-btn")
+            .addEventListener("click", () => this._closeCreateModal());
+        nameInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter")  { e.preventDefault(); this._onModalSave(); }
+            if (e.key === "Escape") { this._closeCreateModal(); }
+        });
+        this._modal.addEventListener("click", (e) => {
+            if (e.target === this._modal) this._closeCreateModal();
+        });
+    },
+
+    _openCreateModal(searchText) {
+        const nameInput = this._modal.querySelector(".ws-modal-name-input");
+        const errorEl   = this._modal.querySelector(".ws-modal-error");
+        const saveBtn   = this._modal.querySelector(".ws-modal-save-btn");
+        nameInput.value = (searchText || "").toUpperCase();
+        errorEl.classList.add("d-none");
+        errorEl.textContent = "";
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fa fa-check me-1"></i>Crear y seleccionar';
+        this._modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+        requestAnimationFrame(() => {
+            this._modal.classList.add("ws-modal-visible");
+            nameInput.select();
+            nameInput.focus();
+        });
+    },
+
+    _closeCreateModal() {
+        this._modal.classList.remove("ws-modal-visible");
+        document.body.style.overflow = "";
+        setTimeout(() => { this._modal.style.display = "none"; }, 200);
+    },
+
+    async _onModalSave() {
+        const nameInput = this._modal.querySelector(".ws-modal-name-input");
+        const errorEl   = this._modal.querySelector(".ws-modal-error");
+        const saveBtn   = this._modal.querySelector(".ws-modal-save-btn");
+        const name = (nameInput.value || "").trim();
+        if (!name) {
+            errorEl.textContent = "Ingresa el nombre del servicio.";
+            errorEl.classList.remove("d-none");
+            nameInput.focus();
+            return;
+        }
+        const lc = name.toLowerCase();
+        if (this._selectedIds.some(s => s.name.toLowerCase() === lc) ||
+            this._newNames.some(n => n.toLowerCase() === lc)) {
+            this._closeCreateModal();
+            this._searchInput.value = "";
+            return;
+        }
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Verificando...';
         try {
-            // Duplicate check among already selected
-            const lc = name.toLowerCase();
-            if (this._selectedIds.some(s => s.name.toLowerCase() === lc) ||
-                this._newNames.some(n => n.toLowerCase() === lc)) {
-                this._newInput.value = "";
-                return;
-            }
-            // Try exact match in catalog first
             const resp = await fetch(
                 `/my/workshop/service-search?q=${encodeURIComponent(name)}`,
                 { headers: { "X-Requested-With": "XMLHttpRequest" } }
@@ -779,16 +883,21 @@ publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
                 const match = items.find(i => i.name.toLowerCase() === lc);
                 if (match) {
                     this._selectExisting(match.id, match.name);
-                    this._newInput.value = "";
+                    this._closeCreateModal();
+                    this._searchInput.value = "";
                     return;
                 }
             }
-            // No exact match → mark as new (created server-side on submit)
             this._newNames.push(name);
             this._sync();
-            this._newInput.value = "";
-        } catch { /* silent */ }
-        finally { this._newBtn.disabled = false; }
+            this._closeCreateModal();
+            this._searchInput.value = "";
+        } catch {
+            errorEl.textContent = "Error de conexión. Intenta de nuevo.";
+            errorEl.classList.remove("d-none");
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa fa-check me-1"></i>Crear y seleccionar';
+        }
     },
 
     _esc(str) {

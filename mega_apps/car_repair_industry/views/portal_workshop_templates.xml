@@ -609,19 +609,6 @@
                                         <i class="fa fa-exclamation-circle me-1"/>Debe seleccionar al menos un servicio.
                                     </div>
                                     <div id="service-hidden-inputs"/>
-                                    <div class="mt-2 pt-2 border-top">
-                                        <small class="text-muted">
-                                            <i class="fa fa-plus-circle me-1"/>¿No encuentras el servicio? Agrégalo:
-                                        </small>
-                                        <div class="input-group input-group-sm mt-1" style="max-width:440px;">
-                                            <input type="text" id="new-service-input" class="form-control workshop-input-uppercase"
-                                                   placeholder="NOMBRE DEL NUEVO SERVICIO..."/>
-                                            <button type="button" id="btn-add-new-service"
-                                                    class="btn btn-outline-secondary">
-                                                <i class="fa fa-plus me-1"/>Agregar
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -737,14 +724,25 @@
                             <span class="badge text-bg-light js-workshop-photo-count ms-auto align-self-center">0 fotos</span>
                         </div>
                         <section class="workshop-photo-uploader">
-                            <label class="workshop-photo-dropzone" for="reception_photos">
-                                <i class="fa fa-camera" aria-hidden="true"></i>
-                                <span class="fw-semibold">Seleccionar fotos</span>
-                                <small>JPG, PNG o WEBP. Puedes elegir varias.</small>
-                            </label>
+                            <div class="workshop-photo-actions">
+                                <label class="workshop-photo-btn workshop-photo-btn-gallery" for="reception_photos">
+                                    <i class="fa fa-images" aria-hidden="true"></i>
+                                    <span class="fw-semibold">Seleccionar fotos</span>
+                                    <small>Galería o archivos</small>
+                                </label>
+                                <label class="workshop-photo-btn workshop-photo-btn-camera" for="reception_photos_camera">
+                                    <i class="fa fa-camera" aria-hidden="true"></i>
+                                    <span class="fw-semibold">Tomar foto</span>
+                                    <small>Cámara del celular</small>
+                                </label>
+                            </div>
                             <input id="reception_photos" name="reception_photos" type="file"
                                    class="visually-hidden js-workshop-photo-input" multiple="multiple"
                                    accept="image/jpeg,image/png,image/webp"/>
+                            <input id="reception_photos_camera" type="file"
+                                   class="visually-hidden js-workshop-camera-input"
+                                   accept="image/jpeg,image/png,image/webp"
+                                   capture="environment"/>
                             <div class="row g-3 mt-1 js-workshop-photo-preview"></div>
                             <div class="mt-3">
                                 <label class="form-label" for="photo_description">Descripción del lote</label>
