@@ -388,14 +388,12 @@
                                 <label class="workshop-customer-type-card flex-fill" style="max-width: 280px;" for="renting_mode_billing">
                                     <input class="form-check-input js-workshop-renting-mode" type="radio" name="renting_mode" id="renting_mode_billing" value="billing" checked="checked" disabled="disabled"/>
                                     <div class="workshop-customer-type-icon workshop-customer-type-renting"><i class="fa fa-building"></i></div>
-                                    <div class="workshop-customer-type-name">Facturar al renting</div>
-                                    <div class="workshop-customer-type-desc">Se asigna la empresa de renting como cliente</div>
+                                    <div class="workshop-customer-type-name">Factura Renting</div>
                                 </label>
                                 <label class="workshop-customer-type-card flex-fill" style="max-width: 280px;" for="renting_mode_client">
                                     <input class="form-check-input js-workshop-renting-mode" type="radio" name="renting_mode" id="renting_mode_client" value="client" disabled="disabled"/>
                                     <div class="workshop-customer-type-icon workshop-customer-type-particular"><i class="fa fa-user"></i></div>
-                                    <div class="workshop-customer-type-name">Cliente del renting</div>
-                                    <div class="workshop-customer-type-desc">Se registra el conductor como cliente particular</div>
+                                    <div class="workshop-customer-type-name">Cliente Natural</div>
                                 </label>
                             </div>
                         </div>
@@ -460,6 +458,96 @@
                                 <input name="client_email" type="email" class="form-control" placeholder="correo@ejemplo.com"/>
                             </div>
                         </div>
+                        <!-- Dirección DIAN -->
+                        <div class="mt-3 pt-3 border-top">
+                            <p class="fw-semibold small mb-2 text-muted">
+                                <i class="fa fa-map-marker me-1 text-danger"></i>
+                                Dirección <span class="text-danger">*</span>
+                                <span class="fw-normal ms-1">(Nomenclatura DIAN)</span>
+                            </p>
+                            <div class="row g-2">
+                                <div class="col-6 col-md-2">
+                                    <select name="addr_via_tipo" class="form-select js-addr-field js-workshop-particular-required" required="required">
+                                        <option value="">Tipo de vía *</option>
+                                        <option value="CL">CL — Calle</option>
+                                        <option value="CR">CR — Carrera</option>
+                                        <option value="AV">AV — Avenida</option>
+                                        <option value="AC">AC — Avenida Calle</option>
+                                        <option value="AK">AK — Avenida Carrera</option>
+                                        <option value="DG">DG — Diagonal</option>
+                                        <option value="TV">TV — Transversal</option>
+                                        <option value="AUT">AUT — Autopista</option>
+                                        <option value="CRT">CRT — Carretera</option>
+                                        <option value="KM">KM — Kilómetro</option>
+                                        <option value="VRD">VRD — Vereda</option>
+                                        <option value="URB">URB — Urbanización</option>
+                                        <option value="BRR">BRR — Barrio</option>
+                                        <option value="MZ">MZ — Manzana</option>
+                                        <option value="PQ">PQ — Parque</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <input name="addr_via_num"
+                                           class="form-control workshop-input-uppercase js-addr-field js-workshop-particular-required"
+                                           placeholder="Número de vía *"
+                                           required="required"
+                                           maxlength="15"
+                                           autocomplete="off"/>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <input name="addr_cruce"
+                                           class="form-control workshop-input-uppercase js-addr-field js-workshop-particular-required"
+                                           placeholder="Cruce *"
+                                           required="required"
+                                           maxlength="15"
+                                           autocomplete="off"/>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <input name="addr_placa"
+                                           class="form-control workshop-input-uppercase js-addr-field js-workshop-particular-required"
+                                           placeholder="Placa / Nro *"
+                                           required="required"
+                                           maxlength="15"
+                                           autocomplete="off"/>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <select name="addr_comp_tipo" class="form-select js-addr-field">
+                                        <option value="">Complemento</option>
+                                        <option value="AP">AP — Apartamento</option>
+                                        <option value="OF">OF — Oficina</option>
+                                        <option value="LC">LC — Local</option>
+                                        <option value="TO">TO — Torre</option>
+                                        <option value="BL">BL — Bloque</option>
+                                        <option value="IN">IN — Interior</option>
+                                        <option value="P">P — Piso</option>
+                                        <option value="ED">ED — Edificio</option>
+                                        <option value="CA">CA — Casa</option>
+                                        <option value="CC">CC — C. Comercial</option>
+                                        <option value="CON">CON — Conjunto</option>
+                                        <option value="BG">BG — Bodega</option>
+                                        <option value="PH">PH — Penthouse</option>
+                                        <option value="DPTO">DPTO — Departamento</option>
+                                        <option value="SUR">SUR — Sur</option>
+                                        <option value="AG">AG — Agrupación</option>
+                                        <option value="ZF">ZF — Zona Franca</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <input name="addr_comp_num"
+                                           class="form-control workshop-input-uppercase js-addr-field"
+                                           placeholder="Número / descripción"
+                                           maxlength="20"
+                                           autocomplete="off"/>
+                                </div>
+                            </div>
+                            <!-- Vista previa DIAN -->
+                            <div class="mt-2 p-2 rounded d-flex align-items-center gap-2" style="background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.1);">
+                                <i class="fa fa-map-marker text-muted"></i>
+                                <span class="small text-muted me-2">Dirección DIAN:</span>
+                                <span class="js-addr-preview fw-bold text-dark" style="letter-spacing:.4px;">—</span>
+                            </div>
+                        </div>
+
                         <div class="js-nit-company-banner alert alert-info d-flex align-items-center gap-2 py-2 mt-3 mb-0 d-none">
                             <i class="fa fa-building fa-lg"></i>
                             <span>Se registrará como <strong>empresa</strong> en el sistema (NIT)</span>

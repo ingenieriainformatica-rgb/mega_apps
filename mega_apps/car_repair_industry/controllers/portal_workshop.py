@@ -65,6 +65,40 @@ class CarRepairPortalWorkshop(http.Controller):
                 vals['l10n_latam_identification_type_id'] = id_type.id
         return vals
 
+    _DIAN_VIA_CODES = {
+        'CL', 'CR', 'AV', 'AC', 'AK', 'DG', 'TV', 'AUT', 'CRT',
+        'KM', 'VRD', 'URB', 'BRR', 'MZ', 'PQ',
+    }
+    _DIAN_COMP_CODES = {
+        'AP', 'OF', 'LC', 'TO', 'BL', 'IN', 'P', 'ED', 'CA', 'CC',
+        'CON', 'BG', 'PH', 'DPTO', 'SUR', 'AG', 'ZF',
+    }
+
+    def _build_dian_street(self, post):
+        """Build a DIAN-formatted street string from portal POST fields.
+        Returns the street string or False if required fields are missing.
+        """
+        def clean(val, allow_slash=False):
+            pattern = r'[^A-Za-z0-9\s\-]' if not allow_slash else r'[^A-Za-z0-9\s\-/]'
+            return re.sub(pattern, '', (val or '').strip()).upper()
+
+        via_tipo   = clean(post.get('addr_via_tipo',  '')).split()[0] if post.get('addr_via_tipo') else ''
+        via_num    = clean(post.get('addr_via_num',   ''))
+        cruce      = clean(post.get('addr_cruce',     ''))
+        placa      = clean(post.get('addr_placa',     ''))
+        comp_tipo  = clean(post.get('addr_comp_tipo', '')).split()[0] if post.get('addr_comp_tipo') else ''
+        comp_num   = clean(post.get('addr_comp_num',  ''))
+
+        if not (via_tipo and via_num and cruce and placa):
+            return False
+
+        parts = [via_tipo, via_num, cruce, placa]
+        if comp_tipo:
+            parts.append(comp_tipo)
+        if comp_num:
+            parts.append(comp_num)
+        return ' '.join(parts)
+
     def _build_nit_vat(self, post, is_nit):
         """Return (vat_to_store, nit_digits_only) from POST data.
         For NIT: validates 9 digits + 1 DV, returns ('NNNNNNNNN-D', 'NNNNNNNNN').
@@ -489,6 +523,9 @@ class CarRepairPortalWorkshop(http.Controller):
                             ('is_company', '=', False),
                         ], limit=1)
                 co_defaults = self._get_colombia_partner_defaults(co_doc_code)
+                dian_street = self._build_dian_street(post)
+                if not dian_street:
+                    raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
                 if not partner:
                     partner = Partner.create({
                         'name': client_name,
@@ -498,8 +535,11 @@ class CarRepairPortalWorkshop(http.Controller):
                         'email': client_email,
                         'is_company': is_nit,
                         'company_type': 'company' if is_nit else 'person',
+                        'street': dian_street,
                         **co_defaults,
                     })
+                elif not partner.street:
+                    partner.write({'street': dian_street})
                 contact_name = delivered_by_name or client_name
                 contact_phone = delivered_by_phone or client_phone
             else:
@@ -511,30 +551,45 @@ class CarRepairPortalWorkshop(http.Controller):
                 contact_name = delivered_by_name
                 contact_phone = delivered_by_phone
         elif customer_type == 'corporate':
-            company_name = (post.get('company_name') or '').strip()
-            company_vat = (post.get('company_vat') or '').strip()
-            if not company_name:
-                raise UserError(_("Para Corporativo debe registrar la razón social de la empresa."))
-            if not delivered_by_name or not delivered_by_phone:
-                raise UserError(_("Para Corporativo debe registrar nombre y celular de quien entrega el vehículo."))
+            # MegaSur uses the same fields as particular (persons or companies)
+            if not client_name:
+                raise UserError(_("Debe registrar el nombre del cliente."))
+            client_doc_type = (post.get('client_doc_type') or 'cedula').strip()
+            is_nit = client_doc_type == 'nit'
+            co_doc_code = 'rut' if is_nit else 'national_citizen_id'
+            client_vat, nit_digits = self._build_nit_vat(post, is_nit)
             partner = Partner.browse()
-            if company_vat:
-                partner = Partner.search([('vat', '=', company_vat)], limit=1)
-            if not partner:
-                partner = Partner.search([('name', '=ilike', company_name), ('is_company', '=', True)], limit=1)
+            if client_vat:
+                if is_nit:
+                    partner = Partner.search([
+                        ('vat', 'ilike', nit_digits),
+                        ('is_company', '=', True),
+                    ], limit=1)
+                else:
+                    partner = Partner.search([
+                        ('vat', '=ilike', client_vat),
+                        ('is_company', '=', False),
+                    ], limit=1)
+            co_defaults = self._get_colombia_partner_defaults(co_doc_code)
+            dian_street = self._build_dian_street(post)
+            if not dian_street:
+                raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
             if not partner:
                 partner = Partner.create({
-                    'name': company_name,
-                    'is_company': True,
-                    'vat': company_vat,
-                    'phone': delivered_by_phone,
-                    'mobile': delivered_by_phone,
-                    'email': delivered_by_email or client_email,
+                    'name': client_name,
+                    'vat': client_vat or False,
+                    'phone': client_phone,
+                    'mobile': client_phone,
+                    'email': client_email,
+                    'is_company': is_nit,
+                    'company_type': 'company' if is_nit else 'person',
+                    'street': dian_street,
+                    **co_defaults,
                 })
-            client_phone = partner.phone or partner.mobile or delivered_by_phone
-            client_email = partner.email or client_email
-            contact_name = delivered_by_name
-            contact_phone = delivered_by_phone
+            elif not partner.street:
+                partner.write({'street': dian_street})
+            contact_name = delivered_by_name or client_name
+            contact_phone = delivered_by_phone or client_phone
         else:
             if not client_name:
                 raise UserError(_("Debe registrar el nombre del cliente particular."))
@@ -555,6 +610,9 @@ class CarRepairPortalWorkshop(http.Controller):
                         ('is_company', '=', False),
                     ], limit=1)
             co_defaults = self._get_colombia_partner_defaults(co_doc_code)
+            dian_street = self._build_dian_street(post)
+            if not dian_street:
+                raise UserError(_("La dirección es obligatoria. Complete tipo de vía, número, cruce y placa."))
             if not partner:
                 partner = Partner.create({
                     'name': client_name,
@@ -564,8 +622,11 @@ class CarRepairPortalWorkshop(http.Controller):
                     'email': client_email,
                     'is_company': is_nit,
                     'company_type': 'company' if is_nit else 'person',
+                    'street': dian_street,
                     **co_defaults,
                 })
+            elif not partner.street:
+                partner.write({'street': dian_street})
             contact_name = delivered_by_name or client_name
             contact_phone = delivered_by_phone or client_phone
 

@@ -26,6 +26,8 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         "input .js-plate-lookup": "_onPlateInput",
         "input .js-client-dv": "_onDvInput",
         "keydown .js-nit-numeric": "_onNitNumericKeydown",
+        "input .js-addr-field": "_onAddrFieldChange",
+        "change .js-addr-field": "_onAddrFieldChange",
         "change .js-same-person-check": "_onSamePersonCheck",
         "change .js-client-doc-type": "_onDocTypeChange",
         "input [name='client_name'], input [name='client_phone'], input [name='client_email'], input [name='client_vat']": "_onClientFieldChange",
@@ -59,8 +61,6 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
     _updateCustomerType() {
         const customerType = this.el.querySelector("[name='customer_type']:checked")?.value || "particular";
         const isRenting = customerType === "renting";
-        const isCorporate = customerType === "corporate";
-        const isCompany = isRenting || isCorporate;
 
         const particularFields = this.el.querySelector(".js-workshop-particular-fields");
         const rentingFields = this.el.querySelector(".js-workshop-renting-fields");
@@ -74,36 +74,43 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
             }
         }
 
+        // Corporate section retired — always hidden; MegaSur now uses particular fields
         if (corporateFields) {
-            corporateFields.classList.toggle("d-none", !isCorporate);
+            corporateFields.classList.add("d-none");
             for (const input of corporateFields.querySelectorAll("input, select, textarea")) {
-                input.disabled = !isCorporate;
-            }
-            for (const input of corporateFields.querySelectorAll(".js-workshop-corporate-required")) {
-                input.required = isCorporate;
+                input.disabled = true;
+                input.required = false;
             }
         }
 
         if (isRenting) {
             this._updateRentingMode();
         } else {
-            particularFields.classList.toggle("d-none", isCorporate);
+            // Both 'particular' and 'corporate' show the same fields
+            particularFields.classList.remove("d-none");
             rentingFields.classList.add("d-none");
             for (const input of particularFields.querySelectorAll("input, select, textarea")) {
-                input.disabled = isCorporate;
+                input.disabled = false;
             }
             for (const input of rentingFields.querySelectorAll("input, select, textarea")) {
                 input.disabled = true;
             }
             for (const input of particularFields.querySelectorAll(".js-workshop-particular-required")) {
-                input.required = !isCorporate;
+                input.required = true;
+            }
+            this._updateDocTypeDisplay();
+            const titleEl = particularFields.querySelector(".workshop-form-section-title");
+            if (titleEl) {
+                titleEl.textContent = customerType === "corporate"
+                    ? "Datos del cliente MegaSur"
+                    : "Datos del cliente particular";
             }
         }
 
         const deliveredName = this.el.querySelector("[name='delivered_by_name']");
         const deliveredPhone = this.el.querySelector("[name='delivered_by_phone']");
-        deliveredName.required = isCompany;
-        deliveredPhone.required = isCompany;
+        deliveredName.required = isRenting;
+        deliveredPhone.required = isRenting;
     },
 
     _updateRentingMode() {
@@ -424,6 +431,23 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
                 this._vatLookupTimer = setTimeout(() => this._doVatLookup(vatInput.value), 300);
             }
         }
+    },
+
+    _onAddrFieldChange() {
+        const section = this.el.querySelector('.js-workshop-particular-fields');
+        if (!section) return;
+        const tipo    =  section.querySelector('[name="addr_via_tipo"]')?.value || '';
+        const viaNum  = (section.querySelector('[name="addr_via_num"]')?.value  || '').trim().toUpperCase();
+        const cruce   = (section.querySelector('[name="addr_cruce"]')?.value    || '').trim().toUpperCase();
+        const placa   = (section.querySelector('[name="addr_placa"]')?.value    || '').trim().toUpperCase();
+        const compTipo = section.querySelector('[name="addr_comp_tipo"]')?.value || '';
+        const compNum  = (section.querySelector('[name="addr_comp_num"]')?.value || '').trim().toUpperCase();
+        const preview  = section.querySelector('.js-addr-preview');
+        if (!preview) return;
+        const parts = [tipo, viaNum, cruce, placa].filter(Boolean);
+        if (compTipo) parts.push(compTipo);
+        if (compNum)  parts.push(compNum);
+        preview.textContent = parts.length ? parts.join(' ') : '—';
     },
 
     _onSamePersonCheck(ev) {
