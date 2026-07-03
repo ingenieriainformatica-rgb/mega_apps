@@ -843,10 +843,6 @@ class FleetRepair(models.Model):
 
     def action_flow_mark_to_assign(self):
         self.write({'service_flow_state': 'to_assign'})
-        self._notify_repair_group(
-            'car_repair_industry.group_fleet_repair_service_manager',
-            _("Nueva orden por asignar"),
-        )
         return True
 
     def action_flow_assign_technician(self):
