@@ -36,6 +36,7 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         this.modelSelect = this.el.querySelector(".js-workshop-vehicle-model");
         this._updateCustomerType();
         this._updateVehicleModels();
+        this._initVehicleComboboxes();
         return this._super(...arguments);
     },
 
@@ -120,6 +121,206 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
     _onVehicleBrandChanged() {
         this._updateVehicleModels();
     },
+
+    // ── Combobox: Marca + Línea ─────────────────────────────────────────────
+
+    _initVehicleComboboxes() {
+        const brandWrap = this.el.querySelector(".js-workshop-brand-combobox");
+        const modelWrap = this.el.querySelector(".js-workshop-model-combobox");
+        if (!brandWrap || !modelWrap) return;
+
+        this._brandInput    = brandWrap.querySelector(".js-brand-search-input");
+        this._brandDropdown = brandWrap.querySelector(".js-brand-dropdown");
+        this._modelInput    = modelWrap.querySelector(".js-model-search-input");
+        this._modelDropdown = modelWrap.querySelector(".js-model-dropdown");
+
+        // Brand events
+        this._brandInput.addEventListener("input",   () => this._onBrandInput());
+        this._brandInput.addEventListener("focus",   () => this._onBrandFocus());
+        this._brandInput.addEventListener("click",   () => this._onBrandFocus());
+        this._brandInput.addEventListener("blur",    () => {
+            setTimeout(() => {
+                this._closeBrandDropdown();
+                this._syncBrandDisplay();
+            }, 200);
+        });
+        this._brandInput.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") { this._closeBrandDropdown(); this._syncBrandDisplay(); }
+            if (e.key === "Enter")  { e.preventDefault(); this._pickFirstBrand(); }
+        });
+
+        // Model events
+        this._modelInput.addEventListener("input",   () => this._onModelInput());
+        this._modelInput.addEventListener("focus",   () => this._onModelFocus());
+        this._modelInput.addEventListener("click",   () => this._onModelFocus());
+        this._modelInput.addEventListener("blur",    () => {
+            setTimeout(() => {
+                this._closeModelDropdown();
+                this._syncModelDisplay();
+            }, 200);
+        });
+        this._modelInput.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") { this._closeModelDropdown(); this._syncModelDisplay(); }
+            if (e.key === "Enter")  { e.preventDefault(); this._pickFirstModel(); }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!brandWrap.contains(e.target)) this._closeBrandDropdown();
+            if (!modelWrap.contains(e.target)) this._closeModelDropdown();
+        });
+    },
+
+    _brandOptions() {
+        if (!this.brandSelect) return [];
+        return Array.from(this.brandSelect.options)
+            .filter(o => o.value)
+            .map(o => ({ id: o.value, name: o.text }));
+    },
+
+    _modelOptions(brandId) {
+        if (!this.modelSelect) return [];
+        return Array.from(this.modelSelect.options)
+            .filter(o => o.value && (!brandId || String(o.dataset.brandId) === String(brandId)))
+            .map(o => ({ id: o.value, name: o.text }));
+    },
+
+    _onBrandInput() {
+        const q = (this._brandInput.value || "").toLowerCase().trim();
+        const opts = q
+            ? this._brandOptions().filter(o => o.name.toLowerCase().includes(q))
+            : this._brandOptions();
+        this._renderBrandDropdown(opts);
+    },
+
+    _onBrandFocus() {
+        this._brandInput.select();
+        const q = (this._brandInput.value || "").toLowerCase().trim();
+        const opts = q
+            ? this._brandOptions().filter(o => o.name.toLowerCase().includes(q))
+            : this._brandOptions();
+        this._renderBrandDropdown(opts);
+    },
+
+    _renderBrandDropdown(opts) {
+        this._brandDropdown.replaceChildren();
+        const currentId = this.brandSelect ? this.brandSelect.value : "";
+        if (opts.length === 0) {
+            const el = document.createElement("div");
+            el.className = "dropdown-item text-muted small disabled py-2";
+            el.textContent = "Sin resultados";
+            this._brandDropdown.appendChild(el);
+        } else {
+            for (const opt of opts) {
+                const a = document.createElement("a");
+                a.className = "dropdown-item py-2" + (opt.id === currentId ? " active" : "");
+                a.href = "#";
+                a.textContent = opt.name;
+                a.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                    this._selectBrand(opt.id, opt.name);
+                });
+                this._brandDropdown.appendChild(a);
+            }
+        }
+        this._brandDropdown.style.display = "block";
+    },
+
+    _closeBrandDropdown() {
+        this._brandDropdown.style.display = "none";
+    },
+
+    _selectBrand(id, name) {
+        if (this.brandSelect) this.brandSelect.value = id;
+        if (this._brandInput) this._brandInput.value = name;
+        this._closeBrandDropdown();
+        // Reset model
+        if (this.modelSelect) this.modelSelect.value = "";
+        if (this._modelInput) {
+            this._modelInput.value = "";
+            this._modelInput.disabled = !id;
+            this._modelInput.placeholder = id ? "Buscar línea..." : "Seleccione marca primero...";
+        }
+        this._closeModelDropdown();
+        this._updateVehicleModels();
+    },
+
+    _pickFirstBrand() {
+        const first = this._brandDropdown.querySelector("a.dropdown-item:not(.disabled)");
+        if (first) first.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    },
+
+    _syncBrandDisplay() {
+        if (!this.brandSelect || !this._brandInput) return;
+        const sel = this.brandSelect.options[this.brandSelect.selectedIndex];
+        this._brandInput.value = (sel && sel.value) ? sel.text : "";
+    },
+
+    _onModelInput() {
+        const brandId = this.brandSelect ? this.brandSelect.value : "";
+        const q = (this._modelInput.value || "").toLowerCase().trim();
+        const opts = this._modelOptions(brandId).filter(o =>
+            !q || o.name.toLowerCase().includes(q)
+        );
+        this._renderModelDropdown(opts);
+    },
+
+    _onModelFocus() {
+        const brandId = this.brandSelect ? this.brandSelect.value : "";
+        if (!brandId) return;
+        this._modelInput.select();
+        const q = (this._modelInput.value || "").toLowerCase().trim();
+        const opts = q
+            ? this._modelOptions(brandId).filter(o => o.name.toLowerCase().includes(q))
+            : this._modelOptions(brandId);
+        this._renderModelDropdown(opts);
+    },
+
+    _renderModelDropdown(opts) {
+        this._modelDropdown.replaceChildren();
+        const currentId = this.modelSelect ? this.modelSelect.value : "";
+        if (opts.length === 0) {
+            const el = document.createElement("div");
+            el.className = "dropdown-item text-muted small disabled py-2";
+            el.textContent = "Sin resultados para esta marca";
+            this._modelDropdown.appendChild(el);
+        } else {
+            for (const opt of opts) {
+                const a = document.createElement("a");
+                a.className = "dropdown-item py-2" + (opt.id === currentId ? " active" : "");
+                a.href = "#";
+                a.textContent = opt.name;
+                a.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                    this._selectModel(opt.id, opt.name);
+                });
+                this._modelDropdown.appendChild(a);
+            }
+        }
+        this._modelDropdown.style.display = "block";
+    },
+
+    _closeModelDropdown() {
+        this._modelDropdown.style.display = "none";
+    },
+
+    _selectModel(id, name) {
+        if (this.modelSelect) this.modelSelect.value = id;
+        if (this._modelInput) this._modelInput.value = name;
+        this._closeModelDropdown();
+    },
+
+    _pickFirstModel() {
+        const first = this._modelDropdown.querySelector("a.dropdown-item:not(.disabled)");
+        if (first) first.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    },
+
+    _syncModelDisplay() {
+        if (!this.modelSelect || !this._modelInput) return;
+        const sel = this.modelSelect.options[this.modelSelect.selectedIndex];
+        this._modelInput.value = (sel && sel.value) ? sel.text : "";
+    },
+
+    // ───────────────────────────────────────────────────────────────────────
 
     _onUppercaseInput(ev) {
         const el = ev.target;
@@ -216,6 +417,13 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
                 }
                 if (data.model_id && this.modelSelect) {
                     this.modelSelect.value = String(data.model_id);
+                }
+                // Sync combobox visual display after plate autofill
+                this._syncBrandDisplay();
+                this._syncModelDisplay();
+                if (this._modelInput && this.brandSelect && this.brandSelect.value) {
+                    this._modelInput.disabled = false;
+                    this._modelInput.placeholder = "Buscar línea...";
                 }
 
                 // Tipo de combustible

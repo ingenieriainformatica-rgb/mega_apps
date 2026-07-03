@@ -484,22 +484,43 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Marca</label>
-                                <select name="vehicle_brand_id" class="form-select js-workshop-vehicle-brand">
-                                    <option value="">Seleccione...</option>
-                                    <option t-foreach="vehicle_brands" t-as="brand"
-                                            t-att-value="brand.id"
-                                            t-esc="brand.name"/>
-                                </select>
+                                <div class="js-workshop-brand-combobox position-relative">
+                                    <select name="vehicle_brand_id" class="js-workshop-vehicle-brand d-none">
+                                        <option value=""/>
+                                        <option t-foreach="vehicle_brands" t-as="brand"
+                                                t-att-value="brand.id"
+                                                t-esc="brand.name"/>
+                                    </select>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control js-brand-search-input"
+                                               placeholder="Buscar marca..." autocomplete="off" spellcheck="false"/>
+                                        <span class="input-group-text bg-white border-start-0 workshop-combobox-icon">
+                                            <i class="fa fa-search text-muted"></i>
+                                        </span>
+                                    </div>
+                                    <div class="dropdown-menu w-100 shadow-sm js-brand-dropdown workshop-combobox-dropdown"/>
+                                </div>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Línea</label>
-                                <select name="vehicle_model_id" class="form-select js-workshop-vehicle-model">
-                                    <option value="">Seleccione marca primero...</option>
-                                    <option t-foreach="vehicle_models" t-as="vmodel"
-                                            t-att-value="vmodel.id"
-                                            t-att-data-brand-id="vmodel.brand_id.id or 0"
-                                            t-esc="vmodel.name"/>
-                                </select>
+                                <div class="js-workshop-model-combobox position-relative">
+                                    <select name="vehicle_model_id" class="js-workshop-vehicle-model d-none">
+                                        <option value=""/>
+                                        <option t-foreach="vehicle_models" t-as="vmodel"
+                                                t-att-value="vmodel.id"
+                                                t-att-data-brand-id="vmodel.brand_id.id or 0"
+                                                t-esc="vmodel.name"/>
+                                    </select>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control js-model-search-input"
+                                               placeholder="Seleccione marca primero..." autocomplete="off"
+                                               spellcheck="false" disabled="disabled"/>
+                                        <span class="input-group-text bg-white border-start-0 workshop-combobox-icon">
+                                            <i class="fa fa-search text-muted"></i>
+                                        </span>
+                                    </div>
+                                    <div class="dropdown-menu w-100 shadow-sm js-model-dropdown workshop-combobox-dropdown"/>
+                                </div>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Modelo (año)</label>

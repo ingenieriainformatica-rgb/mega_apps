@@ -1,3 +1,33 @@
+/* ── Vehicle brand / model combobox ──────────────────────────────────────── */
+.workshop-combobox-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1055;
+    max-height: 240px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 0 0 6px 6px;
+}
+
+.workshop-combobox-dropdown .dropdown-item {
+    white-space: normal;
+    word-break: break-word;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.workshop-combobox-dropdown .dropdown-item.active {
+    background-color: #017e84;
+    color: #fff;
+}
+
+.workshop-combobox-icon {
+    pointer-events: none;
+}
+
+/* ── Photos ──────────────────────────────────────────────────────────────── */
 .workshop-photo-uploader {
     border: 1px solid #d8dde3;
     border-radius: 8px;
