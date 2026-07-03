@@ -418,28 +418,42 @@
                                     <option value="nit">NIT</option>
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="form-label">Número de documento <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input name="client_vat"
-                                           class="form-control js-partner-vat-lookup"
+                                           class="form-control js-partner-vat-lookup js-nit-numeric"
                                            placeholder="Número"
                                            maxlength="20"
                                            autocomplete="off"
-                                           required="required"/>
-                                    <span class="input-group-text">
+                                           required="required"
+                                           inputmode="numeric"/>
+                                    <span class="input-group-text px-2">
                                         <i class="fa fa-search js-vat-lookup-icon"></i>
                                     </span>
                                 </div>
+                                <!-- DV — solo visible cuando Tipo = NIT -->
+                                <div class="js-dv-block d-none mt-2 p-2 rounded" style="background:rgba(13,110,253,.07);border:1px solid rgba(13,110,253,.22);">
+                                    <label class="form-label form-label-sm mb-1 fw-semibold" style="color:#0d6efd;">
+                                        <i class="fa fa-key me-1"/>Código de verificación / DV <span class="text-danger">*</span>
+                                    </label>
+                                    <input name="client_dv"
+                                           class="form-control js-client-dv js-nit-numeric text-center fw-bold"
+                                           placeholder="0"
+                                           maxlength="1"
+                                           inputmode="numeric"
+                                           style="max-width:72px;font-size:1.15rem;letter-spacing:3px;"/>
+                                </div>
                                 <div class="js-vat-lookup-status mt-1" style="min-height:20px;"></div>
+                                <div class="js-nit-err text-danger small mt-1 d-none"></div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label js-client-name-label">Nombre del cliente <span class="text-danger">*</span></label>
                                 <input name="client_name" class="form-control js-workshop-particular-required workshop-input-uppercase" required="required" placeholder="NOMBRE COMPLETO"/>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">Celular</label>
-                                <input name="client_phone" type="tel" class="form-control" placeholder="300 123 4567"/>
+                                <label class="form-label">Celular <span class="text-danger">*</span></label>
+                                <input name="client_phone" type="tel" class="form-control js-workshop-particular-required" placeholder="300 123 4567" required="required"/>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Correo de facturación</label>

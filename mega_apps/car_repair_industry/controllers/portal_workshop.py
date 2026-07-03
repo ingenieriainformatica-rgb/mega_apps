@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import re
 from odoo import _, fields, http
 from pathlib import Path
 
@@ -30,6 +31,11 @@ class CarRepairPortalWorkshop(http.Controller):
     def _is_road_test(self):
         return request.env.user.has_group('car_repair_industry.group_fleet_repair_portal_road_test')
 
+    _CO_DOC_NAME_MAP = {
+        'rut': 'NIT',
+        'national_citizen_id': 'Cédula de ciudadanía',
+    }
+
     def _get_colombia_partner_defaults(self, doc_type_code=None):
         """Return localization fields for Colombia partners.
         doc_type_code: 'national_citizen_id' | 'rut' | None
@@ -46,12 +52,37 @@ class CarRepairPortalWorkshop(http.Controller):
             'city': 'Medellín',
         }
         if doc_type_code:
-            id_type = env['l10n_latam.identification.type'].sudo().search([
-                ('l10n_co_document_code', '=', doc_type_code),
-            ], limit=1)
+            IdType = env['l10n_latam.identification.type'].sudo()
+            id_type = IdType.search([('l10n_co_document_code', '=', doc_type_code)], limit=1)
+            if not id_type:
+                display_name = self._CO_DOC_NAME_MAP.get(doc_type_code, '')
+                if display_name and country_co:
+                    id_type = IdType.search([
+                        ('name', 'ilike', display_name),
+                        ('country_id', '=', country_co.id),
+                    ], limit=1)
             if id_type:
                 vals['l10n_latam_identification_type_id'] = id_type.id
         return vals
+
+    def _build_nit_vat(self, post, is_nit):
+        """Return (vat_to_store, nit_digits_only) from POST data.
+        For NIT: validates 9 digits + 1 DV, returns ('NNNNNNNNN-D', 'NNNNNNNNN').
+        For others: returns (cleaned_vat, cleaned_vat).
+        Raises UserError on invalid NIT format.
+        """
+        if is_nit:
+            raw_digits = re.sub(r'\D', '', (post.get('client_vat') or ''))
+            raw_dv     = re.sub(r'\D', '', (post.get('client_dv') or ''))
+            if raw_digits and len(raw_digits) != 9:
+                raise UserError(_("El NIT debe tener exactamente 9 dígitos."))
+            if raw_digits and (not raw_dv or len(raw_dv) != 1):
+                raise UserError(_("El código de verificación (DV) es obligatorio y debe ser 1 dígito."))
+            vat = f"{raw_digits}-{raw_dv}" if raw_digits and raw_dv else (raw_digits or False)
+            return vat, raw_digits
+        else:
+            vat = re.sub(r'\s+', '', (post.get('client_vat') or '')).upper() or False
+            return vat, vat
 
     def _is_internal_manager(self):
         return (
@@ -231,32 +262,58 @@ class CarRepairPortalWorkshop(http.Controller):
         })
 
     @http.route('/my/workshop/partner-lookup', type='http', auth='user', website=True, methods=['GET'])
-    def workshop_partner_lookup(self, vat='', doc_type='', **kwargs):
+    def workshop_partner_lookup(self, vat='', doc_type='', dv='', **kwargs):
         if not (self._is_advisor() or self._is_internal_manager()):
             return request.make_response(
                 json.dumps({'found': False}),
                 headers=[('Content-Type', 'application/json')],
             )
-        vat = (vat or '').strip().upper()
-        if len(vat) < 3:
-            return request.make_response(
-                json.dumps({'found': False}),
-                headers=[('Content-Type', 'application/json')],
-            )
-        is_company = doc_type == 'nit'
-        domain = [('vat', '=ilike', vat), ('is_company', '=', is_company)]
+        is_nit = doc_type == 'nit'
+        if is_nit:
+            nit_digits = re.sub(r'\D', '', vat or '')
+            dv_digit = re.sub(r'\D', '', dv or '')
+            if len(nit_digits) < 3:
+                return request.make_response(
+                    json.dumps({'found': False}),
+                    headers=[('Content-Type', 'application/json')],
+                )
+            search_terms = [nit_digits]
+            if dv_digit:
+                search_terms.append(f"{nit_digits}-{dv_digit}")
+            if len(search_terms) == 1:
+                domain = [('vat', 'ilike', nit_digits), ('is_company', '=', True)]
+            else:
+                domain = ['&', '|',
+                          ('vat', 'ilike', search_terms[0]),
+                          ('vat', 'ilike', search_terms[1]),
+                          ('is_company', '=', True)]
+        else:
+            vat_clean = (vat or '').strip().upper()
+            if len(vat_clean) < 3:
+                return request.make_response(
+                    json.dumps({'found': False}),
+                    headers=[('Content-Type', 'application/json')],
+                )
+            domain = [('vat', '=ilike', vat_clean), ('is_company', '=', False)]
         partner = request.env['res.partner'].sudo().search(domain, limit=1)
         if not partner:
             return request.make_response(
                 json.dumps({'found': False}),
                 headers=[('Content-Type', 'application/json')],
             )
+        # Extract DV from stored NIT (format: "NNNNNNNNN-D" or "NNN.NNN.NNN-D")
+        stored_dv = ''
+        if is_nit and partner.vat:
+            match = re.search(r'-(\d)$', partner.vat.strip())
+            if match:
+                stored_dv = match.group(1)
         return request.make_response(
             json.dumps({
                 'found': True,
                 'name': partner.name or '',
                 'phone': partner.phone or partner.mobile or '',
                 'email': partner.email or '',
+                'dv': stored_dv,
             }),
             headers=[('Content-Type', 'application/json')],
         )
@@ -416,15 +473,21 @@ class CarRepairPortalWorkshop(http.Controller):
                 if not client_name:
                     raise UserError(_("Para Cliente de Renting debe registrar el nombre del conductor."))
                 client_doc_type = (post.get('client_doc_type') or 'cedula').strip()
-                client_vat = (post.get('client_vat') or '').strip().upper()
                 is_nit = client_doc_type == 'nit'
                 co_doc_code = 'rut' if is_nit else 'national_citizen_id'
+                client_vat, nit_digits = self._build_nit_vat(post, is_nit)
                 partner = Partner.browse()
                 if client_vat:
-                    partner = Partner.search([
-                        ('vat', '=ilike', client_vat),
-                        ('is_company', '=', is_nit),
-                    ], limit=1)
+                    if is_nit:
+                        partner = Partner.search([
+                            ('vat', 'ilike', nit_digits),
+                            ('is_company', '=', True),
+                        ], limit=1)
+                    else:
+                        partner = Partner.search([
+                            ('vat', '=ilike', client_vat),
+                            ('is_company', '=', False),
+                        ], limit=1)
                 co_defaults = self._get_colombia_partner_defaults(co_doc_code)
                 if not partner:
                     partner = Partner.create({
@@ -476,15 +539,21 @@ class CarRepairPortalWorkshop(http.Controller):
             if not client_name:
                 raise UserError(_("Debe registrar el nombre del cliente particular."))
             client_doc_type = (post.get('client_doc_type') or 'cedula').strip()
-            client_vat = (post.get('client_vat') or '').strip().upper()
             is_nit = client_doc_type == 'nit'
             co_doc_code = 'rut' if is_nit else 'national_citizen_id'
+            client_vat, nit_digits = self._build_nit_vat(post, is_nit)
             partner = Partner.browse()
             if client_vat:
-                partner = Partner.search([
-                    ('vat', '=ilike', client_vat),
-                    ('is_company', '=', is_nit),
-                ], limit=1)
+                if is_nit:
+                    partner = Partner.search([
+                        ('vat', 'ilike', nit_digits),
+                        ('is_company', '=', True),
+                    ], limit=1)
+                else:
+                    partner = Partner.search([
+                        ('vat', '=ilike', client_vat),
+                        ('is_company', '=', False),
+                    ], limit=1)
             co_defaults = self._get_colombia_partner_defaults(co_doc_code)
             if not partner:
                 partner = Partner.create({

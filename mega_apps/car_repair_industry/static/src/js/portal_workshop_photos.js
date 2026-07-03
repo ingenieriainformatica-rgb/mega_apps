@@ -24,6 +24,8 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         "input .workshop-input-uppercase": "_onUppercaseInput",
         "input .js-partner-vat-lookup": "_onVatInput",
         "input .js-plate-lookup": "_onPlateInput",
+        "input .js-client-dv": "_onDvInput",
+        "keydown .js-nit-numeric": "_onNitNumericKeydown",
         "change .js-same-person-check": "_onSamePersonCheck",
         "change .js-client-doc-type": "_onDocTypeChange",
         "input [name='client_name'], input [name='client_phone'], input [name='client_email'], input [name='client_vat']": "_onClientFieldChange",
@@ -40,6 +42,9 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         this._updateVehicleModels();
         this._initVehicleComboboxes();
         this._updateDocTypeDisplay();
+        this.el.addEventListener('submit', (e) => {
+            if (!this._validateNitFields()) e.preventDefault();
+        });
         return this._super(...arguments);
     },
 
@@ -344,20 +349,80 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         if (!section) return;
         const docTypeSelect = section.querySelector('[name="client_doc_type"]');
         const isNit = docTypeSelect && docTypeSelect.value === 'nit';
+
+        const vatInput  = section.querySelector('[name="client_vat"]');
+        const dvBlock   = section.querySelector('.js-dv-block');
+        const dvInput   = section.querySelector('.js-client-dv');
         const nameInput = section.querySelector('[name="client_name"]');
         const nameLabel = section.querySelector('.js-client-name-label');
-        const banner = section.querySelector('.js-nit-company-banner');
+        const banner    = section.querySelector('.js-nit-company-banner');
+        const errEl     = section.querySelector('.js-nit-err');
 
+        if (vatInput) {
+            vatInput.maxLength = isNit ? 9 : 20;
+            vatInput.placeholder = isNit ? 'NIT (9 dígitos)' : 'Número';
+        }
+        if (dvBlock) dvBlock.classList.toggle('d-none', !isNit);
+        if (dvInput) {
+            dvInput.required = isNit;
+            if (!isNit) dvInput.value = '';
+        }
+        if (errEl) errEl.classList.add('d-none');
         if (nameLabel) {
             nameLabel.innerHTML = isNit
                 ? 'Razón social <span class="text-danger">*</span>'
                 : 'Nombre del cliente <span class="text-danger">*</span>';
         }
-        if (nameInput) {
-            nameInput.placeholder = isNit ? 'NOMBRE DE LA EMPRESA' : 'NOMBRE COMPLETO';
+        if (nameInput) nameInput.placeholder = isNit ? 'NOMBRE DE LA EMPRESA' : 'NOMBRE COMPLETO';
+        if (banner) banner.classList.toggle('d-none', !isNit);
+    },
+
+    _validateNitFields() {
+        const section = this.el.querySelector('.js-workshop-particular-fields');
+        if (!section || section.classList.contains('d-none')) return true;
+        const docType = section.querySelector('[name="client_doc_type"]')?.value;
+        if (docType !== 'nit') return true;
+
+        const vatInput = section.querySelector('[name="client_vat"]');
+        if (vatInput && vatInput.disabled) return true;
+
+        const dvInput = section.querySelector('.js-client-dv');
+        const errEl   = section.querySelector('.js-nit-err');
+        const vatDigits = (vatInput?.value || '').replace(/\D/g, '');
+        const dvDigits  = (dvInput?.value  || '').replace(/\D/g, '');
+
+        if (vatDigits.length !== 9) {
+            if (errEl) { errEl.textContent = 'El NIT debe tener exactamente 9 dígitos.'; errEl.classList.remove('d-none'); }
+            vatInput?.focus();
+            vatInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
         }
-        if (banner) {
-            banner.classList.toggle('d-none', !isNit);
+        if (dvDigits.length !== 1) {
+            if (errEl) { errEl.textContent = 'El código de verificación (DV) es obligatorio (1 dígito).'; errEl.classList.remove('d-none'); }
+            dvInput?.focus();
+            return false;
+        }
+        if (errEl) errEl.classList.add('d-none');
+        return true;
+    },
+
+    _onNitNumericKeydown(ev) {
+        if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+        if (!/^\d$/.test(ev.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab','Enter'].includes(ev.key)) {
+            ev.preventDefault();
+        }
+    },
+
+    _onDvInput(ev) {
+        const input = ev.currentTarget;
+        input.value = input.value.replace(/\D/g, '');
+        if (input.value.length === 1) {
+            const section = this.el.querySelector('.js-workshop-particular-fields');
+            const vatInput = section && section.querySelector('[name="client_vat"]');
+            if (vatInput && vatInput.value.replace(/\D/g, '').length === 9) {
+                clearTimeout(this._vatLookupTimer);
+                this._vatLookupTimer = setTimeout(() => this._doVatLookup(vatInput.value), 300);
+            }
         }
     },
 
@@ -473,11 +538,13 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
     },
 
     async _doVatLookup(rawVat) {
-        const vat = (rawVat || '').trim().toUpperCase();
+        const vat = (rawVat || '').trim().replace(/\D/g, '');
         const section = this.el.querySelector('.js-workshop-particular-fields');
         const statusEl = section && section.querySelector('.js-vat-lookup-status');
         const iconEl = section && section.querySelector('.js-vat-lookup-icon');
         const docType = (section && section.querySelector('[name="client_doc_type"]')?.value) || 'cedula';
+        const dvInput = section && section.querySelector('.js-client-dv');
+        const dv = dvInput ? (dvInput.value || '').trim() : '';
 
         if (vat.length < 3) {
             if (statusEl) statusEl.innerHTML = '';
@@ -486,18 +553,28 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
 
         if (iconEl) iconEl.className = 'fa fa-spinner fa-spin';
         try {
-            const url = `/my/workshop/partner-lookup?vat=${encodeURIComponent(vat)}&doc_type=${encodeURIComponent(docType)}`;
+            const url = `/my/workshop/partner-lookup?vat=${encodeURIComponent(vat)}&doc_type=${encodeURIComponent(docType)}&dv=${encodeURIComponent(dv)}`;
             const resp = await fetch(url);
             const data = await resp.json();
             if (iconEl) iconEl.className = 'fa fa-search';
 
             if (data.found) {
-                const nameEl = section.querySelector('[name="client_name"]');
+                const nameEl  = section.querySelector('[name="client_name"]');
                 const phoneEl = section.querySelector('[name="client_phone"]');
                 const emailEl = section.querySelector('[name="client_email"]');
-                if (nameEl) nameEl.value = (data.name || '').toUpperCase();
+                const dvEl    = section.querySelector('.js-client-dv');
+                if (nameEl)  nameEl.value  = (data.name  || '').toUpperCase();
                 if (phoneEl && data.phone) phoneEl.value = data.phone;
                 if (emailEl && data.email) emailEl.value = data.email;
+                if (dvEl && data.dv) {
+                    dvEl.value = data.dv;
+                    const dvBlock = section.querySelector('.js-dv-block');
+                    if (dvBlock) {
+                        dvBlock.style.transition = 'box-shadow .25s';
+                        dvBlock.style.boxShadow  = '0 0 0 3px rgba(25,135,84,.35)';
+                        setTimeout(() => { dvBlock.style.boxShadow = ''; }, 1400);
+                    }
+                }
                 if (statusEl) statusEl.innerHTML =
                     '<span class="badge bg-success"><i class="fa fa-check me-1"></i>Cliente encontrado — datos cargados</span>';
             } else {
