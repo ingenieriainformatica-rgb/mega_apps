@@ -223,13 +223,6 @@
             <field name="display_options">Sí,No</field>
         </record>
 
-        <record id="reception_checklist_advisor_item_soat_papeles" model="fleet.repair.reception.checklist.template.line">
-            <field name="sequence">60</field>
-            <field name="template_id" ref="reception_checklist_template_advisor"/>
-            <field name="name">SOAT y papeles</field>
-            <field name="display_options">Sí,No</field>
-        </record>
-
         <record id="reception_checklist_advisor_item_elementos_valor" model="fleet.repair.reception.checklist.template.line">
             <field name="sequence">70</field>
             <field name="template_id" ref="reception_checklist_template_advisor"/>

@@ -442,7 +442,7 @@
                                 <input name="client_phone" type="tel" class="form-control" placeholder="300 123 4567"/>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">Correo</label>
+                                <label class="form-label">Correo de facturación</label>
                                 <input name="client_email" type="email" class="form-control" placeholder="correo@ejemplo.com"/>
                             </div>
                         </div>
