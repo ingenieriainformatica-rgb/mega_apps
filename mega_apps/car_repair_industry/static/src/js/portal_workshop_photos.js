@@ -25,6 +25,7 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         "input .js-partner-vat-lookup": "_onVatInput",
         "input .js-plate-lookup": "_onPlateInput",
         "change .js-same-person-check": "_onSamePersonCheck",
+        "change .js-client-doc-type": "_onDocTypeChange",
         "input [name='client_name'], input [name='client_phone'], input [name='client_email'], input [name='client_vat']": "_onClientFieldChange",
     },
 
@@ -38,6 +39,7 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         this._updateCustomerType();
         this._updateVehicleModels();
         this._initVehicleComboboxes();
+        this._updateDocTypeDisplay();
         return this._super(...arguments);
     },
 
@@ -333,6 +335,32 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         }
     },
 
+    _onDocTypeChange() {
+        this._updateDocTypeDisplay();
+    },
+
+    _updateDocTypeDisplay() {
+        const section = this.el.querySelector('.js-workshop-particular-fields');
+        if (!section) return;
+        const docTypeSelect = section.querySelector('[name="client_doc_type"]');
+        const isNit = docTypeSelect && docTypeSelect.value === 'nit';
+        const nameInput = section.querySelector('[name="client_name"]');
+        const nameLabel = section.querySelector('.js-client-name-label');
+        const banner = section.querySelector('.js-nit-company-banner');
+
+        if (nameLabel) {
+            nameLabel.innerHTML = isNit
+                ? 'Razón social <span class="text-danger">*</span>'
+                : 'Nombre del cliente <span class="text-danger">*</span>';
+        }
+        if (nameInput) {
+            nameInput.placeholder = isNit ? 'NOMBRE DE LA EMPRESA' : 'NOMBRE COMPLETO';
+        }
+        if (banner) {
+            banner.classList.toggle('d-none', !isNit);
+        }
+    },
+
     _onSamePersonCheck(ev) {
         this._syncSamePerson(ev.target.checked);
     },
@@ -449,6 +477,7 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
         const section = this.el.querySelector('.js-workshop-particular-fields');
         const statusEl = section && section.querySelector('.js-vat-lookup-status');
         const iconEl = section && section.querySelector('.js-vat-lookup-icon');
+        const docType = (section && section.querySelector('[name="client_doc_type"]')?.value) || 'cedula';
 
         if (vat.length < 3) {
             if (statusEl) statusEl.innerHTML = '';
@@ -457,7 +486,8 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
 
         if (iconEl) iconEl.className = 'fa fa-spinner fa-spin';
         try {
-            const resp = await fetch(`/my/workshop/partner-lookup?vat=${encodeURIComponent(vat)}`);
+            const url = `/my/workshop/partner-lookup?vat=${encodeURIComponent(vat)}&doc_type=${encodeURIComponent(docType)}`;
+            const resp = await fetch(url);
             const data = await resp.json();
             if (iconEl) iconEl.className = 'fa fa-search';
 
@@ -714,6 +744,8 @@ publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
         }
         this._searchInput.value = "";
         this._closeDropdown();
+        this._searchInput.focus();
+        this._fetchServices("");
     },
 
     _removeExisting(id) {

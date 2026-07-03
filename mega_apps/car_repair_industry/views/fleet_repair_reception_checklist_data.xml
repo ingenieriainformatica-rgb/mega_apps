@@ -199,7 +199,42 @@
             <field name="sequence">20</field>
             <field name="template_id" ref="reception_checklist_template_advisor"/>
             <field name="name">Matrícula</field>
-            <field name="display_options">Sí,No,Foto</field>
+            <field name="display_options">Sí,No</field>
+        </record>
+
+        <record id="reception_checklist_advisor_item_llanta_repuesto" model="fleet.repair.reception.checklist.template.line">
+            <field name="sequence">30</field>
+            <field name="template_id" ref="reception_checklist_template_advisor"/>
+            <field name="name">Llanta de repuesto</field>
+            <field name="display_options">Sí,No</field>
+        </record>
+
+        <record id="reception_checklist_advisor_item_equipo_carretera" model="fleet.repair.reception.checklist.template.line">
+            <field name="sequence">40</field>
+            <field name="template_id" ref="reception_checklist_template_advisor"/>
+            <field name="name">Equipo de carretera</field>
+            <field name="display_options">Sí,No</field>
+        </record>
+
+        <record id="reception_checklist_advisor_item_botiquin" model="fleet.repair.reception.checklist.template.line">
+            <field name="sequence">50</field>
+            <field name="template_id" ref="reception_checklist_template_advisor"/>
+            <field name="name">Botiquín</field>
+            <field name="display_options">Sí,No</field>
+        </record>
+
+        <record id="reception_checklist_advisor_item_soat_papeles" model="fleet.repair.reception.checklist.template.line">
+            <field name="sequence">60</field>
+            <field name="template_id" ref="reception_checklist_template_advisor"/>
+            <field name="name">SOAT y papeles</field>
+            <field name="display_options">Sí,No</field>
+        </record>
+
+        <record id="reception_checklist_advisor_item_elementos_valor" model="fleet.repair.reception.checklist.template.line">
+            <field name="sequence">70</field>
+            <field name="template_id" ref="reception_checklist_template_advisor"/>
+            <field name="name">Elementos de valor</field>
+            <field name="display_options">Sí,No</field>
         </record>
     </data>
 </odoo>

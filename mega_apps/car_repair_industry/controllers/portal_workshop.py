@@ -30,6 +30,29 @@ class CarRepairPortalWorkshop(http.Controller):
     def _is_road_test(self):
         return request.env.user.has_group('car_repair_industry.group_fleet_repair_portal_road_test')
 
+    def _get_colombia_partner_defaults(self, doc_type_code=None):
+        """Return localization fields for Colombia partners.
+        doc_type_code: 'national_citizen_id' | 'rut' | None
+        """
+        env = request.env
+        country_co = env['res.country'].sudo().search([('code', '=', 'CO')], limit=1)
+        state_ant = env['res.country.state'].sudo().search([
+            ('country_id', '=', country_co.id),
+            ('name', 'ilike', 'Antioquia'),
+        ], limit=1)
+        vals = {
+            'country_id': country_co.id if country_co else False,
+            'state_id': state_ant.id if state_ant else False,
+            'city': 'Medellín',
+        }
+        if doc_type_code:
+            id_type = env['l10n_latam.identification.type'].sudo().search([
+                ('l10n_co_document_code', '=', doc_type_code),
+            ], limit=1)
+            if id_type:
+                vals['l10n_latam_identification_type_id'] = id_type.id
+        return vals
+
     def _is_internal_manager(self):
         return (
             request.env.user.has_group('car_repair_industry.group_fleet_repair_service_manager')
@@ -208,7 +231,7 @@ class CarRepairPortalWorkshop(http.Controller):
         })
 
     @http.route('/my/workshop/partner-lookup', type='http', auth='user', website=True, methods=['GET'])
-    def workshop_partner_lookup(self, vat='', **kwargs):
+    def workshop_partner_lookup(self, vat='', doc_type='', **kwargs):
         if not (self._is_advisor() or self._is_internal_manager()):
             return request.make_response(
                 json.dumps({'found': False}),
@@ -220,10 +243,9 @@ class CarRepairPortalWorkshop(http.Controller):
                 json.dumps({'found': False}),
                 headers=[('Content-Type', 'application/json')],
             )
-        partner = request.env['res.partner'].sudo().search(
-            [('vat', '=ilike', vat), ('is_company', '=', False)],
-            limit=1,
-        )
+        is_company = doc_type == 'nit'
+        domain = [('vat', '=ilike', vat), ('is_company', '=', is_company)]
+        partner = request.env['res.partner'].sudo().search(domain, limit=1)
         if not partner:
             return request.make_response(
                 json.dumps({'found': False}),
@@ -393,14 +415,17 @@ class CarRepairPortalWorkshop(http.Controller):
             if renting_mode == 'client':
                 if not client_name:
                     raise UserError(_("Para Cliente de Renting debe registrar el nombre del conductor."))
+                client_doc_type = (post.get('client_doc_type') or 'cedula').strip()
                 client_vat = (post.get('client_vat') or '').strip().upper()
+                is_nit = client_doc_type == 'nit'
+                co_doc_code = 'rut' if is_nit else 'national_citizen_id'
                 partner = Partner.browse()
                 if client_vat:
-                    partner = Partner.search([('vat', '=ilike', client_vat), ('is_company', '=', False)], limit=1)
-                if not partner and client_phone:
-                    partner = Partner.search(['|', ('phone', '=', client_phone), ('mobile', '=', client_phone)], limit=1)
-                if not partner and client_email:
-                    partner = Partner.search([('email', '=', client_email)], limit=1)
+                    partner = Partner.search([
+                        ('vat', '=ilike', client_vat),
+                        ('is_company', '=', is_nit),
+                    ], limit=1)
+                co_defaults = self._get_colombia_partner_defaults(co_doc_code)
                 if not partner:
                     partner = Partner.create({
                         'name': client_name,
@@ -408,9 +433,10 @@ class CarRepairPortalWorkshop(http.Controller):
                         'phone': client_phone,
                         'mobile': client_phone,
                         'email': client_email,
+                        'is_company': is_nit,
+                        'company_type': 'company' if is_nit else 'person',
+                        **co_defaults,
                     })
-                elif client_vat and not partner.vat:
-                    partner.write({'vat': client_vat})
                 contact_name = delivered_by_name or client_name
                 contact_phone = delivered_by_phone or client_phone
             else:
@@ -449,14 +475,17 @@ class CarRepairPortalWorkshop(http.Controller):
         else:
             if not client_name:
                 raise UserError(_("Debe registrar el nombre del cliente particular."))
+            client_doc_type = (post.get('client_doc_type') or 'cedula').strip()
             client_vat = (post.get('client_vat') or '').strip().upper()
+            is_nit = client_doc_type == 'nit'
+            co_doc_code = 'rut' if is_nit else 'national_citizen_id'
             partner = Partner.browse()
             if client_vat:
-                partner = Partner.search([('vat', '=ilike', client_vat), ('is_company', '=', False)], limit=1)
-            if not partner and client_phone:
-                partner = Partner.search(['|', ('phone', '=', client_phone), ('mobile', '=', client_phone)], limit=1)
-            if not partner and client_email:
-                partner = Partner.search([('email', '=', client_email)], limit=1)
+                partner = Partner.search([
+                    ('vat', '=ilike', client_vat),
+                    ('is_company', '=', is_nit),
+                ], limit=1)
+            co_defaults = self._get_colombia_partner_defaults(co_doc_code)
             if not partner:
                 partner = Partner.create({
                     'name': client_name,
@@ -464,9 +493,10 @@ class CarRepairPortalWorkshop(http.Controller):
                     'phone': client_phone,
                     'mobile': client_phone,
                     'email': client_email,
+                    'is_company': is_nit,
+                    'company_type': 'company' if is_nit else 'person',
+                    **co_defaults,
                 })
-            elif client_vat and not partner.vat:
-                partner.write({'vat': client_vat})
             contact_name = delivered_by_name or client_name
             contact_phone = delivered_by_phone or client_phone
 

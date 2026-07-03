@@ -375,12 +375,20 @@
                             </div>
                         </div>
                         <div class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label">Cédula / NIT</label>
+                            <div class="col-md-2">
+                                <label class="form-label">Tipo de documento <span class="text-danger">*</span></label>
+                                <select name="client_doc_type" class="form-select js-client-doc-type" required="required">
+                                    <option value="">Seleccione...</option>
+                                    <option value="cedula">Cédula de ciudadanía</option>
+                                    <option value="nit">NIT</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Número de documento</label>
                                 <div class="input-group">
                                     <input name="client_vat"
-                                           class="form-control workshop-input-uppercase js-partner-vat-lookup"
-                                           placeholder="CC / NIT"
+                                           class="form-control js-partner-vat-lookup"
+                                           placeholder="Número"
                                            maxlength="20"
                                            autocomplete="off"/>
                                     <span class="input-group-text">
@@ -389,8 +397,8 @@
                                 </div>
                                 <div class="js-vat-lookup-status mt-1" style="min-height:20px;"></div>
                             </div>
-                            <div class="col-md-5">
-                                <label class="form-label">Nombre del cliente <span class="text-danger">*</span></label>
+                            <div class="col-md-4">
+                                <label class="form-label js-client-name-label">Nombre del cliente <span class="text-danger">*</span></label>
                                 <input name="client_name" class="form-control js-workshop-particular-required workshop-input-uppercase" required="required" placeholder="NOMBRE COMPLETO"/>
                             </div>
                             <div class="col-md-2">
@@ -401,6 +409,10 @@
                                 <label class="form-label">Correo</label>
                                 <input name="client_email" type="email" class="form-control" placeholder="correo@ejemplo.com"/>
                             </div>
+                        </div>
+                        <div class="js-nit-company-banner alert alert-info d-flex align-items-center gap-2 py-2 mt-3 mb-0 d-none">
+                            <i class="fa fa-building fa-lg"></i>
+                            <span>Se registrará como <strong>empresa</strong> en el sistema (NIT)</span>
                         </div>
                     </div>
 
