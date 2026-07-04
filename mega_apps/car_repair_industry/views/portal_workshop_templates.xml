@@ -915,9 +915,11 @@
                     </div>
 
                     <div class="workshop-form-actionbar">
-                        <a href="/my/workshop" class="btn btn-light">Cancelar</a>
-                        <button class="btn btn-primary btn-lg" type="submit">
-                            <i class="fa fa-check"></i> Crear orden de servicio
+                        <a href="/my/workshop" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold">
+                            Cancelar
+                        </a>
+                        <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold" type="submit">
+                            <i class="fa fa-check-circle me-2"/>Crear orden de servicio
                         </button>
                     </div>
                 </form>

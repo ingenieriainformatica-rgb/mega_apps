@@ -697,14 +697,21 @@
     position: sticky;
 }
 
+.workshop-form-actionbar .btn {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.workshop-form-actionbar .btn:hover {
+    transform: translateY(-2px);
+}
 .workshop-form-actionbar .btn-primary {
     background: #017e84;
     border-color: #017e84;
+    box-shadow: 0 4px 14px rgba(1, 126, 132, 0.4);
 }
-
 .workshop-form-actionbar .btn-primary:hover {
     background: #016a6f;
     border-color: #016a6f;
+    box-shadow: 0 7px 20px rgba(1, 126, 132, 0.5);
 }
 
 .workshop-input-uppercase {
