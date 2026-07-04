@@ -484,7 +484,7 @@
                                 Dirección <span class="text-danger">*</span>
                                 <span class="fw-normal ms-1">(Nomenclatura DIAN)</span>
                             </p>
-                            <div class="row g-2">
+                            <div class="row g-3">
                                 <div class="col-6 col-md-2">
                                     <select name="addr_via_tipo" class="form-select js-addr-field js-workshop-particular-required" required="required">
                                         <option value="">Tipo de vía *</option>
@@ -1165,7 +1165,7 @@
                                                     </td>
                                                     <td>
                                                         <t t-if="is_technician or is_internal_manager">
-                                                            <select t-att-name="'svc_status_%s' % svc.id" class="form-select form-select-sm workshop-service-status-select">
+                                                            <select t-att-name="'svc_status_%s' % svc.id" class="form-select workshop-service-status-select">
                                                                 <option value="pendiente" t-att-selected="'selected' if svc.tecnico_status == 'pendiente' else None">⏳ Pendiente</option>
                                                                 <option value="en_progreso" t-att-selected="'selected' if svc.tecnico_status == 'en_progreso' else None">⚙ En progreso</option>
                                                                 <option value="completado" t-att-selected="'selected' if svc.tecnico_status == 'completado' else None">✓ Completado</option>
@@ -1179,7 +1179,7 @@
                                                     </td>
                                                     <td>
                                                         <t t-if="is_technician or is_internal_manager">
-                                                            <input t-att-name="'svc_notes_%s' % svc.id" class="form-control form-control-sm"
+                                                            <input t-att-name="'svc_notes_%s' % svc.id" class="form-control"
                                                                    t-att-placeholder="'Notas sobre ' + (svc.service_type.name or 'este servicio')"
                                                                    t-att-value="svc.tecnico_notes or ''"/>
                                                         </t>
@@ -1209,7 +1209,7 @@
                                     </p>
                                     <div class="d-flex gap-2">
                                         <input type="text" id="new-service-name"
-                                               class="form-control form-control-sm"
+                                               class="form-control"
                                                placeholder="Nombre del servicio..."/>
                                         <button type="button" id="btn-add-service-order"
                                                 class="btn btn-outline-primary btn-sm text-nowrap">
@@ -1333,7 +1333,7 @@
                                                                 <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
                                                                 <td t-esc="tline.name"/>
                                                                 <td class="workshop-checklist-estado-cell">
-                                                                    <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select form-select-sm">
+                                                                    <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select">
                                                                         <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">Bueno</option>
                                                                         <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">Regular</option>
                                                                         <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">Malo</option>
@@ -1348,7 +1348,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <t t-if="is_editor">
-                                                                        <input t-att-name="'tech_obs_%s' % tline.id" class="form-control form-control-sm" t-att-value="tline.observation or ''"/>
+                                                                        <input t-att-name="'tech_obs_%s' % tline.id" class="form-control" t-att-value="tline.observation or ''"/>
                                                                     </t>
                                                                     <t t-else="" t-esc="tline.observation or ''"/>
                                                                 </td>
@@ -1373,7 +1373,7 @@
                                                                 <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
                                                                 <td t-esc="tline.name"/>
                                                                 <td class="workshop-checklist-estado-cell">
-                                                                    <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select form-select-sm">
+                                                                    <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select">
                                                                         <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">Bueno</option>
                                                                         <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">Regular</option>
                                                                         <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">Malo</option>
@@ -1388,7 +1388,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <t t-if="is_editor">
-                                                                        <input t-att-name="'tech_obs_%s' % tline.id" class="form-control form-control-sm" t-att-value="tline.observation or ''"/>
+                                                                        <input t-att-name="'tech_obs_%s' % tline.id" class="form-control" t-att-value="tline.observation or ''"/>
                                                                     </t>
                                                                     <t t-else="" t-esc="tline.observation or ''"/>
                                                                 </td>
@@ -1427,18 +1427,18 @@
                                                                 <td t-esc="tline.name"/>
                                                                 <td>
                                                                     <t t-if="is_editor">
-                                                                        <input t-att-name="'tech_measure_left_%s' % tline.id" class="form-control form-control-sm text-end" required="required" t-att-value="tline.measurement_left or ''" placeholder="mm"/>
+                                                                        <input t-att-name="'tech_measure_left_%s' % tline.id" class="form-control text-end" required="required" t-att-value="tline.measurement_left or ''" placeholder="mm"/>
                                                                     </t>
                                                                     <t t-else="" t-esc="(tline.measurement_left or '') + ' mm'"/>
                                                                 </td>
                                                                 <td>
                                                                     <t t-if="is_editor">
-                                                                        <input t-att-name="'tech_measure_right_%s' % tline.id" class="form-control form-control-sm text-end" required="required" t-att-value="tline.measurement_right or ''" placeholder="mm"/>
+                                                                        <input t-att-name="'tech_measure_right_%s' % tline.id" class="form-control text-end" required="required" t-att-value="tline.measurement_right or ''" placeholder="mm"/>
                                                                     </t>
                                                                     <t t-else="" t-esc="(tline.measurement_right or '') + ' mm'"/>
                                                                 </td>
                                                                 <td>
-                                                                    <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select form-select-sm">
+                                                                    <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select">
                                                                         <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">Bueno</option>
                                                                         <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">Regular</option>
                                                                         <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">Malo</option>
@@ -1474,7 +1474,7 @@
                                                                 <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
                                                                 <td>
                                                                     <t t-if="is_editor">
-                                                                        <select t-att-name="'tech_position_%s' % tline.id" class="form-select form-select-sm">
+                                                                        <select t-att-name="'tech_position_%s' % tline.id" class="form-select">
                                                                             <option value="DD" t-att-selected="'selected' if tline.position == 'DD' else None">DD – Del. Der.</option>
                                                                             <option value="DI" t-att-selected="'selected' if tline.position == 'DI' else None">DI – Del. Izq.</option>
                                                                             <option value="TD" t-att-selected="'selected' if tline.position == 'TD' else None">TD – Tra. Der.</option>
@@ -1485,7 +1485,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <t t-if="is_editor">
-                                                                        <input t-att-name="'tech_measure_left_%s' % tline.id" class="form-control form-control-sm text-end" required="required" t-att-value="tline.measurement_left or ''" placeholder="mm"/>
+                                                                        <input t-att-name="'tech_measure_left_%s' % tline.id" class="form-control text-end" required="required" t-att-value="tline.measurement_left or ''" placeholder="mm"/>
                                                                     </t>
                                                                     <t t-else="" t-esc="(tline.measurement_left or '') + ' mm'"/>
                                                                 </td>
@@ -1664,10 +1664,10 @@
                                                  t-att-data-tbody-id="'spare-tbody-%s' % sr.id">
                                                 <div class="row g-2 align-items-end">
                                                     <div class="col-sm-6">
-                                                        <label class="form-label small mb-1">Buscar repuesto</label>
+                                                        <label class="form-label mb-1">Buscar repuesto</label>
                                                         <div class="position-relative">
                                                             <input type="text"
-                                                                   class="form-control form-control-sm js-spare-edit-search"
+                                                                   class="form-control js-spare-edit-search"
                                                                    placeholder="Escribe al menos 2 letras..."
                                                                    autocomplete="off"/>
                                                             <div class="dropdown-menu w-100 js-spare-edit-dropdown"
@@ -1676,15 +1676,15 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-2">
-                                                        <label class="form-label small mb-1">Cantidad</label>
+                                                        <label class="form-label mb-1">Cantidad</label>
                                                         <input type="number"
-                                                               class="form-control form-control-sm js-spare-edit-qty"
+                                                               class="form-control js-spare-edit-qty"
                                                                value="1" min="0.01" step="0.01"/>
                                                     </div>
                                                     <div class="col-sm-4">
-                                                        <label class="form-label small mb-1">Nota (opcional)</label>
+                                                        <label class="form-label mb-1">Nota (opcional)</label>
                                                         <input type="text"
-                                                               class="form-control form-control-sm js-spare-edit-note"
+                                                               class="form-control js-spare-edit-note"
                                                                placeholder="Especificación adicional"/>
                                                     </div>
                                                 </div>
@@ -1741,7 +1741,7 @@
                                     </div>
                                     <div class="mb-2">
                                         <label class="form-label small">Observación (opcional)</label>
-                                        <input type="text" id="spare-catalog-note" class="form-control form-control-sm"
+                                        <input type="text" id="spare-catalog-note" class="form-control"
                                                placeholder="Especificación adicional del técnico"/>
                                     </div>
 
@@ -1841,24 +1841,24 @@
                                                     <div class="row g-2 mb-3">
                                                         <div class="col-6">
                                                             <label class="form-label small fw-semibold">Km inicial</label>
-                                                            <input type="number" name="km_start" class="form-control form-control-sm"
+                                                            <input type="number" name="km_start" class="form-control"
                                                                    t-att-value="rt.km_start if rt.km_start else ''"
                                                                    step="0.1" min="0" placeholder="0.0"/>
                                                         </div>
                                                         <div class="col-6">
                                                             <label class="form-label small fw-semibold">Km final</label>
-                                                            <input type="number" name="km_end" class="form-control form-control-sm"
+                                                            <input type="number" name="km_end" class="form-control"
                                                                    t-att-value="rt.km_end if rt.km_end else ''"
                                                                    step="0.1" min="0" placeholder="0.0"/>
                                                         </div>
                                                     </div>
                                                     <div class="mb-2">
                                                         <label class="form-label small fw-semibold">Resultado / Observaciones</label>
-                                                        <textarea name="result" class="form-control form-control-sm" rows="3"><t t-esc="rt.result or ''"/></textarea>
+                                                        <textarea name="result" class="form-control" rows="3"><t t-esc="rt.result or ''"/></textarea>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label small fw-semibold">Observaciones finales</label>
-                                                        <textarea name="final_observations" class="form-control form-control-sm" rows="2"><t t-esc="rt.final_observations or ''"/></textarea>
+                                                        <textarea name="final_observations" class="form-control" rows="3"><t t-esc="rt.final_observations or ''"/></textarea>
                                                     </div>
                                                     <div class="d-flex gap-2 flex-wrap">
                                                         <t t-if="rt.state == 'assigned'">
@@ -1900,7 +1900,7 @@
                                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                                     <div class="mb-3">
                                                         <label class="form-label small fw-semibold">Tipo de prueba</label>
-                                                        <select name="test_type" class="form-select form-select-sm">
+                                                        <select name="test_type" class="form-select">
                                                             <option value="before">Antes de la reparación</option>
                                                             <option value="during">Durante la reparación</option>
                                                             <option value="after" selected="selected">Después de la reparación</option>
@@ -1908,7 +1908,7 @@
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label small fw-semibold">Observación de solicitud</label>
-                                                        <textarea name="request_observation" class="form-control form-control-sm"
+                                                        <textarea name="request_observation" class="form-control"
                                                                   rows="3" placeholder="Describa las condiciones o motivo de la prueba..."></textarea>
                                                     </div>
                                                     <button type="submit" class="btn btn-primary btn-sm">
@@ -1997,12 +1997,12 @@
                 <!-- ── Header compacto ─────────────────────────────── -->
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <a t-att-href="'/my/workshop/order/%s' % repair.id"
-                       class="btn btn-sm btn-light border flex-shrink-0">
+                       class="btn btn-light border flex-shrink-0 px-3">
                         <i class="fa fa-arrow-left"/>
                     </a>
                     <div class="min-w-0">
-                        <div class="text-muted small fw-semibold lh-1 mb-1" t-esc="repair.sequence or ''"/>
-                        <h1 class="h5 fw-bold mb-0 text-truncate">Editar recepción</h1>
+                        <div class="text-muted fw-semibold lh-1 mb-1" style="font-size:0.8rem;letter-spacing:1px;" t-esc="repair.sequence or ''"/>
+                        <h1 class="h4 fw-bold mb-0 text-truncate">Editar recepción</h1>
                     </div>
                     <div class="ms-auto d-flex align-items-center gap-2 flex-shrink-0">
                         <span class="badge bg-warning text-dark">
@@ -2027,24 +2027,24 @@
 
                     <!-- ── 1. Contacto ───────────────────────────────── -->
                     <div class="card border-0 shadow-sm mb-3">
-                        <div class="card-header bg-white border-bottom py-2 px-3">
-                            <span class="fw-semibold small"><i class="fa fa-phone me-2 text-primary"/>Contacto</span>
+                        <div class="card-header bg-white border-bottom py-3 px-4">
+                            <span class="fw-semibold"><i class="fa fa-phone me-2 text-primary"/>Contacto</span>
                         </div>
-                        <div class="card-body py-3 px-3">
-                            <div class="row g-2">
+                        <div class="card-body py-4 px-4">
+                            <div class="row g-3">
                                 <div class="col-6 col-md-4">
-                                    <label class="form-label small mb-1">Teléfono</label>
-                                    <input name="client_phone" type="tel" class="form-control form-control-sm"
+                                    <label class="form-label mb-1">Teléfono</label>
+                                    <input name="client_phone" type="tel" class="form-control"
                                            t-att-value="repair.client_phone or ''" placeholder="604 xxx xxxx"/>
                                 </div>
                                 <div class="col-6 col-md-4">
-                                    <label class="form-label small mb-1">Celular</label>
-                                    <input name="client_mobile" type="tel" class="form-control form-control-sm"
+                                    <label class="form-label mb-1">Celular</label>
+                                    <input name="client_mobile" type="tel" class="form-control"
                                            t-att-value="repair.client_mobile or ''" placeholder="300 xxx xxxx"/>
                                 </div>
                                 <div class="col-12 col-md-4">
-                                    <label class="form-label small mb-1">Correo</label>
-                                    <input name="client_email" type="email" class="form-control form-control-sm"
+                                    <label class="form-label mb-1">Correo</label>
+                                    <input name="client_email" type="email" class="form-control"
                                            t-att-value="repair.client_email or ''" placeholder="correo@ejemplo.com"/>
                                 </div>
                             </div>
@@ -2053,21 +2053,21 @@
 
                     <!-- ── 2. Vehículo ───────────────────────────────── -->
                     <div class="card border-0 shadow-sm mb-3">
-                        <div class="card-header bg-white border-bottom py-2 px-3">
-                            <span class="fw-semibold small"><i class="fa fa-car me-2 text-primary"/>Vehículo</span>
+                        <div class="card-header bg-white border-bottom py-3 px-4">
+                            <span class="fw-semibold"><i class="fa fa-car me-2 text-primary"/>Vehículo</span>
                         </div>
-                        <div class="card-body py-3 px-3">
-                            <div class="row g-2">
+                        <div class="card-body py-4 px-4">
+                            <div class="row g-3">
                                 <div class="col-6 col-md-2">
-                                    <label class="form-label small mb-1">Placa <span class="text-danger">*</span></label>
+                                    <label class="form-label mb-1">Placa <span class="text-danger">*</span></label>
                                     <input name="license_plate" type="text"
-                                           class="form-control form-control-sm workshop-input-uppercase"
+                                           class="form-control workshop-input-uppercase"
                                            t-att-value="repair.license_plate or ''"
                                            required="required" maxlength="10" placeholder="ABC123"/>
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <label class="form-label small mb-1">Marca</label>
-                                    <select name="vehicle_brand_id" id="edit-brand-select" class="form-select form-select-sm">
+                                    <label class="form-label mb-1">Marca</label>
+                                    <select name="vehicle_brand_id" id="edit-brand-select" class="form-select">
                                         <option value="">— —</option>
                                         <t t-foreach="vehicle_brands" t-as="brand">
                                             <option t-att-value="brand.id"
@@ -2077,8 +2077,8 @@
                                     </select>
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <label class="form-label small mb-1">Línea</label>
-                                    <select name="model_id" id="edit-model-select" class="form-select form-select-sm">
+                                    <label class="form-label mb-1">Línea</label>
+                                    <select name="model_id" id="edit-model-select" class="form-select">
                                         <option value="">— —</option>
                                         <t t-foreach="vehicle_models" t-as="vmodel">
                                             <option t-att-value="vmodel.id"
@@ -2088,25 +2088,25 @@
                                     </select>
                                 </div>
                                 <div class="col-6 col-md-2">
-                                    <label class="form-label small mb-1">Año</label>
+                                    <label class="form-label mb-1">Año</label>
                                     <input name="model_year" type="number" min="1900" max="2100" step="1"
-                                           class="form-control form-control-sm"
+                                           class="form-control"
                                            t-att-value="repair.model_year or ''" placeholder="2017"/>
                                 </div>
                                 <div class="col-6 col-md-2">
-                                    <label class="form-label small mb-1">Cilindraje</label>
+                                    <label class="form-label mb-1">Cilindraje</label>
                                     <input name="engine_displacement" type="number" min="0" step="1"
-                                           class="form-control form-control-sm"
+                                           class="form-control"
                                            t-att-value="repair.engine_displacement or ''" placeholder="1998"/>
                                 </div>
                                 <div class="col-6 col-md-4">
-                                    <label class="form-label small mb-1">VIN / Chasis</label>
-                                    <input name="vin_sn" class="form-control form-control-sm text-uppercase workshop-input-uppercase"
+                                    <label class="form-label mb-1">VIN / Chasis</label>
+                                    <input name="vin_sn" class="form-control text-uppercase workshop-input-uppercase"
                                            maxlength="32" t-att-value="repair.vin_sn or ''"/>
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <label class="form-label small mb-1">Combustible</label>
-                                    <select name="fuel_type" class="form-select form-select-sm">
+                                    <label class="form-label mb-1">Combustible</label>
+                                    <select name="fuel_type" class="form-select">
                                         <option value="">—</option>
                                         <option value="gasoline"              t-att-selected="'selected' if repair.fuel_type == 'gasoline'              else None">Gasolina</option>
                                         <option value="diesel"                t-att-selected="'selected' if repair.fuel_type == 'diesel'                else None">Diésel</option>
@@ -2121,15 +2121,15 @@
                                     </select>
                                 </div>
                                 <div class="col-6 col-md-2">
-                                    <label class="form-label small mb-1">Kilometraje</label>
+                                    <label class="form-label mb-1">Kilometraje</label>
                                     <input name="reception_mileage" type="number" min="0" step="1"
-                                           class="form-control form-control-sm"
+                                           class="form-control"
                                            t-att-value="int(repair.reception_mileage) if repair.reception_mileage else ''"
                                            placeholder="85000"/>
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <label class="form-label small mb-1">Nivel combustible</label>
-                                    <select name="reception_fuel_level" class="form-select form-select-sm">
+                                    <label class="form-label mb-1">Nivel combustible</label>
+                                    <select name="reception_fuel_level" class="form-select">
                                         <option value="">—</option>
                                         <option value="empty"          t-att-selected="'selected' if repair.reception_fuel_level == 'empty'          else None">Vacío</option>
                                         <option value="reserve"        t-att-selected="'selected' if repair.reception_fuel_level == 'reserve'        else None">Reserva</option>
@@ -2145,25 +2145,25 @@
 
                     <!-- ── 3. Servicio ───────────────────────────────── -->
                     <div class="card border-0 shadow-sm mb-3">
-                        <div class="card-header bg-white border-bottom py-2 px-3">
-                            <span class="fw-semibold small"><i class="fa fa-wrench me-2 text-primary"/>Servicio</span>
+                        <div class="card-header bg-white border-bottom py-3 px-4">
+                            <span class="fw-semibold"><i class="fa fa-wrench me-2 text-primary"/>Servicio</span>
                         </div>
-                        <div class="card-body py-3 px-3">
+                        <div class="card-body py-4 px-4">
                             <div class="mb-2">
-                                <label class="form-label small mb-1">Motivo de ingreso <span class="text-danger">*</span></label>
-                                <input name="service_detail" class="form-control form-control-sm workshop-input-uppercase"
+                                <label class="form-label mb-1">Motivo de ingreso <span class="text-danger">*</span></label>
+                                <input name="service_detail" class="form-control workshop-input-uppercase"
                                        required="required" maxlength="200"
                                        placeholder="CAMBIO DE FRENOS, FALLA MOTOR..."
                                        t-att-value="repair.service_detail or ''"/>
                             </div>
                             <div class="mb-2">
-                                <label class="form-label small mb-1">Descripción / daños</label>
-                                <textarea name="description" class="form-control form-control-sm" rows="2"
+                                <label class="form-label mb-1">Descripción / daños</label>
+                                <textarea name="description" class="form-control" rows="3"
                                           placeholder="Daños observados en el vehículo..."><t t-esc="repair.description or ''"/></textarea>
                             </div>
                             <div>
-                                <label class="form-label small mb-1">Observaciones de recepción</label>
-                                <textarea name="reception_general_observations" class="form-control form-control-sm" rows="2"
+                                <label class="form-label mb-1">Observaciones de recepción</label>
+                                <textarea name="reception_general_observations" class="form-control" rows="3"
                                           placeholder="Observaciones adicionales..."><t t-esc="repair.reception_general_observations or ''"/></textarea>
                             </div>
                         </div>
@@ -2171,10 +2171,10 @@
 
                     <!-- ── 4. Servicios (chips) ──────────────────────── -->
                     <div class="card border-0 shadow-sm mb-3">
-                        <div class="card-header bg-white border-bottom py-2 px-3">
-                            <span class="fw-semibold small"><i class="fa fa-list me-2 text-primary"/>Servicios solicitados</span>
+                        <div class="card-header bg-white border-bottom py-3 px-4">
+                            <span class="fw-semibold"><i class="fa fa-list me-2 text-primary"/>Servicios solicitados</span>
                         </div>
-                        <div class="card-body py-3 px-3">
+                        <div class="card-body py-4 px-4">
                             <!-- Chips existentes pendientes -->
                             <div t-if="pending_service_lines" class="mb-3">
                                 <p class="small text-muted mb-2">Actuales — toca × para eliminar:</p>
@@ -2197,8 +2197,8 @@
                             </div>
                             <!-- Agregar nuevos -->
                             <div class="js-workshop-service-selector" data-optional="true">
-                                <p class="small text-muted mb-2">Agregar:</p>
-                                <div class="input-group input-group-sm">
+                                <p class="text-muted mb-2">Agregar:</p>
+                                <div class="input-group">
                                     <input type="text" id="service-search-input"
                                            class="form-control workshop-input-uppercase"
                                            placeholder="Ej: ACEITE, FRENOS..."
@@ -2216,19 +2216,19 @@
 
                     <!-- ── 5. Checklist ──────────────────────────────── -->
                     <div class="card border-0 shadow-sm mb-3" t-if="asesor_checklist_lines">
-                        <div class="card-header bg-white border-bottom py-2 px-3">
-                            <span class="fw-semibold small"><i class="fa fa-check-square-o me-2 text-primary"/>Checklist de recepción</span>
+                        <div class="card-header bg-white border-bottom py-3 px-4">
+                            <span class="fw-semibold"><i class="fa fa-check-square-o me-2 text-primary"/>Checklist de recepción</span>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table table-sm align-middle mb-0" style="font-size:0.85rem;">
+                                <table class="table align-middle mb-0">
                                     <tbody>
                                         <t t-foreach="asesor_checklist_lines" t-as="cl">
                                             <tr>
-                                                <td class="ps-3 py-2" style="width:40%;" t-esc="cl.name"/>
-                                                <td class="py-1" style="width:120px;">
+                                                <td class="ps-4 py-3" style="width:42%;" t-esc="cl.name"/>
+                                                <td class="py-2" style="width:140px;">
                                                     <select t-att-name="'check_state_%s' % cl.template_line_id.id"
-                                                            class="form-select form-select-sm">
+                                                            class="form-select">
                                                         <t t-if="cl.template_line_id.display_options">
                                                             <t t-set="state_values" t-value="['good', 'bad', 'regular', 'not_apply']"/>
                                                             <t t-foreach="cl.template_line_id.display_options.split(',')" t-as="opt_label">
@@ -2245,9 +2245,9 @@
                                                         </t>
                                                     </select>
                                                 </td>
-                                                <td class="pe-3 py-1">
+                                                <td class="pe-4 py-2">
                                                     <input t-att-name="'check_obs_%s' % cl.template_line_id.id"
-                                                           class="form-control form-control-sm workshop-input-uppercase"
+                                                           class="form-control workshop-input-uppercase"
                                                            t-att-value="cl.observation or ''"
                                                            placeholder="Obs."/>
                                                 </td>
@@ -2261,14 +2261,14 @@
 
                     <!-- ── 6. Fotos ──────────────────────────────────── -->
                     <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-white border-bottom py-2 px-3">
-                            <span class="fw-semibold small"><i class="fa fa-camera me-2 text-primary"/>Agregar fotos</span>
+                        <div class="card-header bg-white border-bottom py-3 px-4">
+                            <span class="fw-semibold"><i class="fa fa-camera me-2 text-primary"/>Agregar fotos</span>
                         </div>
-                        <div class="card-body py-3 px-3">
+                        <div class="card-body py-4 px-4">
                             <div class="row g-2 mb-2">
                                 <div class="col-6 col-md-3">
-                                    <label class="form-label small mb-1">Categoría</label>
-                                    <select name="photo_category" class="form-select form-select-sm">
+                                    <label class="form-label mb-1">Categoría</label>
+                                    <select name="photo_category" class="form-select">
                                         <option value="externa">Externa</option>
                                         <option value="interna">Interna</option>
                                         <option value="dano_existente">Daño existente</option>
