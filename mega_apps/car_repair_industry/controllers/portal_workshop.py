@@ -567,12 +567,10 @@ class CarRepairPortalWorkshop(http.Controller):
                 contact_phone = delivered_by_phone or client_phone
             else:
                 partner = Repair._get_renting_partner()
-                if not delivered_by_name or not delivered_by_phone:
-                    raise UserError(_("Para Renting debe registrar nombre y celular de quien entrega el vehículo."))
                 client_phone = partner.phone or partner.mobile or ''
                 client_email = partner.email or ''
-                contact_name = delivered_by_name
-                contact_phone = delivered_by_phone
+                contact_name = delivered_by_name or ''
+                contact_phone = delivered_by_phone or ''
         elif customer_type == 'corporate':
             # MegaSur uses the same fields as particular (persons or companies)
             if not client_name:

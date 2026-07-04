@@ -785,10 +785,12 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Motivo de ingreso <span class="text-danger">*</span></label>
-                                <input name="reason" class="form-control workshop-input-uppercase"
-                                       required="required"
-                                       placeholder="Ej: CAMBIO DE FRENOS, FALLA MOTOR, MANTENIMIENTO..."
-                                       maxlength="200"/>
+                                <select name="reason" class="form-select" required="required">
+                                    <option value="">Seleccione un motivo...</option>
+                                    <option value="MEGACOMBO">Megacombo</option>
+                                    <option value="MANTENIMIENTO PREVENTIVO">Mantenimiento preventivo</option>
+                                    <option value="MANTENIMIENTO CORRECTIVO">Mantenimiento correctivo</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -985,6 +987,10 @@
                                 </t>
                                 <span t-else="" class="text-muted">—</span>
                             </div>
+                        </div>
+                        <div class="workshop-detail-quickinfo-cell">
+                            <div class="workshop-detail-quickinfo-label"><i class="fa fa-tag"></i> Motivo</div>
+                            <div class="workshop-detail-quickinfo-value text-truncate" t-esc="repair.service_detail or '—'"/>
                         </div>
                     </div>
                 </div>

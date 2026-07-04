@@ -110,8 +110,11 @@ publicWidget.registry.WorkshopReceptionPhotos = publicWidget.Widget.extend({
 
         const deliveredName = this.el.querySelector("[name='delivered_by_name']");
         const deliveredPhone = this.el.querySelector("[name='delivered_by_phone']");
-        deliveredName.required = isRenting;
-        deliveredPhone.required = isRenting;
+        // For renting billing the backend no longer requires delivered_by fields
+        const currentRentingMode = this.el.querySelector("[name='renting_mode']:checked")?.value || "billing";
+        const isRentingClient = isRenting && currentRentingMode === "client";
+        deliveredName.required = isRentingClient;
+        deliveredPhone.required = isRentingClient;
     },
 
     _updateRentingMode() {
