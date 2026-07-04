@@ -51,6 +51,7 @@ from ...helpers.whatsapp_chatter_helper import (
 from ...helpers.whatsapp_discuss_helper import (
     HUMAN_HANDOFF_STEPS,
     ensure_discuss_channel_for_handoff,
+    ensure_discuss_channel_for_session,
     post_inbound_whatsapp_media_to_discuss,
     post_inbound_whatsapp_message_to_discuss,
     post_outbound_whatsapp_message_to_discuss,
@@ -1213,6 +1214,27 @@ def apply_ai_to_whatsapp_session(self, **post):
         ai_result=ai_result_for_lead,
     )
 
+    if lead:
+        try:
+            ensure_discuss_channel_for_session(
+                request.env,
+                session,
+                lead=lead,
+                notify_internal=False,
+            )
+        except Exception:
+            _logger.exception(
+                "[WHATSAPP FLOW] Failed to auto-link WhatsApp channel lead=%s session=%s",
+                lead.id,
+                session.id,
+            )
+    else:
+        _logger.info(
+            "[WHATSAPP FLOW] No lead yet for session=%s phone=%s; channel link deferred",
+            session.id,
+            phone,
+        )
+
     if next_step == "catalog_sent" and lead:
         option, base_price = _store_catalog_battery_on_session(
             request.env,
@@ -1320,10 +1342,26 @@ def apply_ai_to_whatsapp_session(self, **post):
     if session.step in HUMAN_HANDOFF_STEPS and (
         previous_step not in HUMAN_HANDOFF_STEPS or not session.discuss_channel_id
     ):
-        ensure_discuss_channel_for_handoff(request.env, session, lead)
+        try:
+            ensure_discuss_channel_for_handoff(request.env, session, lead)
+        except Exception:
+            _logger.exception(
+                "[WHATSAPP FLOW] Failed to ensure Discuss channel on handoff phone=%s session=%s step=%s",
+                phone,
+                session.id,
+                session.step,
+            )
 
     if should_send and reply and session.step in HUMAN_HANDOFF_STEPS:
-        post_outbound_whatsapp_message_to_discuss(request.env, session, reply)
+        try:
+            post_outbound_whatsapp_message_to_discuss(request.env, session, reply)
+        except Exception:
+            _logger.exception(
+                "[WHATSAPP FLOW] Failed to post outbound message to Discuss phone=%s session=%s step=%s",
+                phone,
+                session.id,
+                session.step,
+            )
 
     _logger.info(
         "[WHATSAPP FLOW] should_send=%s reply_len=%s next_step=%s",

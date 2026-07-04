@@ -4,6 +4,7 @@ import time
 from markupsafe import Markup, escape
 
 from odoo.tools import html2plaintext, plaintext2html  # type: ignore
+from odoo.addons.whatsapp.tools import phone_validation as wa_phone_validation  # type: ignore
 
 
 _logger = logging.getLogger(__name__)
@@ -11,8 +12,13 @@ _logger = logging.getLogger(__name__)
 HUMAN_HANDOFF_STEPS = {"advisor_handoff", "after_hours_handoff"}
 
 
-def ensure_discuss_channel_for_session(env, session, lead=None):
-    """Create or reuse the Discuss/WhatsApp channel linked to a WhatsApp session."""
+def ensure_discuss_channel_for_session(env, session, lead=None, notify_internal=True):
+    """Create or reuse the Discuss/WhatsApp channel linked to a WhatsApp session.
+
+    ``notify_internal`` controls whether advisors get added/force-notified
+    (chat popup reopened). It stays True for real handoff moments and should
+    be False for the automatic per-lead linking that runs on every message.
+    """
     if not session:
         return False
 
@@ -21,37 +27,64 @@ def ensure_discuss_channel_for_session(env, session, lead=None):
     if _is_public_env_user(env):
         _logger.info("[WHATSAPP DISCUSS] Public user detected, using sudo fallback")
 
+    if not lead:
+        _logger.info(
+            "[WHATSAPP DISCUSS] No lead yet for session=%s phone=%s; channel will not be "
+            "linked to any CRM document until a lead exists",
+            session.id,
+            session.phone,
+        )
+
     _logger.info(
-        "[WHATSAPP DISCUSS] Ensuring channel session=%s lead=%s",
+        "[WHATSAPP DISCUSS] Ensuring channel session=%s lead=%s notify_internal=%s",
         session.id,
         lead.id if lead else False,
+        notify_internal,
     )
 
     if session.discuss_channel_id:
         channel = session.discuss_channel_id.sudo()
-        _ensure_channel_members(channel, _get_internal_partners(env, lead, channel=channel))
+        if notify_internal:
+            _ensure_channel_members(channel, _get_internal_partners(env, lead, channel=channel))
         _post_summary_once(env, session, channel, lead)
-        _notify_internal_members(channel)
+        if notify_internal:
+            _notify_internal_members(channel)
         _logger.info(
-            "[WHATSAPP DISCUSS] Channel reused session=%s channel=%s",
+            "[WHATSAPP DISCUSS] Channel reused (cached on session) session=%s channel=%s",
             session.id,
             channel.id,
         )
         return channel
 
-    channel = _get_or_create_whatsapp_channel(env, session, lead)
+    channel, reused, blocked_reason = _get_or_create_whatsapp_channel(env, session, lead)
+
     if not channel:
+        if blocked_reason == "no_account":
+            _logger.warning(
+                "[WHATSAPP DISCUSS] No whatsapp.account configured; skipping channel link "
+                "(no generic fallback created) session=%s phone=%s",
+                session.id,
+                session.phone,
+            )
+            return False
         channel = _create_internal_discuss_channel(env, session, lead)
+        reused = False
 
     if not channel:
         return False
 
+    if reused and lead:
+        _post_channel_reused_note_on_lead(env, lead, channel)
+
     session.write({"discuss_channel_id": channel.id})
-    _ensure_channel_members(channel, _get_internal_partners(env, lead, channel=channel))
+    if notify_internal:
+        _ensure_channel_members(channel, _get_internal_partners(env, lead, channel=channel))
     _post_summary_once(env, session, channel, lead)
-    _notify_internal_members(channel)
+    if notify_internal:
+        _notify_internal_members(channel)
     _logger.info(
-        "[WHATSAPP DISCUSS] Channel created session=%s channel=%s",
+        "[WHATSAPP DISCUSS] Channel %s session=%s channel=%s",
+        "reused (native)" if reused else "created",
         session.id,
         channel.id,
     )
@@ -338,22 +371,87 @@ def log_inbound_message_on_discuss_channel(session, message, message_id=None):
 
 
 def _get_or_create_whatsapp_channel(env, session, lead):
+    """Return (channel_or_False, reused, blocked_reason).
+
+    ``blocked_reason`` is "no_account"/"no_phone" when no channel could be
+    resolved at all, or None otherwise. The existence check is done
+    ourselves (by whatsapp_number + wa_account_id, without a
+    related_message) before calling the native method: the native
+    ``_get_whatsapp_channel`` filters an existing channel by "responsible
+    partners" when related_message is passed, and can create a duplicate
+    channel for the same number if the responsible partners don't match.
+    """
     account = _get_whatsapp_account(env, session)
     if not account:
-        return False
+        _logger.warning(
+            "[WHATSAPP DISCUSS] No whatsapp.account found in system; cannot resolve "
+            "WhatsApp channel session=%s phone=%s phone_number_id=%s",
+            session.id,
+            session.phone,
+            session.phone_number_id,
+        )
+        return False, False, "no_account"
 
     phone = _normalize_whatsapp_phone(session.phone)
     if not phone:
-        return False
+        _logger.warning(
+            "[WHATSAPP DISCUSS] Empty/invalid phone, cannot resolve WhatsApp channel session=%s",
+            session.id,
+        )
+        return False, False, "no_phone"
 
-    related_message = _get_related_message_for_whatsapp_channel(env, lead)
-    return env["discuss.channel"].sudo()._get_whatsapp_channel(
+    wa_formatted = _format_whatsapp_number_like_native(env, phone)
+
+    existing_channel = env["discuss.channel"].sudo().search(
+        [
+            ("whatsapp_number", "=", wa_formatted),
+            ("wa_account_id", "=", account.id),
+        ],
+        order="create_date desc",
+        limit=1,
+    )
+    if existing_channel:
+        _logger.info(
+            "[WHATSAPP DISCUSS] Found existing WhatsApp channel=%s for phone=%s account=%s session=%s",
+            existing_channel.id,
+            wa_formatted,
+            account.id,
+            session.id,
+        )
+        return existing_channel, True, None
+
+    is_handoff = session.step in HUMAN_HANDOFF_STEPS
+    related_message = (
+        _get_related_message_for_whatsapp_channel(env, lead, is_handoff=is_handoff)
+        if lead
+        else env["mail.message"].sudo().browse()
+    )
+    channel = env["discuss.channel"].sudo()._get_whatsapp_channel(
         whatsapp_number=phone,
         wa_account_id=account.sudo(),
         sender_name=(session.customer_name or "").strip() or False,
         create_if_not_found=True,
         related_message=related_message,
     )
+    _logger.info(
+        "[WHATSAPP DISCUSS] Created new WhatsApp channel=%s for phone=%s account=%s session=%s",
+        channel.id if channel else False,
+        wa_formatted,
+        account.id,
+        session.id,
+    )
+    return channel, False, None
+
+
+def _format_whatsapp_number_like_native(env, phone):
+    base_number = phone if phone.startswith("+") else f"+{phone}"
+    formatted = wa_phone_validation.wa_phone_format(
+        env.company,
+        number=base_number,
+        force_format="WHATSAPP",
+        raise_exception=False,
+    )
+    return formatted or phone
 
 
 def _create_internal_discuss_channel(env, session, lead):
@@ -375,14 +473,45 @@ def _create_internal_discuss_channel(env, session, lead):
     )
 
 
-def _get_related_message_for_whatsapp_channel(env, lead):
+def _get_related_message_for_whatsapp_channel(env, lead, is_handoff=False):
     if lead:
+        text = (
+            "Conversacion WhatsApp entregada a asesor humano."
+            if is_handoff
+            else "Canal de WhatsApp vinculado automáticamente a este lead."
+        )
         return lead.sudo().message_post(
-            body=Markup("<p>Conversacion WhatsApp entregada a asesor humano.</p>"),
+            body=Markup("<p>%s</p>") % text,
             message_type="comment",
             subtype_xmlid="mail.mt_comment",
         )
     return env["mail.message"].sudo().browse()
+
+
+def _post_channel_reused_note_on_lead(env, lead, channel):
+    if not lead or not channel:
+        return False
+
+    # Same markup/class Odoo's native whatsapp module uses for its own
+    # "new channel" chatter link, so clicking it opens the conversation
+    # in place (and auto-joins the user) instead of just navigating away.
+    channel_url = f"{_get_base_url(env)}/odoo/discuss.channel/{channel.id}"
+    lead.sudo().message_post(
+        body=Markup(
+            '<p>Este lead se vinculó a un canal de WhatsApp existente, '
+            'creado previamente para el mismo número de teléfono: '
+            '<a target="_blank" class="o_whatsapp_channel_redirect" '
+            'data-oe-id="%s" href="%s">%s</a></p>'
+        ) % (channel.id, escape(channel_url), escape(channel.display_name)),
+        message_type="comment",
+        subtype_xmlid="mail.mt_note",
+    )
+    _logger.info(
+        "[WHATSAPP DISCUSS] Reused-channel note posted on lead=%s channel=%s",
+        lead.id,
+        channel.id,
+    )
+    return True
 
 
 def _post_summary_once(env, session, channel, lead):
@@ -667,13 +796,15 @@ def _get_recent_lead_history(lead, limit=8):
     return "\n\n".join(lines)
 
 
+def _get_base_url(env):
+    return (
+        env["ir.config_parameter"].sudo().get_param("web.base.url") or ""
+    ).rstrip("/")
+
+
 def _get_lead_url(env, lead):
     if not lead:
         return ""
 
-    base_url = (
-        env["ir.config_parameter"].sudo().get_param("web.base.url")
-        or ""
-    ).rstrip("/")
     path = f"/odoo/crm.lead/{lead.id}"
-    return f"{base_url}{path}" if base_url else path
+    return f"{_get_base_url(env)}{path}" if _get_base_url(env) else path
