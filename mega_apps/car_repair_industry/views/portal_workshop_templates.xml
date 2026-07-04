@@ -942,14 +942,23 @@
                                 <h1 class="h3 mb-0" t-esc="repair.name"/>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
                             <span class="workshop-detail-state" t-esc="repair.get_state_label()"/>
-                            <a t-if="is_advisor or is_internal_manager"
-                               t-att-href="'/my/workshop/order/%s/reception-pdf' % repair.id"
-                               class="btn btn-success px-3 py-2" target="_blank">
-                                <i class="fa fa-file-pdf-o me-2"/>
-                                <strong>Descargar Acta PDF</strong>
-                            </a>
+                            <t t-if="can_edit or is_advisor or is_internal_manager">
+                                <div class="ws-header-divider d-none d-sm-block"/>
+                                <div class="d-flex align-items-center gap-2">
+                                    <a t-if="can_edit"
+                                       t-att-href="'/my/workshop/order/%s/edit' % repair.id"
+                                       class="ws-header-btn ws-header-btn-edit">
+                                        <i class="fa fa-pencil"/>Editar recepción
+                                    </a>
+                                    <a t-if="is_advisor or is_internal_manager"
+                                       t-att-href="'/my/workshop/order/%s/reception-pdf' % repair.id"
+                                       class="ws-header-btn ws-header-btn-pdf" target="_blank">
+                                        <i class="fa fa-file-pdf-o"/>Descargar PDF
+                                    </a>
+                                </div>
+                            </t>
                         </div>
                     </div>
                     <div class="workshop-detail-quickinfo">
@@ -1977,4 +1986,373 @@
             </t>
         </xpath>
     </template>
+
+    <!-- ─────────────────────────────────────────────────────────────────────
+         EDICIÓN DE RECEPCIÓN (asesor portal, borrador sin técnico)
+         ──────────────────────────────────────────────────────────────────── -->
+    <template id="portal_workshop_edit_reception" name="Portal taller — Editar recepción">
+        <t t-call="website.layout">
+            <div class="container-fluid container-lg px-3 px-md-4 my-3 my-md-4">
+
+                <!-- ── Header compacto ─────────────────────────────── -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <a t-att-href="'/my/workshop/order/%s' % repair.id"
+                       class="btn btn-sm btn-light border flex-shrink-0">
+                        <i class="fa fa-arrow-left"/>
+                    </a>
+                    <div class="min-w-0">
+                        <div class="text-muted small fw-semibold lh-1 mb-1" t-esc="repair.sequence or ''"/>
+                        <h1 class="h5 fw-bold mb-0 text-truncate">Editar recepción</h1>
+                    </div>
+                    <div class="ms-auto d-flex align-items-center gap-2 flex-shrink-0">
+                        <span class="badge bg-warning text-dark">
+                            <i class="fa fa-lock me-1"/>Sin técnico
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Nota cliente bloqueado -->
+                <div class="d-flex align-items-center gap-2 rounded px-3 py-2 mb-3 small text-muted"
+                     style="background:#f8f9fa;border:1px solid #dee2e6;">
+                    <i class="fa fa-user-circle text-secondary"/>
+                    <span>Cliente: <strong class="text-dark"><t t-esc="repair.client_id.display_name or '—'"/></strong></span>
+                    <span class="ms-auto"><i class="fa fa-lock me-1"/>No editable</span>
+                </div>
+
+                <form t-att-action="'/my/workshop/order/%s/edit' % repair.id"
+                      method="post"
+                      enctype="multipart/form-data"
+                      class="js-workshop-edit-form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                    <!-- ── 1. Contacto ───────────────────────────────── -->
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-white border-bottom py-2 px-3">
+                            <span class="fw-semibold small"><i class="fa fa-phone me-2 text-primary"/>Contacto</span>
+                        </div>
+                        <div class="card-body py-3 px-3">
+                            <div class="row g-2">
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label small mb-1">Teléfono</label>
+                                    <input name="client_phone" type="tel" class="form-control form-control-sm"
+                                           t-att-value="repair.client_phone or ''" placeholder="604 xxx xxxx"/>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label small mb-1">Celular</label>
+                                    <input name="client_mobile" type="tel" class="form-control form-control-sm"
+                                           t-att-value="repair.client_mobile or ''" placeholder="300 xxx xxxx"/>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label small mb-1">Correo</label>
+                                    <input name="client_email" type="email" class="form-control form-control-sm"
+                                           t-att-value="repair.client_email or ''" placeholder="correo@ejemplo.com"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── 2. Vehículo ───────────────────────────────── -->
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-white border-bottom py-2 px-3">
+                            <span class="fw-semibold small"><i class="fa fa-car me-2 text-primary"/>Vehículo</span>
+                        </div>
+                        <div class="card-body py-3 px-3">
+                            <div class="row g-2">
+                                <div class="col-6 col-md-2">
+                                    <label class="form-label small mb-1">Placa <span class="text-danger">*</span></label>
+                                    <input name="license_plate" type="text"
+                                           class="form-control form-control-sm workshop-input-uppercase"
+                                           t-att-value="repair.license_plate or ''"
+                                           required="required" maxlength="10" placeholder="ABC123"/>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small mb-1">Marca</label>
+                                    <select name="vehicle_brand_id" id="edit-brand-select" class="form-select form-select-sm">
+                                        <option value="">— —</option>
+                                        <t t-foreach="vehicle_brands" t-as="brand">
+                                            <option t-att-value="brand.id"
+                                                    t-att-selected="'selected' if repair.vehicle_brand_id and repair.vehicle_brand_id.id == brand.id else None"
+                                                    t-esc="brand.name"/>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small mb-1">Línea</label>
+                                    <select name="model_id" id="edit-model-select" class="form-select form-select-sm">
+                                        <option value="">— —</option>
+                                        <t t-foreach="vehicle_models" t-as="vmodel">
+                                            <option t-att-value="vmodel.id"
+                                                    t-att-selected="'selected' if repair.model_id and repair.model_id.id == vmodel.id else None"
+                                                    t-esc="vmodel.name"/>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <label class="form-label small mb-1">Año</label>
+                                    <input name="model_year" type="number" min="1900" max="2100" step="1"
+                                           class="form-control form-control-sm"
+                                           t-att-value="repair.model_year or ''" placeholder="2017"/>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <label class="form-label small mb-1">Cilindraje</label>
+                                    <input name="engine_displacement" type="number" min="0" step="1"
+                                           class="form-control form-control-sm"
+                                           t-att-value="repair.engine_displacement or ''" placeholder="1998"/>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label small mb-1">VIN / Chasis</label>
+                                    <input name="vin_sn" class="form-control form-control-sm text-uppercase workshop-input-uppercase"
+                                           maxlength="32" t-att-value="repair.vin_sn or ''"/>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small mb-1">Combustible</label>
+                                    <select name="fuel_type" class="form-select form-select-sm">
+                                        <option value="">—</option>
+                                        <option value="gasoline"              t-att-selected="'selected' if repair.fuel_type == 'gasoline'              else None">Gasolina</option>
+                                        <option value="diesel"                t-att-selected="'selected' if repair.fuel_type == 'diesel'                else None">Diésel</option>
+                                        <option value="full_hybrid"           t-att-selected="'selected' if repair.fuel_type == 'full_hybrid'           else None">Híbrido</option>
+                                        <option value="plug_in_hybrid_gasoline" t-att-selected="'selected' if repair.fuel_type == 'plug_in_hybrid_gasoline' else None">Híbrido enc. gasolina</option>
+                                        <option value="plug_in_hybrid_diesel" t-att-selected="'selected' if repair.fuel_type == 'plug_in_hybrid_diesel' else None">Híbrido enc. diésel</option>
+                                        <option value="cng"                   t-att-selected="'selected' if repair.fuel_type == 'cng'                   else None">GNC</option>
+                                        <option value="lpg"                   t-att-selected="'selected' if repair.fuel_type == 'lpg'                   else None">GLP</option>
+                                        <option value="hydrogen"              t-att-selected="'selected' if repair.fuel_type == 'hydrogen'              else None">Hidrógeno</option>
+                                        <option value="electric"              t-att-selected="'selected' if repair.fuel_type == 'electric'              else None">Eléctrico</option>
+                                        <option value="hybrid"                t-att-selected="'selected' if repair.fuel_type == 'hybrid'                else None">Híbrido (otro)</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <label class="form-label small mb-1">Kilometraje</label>
+                                    <input name="reception_mileage" type="number" min="0" step="1"
+                                           class="form-control form-control-sm"
+                                           t-att-value="int(repair.reception_mileage) if repair.reception_mileage else ''"
+                                           placeholder="85000"/>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small mb-1">Nivel combustible</label>
+                                    <select name="reception_fuel_level" class="form-select form-select-sm">
+                                        <option value="">—</option>
+                                        <option value="empty"          t-att-selected="'selected' if repair.reception_fuel_level == 'empty'          else None">Vacío</option>
+                                        <option value="reserve"        t-att-selected="'selected' if repair.reception_fuel_level == 'reserve'        else None">Reserva</option>
+                                        <option value="quarter"        t-att-selected="'selected' if repair.reception_fuel_level == 'quarter'        else None">1/4</option>
+                                        <option value="half"           t-att-selected="'selected' if repair.reception_fuel_level == 'half'           else None">1/2</option>
+                                        <option value="three_quarters" t-att-selected="'selected' if repair.reception_fuel_level == 'three_quarters' else None">3/4</option>
+                                        <option value="full"           t-att-selected="'selected' if repair.reception_fuel_level == 'full'           else None">Lleno</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── 3. Servicio ───────────────────────────────── -->
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-white border-bottom py-2 px-3">
+                            <span class="fw-semibold small"><i class="fa fa-wrench me-2 text-primary"/>Servicio</span>
+                        </div>
+                        <div class="card-body py-3 px-3">
+                            <div class="mb-2">
+                                <label class="form-label small mb-1">Motivo de ingreso <span class="text-danger">*</span></label>
+                                <input name="service_detail" class="form-control form-control-sm workshop-input-uppercase"
+                                       required="required" maxlength="200"
+                                       placeholder="CAMBIO DE FRENOS, FALLA MOTOR..."
+                                       t-att-value="repair.service_detail or ''"/>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small mb-1">Descripción / daños</label>
+                                <textarea name="description" class="form-control form-control-sm" rows="2"
+                                          placeholder="Daños observados en el vehículo..."><t t-esc="repair.description or ''"/></textarea>
+                            </div>
+                            <div>
+                                <label class="form-label small mb-1">Observaciones de recepción</label>
+                                <textarea name="reception_general_observations" class="form-control form-control-sm" rows="2"
+                                          placeholder="Observaciones adicionales..."><t t-esc="repair.reception_general_observations or ''"/></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── 4. Servicios (chips) ──────────────────────── -->
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-white border-bottom py-2 px-3">
+                            <span class="fw-semibold small"><i class="fa fa-list me-2 text-primary"/>Servicios solicitados</span>
+                        </div>
+                        <div class="card-body py-3 px-3">
+                            <!-- Chips existentes pendientes -->
+                            <div t-if="pending_service_lines" class="mb-3">
+                                <p class="small text-muted mb-2">Actuales — toca × para eliminar:</p>
+                                <div id="edit-existing-chips" class="d-flex flex-wrap gap-2">
+                                    <t t-foreach="pending_service_lines" t-as="svc_line">
+                                        <span class="badge rounded-pill d-inline-flex align-items-center gap-1 py-2 px-3"
+                                              style="font-size:0.8rem;background:#495057;"
+                                              t-att-data-svc-id="svc_line.id">
+                                            <i class="fa fa-wrench"/>
+                                            <span t-esc="svc_line.service_type.name or svc_line.service_detail or '—'"/>
+                                            <button type="button"
+                                                    class="btn-close btn-close-white ms-1 js-edit-svc-remove"
+                                                    style="font-size:0.5rem;opacity:0.8;"
+                                                    aria-label="Eliminar"
+                                                    t-att-data-svc-id="svc_line.id"/>
+                                        </span>
+                                    </t>
+                                </div>
+                                <div id="edit-delete-inputs"/>
+                            </div>
+                            <!-- Agregar nuevos -->
+                            <div class="js-workshop-service-selector" data-optional="true">
+                                <p class="small text-muted mb-2">Agregar:</p>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" id="service-search-input"
+                                           class="form-control workshop-input-uppercase"
+                                           placeholder="Ej: ACEITE, FRENOS..."
+                                           autocomplete="off" maxlength="120"/>
+                                    <button type="button" id="js-service-add-btn" class="btn btn-outline-primary">
+                                        <i class="fa fa-plus"/>
+                                    </button>
+                                </div>
+                                <div id="service-selected-chips" class="d-flex flex-wrap gap-2 mt-2"/>
+                                <div id="service-error-msg" class="text-danger small mt-1 d-none"/>
+                                <div id="service-hidden-inputs"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── 5. Checklist ──────────────────────────────── -->
+                    <div class="card border-0 shadow-sm mb-3" t-if="asesor_checklist_lines">
+                        <div class="card-header bg-white border-bottom py-2 px-3">
+                            <span class="fw-semibold small"><i class="fa fa-check-square-o me-2 text-primary"/>Checklist de recepción</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle mb-0" style="font-size:0.85rem;">
+                                    <tbody>
+                                        <t t-foreach="asesor_checklist_lines" t-as="cl">
+                                            <tr>
+                                                <td class="ps-3 py-2" style="width:40%;" t-esc="cl.name"/>
+                                                <td class="py-1" style="width:120px;">
+                                                    <select t-att-name="'check_state_%s' % cl.template_line_id.id"
+                                                            class="form-select form-select-sm">
+                                                        <t t-if="cl.template_line_id.display_options">
+                                                            <t t-set="state_values" t-value="['good', 'bad', 'regular', 'not_apply']"/>
+                                                            <t t-foreach="cl.template_line_id.display_options.split(',')" t-as="opt_label">
+                                                                <option t-att-value="state_values[opt_label_index]"
+                                                                        t-att-selected="'selected' if cl.state == state_values[opt_label_index] else None"
+                                                                        t-esc="opt_label.strip()"/>
+                                                            </t>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <option value="good"      t-att-selected="'selected' if cl.state == 'good'      else None">Bueno</option>
+                                                            <option value="regular"   t-att-selected="'selected' if cl.state == 'regular'   else None">Regular</option>
+                                                            <option value="bad"       t-att-selected="'selected' if cl.state == 'bad'       else None">Malo</option>
+                                                            <option value="not_apply" t-att-selected="'selected' if cl.state == 'not_apply' else None">N/A</option>
+                                                        </t>
+                                                    </select>
+                                                </td>
+                                                <td class="pe-3 py-1">
+                                                    <input t-att-name="'check_obs_%s' % cl.template_line_id.id"
+                                                           class="form-control form-control-sm workshop-input-uppercase"
+                                                           t-att-value="cl.observation or ''"
+                                                           placeholder="Obs."/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── 6. Fotos ──────────────────────────────────── -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-bottom py-2 px-3">
+                            <span class="fw-semibold small"><i class="fa fa-camera me-2 text-primary"/>Agregar fotos</span>
+                        </div>
+                        <div class="card-body py-3 px-3">
+                            <div class="row g-2 mb-2">
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small mb-1">Categoría</label>
+                                    <select name="photo_category" class="form-select form-select-sm">
+                                        <option value="externa">Externa</option>
+                                        <option value="interna">Interna</option>
+                                        <option value="dano_existente">Daño existente</option>
+                                        <option value="pertenencias">Pertenencias</option>
+                                        <option value="documentos">Documentos</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <label class="workshop-photo-dropzone" for="edit-photo-input" style="padding:1.2rem;">
+                                <i class="fa fa-camera"/>
+                                <span class="fw-semibold">Seleccionar fotos</span>
+                                <span class="text-muted small">JPG / PNG · máx 10 MB c/u</span>
+                                <input id="edit-photo-input" type="file" name="reception_photos"
+                                       class="d-none js-workshop-photo-input"
+                                       accept="image/*" multiple="multiple"/>
+                            </label>
+                            <div class="js-workshop-photo-count small text-muted mt-1"/>
+                            <div class="js-workshop-photo-preview d-flex flex-wrap gap-2 mt-2"/>
+                        </div>
+                    </div>
+
+                    <!-- ── Botones (sticky) ──────────────────────────── -->
+                    <div class="d-flex gap-2 justify-content-end position-sticky bottom-0 py-3 bg-white border-top"
+                         style="z-index:20;margin-left:-1rem;margin-right:-1rem;padding-left:1rem;padding-right:1rem;">
+                        <a t-att-href="'/my/workshop/order/%s' % repair.id"
+                           class="btn btn-outline-secondary px-4">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-warning fw-semibold px-4">
+                            <i class="fa fa-save me-1"/>Guardar
+                        </button>
+                    </div>
+
+                </form>
+
+                <!-- Brand → Model reload + chip delete -->
+                <script type="text/javascript">
+                (function() {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var brandSel = document.getElementById('edit-brand-select');
+                        var modelSel = document.getElementById('edit-model-select');
+                        if (brandSel &amp;&amp; modelSel) {
+                            brandSel.addEventListener('change', function() {
+                                var brandId = brandSel.value;
+                                var url = '/my/workshop/models-for-brand?brand_id=' + encodeURIComponent(brandId || '');
+                                fetch(url, {credentials: 'same-origin'})
+                                    .then(function(r) { return r.json(); })
+                                    .then(function(models) {
+                                        modelSel.innerHTML = '<option value="">— Sin línea —</option>';
+                                        models.forEach(function(m) {
+                                            var opt = document.createElement('option');
+                                            opt.value = m.id;
+                                            opt.textContent = m.name;
+                                            modelSel.appendChild(opt);
+                                        });
+                                    });
+                            });
+                        }
+
+                        var deleteInputsEl = document.getElementById('edit-delete-inputs');
+                        var chipsEl = document.getElementById('edit-existing-chips');
+                        if (chipsEl) {
+                            chipsEl.addEventListener('click', function(e) {
+                                var btn = e.target.closest('.js-edit-svc-remove');
+                                if (!btn) return;
+                                var svcId = btn.dataset.svcId;
+                                var chip = btn.closest('[data-svc-id]');
+                                if (chip) chip.remove();
+                                if (deleteInputsEl &amp;&amp; svcId) {
+                                    var inp = document.createElement('input');
+                                    inp.type = 'hidden';
+                                    inp.name = 'delete_svc_id';
+                                    inp.value = svcId;
+                                    deleteInputsEl.appendChild(inp);
+                                }
+                            });
+                        }
+                    });
+                })();
+                </script>
+
+            </div>
+        </t>
+    </template>
+
 </odoo>

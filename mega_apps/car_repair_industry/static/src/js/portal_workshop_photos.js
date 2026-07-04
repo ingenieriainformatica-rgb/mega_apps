@@ -781,19 +781,22 @@ publicWidget.registry.WorkshopServiceSelector = publicWidget.Widget.extend({
         });
         this._addBtn.addEventListener("click", () => this._addItem());
 
+        const isOptional = this.el.dataset.optional === "true";
         const form = this.el.closest("form");
         if (form) {
             form.addEventListener("submit", (e) => {
-                if (this._items.length === 0) {
+                if (!isOptional && this._items.length === 0) {
                     e.preventDefault();
                     this._errorMsg.classList.remove("d-none");
                     this.el.scrollIntoView({ behavior: "smooth", block: "center" });
                 } else {
                     this._errorMsg.classList.add("d-none");
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        submitBtn.disabled = true;
-                        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Creando orden...';
+                    if (!isOptional) {
+                        const submitBtn = form.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.disabled = true;
+                            submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Creando orden...';
+                        }
                     }
                 }
             });

@@ -424,6 +424,19 @@ class CarRepairPortalWorkshop(http.Controller):
             headers=[('Content-Type', 'application/json')],
         )
 
+    @http.route('/my/workshop/models-for-brand', type='http', auth='user', website=True, methods=['GET'])
+    def workshop_models_for_brand(self, brand_id='', **kwargs):
+        if not (self._is_advisor() or self._is_internal_manager()):
+            return request.make_response(json.dumps([]), headers=[('Content-Type', 'application/json')])
+        try:
+            bid = int(brand_id or 0)
+        except (ValueError, TypeError):
+            bid = 0
+        domain = [('brand_id', '=', bid)] if bid else []
+        models = request.env['fleet.vehicle.model'].sudo().search(domain, order='name asc')
+        data = [{'id': m.id, 'name': m.name} for m in models]
+        return request.make_response(json.dumps(data), headers=[('Content-Type', 'application/json')])
+
     @http.route('/my/workshop/service-search', type='http', auth='user', website=True, methods=['GET'])
     def workshop_service_search(self, q='', **kwargs):
         if not (self._is_advisor() or self._is_internal_manager()):
@@ -806,6 +819,21 @@ class CarRepairPortalWorkshop(http.Controller):
             ],
         )
 
+    def _can_portal_advisor_edit(self, repair):
+        """Return True if the current user may edit this reception draft."""
+        user = request.env.user
+        if repair.portal_advisor_id.id != user.id:
+            return False
+        if repair.state != 'draft':
+            return False
+        if repair.service_flow_state not in ('received', 'to_assign'):
+            return False
+        if repair.portal_technician_id or repair.user_id:
+            return False
+        if repair.diagnose_id or repair.sale_order_id or repair.workorder_id:
+            return False
+        return True
+
     @http.route('/my/workshop/order/<int:repair_id>', type='http', auth='user', website=True)
     def workshop_order_detail(self, repair_id, **kwargs):
         try:
@@ -822,6 +850,7 @@ class CarRepairPortalWorkshop(http.Controller):
             'is_technician': self._is_technician(),
             'is_road_test': self._is_road_test(),
             'is_internal_manager': self._is_internal_manager(),
+            'can_edit': self._can_portal_advisor_edit(repair),
         })
 
     def _ensure_tecnico_checklist_lines(self, repair):
@@ -848,6 +877,252 @@ class CarRepairPortalWorkshop(http.Controller):
                 'name': item.name,
                 'state': 'not_apply',
             })
+
+    # ── Reception Edit ────────────────────────────────────────────────────────
+
+    def _update_reception_service_lines(self, repair, post):
+        """Delete pending lines marked for removal, add new ones by name."""
+        RepairLine = request.env['fleet.repair.line'].sudo()
+        # Delete pending lines whose IDs appear in delete_svc_id list
+        delete_ids_raw = request.httprequest.form.getlist('delete_svc_id')
+        delete_ids = set()
+        for raw in delete_ids_raw:
+            try:
+                delete_ids.add(int(raw))
+            except (ValueError, TypeError):
+                pass
+        if delete_ids:
+            pending = RepairLine.search([
+                ('fleet_repair_id', '=', repair.id),
+                ('tecnico_status', '=', 'pendiente'),
+                ('id', 'in', list(delete_ids)),
+            ])
+            pending.unlink()
+
+        # Add new service lines by name (same logic as creation form)
+        ServiceTypeModel = request.env['service.type'].sudo()
+        for raw_name in request.httprequest.form.getlist('new_service_names'):
+            name = (raw_name or '').strip()
+            if not name:
+                continue
+            existing = ServiceTypeModel.search([('name', '=ilike', name)], limit=1)
+            if existing:
+                svc_id = existing.id
+            else:
+                try:
+                    with request.env.cr.savepoint():
+                        svc_id = ServiceTypeModel.create({'name': name}).id
+                except Exception:
+                    fallback = ServiceTypeModel.search([('name', '=ilike', name)], limit=1)
+                    if fallback:
+                        svc_id = fallback.id
+                    else:
+                        raise
+            RepairLine.create({
+                'fleet_repair_id': repair.id,
+                'license_plate': repair.license_plate,
+                'model_id': repair.model_id.id or False,
+                'vehicle_brand_id': repair.vehicle_brand_id.id or False,
+                'model_year': repair.model_year or False,
+                'engine_displacement': repair.engine_displacement or False,
+                'vin_sn': repair.vin_sn or False,
+                'fuel_type': repair.fuel_type or False,
+                'service_type': svc_id,
+                'tecnico_status': 'pendiente',
+            })
+
+    def _update_reception_checklist(self, repair, post):
+        """Update advisor checklist states and observations."""
+        ChecklistLine = request.env['fleet.repair.reception.checklist.line'].sudo()
+        asesor_lines = ChecklistLine.search([
+            ('repair_id', '=', repair.id),
+            ('checklist_type', '=', 'asesor'),
+        ])
+        allowed_display_options = None
+        for line in asesor_lines:
+            new_state = post.get('check_state_%s' % line.template_line_id.id)
+            new_obs = post.get('check_obs_%s' % line.template_line_id.id)
+            write_vals = {}
+            if new_state is not None:
+                # Validate against display_options if set
+                opts = [o.strip() for o in (line.template_line_id.display_options or '').split(',') if o.strip()]
+                if not opts or new_state in opts or new_state == 'not_apply':
+                    write_vals['state'] = new_state
+            if new_obs is not None:
+                write_vals['observation'] = new_obs or False
+            if write_vals:
+                line.write(write_vals)
+
+    def _log_reception_edit(self, repair, old_vals, new_vals, post):
+        """Post a chatter message listing all changed fields."""
+        field_labels = {
+            'client_phone': 'Teléfono',
+            'client_mobile': 'Celular',
+            'client_email': 'Correo',
+            'license_plate': 'Placa',
+            'vehicle_brand_id': 'Marca',
+            'model_id': 'Modelo',
+            'model_year': 'Año',
+            'engine_displacement': 'Cilindraje',
+            'vin_sn': 'VIN/Chasis',
+            'fuel_type': 'Combustible',
+            'reception_mileage': 'Kilometraje',
+            'reception_fuel_level': 'Nivel combustible',
+            'service_detail': 'Detalle servicio',
+            'description': 'Descripción daños',
+            'reception_general_observations': 'Observaciones generales',
+        }
+        lines = []
+        for field, label in field_labels.items():
+            old = old_vals.get(field)
+            new = new_vals.get(field)
+            if old != new:
+                lines.append("• <b>%s</b>: %s → %s" % (label, old or '—', new or '—'))
+        if lines:
+            body = _("Recepción editada desde portal por <b>%s</b>:<br/>%s") % (
+                request.env.user.display_name,
+                "<br/>".join(lines),
+            )
+        else:
+            body = _("Recepción revisada desde portal por <b>%s</b> (sin cambios en campos principales)." % request.env.user.display_name)
+        repair.message_post(body=body)
+
+    def _get_edit_context(self, repair):
+        """Build template context dict for the edit form."""
+        ChecklistLine = request.env['fleet.repair.reception.checklist.line'].sudo()
+        asesor_lines = ChecklistLine.search([
+            ('repair_id', '=', repair.id),
+            ('checklist_type', '=', 'asesor'),
+        ], order='sequence asc')
+        pending_lines = request.env['fleet.repair.line'].sudo().search([
+            ('fleet_repair_id', '=', repair.id),
+            ('tecnico_status', '=', 'pendiente'),
+        ], order='id asc')
+        vehicle_brands = request.env['fleet.vehicle.model.brand'].sudo().search([], order='name asc')
+        vehicle_models = request.env['fleet.vehicle.model'].sudo().search(
+            [('brand_id', '=', repair.vehicle_brand_id.id)] if repair.vehicle_brand_id else [],
+            order='name asc',
+        )
+        return {
+            'repair': repair,
+            'asesor_checklist_lines': asesor_lines,
+            'pending_service_lines': pending_lines,
+            'vehicle_brands': vehicle_brands,
+            'vehicle_models': vehicle_models,
+            'is_advisor': self._is_advisor(),
+            'is_internal_manager': self._is_internal_manager(),
+        }
+
+    @http.route('/my/workshop/order/<int:repair_id>/edit', type='http', auth='user', website=True, methods=['GET'])
+    def workshop_order_edit_get(self, repair_id, **kwargs):
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        if not self._can_portal_advisor_edit(repair):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        return request.render(
+            'car_repair_industry.portal_workshop_edit_reception',
+            self._get_edit_context(repair),
+        )
+
+    @http.route('/my/workshop/order/<int:repair_id>/edit', type='http', auth='user', website=True, methods=['POST'])
+    def workshop_order_edit_post(self, repair_id, **post):
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+        if not self._can_portal_advisor_edit(repair):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+
+        # Snapshot editable fields before change
+        old_vals = {
+            'client_phone': repair.client_phone or '',
+            'client_mobile': repair.client_mobile or '',
+            'client_email': repair.client_email or '',
+            'license_plate': repair.license_plate or '',
+            'vehicle_brand_id': repair.vehicle_brand_id.display_name or '',
+            'model_id': repair.model_id.display_name or '',
+            'model_year': repair.model_year or '',
+            'engine_displacement': repair.engine_displacement or '',
+            'vin_sn': repair.vin_sn or '',
+            'fuel_type': repair.fuel_type or '',
+            'reception_mileage': str(repair.reception_mileage or ''),
+            'reception_fuel_level': repair.reception_fuel_level or '',
+            'service_detail': repair.service_detail or '',
+            'description': repair.description or '',
+            'reception_general_observations': repair.reception_general_observations or '',
+        }
+
+        # Resolve relational IDs
+        brand_id = False
+        try:
+            brand_id = int(post.get('vehicle_brand_id') or 0) or False
+        except (ValueError, TypeError):
+            pass
+        model_id = False
+        try:
+            model_id = int(post.get('model_id') or 0) or False
+        except (ValueError, TypeError):
+            pass
+
+        new_vals = {
+            'client_phone': (post.get('client_phone') or '').strip() or False,
+            'client_mobile': (post.get('client_mobile') or '').strip() or False,
+            'client_email': (post.get('client_email') or '').strip() or False,
+            'license_plate': (post.get('license_plate') or '').strip().upper() or False,
+            'vehicle_brand_id': brand_id,
+            'model_id': model_id,
+            'model_year': (post.get('model_year') or '').strip() or False,
+            'engine_displacement': (post.get('engine_displacement') or '').strip() or False,
+            'vin_sn': (post.get('vin_sn') or '').strip().upper() or False,
+            'fuel_type': post.get('fuel_type') or False,
+            'reception_mileage': float(post.get('reception_mileage') or 0.0),
+            'reception_fuel_level': post.get('reception_fuel_level') or False,
+            'service_detail': (post.get('service_detail') or '').strip() or False,
+            'description': (post.get('description') or '').strip() or False,
+            'reception_general_observations': (post.get('reception_general_observations') or '').strip() or False,
+        }
+        repair.sudo().write(new_vals)
+
+        # Build new_vals snapshot using display names for the chatter diff
+        brand = request.env['fleet.vehicle.model.brand'].sudo().browse(brand_id) if brand_id else None
+        model = request.env['fleet.vehicle.model'].sudo().browse(model_id) if model_id else None
+        new_vals_display = dict(old_vals)
+        new_vals_display.update({
+            'client_phone': new_vals['client_phone'] or '',
+            'client_mobile': new_vals['client_mobile'] or '',
+            'client_email': new_vals['client_email'] or '',
+            'license_plate': new_vals['license_plate'] or '',
+            'vehicle_brand_id': brand.display_name if brand and brand.exists() else '',
+            'model_id': model.display_name if model and model.exists() else '',
+            'model_year': new_vals['model_year'] or '',
+            'engine_displacement': new_vals['engine_displacement'] or '',
+            'vin_sn': new_vals['vin_sn'] or '',
+            'fuel_type': new_vals['fuel_type'] or '',
+            'reception_mileage': str(new_vals['reception_mileage'] or ''),
+            'reception_fuel_level': new_vals['reception_fuel_level'] or '',
+            'service_detail': new_vals['service_detail'] or '',
+            'description': new_vals['description'] or '',
+            'reception_general_observations': new_vals['reception_general_observations'] or '',
+        })
+
+        self._update_reception_service_lines(repair, post)
+        self._update_reception_checklist(repair, post)
+
+        # Upload new photos
+        validated_files = self._prepare_reception_photo_files()
+        if validated_files:
+            repair._drive_upload_evidence_images(
+                self._rename_reception_photo_files(repair, validated_files),
+                evidence_type='recepcion',
+                description=post.get('reception_general_observations') or '',
+            )
+
+        self._log_reception_edit(repair, old_vals, new_vals_display, post)
+        return request.redirect('/my/workshop/order/%s' % repair.id)
+
+    # ── end Reception Edit ─────────────────────────────────────────────────────
 
     @http.route('/my/workshop/order/<int:repair_id>/technician', type='http', auth='user', website=True, methods=['POST'])
     def workshop_technician_update(self, repair_id, **post):
