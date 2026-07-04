@@ -487,7 +487,7 @@
                             <div class="row g-3">
                                 <div class="col-6 col-md-2">
                                     <select name="addr_via_tipo" class="form-select js-addr-field js-workshop-particular-required" required="required">
-                                        <option value="">Tipo de vía *</option>
+                                        <option value="">Tipo de vía...</option>
                                         <option value="CL">CL — Calle</option>
                                         <option value="CR">CR — Carrera</option>
                                         <option value="AV">AV — Avenida</option>
@@ -508,7 +508,7 @@
                                 <div class="col-6 col-md-2">
                                     <input name="addr_via_num"
                                            class="form-control workshop-input-uppercase js-addr-field js-workshop-particular-required"
-                                           placeholder="Número de vía *"
+                                           placeholder="Ej: 45"
                                            required="required"
                                            maxlength="15"
                                            autocomplete="off"/>
@@ -516,7 +516,7 @@
                                 <div class="col-6 col-md-2">
                                     <input name="addr_cruce"
                                            class="form-control workshop-input-uppercase js-addr-field js-workshop-particular-required"
-                                           placeholder="Cruce *"
+                                           placeholder="Ej: 32B"
                                            required="required"
                                            maxlength="15"
                                            autocomplete="off"/>
@@ -524,14 +524,14 @@
                                 <div class="col-6 col-md-2">
                                     <input name="addr_placa"
                                            class="form-control workshop-input-uppercase js-addr-field js-workshop-particular-required"
-                                           placeholder="Placa / Nro *"
+                                           placeholder="Ej: 15"
                                            required="required"
                                            maxlength="15"
                                            autocomplete="off"/>
                                 </div>
                                 <div class="col-6 col-md-2">
                                     <select name="addr_comp_tipo" class="form-select js-addr-field">
-                                        <option value="">Complemento</option>
+                                        <option value="">Sin complemento</option>
                                         <option value="AP">AP — Apartamento</option>
                                         <option value="OF">OF — Oficina</option>
                                         <option value="LC">LC — Local</option>
@@ -554,7 +554,7 @@
                                 <div class="col-6 col-md-2">
                                     <input name="addr_comp_num"
                                            class="form-control workshop-input-uppercase js-addr-field"
-                                           placeholder="Número / descripción"
+                                           placeholder="Ej: 301"
                                            maxlength="20"
                                            autocomplete="off"/>
                                 </div>
