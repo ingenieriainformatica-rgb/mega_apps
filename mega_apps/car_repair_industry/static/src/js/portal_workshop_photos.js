@@ -871,6 +871,7 @@ publicWidget.registry.WorkshopTechnicianPhotos = publicWidget.Widget.extend({
     selector: ".js-workshop-technician-photos",
     events: {
         "change .js-workshop-technician-photo-input": "_onFilesSelected",
+        "change .js-workshop-technician-camera-input": "_onCameraSelected",
         "change .js-workshop-technician-photo-category": "_onCategoryChanged",
         "click .js-workshop-technician-photo-remove": "_onRemovePhoto",
     },
@@ -888,6 +889,14 @@ publicWidget.registry.WorkshopTechnicianPhotos = publicWidget.Widget.extend({
         this.photos.push(...selectedFiles.map((file) => ({file, category: "externa"})));
         this._syncInputFiles();
         this._renderPreviews();
+    },
+
+    _onCameraSelected(event) {
+        const selectedFiles = Array.from(event.currentTarget.files || []);
+        this.photos.push(...selectedFiles.map((file) => ({file, category: "externa"})));
+        this._syncInputFiles();
+        this._renderPreviews();
+        event.currentTarget.value = "";
     },
 
     _onCategoryChanged(event) {
