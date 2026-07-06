@@ -12,10 +12,10 @@ Diagnóstico (ver detalle completo entregado al usuario):
   (account_edi_xml_ubl_dian.py:553) calcula ese valor heredándolo de
   account_edi_ubl_cii (`invoice.ref or invoice.name`) y ya fuerza
   `sales_order_id=False` y no define `order_issue_date`.
-- `cleanup_xml_node` (odoo/tools/xml_utils.py) elimina en cascada cualquier
-  nodo hoja totalmente vacío. Como sales_order_id/order_issue_date ya están
-  siempre vacíos para DIAN, basta con controlar `order_reference`: si lo
-  dejamos en False, cac:OrderReference completo desaparece del XML solo.
+- Para cualquier cliente que NO sea ALFRED SAS (o sin N° orden), el nodo debe
+  comportarse EXACTAMENTE como antes de este módulo: no tocamos
+  `order_reference` en absoluto y se deja el valor que ya calculaba
+  `l10n_co_dian`/`account_edi_ubl_cii` (`invoice.ref or invoice.name`).
 - No usamos `_inherit = 'account.edi.xml.ubl_dian'` porque ese modelo hereda
   transitivamente de una copia de `account_edi_ubl_cii` empaquetada en la
   imagen Docker (/usr/lib/python3/dist-packages) cuyo `_inherit` interno
@@ -53,11 +53,12 @@ def _mega_export_invoice_vals(self, invoice):
         invoice.name, partner.name, partner.vat, order_ref, apply_custom,
     )
 
-    # cac:OrderReference/cbc:ID es el único dato variable que queda en el nodo
-    # para documentos DIAN (sales_order_id y order_issue_date ya van siempre
-    # vacíos). Ponerlo en False hace que cleanup_xml_node elimine el nodo
-    # completo por estar totalmente vacío.
-    vals['vals']['order_reference'] = order_ref if apply_custom else False
+    # Solo tocamos order_reference para ALFRED SAS con N° orden. Para
+    # cualquier otro caso NO se modifica: queda el valor original que ya
+    # traía vals['vals']['order_reference'] (invoice.ref or invoice.name),
+    # igual que antes de instalar este módulo.
+    if apply_custom:
+        vals['vals']['order_reference'] = order_ref
 
     return vals
 
