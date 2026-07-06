@@ -20,6 +20,8 @@ from ._utm import (
 
 _logger = logging.getLogger(__name__)
 
+AUTHORIZED_TRIGGER = "website_lead_button"
+
 
 def _format_phone_colombia(phone: str) -> str:
     """Formatea el teléfono con prefijo +57 de Colombia"""
@@ -96,10 +98,21 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
         website_name = _clean(post.get("website_name"))
         website_url = _clean(post.get("website_url"))
         accept_terms = post.get("accept_terms") in (True, "1", "true", "True", 1)
+        authorized_trigger = _clean(post.get("authorized_trigger"))
 
         # ============================================
         # 2. VALIDACIONES
         # ============================================
+        if authorized_trigger != AUTHORIZED_TRIGGER:
+            _logger.warning(
+                "Lead rechazado: falta trigger autorizado. path=%s website_id=%s ip=%s params=%s",
+                request.httprequest.path,
+                request.website.id if request.website else None,
+                _get_client_ip(),
+                {k: v for k, v in post.items() if k != "authorized_trigger"},
+            )
+            return {"success": False, "message": "Formulario no habilitado para crear solicitudes."}
+
         if not all([invoice_name, phone, email]):
             return {"success": False, "message": "Faltan campos obligatorios."}
 

@@ -176,7 +176,7 @@
 
                                     <!-- Botón -->
                                     <div class="d-grid mt-4">
-                                        <button type="submit" id="leadDemoSubmitBtn" class="btn lead-demo-submit-btn">
+                                        <button type="submit" id="leadDemoSubmitBtn" class="btn lead-demo-submit-btn" data-lead-authorized="1">
                                             <i class="fa fa-bolt me-2" aria-hidden="true"/>
                                             <span>
                                                 <t t-esc="lead_cta_text"/>

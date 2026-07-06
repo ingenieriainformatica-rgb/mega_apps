@@ -95,6 +95,10 @@ async function initLeadModal() {
             const formData = new FormData(form);
             const params = Object.fromEntries(formData.entries());
 
+            if (submitBtn.dataset.leadAuthorized === "1") {
+                params.authorized_trigger = "website_lead_button";
+            }
+
             const result = await rpc("/lead/submit", params);
 
             if (!result.success) {

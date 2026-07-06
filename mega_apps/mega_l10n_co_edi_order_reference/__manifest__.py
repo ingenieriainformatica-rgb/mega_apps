@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Mega L10n CO EDI - Order Reference condicional",
-    'summary': "Envia cac:OrderReference en el XML DIAN solo si el cliente lo tiene habilitado y la factura tiene N° orden.",
+    'summary': "Envia cac:OrderReference (N. orden) en el XML DIAN solo para ALFRED SAS.",
     'author': "Realnet",
     'website': 'https://www.realnet.com.co',
     'category': 'Accounting/Localizations/EDI',
@@ -9,9 +9,6 @@
     'depends': [
         'l10n_co_dian',
         'mega_invoice_order_number_report',
-    ],
-    'data': [
-        'views/res_partner_views.xml',
     ],
     'installable': True,
     'application': False,
