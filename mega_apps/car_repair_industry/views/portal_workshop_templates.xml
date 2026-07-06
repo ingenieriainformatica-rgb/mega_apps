@@ -827,7 +827,7 @@
                                                 </t>
                                                 <t t-else="">
                                                     <option value="good">Bueno</option>
-                                                    <option value="regular">Regular</option>
+                                                    <option value="regular">OK</option>
                                                     <option value="bad">Malo</option>
                                                     <option value="not_apply">No aplica</option>
                                                 </t>
@@ -1343,13 +1343,13 @@
                                                                 <td class="workshop-checklist-estado-cell">
                                                                     <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select">
                                                                         <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">Bueno</option>
-                                                                        <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">Regular</option>
+                                                                        <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">OK</option>
                                                                         <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">Malo</option>
                                                                         <option value="not_apply" t-att-selected="'selected' if (not tline.state or tline.state == 'not_apply') else None">N/A</option>
                                                                     </select>
                                                                     <t t-else="">
                                                                         <span t-if="tline.state == 'good'" class="badge bg-success">Bueno</span>
-                                                                        <span t-if="tline.state == 'regular'" class="badge bg-warning text-dark">Regular</span>
+                                                                        <span t-if="tline.state == 'regular'" class="badge bg-warning text-dark">OK</span>
                                                                         <span t-if="tline.state == 'bad'" class="badge bg-danger">Malo</span>
                                                                         <span t-if="not tline.state or tline.state == 'not_apply'" class="badge bg-secondary">N/A</span>
                                                                     </t>
@@ -1383,13 +1383,13 @@
                                                                 <td class="workshop-checklist-estado-cell">
                                                                     <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select">
                                                                         <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">Bueno</option>
-                                                                        <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">Regular</option>
+                                                                        <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">OK</option>
                                                                         <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">Malo</option>
                                                                         <option value="not_apply" t-att-selected="'selected' if (not tline.state or tline.state == 'not_apply') else None">N/A</option>
                                                                     </select>
                                                                     <t t-else="">
                                                                         <span t-if="tline.state == 'good'" class="badge bg-success">Bueno</span>
-                                                                        <span t-if="tline.state == 'regular'" class="badge bg-warning text-dark">Regular</span>
+                                                                        <span t-if="tline.state == 'regular'" class="badge bg-warning text-dark">OK</span>
                                                                         <span t-if="tline.state == 'bad'" class="badge bg-danger">Malo</span>
                                                                         <span t-if="not tline.state or tline.state == 'not_apply'" class="badge bg-secondary">N/A</span>
                                                                     </t>
@@ -1448,7 +1448,7 @@
                                                                 <td>
                                                                     <select t-if="is_editor" t-att-name="'tech_state_%s' % tline.id" class="form-select">
                                                                         <option value="good" t-att-selected="'selected' if tline.state == 'good' else None">Bueno</option>
-                                                                        <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">Regular</option>
+                                                                        <option value="regular" t-att-selected="'selected' if tline.state == 'regular' else None">OK</option>
                                                                         <option value="bad" t-att-selected="'selected' if tline.state == 'bad' else None">Malo</option>
                                                                         <option value="not_apply" t-att-selected="'selected' if (not tline.state or tline.state == 'not_apply') else None">N/A</option>
                                                                     </select>
@@ -1477,19 +1477,21 @@
                                                                 <th>PROFUND. <span class="text-danger">*</span></th>
                                                             </tr>
                                                         </thead>
+                                                        <t t-set="tire_pos_defaults" t-value="['DD', 'DI', 'TD', 'TI']"/>
                                                         <tbody>
                                                             <tr t-foreach="tire_lines" t-as="tline">
+                                                                <t t-set="eff_pos" t-value="tline.position or tire_pos_defaults[tline_index]"/>
                                                                 <td class="workshop-checklist-num" t-esc="tline.sequence // 10"/>
                                                                 <td>
                                                                     <t t-if="is_editor">
                                                                         <select t-att-name="'tech_position_%s' % tline.id" class="form-select">
-                                                                            <option value="DD" t-att-selected="'selected' if tline.position == 'DD' else None">DD – Del. Der.</option>
-                                                                            <option value="DI" t-att-selected="'selected' if tline.position == 'DI' else None">DI – Del. Izq.</option>
-                                                                            <option value="TD" t-att-selected="'selected' if tline.position == 'TD' else None">TD – Tra. Der.</option>
-                                                                            <option value="TI" t-att-selected="'selected' if tline.position == 'TI' else None">TI – Tra. Izq.</option>
+                                                                            <option value="DD" t-att-selected="'selected' if eff_pos == 'DD' else None">DD – Del. Der.</option>
+                                                                            <option value="DI" t-att-selected="'selected' if eff_pos == 'DI' else None">DI – Del. Izq.</option>
+                                                                            <option value="TD" t-att-selected="'selected' if eff_pos == 'TD' else None">TD – Tra. Der.</option>
+                                                                            <option value="TI" t-att-selected="'selected' if eff_pos == 'TI' else None">TI – Tra. Izq.</option>
                                                                         </select>
                                                                     </t>
-                                                                    <t t-else="" t-esc="tline.position or tline.name"/>
+                                                                    <t t-else="" t-esc="eff_pos"/>
                                                                 </td>
                                                                 <td>
                                                                     <t t-if="is_editor">
@@ -2247,7 +2249,7 @@
                                                         </t>
                                                         <t t-else="">
                                                             <option value="good"      t-att-selected="'selected' if cl.state == 'good'      else None">Bueno</option>
-                                                            <option value="regular"   t-att-selected="'selected' if cl.state == 'regular'   else None">Regular</option>
+                                                            <option value="regular"   t-att-selected="'selected' if cl.state == 'regular'   else None">OK</option>
                                                             <option value="bad"       t-att-selected="'selected' if cl.state == 'bad'       else None">Malo</option>
                                                             <option value="not_apply" t-att-selected="'selected' if cl.state == 'not_apply' else None">N/A</option>
                                                         </t>
