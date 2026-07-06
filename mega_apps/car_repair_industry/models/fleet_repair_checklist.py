@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of BrowseInfo. See LICENSE file for full copyright and licensing details.
 
+import logging
 
 from odoo import fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class FleetRepairChecklist(models.Model):
@@ -148,6 +151,26 @@ class FleetRepairReceptionChecklistLine(models.Model):
         string="Reparado",
         default='pending',
     )
+
+    def unlink(self):
+        tiene_grupo = self.env.user.has_group(
+            'car_repair_industry.group_checklist_technical_manager'
+        )
+        _logger.info(
+            "[ChecklistUnlink] usuario=%s uid=%s modelo=%s env_su=%s tiene_grupo=%s ids=%s",
+            self.env.user.login,
+            self.env.uid,
+            self._name,
+            self.env.su,
+            tiene_grupo,
+            self.ids,
+        )
+        if not tiene_grupo:
+            raise AccessError(
+                _("No tiene permisos para eliminar ítems del checklist. "
+                  "Contacte a un Administrador Checklist.")
+            )
+        return super().unlink()
 
     def get_pdf_state_label(self):
         self.ensure_one()
