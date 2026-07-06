@@ -2205,6 +2205,105 @@
     }
 }
 
+/* ── Checklist 4 columnas: layout 2 líneas en móvil ─────────────────── */
+@media (max-width: 575.98px) {
+    /* Convertir tabla a bloque para permitir grid por fila */
+    .ws-checklist-4col,
+    .ws-checklist-4col thead,
+    .ws-checklist-4col tbody {
+        display: block;
+        width: 100%;
+    }
+
+    /* Ocultar encabezado OBSERVACIONES en móvil */
+    .ws-checklist-4col thead tr {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .ws-obs-header {
+        display: none;
+    }
+    .ws-checklist-4col thead tr th.workshop-checklist-num {
+        flex: 0 0 26px;
+    }
+    .ws-checklist-4col thead tr th.workshop-checklist-estado {
+        flex: 0 0 auto;
+        min-width: 80px;
+    }
+    .ws-checklist-4col thead tr th:not(.workshop-checklist-num):not(.workshop-checklist-estado):not(.ws-obs-header) {
+        flex: 1 1 auto;
+    }
+
+    /* Cada fila: grid 3 col arriba + obs abajo a ancho completo */
+    .ws-checklist-4col tbody tr {
+        display: grid;
+        grid-template-columns: 26px 1fr auto;
+        grid-template-rows: auto auto;
+        column-gap: 6px;
+        row-gap: 0;
+        padding: 8px 4px;
+        border-bottom: 1px solid #e9ecef;
+        align-items: center;
+    }
+
+    /* Celda N° — col 1, fila 1 */
+    .ws-checklist-4col tbody td:nth-child(1) {
+        grid-column: 1;
+        grid-row: 1;
+        padding: 0;
+        font-size: 0.72rem;
+        color: #6c757d;
+        text-align: center;
+    }
+
+    /* Celda INSPECCIÓN — col 2, fila 1 */
+    .ws-checklist-4col tbody td:nth-child(2) {
+        grid-column: 2;
+        grid-row: 1;
+        padding: 0;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    /* Celda ESTADO — col 3, fila 1 */
+    .ws-checklist-4col tbody td:nth-child(3) {
+        grid-column: 3;
+        grid-row: 1;
+        padding: 0;
+    }
+
+    /* Celda OBSERVACIÓN — ancho completo, fila 2 */
+    .ws-checklist-4col tbody td:nth-child(4) {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        padding: 4px 4px 2px 32px;
+        font-size: 0.78rem;
+        color: #555;
+    }
+
+    /* Select de estado compacto en móvil */
+    .ws-checklist-4col .workshop-checklist-estado-cell .form-select {
+        font-size: 0.82rem;
+        min-height: 38px;
+        padding: 4px 22px 4px 6px;
+    }
+
+    /* Input observación: ancho completo, menos altura */
+    .ws-checklist-4col tbody td:nth-child(4) .form-control {
+        font-size: 0.82rem;
+        min-height: 34px;
+        padding: 4px 8px;
+        width: 100%;
+    }
+
+    /* Badge de estado: tamaño apropiado */
+    .ws-checklist-4col .badge {
+        font-size: 0.72rem;
+        padding: 4px 7px;
+    }
+}
+
 /* ── Pruebas de ruta ─────────────────────────────────────────────────── */
 .workshop-road-test-table thead th {
     background: #f8f9fa;

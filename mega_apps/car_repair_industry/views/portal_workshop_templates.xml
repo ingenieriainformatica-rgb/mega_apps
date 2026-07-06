@@ -1327,13 +1327,13 @@
                                         <div class="row g-3">
                                             <div class="col-12 col-lg-6">
                                                 <div class="workshop-checklist-section h-100">
-                                                    <table class="workshop-checklist-table table table-sm mb-0">
+                                                    <table class="workshop-checklist-table ws-checklist-4col table table-sm mb-0">
                                                         <thead>
                                                             <tr>
                                                                 <th class="workshop-checklist-num">N°</th>
                                                                 <th>INSPECCIÓN</th>
                                                                 <th class="workshop-checklist-estado">ESTADO</th>
-                                                                <th>OBSERVACIONES</th>
+                                                                <th class="ws-obs-header">OBSERVACIONES</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -1367,13 +1367,13 @@
                                             </div>
                                             <div class="col-12 col-lg-6">
                                                 <div class="workshop-checklist-section h-100">
-                                                    <table class="workshop-checklist-table table table-sm mb-0">
+                                                    <table class="workshop-checklist-table ws-checklist-4col table table-sm mb-0">
                                                         <thead>
                                                             <tr>
                                                                 <th class="workshop-checklist-num">N°</th>
                                                                 <th>INSPECCIÓN</th>
                                                                 <th class="workshop-checklist-estado">ESTADO</th>
-                                                                <th>OBSERVACIONES</th>
+                                                                <th class="ws-obs-header">OBSERVACIONES</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
