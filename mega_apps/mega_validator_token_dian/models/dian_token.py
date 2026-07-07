@@ -820,7 +820,8 @@ class MegaDianToken(models.Model):
 
         sheet.write(row, 17, line.validation_status or "", status_fmt)
         sheet.write(row, 18, line.validation_note or "", status_fmt)
-        sheet.write(row, 19, "Sí" if line.is_reconciled else "No", formats["boolean"])
+        conciliado = bool(line.move_id) and abs(diff_iva) <= 500.0 and abs(diff_total) <= 500.0
+        sheet.write(row, 19, "Sí" if conciliado else "No", formats["boolean"])
 
         sheet.write_number(row, 20, diff_iva, diff_iva_fmt)
         sheet.write_number(row, 21, diff_total, diff_total_fmt)
