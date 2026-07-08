@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_merge_bulk_merge_wizard_form" model="ir.ui.view">
+        <field name="name">partner.merge.bulk.merge.wizard.form</field>
+        <field name="model">partner.merge.bulk.merge.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Fusion masiva de propuestas">
+                <group invisible="state != 'confirm'">
+                    <div class="alert alert-info" role="alert">
+                        Se revisaron <field name="count_total" nolabel="1" class="oe_inline"/> propuestas seleccionadas.
+                        Se fusionaran las que esten Aprobadas, en Error (para reintentar) o Pendientes que pasen la
+                        revalidacion (destino unico, sin conflicto de compania, contactos existentes) — las Pendientes
+                        se aprueban automaticamente como parte de esta accion. El resto queda bloqueado y no se toca.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="count_pending_to_approve == 0">
+                        <field name="count_pending_to_approve" nolabel="1" class="oe_inline"/> propuesta(s) pendiente(s)
+                        se aprobaran automaticamente al confirmar.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="count_high_risk == 0">
+                        <field name="count_high_risk" nolabel="1" class="oe_inline"/> de las propuestas a fusionar
+                        son de riesgo alto.
+                    </div>
+                    <group>
+                        <field name="count_total"/>
+                        <field name="count_eligible"/>
+                        <field name="count_blocked"/>
+                        <field name="count_pending_to_approve"/>
+                    </group>
+                    <group invisible="count_pending_high_risk == 0">
+                        <field name="justification" placeholder="Obligatoria: hay propuestas pendientes de riesgo alto que se aprobaran en este lote"
+                               required="count_pending_high_risk != 0"/>
+                    </group>
+                    <field name="line_ids" nolabel="1">
+                        <list decoration-muted="not eligible" decoration-success="eligible" create="0" delete="0" edit="0" open_form_view="0">
+                            <field name="proposal_id" readonly="1"/>
+                            <field name="phase" readonly="1"/>
+                            <field name="risk_level" readonly="1"/>
+                            <field name="proposal_state" readonly="1"/>
+                            <field name="dst_name" readonly="1"/>
+                            <field name="src_names" readonly="1"/>
+                            <field name="eligible" readonly="1"/>
+                            <field name="block_reason" readonly="1"/>
+                        </list>
+                    </field>
+                </group>
+                <group invisible="state != 'done'">
+                    <field name="result_message" nolabel="1" readonly="1"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirmar y fusionar"
+                            class="btn-primary" invisible="state != 'confirm' or count_eligible == 0"
+                            groups="mega_partner_merge_by_vat.group_partner_merge_manager"
+                            confirm="Esta accion fusiona y ELIMINA de forma irreversible los contactos origen de todas las propuestas elegibles. ¿Confirma?"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary" invisible="state != 'confirm'"/>
+                    <button string="Cerrar" special="cancel" class="btn-secondary" invisible="state == 'confirm'"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_server_partner_merge_bulk" model="ir.actions.server">
+        <field name="name">Fusionar seleccionados</field>
+        <field name="model_id" ref="model_partner_merge_proposal"/>
+        <field name="binding_model_id" ref="model_partner_merge_proposal"/>
+        <field name="binding_view_types">list</field>
+        <field name="groups_id" eval="[(4, ref('group_partner_merge_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = records.action_open_bulk_merge_wizard()</field>
+    </record>
+
+</odoo>

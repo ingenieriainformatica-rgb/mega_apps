@@ -14,6 +14,7 @@
         "views/partner_merge_proposal_views.xml",
         "views/partner_merge_excluded_vat_views.xml",
         "views/partner_merge_detect_wizard_views.xml",
+        "views/partner_merge_bulk_merge_wizard_views.xml",
         "views/menu.xml",
     ],
     "application": True,

@@ -357,6 +357,58 @@ class PartnerMergeProposal(models.Model):
                 return False
         return True
 
+    def _bulk_merge_eligibility(self):
+        """ Clasifica si esta propuesta puede fusionarse desde el wizard de
+        fusion masiva, SIN ejecutar nada. Reutiliza los mismos campos y la
+        misma nocion de "valido" que action_approve/action_execute_merge; la
+        validacion fuerte real sigue ocurriendo dentro de esos metodos al
+        confirmar (no se duplica logica de aprobacion/fusion).
+
+        Las propuestas 'pending' que pasan las validaciones duras tambien se
+        consideran elegibles: el wizard las aprueba automaticamente (pidiendo
+        justificacion si son de riesgo alto) antes de fusionarlas.
+
+        Devuelve (elegible: bool, motivo: str). """
+        self.ensure_one()
+        if self.state not in ("pending", "approved", "error"):
+            labels = {
+                "rejected": _("Rechazada."),
+                "merged": _("Ya fue fusionada."),
+            }
+            return False, labels.get(self.state, _("Estado no valido para fusion masiva."))
+        if self.has_company_partner:
+            return False, _("Incluye el partner base de una compania.")
+        if self.has_multi_company_conflict:
+            return False, _("Conflicto multi-compania.")
+        destinations = self.line_ids.filtered(lambda l: l.role == "destination")
+        if len(destinations) != 1:
+            return False, _("No hay un unico contacto destino.")
+        if not self._lines_still_exist():
+            return False, _("Uno o mas contactos ya no existen desde la aprobacion.")
+        return True, ""
+
+    def action_open_bulk_merge_wizard(self):
+        if not self.env.user.has_group(MANAGER_GROUP):
+            raise UserError(_("No tiene permisos para ejecutar la fusion masiva de contactos."))
+        if not self:
+            raise UserError(_("Seleccione al menos una propuesta de fusion."))
+        # El wizard y sus lineas se crean YA persistidos aqui mismo (no via
+        # default_get/onchange): las lineas de un one2many resueltas solo por
+        # onchange en un registro nuevo pueden perderse al guardar desde el
+        # cliente web. Creando todo de una vez evita ese problema por completo.
+        Wizard = self.env["partner.merge.bulk.merge.wizard"]
+        wizard = Wizard.create({
+            "proposal_ids": [(6, 0, self.ids)],
+            "line_ids": [(0, 0, Wizard._make_line_vals(p)) for p in self],
+        })
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "partner.merge.bulk.merge.wizard",
+            "res_id": wizard.id,
+            "view_mode": "form",
+            "target": "new",
+        }
+
     # ------------------------------------------------------------------
     # Aprobacion / rechazo (revision humana obligatoria)
     # ------------------------------------------------------------------
