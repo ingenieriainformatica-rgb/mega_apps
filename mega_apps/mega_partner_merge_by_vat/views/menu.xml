@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_partner_merge_root"
+              name="Fusion de Contactos"
+              parent="contacts.menu_contacts"
+              groups="mega_partner_merge_by_vat.group_partner_merge_reviewer"
+              sequence="90"/>
+
+    <menuitem id="menu_partner_merge_proposal"
+              name="Propuestas de Fusion"
+              parent="menu_partner_merge_root"
+              action="action_partner_merge_proposal"
+              sequence="10"/>
+
+    <menuitem id="menu_partner_merge_detect"
+              name="Detectar Duplicados"
+              parent="menu_partner_merge_root"
+              action="action_partner_merge_detect_wizard"
+              sequence="20"/>
+
+    <menuitem id="menu_partner_merge_config"
+              name="Configuracion"
+              parent="menu_partner_merge_root"
+              groups="mega_partner_merge_by_vat.group_partner_merge_manager"
+              sequence="30"/>
+
+    <menuitem id="menu_partner_merge_excluded_vat"
+              name="VAT/NIT Excluidos"
+              parent="menu_partner_merge_config"
+              action="action_partner_merge_excluded_vat"
+              sequence="10"/>
+
+</odoo>

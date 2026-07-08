@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_duplicate_line_list" model="ir.ui.view">
+        <field name="name">partner.duplicate.line.list</field>
+        <field name="model">partner.duplicate.line</field>
+        <field name="arch" type="xml">
+            <list string="Contactos del grupo" create="false" edit="false" delete="false">
+                <field name="partner_id"/>
+                <field name="name_snapshot" string="Nombre"/>
+                <field name="vat_snapshot" string="Documento"/>
+                <field name="email_snapshot" string="Email"/>
+                <field name="phone_snapshot" string="Teléfono"/>
+                <field name="mobile_snapshot" string="Móvil"/>
+                <field name="city_snapshot" string="Ciudad"/>
+                <field name="parent_id_snapshot" string="Empresa relacionada"/>
+                <field name="active_snapshot" string="Activo"/>
+                <button name="action_open_partner" type="object"
+                        string="Abrir contacto" icon="fa-external-link"
+                        class="btn-link"/>
+            </list>
+        </field>
+    </record>
+
+</odoo>

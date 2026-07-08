@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_partner_duplicate_tools_root"
+              name="Herramientas"
+              parent="contacts.menu_contacts"
+              groups="mega_partner_duplicate_finder.group_partner_duplicate_reviewer"
+              sequence="50"/>
+
+    <menuitem id="menu_partner_duplicate_batch"
+              name="Contactos repetidos"
+              parent="menu_partner_duplicate_tools_root"
+              action="action_partner_duplicate_batch"
+              groups="mega_partner_duplicate_finder.group_partner_duplicate_reviewer"
+              sequence="10"/>
+
+</odoo>

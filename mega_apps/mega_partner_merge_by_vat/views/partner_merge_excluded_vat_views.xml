@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_merge_excluded_vat_list" model="ir.ui.view">
+        <field name="name">partner.merge.excluded.vat.list</field>
+        <field name="model">partner.merge.excluded.vat</field>
+        <field name="arch" type="xml">
+            <list string="VAT/NIT excluidos" editable="bottom">
+                <field name="vat"/>
+                <field name="note"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_partner_merge_excluded_vat" model="ir.actions.act_window">
+        <field name="name">VAT/NIT Excluidos</field>
+        <field name="res_model">partner.merge.excluded.vat</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'default_active': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nogutter_x">No hay VAT/NIT excluidos configurados.</p>
+            <p>Agregue aqui los VAT/NIT genericos (ej. consumidor final, NITs de prueba) que NUNCA deben
+               agruparse como duplicados, aunque coincidan entre varios contactos.</p>
+        </field>
+    </record>
+
+</odoo>

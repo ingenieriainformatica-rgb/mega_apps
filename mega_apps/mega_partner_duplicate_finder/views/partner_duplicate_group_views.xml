@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_duplicate_group_list" model="ir.ui.view">
+        <field name="name">partner.duplicate.group.list</field>
+        <field name="model">partner.duplicate.group</field>
+        <field name="arch" type="xml">
+            <list string="Grupos de contactos repetidos" create="false" delete="false">
+                <field name="batch_id"/>
+                <field name="match_type"/>
+                <field name="match_value" string="Valor"/>
+                <field name="normalized_value" string="Valor normalizado"/>
+                <field name="contact_count" string="Contactos"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'reviewed'"
+                       decoration-muted="state == 'discarded'"
+                       decoration-warning="state == 'pending'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_partner_duplicate_group_form" model="ir.ui.view">
+        <field name="name">partner.duplicate.group.form</field>
+        <field name="model">partner.duplicate.group</field>
+        <field name="arch" type="xml">
+            <form string="Grupo de contactos repetidos" create="false" delete="false">
+                <header>
+                    <button name="action_mark_reviewed" type="object"
+                            string="Marcar como revisado" class="btn-primary"
+                            invisible="state == 'reviewed'"/>
+                    <button name="action_mark_discarded" type="object"
+                            string="Descartar"
+                            invisible="state == 'discarded'"/>
+                    <button name="action_reset_pending" type="object"
+                            string="Volver a pendiente"
+                            invisible="state == 'pending'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,reviewed,discarded"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="batch_id" readonly="1"/>
+                            <field name="match_type" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="match_value" readonly="1"/>
+                            <field name="normalized_value" readonly="1"/>
+                            <field name="contact_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Contactos">
+                            <field name="line_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="partner_id"/>
+                                    <field name="name_snapshot" string="Nombre"/>
+                                    <field name="vat_snapshot" string="Documento"/>
+                                    <field name="email_snapshot" string="Email"/>
+                                    <field name="phone_snapshot" string="Teléfono"/>
+                                    <field name="mobile_snapshot" string="Móvil"/>
+                                    <field name="city_snapshot" string="Ciudad"/>
+                                    <field name="parent_id_snapshot" string="Empresa relacionada"/>
+                                    <field name="active_snapshot" string="Activo"/>
+                                    <button name="action_open_partner" type="object"
+                                            string="Abrir contacto" icon="fa-external-link"
+                                            class="btn-link"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_partner_duplicate_group" model="ir.actions.act_window">
+        <field name="name">Grupos de contactos repetidos</field>
+        <field name="res_model">partner.duplicate.group</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

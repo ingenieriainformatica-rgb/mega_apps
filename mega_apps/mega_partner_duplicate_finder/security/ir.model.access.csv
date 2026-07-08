@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_partner_duplicate_batch_reviewer,partner.duplicate.batch.reviewer,model_partner_duplicate_batch,group_partner_duplicate_reviewer,1,1,1,1
+access_partner_duplicate_group_reviewer,partner.duplicate.group.reviewer,model_partner_duplicate_group,group_partner_duplicate_reviewer,1,1,1,1
+access_partner_duplicate_line_reviewer,partner.duplicate.line.reviewer,model_partner_duplicate_line,group_partner_duplicate_reviewer,1,1,1,1

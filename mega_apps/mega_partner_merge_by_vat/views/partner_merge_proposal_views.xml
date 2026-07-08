@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_merge_proposal_list" model="ir.ui.view">
+        <field name="name">partner.merge.proposal.list</field>
+        <field name="model">partner.merge.proposal</field>
+        <field name="arch" type="xml">
+            <list string="Propuestas de fusion"
+                  decoration-danger="risk_level == 'high'"
+                  decoration-warning="risk_level == 'medium'"
+                  decoration-muted="state in ('rejected', 'merged')">
+                <field name="name"/>
+                <field name="phase"/>
+                <field name="risk_level"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'merged'"
+                       decoration-danger="state == 'error'"
+                       decoration-info="state == 'approved'"/>
+                <field name="user_count"/>
+                <field name="has_dian_validated_invoice"/>
+                <field name="has_multi_company_conflict"/>
+                <field name="reviewer_id"/>
+                <field name="create_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_partner_merge_proposal_form" model="ir.ui.view">
+        <field name="name">partner.merge.proposal.form</field>
+        <field name="model">partner.merge.proposal</field>
+        <field name="arch" type="xml">
+            <form string="Propuesta de fusion">
+                <header>
+                    <button name="action_approve" type="object" string="Aprobar"
+                            class="btn-primary" invisible="state != 'pending'"
+                            groups="mega_partner_merge_by_vat.group_partner_merge_reviewer"
+                            confirm="Va a aprobar esta propuesta de fusion. ¿Confirma?"/>
+                    <button name="action_reject" type="object" string="Rechazar"
+                            invisible="state not in ('pending', 'error')"
+                            groups="mega_partner_merge_by_vat.group_partner_merge_reviewer"/>
+                    <button name="action_execute_merge" type="object" string="Ejecutar fusion"
+                            class="btn-primary" invisible="state != 'approved'"
+                            groups="mega_partner_merge_by_vat.group_partner_merge_manager"
+                            confirm="Esta accion fusiona y ELIMINA los contactos origen de forma irreversible. ¿Confirma?"/>
+                    <button name="action_retry_merge" type="object" string="Reintentar fusion"
+                            invisible="state != 'error'"
+                            groups="mega_partner_merge_by_vat.group_partner_merge_manager"/>
+                    <button name="action_reset_to_pending" type="object" string="Reabrir"
+                            invisible="state != 'rejected'"
+                            groups="mega_partner_merge_by_vat.group_partner_merge_reviewer"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,approved,merged"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-danger" role="alert" invisible="not has_company_partner">
+                        Esta propuesta incluye el contacto base de una compania (res.company.partner_id).
+                        No puede aprobarse ni fusionarse.
+                    </div>
+                    <div class="alert alert-danger" role="alert" invisible="not has_multi_company_conflict">
+                        Los contactos de esta propuesta pertenecen a companias distintas. No puede aprobarse ni fusionarse.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not has_dian_validated_invoice">
+                        Al menos un contacto tiene facturas electronicas DIAN ya validadas. Revise el impacto fiscal antes de aprobar.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="phase != 'name'">
+                        Esta propuesta viene de la Fase 2 (coincidencia solo por nombre). Confirme manualmente que
+                        se trata de la misma entidad antes de aprobar.
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="phase" readonly="1"/>
+                            <field name="risk_level" readonly="1"/>
+                            <field name="state" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="reviewer_id" readonly="1"/>
+                            <field name="review_date" readonly="1"/>
+                            <field name="merge_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Candidatos">
+                            <div class="alert alert-info" role="alert" invisible="state != 'pending'">
+                                Si la sugerencia de "Destino" no es correcta, cambie el campo Rol del contacto
+                                que deba sobrevivir a la fusion. Solo puede haber un Destino por propuesta.
+                            </div>
+                            <field name="line_ids">
+                                <list editable="bottom" create="0" delete="0">
+                                    <field name="partner_id" readonly="1"/>
+                                    <field name="role" readonly="parent.state != 'pending'"/>
+                                    <field name="snapshot_vat" readonly="1"/>
+                                    <field name="snapshot_email" readonly="1"/>
+                                    <field name="snapshot_company_id" readonly="1"/>
+                                    <field name="is_archived" readonly="1"/>
+                                    <field name="is_company_partner" readonly="1"/>
+                                    <field name="has_dian_validated_invoice" readonly="1"/>
+                                    <field name="still_exists" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Riesgos">
+                            <group>
+                                <field name="has_company_partner"/>
+                                <field name="has_multi_company_conflict"/>
+                                <field name="has_dian_validated_invoice"/>
+                                <field name="has_email_conflict"/>
+                                <field name="user_count"/>
+                            </group>
+                            <field name="risk_notes" readonly="1"/>
+                        </page>
+                        <page string="Revision">
+                            <field name="review_note" placeholder="Motivo de aprobacion/rechazo (obligatorio en riesgo alto o al rechazar)"/>
+                            <field name="merge_error" invisible="not merge_error"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_partner_merge_proposal_search" model="ir.ui.view">
+        <field name="name">partner.merge.proposal.search</field>
+        <field name="model">partner.merge.proposal</field>
+        <field name="arch" type="xml">
+            <search string="Propuestas de fusion">
+                <field name="name"/>
+                <field name="vat_key"/>
+                <field name="name_key"/>
+                <filter string="Pendientes" name="filter_pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Aprobadas" name="filter_approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Fusionadas" name="filter_merged" domain="[('state', '=', 'merged')]"/>
+                <filter string="Con error" name="filter_error" domain="[('state', '=', 'error')]"/>
+                <separator/>
+                <filter string="Riesgo alto" name="filter_high_risk" domain="[('risk_level', '=', 'high')]"/>
+                <filter string="Fase VAT" name="filter_phase_vat" domain="[('phase', '=', 'vat')]"/>
+                <filter string="Fase Nombre" name="filter_phase_name" domain="[('phase', '=', 'name')]"/>
+                <filter string="Con factura DIAN validada" name="filter_dian" domain="[('has_dian_validated_invoice', '=', True)]"/>
+                <filter string="Multi-compania" name="filter_multi_company" domain="[('has_multi_company_conflict', '=', True)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Fase" name="group_phase" context="{'group_by': 'phase'}"/>
+                    <filter string="Nivel de riesgo" name="group_risk" context="{'group_by': 'risk_level'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_partner_merge_proposal" model="ir.actions.act_window">
+        <field name="name">Propuestas de Fusion</field>
+        <field name="res_model">partner.merge.proposal</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nogutter_x">No hay propuestas de fusion todavia.</p>
+            <p>Use "Detectar Duplicados" para generar propuestas a partir de contactos con VAT/NIT o nombre duplicado.</p>
+        </field>
+    </record>
+
+</odoo>

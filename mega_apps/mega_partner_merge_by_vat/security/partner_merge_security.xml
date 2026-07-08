@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="category_partner_merge" model="ir.module.category">
+        <field name="name">Fusion de Contactos</field>
+        <field name="description">Permisos para la fusion asistida de contactos duplicados por VAT/NIT</field>
+        <field name="sequence">35</field>
+    </record>
+
+    <record id="group_partner_merge_reviewer" model="res.groups">
+        <field name="name">Fusion de Contactos / Revisor</field>
+        <field name="category_id" ref="category_partner_merge"/>
+        <field name="comment">Puede ejecutar la deteccion de duplicados y aprobar/rechazar propuestas de fusion. No puede ejecutar la fusion fisica.</field>
+    </record>
+
+    <record id="group_partner_merge_manager" model="res.groups">
+        <field name="name">Fusion de Contactos / Responsable de fusion</field>
+        <field name="category_id" ref="category_partner_merge"/>
+        <field name="implied_ids" eval="[(4, ref('group_partner_merge_reviewer'))]"/>
+        <field name="comment">Ademas de revisar y aprobar, puede ejecutar la fusion definitiva y administrar la lista de VAT/NIT excluidos.</field>
+    </record>
+</odoo>

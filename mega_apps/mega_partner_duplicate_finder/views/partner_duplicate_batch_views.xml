@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_duplicate_batch_list" model="ir.ui.view">
+        <field name="name">partner.duplicate.batch.list</field>
+        <field name="model">partner.duplicate.batch</field>
+        <field name="arch" type="xml">
+            <list string="Búsquedas de contactos repetidos">
+                <field name="name"/>
+                <field name="create_date" string="Fecha"/>
+                <field name="user_id"/>
+                <field name="search_type"/>
+                <field name="total_groups"/>
+                <field name="total_contacts"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_partner_duplicate_batch_form" model="ir.ui.view">
+        <field name="name">partner.duplicate.batch.form</field>
+        <field name="model">partner.duplicate.batch</field>
+        <field name="arch" type="xml">
+            <form string="Búsqueda de contactos repetidos">
+                <header>
+                    <button name="action_search_vat" type="object"
+                            string="Buscar repetidos por documento"
+                            class="btn-primary"
+                            invisible="state == 'done'"/>
+                    <button name="action_search_name" type="object"
+                            string="Buscar repetidos por nombre"
+                            class="btn-primary"
+                            invisible="state == 'done'"/>
+                    <button name="action_search_all" type="object"
+                            string="Buscar todos"
+                            class="btn-primary"
+                            invisible="state == 'done'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id" readonly="1"/>
+                            <field name="search_type" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="total_groups" readonly="1"/>
+                            <field name="total_contacts" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Grupos encontrados" invisible="state != 'done'">
+                            <field name="group_ids" readonly="1">
+                                <list create="false" delete="false"
+                                      decoration-muted="state == 'discarded'">
+                                    <field name="match_type"/>
+                                    <field name="match_value" string="Valor"/>
+                                    <field name="normalized_value" string="Valor normalizado"/>
+                                    <field name="contact_count" string="Contactos"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'reviewed'"
+                                           decoration-muted="state == 'discarded'"
+                                           decoration-warning="state == 'pending'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_partner_duplicate_batch" model="ir.actions.act_window">
+        <field name="name">Contactos repetidos</field>
+        <field name="res_model">partner.duplicate.batch</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smart_action">
+                Crea una nueva búsqueda para detectar contactos repetidos por
+                documento (NIT/Cédula) o por nombre. No se modifica, fusiona
+                ni elimina ningún contacto.
+            </p>
+        </field>
+    </record>
+
+</odoo>
