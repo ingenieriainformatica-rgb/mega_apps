@@ -88,6 +88,7 @@
                             </div>
                             <field name="line_ids">
                                 <list editable="bottom" create="0" delete="0">
+                                    <field name="original_partner_id" string="ID" readonly="1"/>
                                     <field name="partner_id" readonly="1"/>
                                     <field name="role" readonly="parent.state != 'pending'"/>
                                     <field name="snapshot_vat" readonly="1"/>
