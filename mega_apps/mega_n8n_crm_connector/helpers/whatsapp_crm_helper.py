@@ -1,3 +1,5 @@
+import logging
+
 from odoo import fields  # type: ignore
 
 from .constants import (
@@ -11,6 +13,14 @@ from .whatsapp_vehicle_helper import (
     build_vehicle_lead_values,
     build_vehicle_info_from_ai
 )
+
+_logger = logging.getLogger(__name__)
+
+
+def get_provisional_contact_label(session) -> str:
+    phone = (session.phone or "").strip()
+    return f"WhatsApp {phone}" if phone else "WhatsApp"
+
 
 def get_partner_model(env):
     return env["res.partner"].sudo()
@@ -59,7 +69,7 @@ def get_or_create_partner_from_session(env, session):
     customer_name = (session.customer_name or "").strip()
     phone = normalize_phone(session.phone)
 
-    if not customer_name or not phone:
+    if not phone:
         return False
 
     partner = find_partner_by_phone(env, phone)
@@ -73,23 +83,40 @@ def get_or_create_partner_from_session(env, session):
         if not partner.phone:
             values["phone"] = phone
 
-        # Solo actualizamos el nombre si parece genérico.
-        if partner.name and partner.name.lower().startswith("whatsapp"):
+        # Solo actualizamos el nombre si parece genérico/provisional y ya
+        # tenemos un nombre real que reemplazarlo.
+        if customer_name and partner.name and partner.name.lower().startswith("whatsapp"):
             values["name"] = customer_name
+            _logger.info(
+                "[WHATSAPP CRM] Updating provisional partner name partner=%s phone=%s name=%s",
+                partner.id,
+                phone,
+                customer_name,
+            )
 
         if values:
             partner.write(values)
 
         return partner
 
-    return get_partner_model(env).create(
+    is_provisional = not customer_name
+    partner = get_partner_model(env).create(
         {
-            "name": customer_name,
+            "name": customer_name or get_provisional_contact_label(session),
             "phone": phone,
             "mobile": phone,
             "customer_rank": 1,
         }
     )
+
+    if is_provisional:
+        _logger.info(
+            "[WHATSAPP CRM] Created provisional partner id=%s phone=%s",
+            partner.id,
+            phone,
+        )
+
+    return partner
 
 def build_lead_description_from_session(session) -> str:
     line_label = get_whatsapp_line_label(session.phone_number_id)
@@ -182,19 +209,19 @@ def create_or_update_lead_from_session(env, session, ai_result=None):
     Crea o actualiza el lead CRM asociado a la sesión.
 
     Reglas:
-    - No crea lead si todavía no hay nombre.
+    - Crea lead/partner provisional desde el primer contacto, aunque todavía
+      no haya nombre (usa el teléfono como identidad provisional).
     - Si no existe contacto, lo crea.
     - Si no existe lead en la sesión, lo crea.
-    - Si ya existe lead_id, actualiza datos variables pero NO cambia el título.
+    - Si ya existe lead_id, actualiza datos variables.
+    - El título (name) del lead solo cambia una vez: en la transición de
+      provisional a nombre real. Fuera de esa transición, no se toca.
     - crm_fecha_instalacion solo se asigna al crear el lead.
     - team_id se mantiene según la línea de WhatsApp para evitar que reglas externas lo muevan.
     - user_id y website solo se asignan al crear el lead.
     """
     ai_result = ai_result or {}
     customer_name = (session.customer_name or "").strip()
-
-    if not customer_name:
-        return False
 
     partner = get_or_create_partner_from_session(env, session)
 
@@ -203,11 +230,12 @@ def create_or_update_lead_from_session(env, session, ai_result=None):
 
     phone = normalize_phone(session.phone)
     line_label = get_whatsapp_line_label(session.phone_number_id)
+    display_name = customer_name or phone
     Lead = get_lead_model(env)
 
     common_values = {
         "partner_id": partner.id,
-        "contact_name": customer_name,
+        "contact_name": display_name,
         "phone": phone or session.phone or partner.phone or partner.mobile,
         "description": build_lead_description_from_session(session),
         "type": "opportunity",
@@ -219,19 +247,26 @@ def create_or_update_lead_from_session(env, session, ai_result=None):
     apply_default_team_values(env, Lead, common_values, session)
 
     # Si ya existe lead, solo actualizamos datos variables.
-    # No tocamos:
-    # - name
-    # - crm_fecha_instalacion
-    # - user_id
-    # - website
+    # El título (name) no se toca, salvo la transición provisional -> nombre real.
     if session.lead_id:
-        session.lead_id.write(common_values)
-        return session.lead_id
+        existing_lead = session.lead_id
+        had_provisional_name = (existing_lead.contact_name or "").strip() == phone
 
-    # Si no existe lead, ahí sí definimos valores iniciales.
+        if had_provisional_name and customer_name:
+            common_values["name"] = f"{line_label} - WhatsApp - {customer_name}"
+            _logger.info(
+                "[WHATSAPP CRM] Updating provisional lead title with real name lead=%s customer_name=%s",
+                existing_lead.id,
+                customer_name,
+            )
+
+        existing_lead.write(common_values)
+        return existing_lead
+
+    # Si no existe lead, ahí sí definimos valores iniciales (puede ser provisional).
     lead_values = {
         **common_values,
-        "name": f"{line_label} - WhatsApp - {customer_name}",
+        "name": f"{line_label} - WhatsApp - {display_name}",
     }
     apply_qualified_lead_priority(Lead, lead_values, session)
 
@@ -260,6 +295,21 @@ def create_or_update_lead_from_session(env, session, ai_result=None):
             "lead_id": lead.id,
         }
     )
+
+    if customer_name:
+        _logger.info(
+            "[WHATSAPP CRM] Created lead id=%s phone=%s customer_name=%s",
+            lead.id,
+            phone,
+            customer_name,
+        )
+    else:
+        _logger.info(
+            "[WHATSAPP CRM] Created provisional lead id=%s phone=%s phone_number_id=%s",
+            lead.id,
+            phone,
+            session.phone_number_id,
+        )
 
     return lead
 

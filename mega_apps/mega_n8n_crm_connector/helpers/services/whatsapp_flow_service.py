@@ -894,6 +894,39 @@ def _log_terminal_customer_message(env, session, message, message_id=None):
     return logged, logged_on_discuss
 
 
+def _bootstrap_lead_and_channel_for_new_session(env, session):
+    """Ensure a provisional CRM lead + Discuss/WhatsApp channel exist from
+    the very first inbound message, even before name/vehicle/location are
+    known. Works for text, audio, image and location as first contact.
+    """
+    lead = create_or_update_lead_from_session(env, session)
+    if not lead:
+        _logger.warning(
+            "[WHATSAPP FLOW] Could not bootstrap lead on first contact session=%s phone=%s",
+            session.id,
+            session.phone,
+        )
+        return False
+
+    _logger.info(
+        "[WHATSAPP FLOW] Bootstrapped lead on first contact lead=%s session=%s phone=%s",
+        lead.id,
+        session.id,
+        session.phone,
+    )
+
+    try:
+        ensure_discuss_channel_for_session(env, session, lead=lead, notify_internal=False)
+    except Exception:
+        _logger.exception(
+            "[WHATSAPP FLOW] Failed to link Discuss channel on first contact lead=%s session=%s",
+            lead.id,
+            session.id,
+        )
+
+    return lead
+
+
 def build_ai_context_response(self, **post):
         payload = get_n8n_payload()
 
@@ -954,6 +987,9 @@ def build_ai_context_response(self, **post):
             created,
             session.step,
         )
+
+        if created or not session.lead_id:
+            _bootstrap_lead_and_channel_for_new_session(request.env, session)
 
         if message_type in {"image", "audio"}:
             return _build_media_handoff_response(
