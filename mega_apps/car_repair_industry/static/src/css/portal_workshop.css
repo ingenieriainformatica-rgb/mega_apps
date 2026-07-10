@@ -2396,6 +2396,61 @@
 .road-test-state-done       { background: #d1fae5; color: #065f46; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
 .road-test-state-cancelled  { background: #f1f5f9; color: #94a3b8; border-radius: 999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; text-decoration: line-through; }
 
+/* -- Pruebas de ruta: tabla -> tarjetas apiladas en movil ------------------ */
+@media (max-width: 767.98px) {
+    .ws-road-test-responsive { overflow-x: visible !important; }
+
+    .workshop-road-test-table,
+    .workshop-road-test-table thead,
+    .workshop-road-test-table tbody { display: block !important; width: 100%; }
+
+    .workshop-road-test-table thead { display: none !important; }
+
+    .workshop-road-test-table tbody tr {
+        display: block !important;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        background: #fff;
+    }
+
+    .workshop-road-test-table tbody tr:hover { background: #f8fafc !important; }
+
+    .workshop-road-test-table tbody td {
+        display: flex !important;
+        align-items: baseline;
+        gap: 8px;
+        padding: 4px 0;
+        border: none !important;
+        font-size: 0.875rem;
+        line-height: 1.4;
+    }
+
+    .workshop-road-test-table tbody td::before {
+        flex: 0 0 110px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding-top: 2px;
+    }
+
+    .workshop-road-test-table tbody td:nth-child(1)::before { content: "Tipo"; }
+    .workshop-road-test-table tbody td:nth-child(2)::before { content: "Solicitado por"; }
+    .workshop-road-test-table tbody td:nth-child(3)::before { content: "Fecha"; }
+    .workshop-road-test-table tbody td:nth-child(4)::before { content: "Conductor"; }
+    .workshop-road-test-table tbody td:nth-child(5)::before { content: "Estado"; }
+
+    #collapse-prueba-ruta > .accordion-body > .btn-outline-primary {
+        width: 100%;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+}
+
 /* -- Tabla frenos: 5 cols -> Estado en segunda linea en movil ---------- */
 @media (max-width: 575.98px) {
     .ws-brakes-5col,

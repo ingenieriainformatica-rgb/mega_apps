@@ -1806,7 +1806,7 @@
 
                                 <!-- Tabla de pruebas existentes -->
                                 <t t-if="repair.road_test_ids">
-                                    <div class="table-responsive mb-3">
+                                    <div class="table-responsive mb-3 ws-road-test-responsive">
                                         <table class="table table-sm workshop-road-test-table mb-0">
                                             <thead>
                                                 <tr>
