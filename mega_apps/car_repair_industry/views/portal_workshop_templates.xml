@@ -1414,7 +1414,7 @@
                                         <div class="row g-3 mt-1">
                                             <div class="col-12 col-lg-8">
                                                 <div class="workshop-checklist-section h-100">
-                                                    <table class="workshop-checklist-table table table-sm mb-0">
+                                                    <table class="workshop-checklist-table ws-brakes-5col table table-sm mb-0">
                                                         <thead>
                                                             <tr>
                                                                 <th colspan="5" class="workshop-checklist-section-title text-center">INSPECCIÓN DE SISTEMA DE FRENOS</th>
