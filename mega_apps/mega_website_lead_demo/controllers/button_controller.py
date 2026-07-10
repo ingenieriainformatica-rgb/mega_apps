@@ -7,10 +7,26 @@ import re
 from odoo import http, _  #type:ignore
 from odoo.http import request  #type:ignore
 
+from ..lead_security import SCOPE_WHATSAPP_CLICK, generate_lead_token, is_lead_token_valid
+
 _logger = logging.getLogger(__name__)
 
 
 class WebsiteLeadWhatsappController(http.Controller):
+
+    @http.route(
+        "/lead/whatsapp/token",
+        type="json",
+        auth="public",
+        website=True,
+        csrf=False,
+    )
+    def lead_whatsapp_token(self) -> dict[str, Any]:
+        """Emite un token firmado por el servidor que el JS debe reenviar en
+        /lead/whatsapp/track. Un bot que solo golpee /lead/whatsapp/track
+        directamente, sin pasar antes por aquí, no puede producir un token
+        válido (se firma con database.secret, no es adivinable)."""
+        return {"token": generate_lead_token(SCOPE_WHATSAPP_CLICK)}
 
     @http.route(
         "/lead/whatsapp/track",
@@ -22,6 +38,25 @@ class WebsiteLeadWhatsappController(http.Controller):
     )
     def lead_whatsapp_track(self, **post: Any) -> dict[str, Any]:
         # _logger.info("WhatsApp click payload recibido: %s", post)
+
+        if not is_lead_token_valid(SCOPE_WHATSAPP_CLICK, post.get("lead_token")):
+            _logger.warning(
+                "Lead WhatsApp rechazado: token inválido o ausente (posible bot o token vencido). "
+                "ip=%s path=%s lead_button=%s lead_source=%s",
+                self._get_client_ip(),
+                request.httprequest.path,
+                post.get("lead_button"),
+                post.get("lead_source"),
+            )
+            # Aunque se rechace el tracking/creación del lead, el botón debe
+            # seguir llevando al usuario a WhatsApp (degradación funcional,
+            # no un botón "mudo"). Solo se pierde la referencia del lead.
+            whatsapp_line = self._get_whatsapp_line()
+            return {
+                "success": False,
+                "message": "Solicitud no autorizada.",
+                "whatsapp_url": self._build_whatsapp_url(post, lead=False, whatsapp_line=whatsapp_line),
+            }
 
         try:
             whatsapp_line = self._get_whatsapp_line()
@@ -71,25 +106,24 @@ class WebsiteLeadWhatsappController(http.Controller):
         csrf=False,
     )
     def lead_whatsapp_start(self, **post: Any):
-        try:
-            whatsapp_line = self._get_whatsapp_line()
+        """
+        Fallback SIN JavaScript. Únicamente redirige a WhatsApp con un mensaje
+        genérico: NO crea crm.lead. Esta ruta se puede alcanzar con un simple
+        GET (bots, crawlers de previsualización de enlaces, enlaces antiguos
+        compartidos), por lo que la creación de leads se retiró de aquí a
+        propósito y quedó limitada a los flujos autorizados (/lead/submit y
+        /lead/whatsapp/track, ambos con validación de token de servidor).
+        """
+        _logger.info(
+            "Fallback /lead/whatsapp/start invocado (sin creación de lead). ip=%s user_agent=%s",
+            self._get_client_ip(),
+            request.httprequest.headers.get("User-Agent", ""),
+        )
 
-            lead = self._create_whatsapp_click_lead(post, whatsapp_line)
-            whatsapp_url = self._build_whatsapp_url(post, lead, whatsapp_line)
+        whatsapp_line = self._get_whatsapp_line()
+        whatsapp_url = self._build_whatsapp_url(post, lead=False, whatsapp_line=whatsapp_line)
 
-            return request.redirect(whatsapp_url)
-
-        except Exception as error:
-            _logger.exception("Error en fallback /lead/whatsapp/start: %s", error)
-
-            whatsapp_line = self._get_whatsapp_line()
-            whatsapp_url = self._build_whatsapp_url(
-                post,
-                lead=False,
-                whatsapp_line=whatsapp_line,
-            )
-
-            return request.redirect(whatsapp_url)
+        return request.redirect(whatsapp_url)
 
     def _create_whatsapp_click_lead(
         self,

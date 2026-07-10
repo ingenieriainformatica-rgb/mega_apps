@@ -17,6 +17,7 @@ from ._partner import (
 from ._utm import (
     _extract_all_url_params,
 )
+from ...lead_security import SCOPE_LEAD_FORM, is_lead_token_valid
 
 _logger = logging.getLogger(__name__)
 
@@ -103,15 +104,30 @@ def get_lead_submit(post: dict[str, Any]) -> dict[str, Any]:
         # ============================================
         # 2. VALIDACIONES
         # ============================================
-        if authorized_trigger != AUTHORIZED_TRIGGER:
+        # El texto fijo de authorized_trigger ya no es suficiente por sí solo
+        # (es trivialmente falsificable desde el cliente). Se exige además un
+        # token firmado por el servidor (HMAC + expiración) que se emite al
+        # renderizar el formulario y no puede ser reproducido por un bot que
+        # solo golpee el endpoint directamente.
+        trigger_ok = authorized_trigger == AUTHORIZED_TRIGGER
+        token_ok = is_lead_token_valid(SCOPE_LEAD_FORM, post.get("lead_token"))
+
+        if not (trigger_ok and token_ok):
             _logger.warning(
-                "Lead rechazado: falta trigger autorizado. path=%s website_id=%s ip=%s params=%s",
+                "Lead rechazado: validación de origen fallida (trigger_ok=%s token_ok=%s, "
+                "posible bot o token vencido por formulario abierto muchas horas). "
+                "path=%s website_id=%s ip=%s",
+                trigger_ok,
+                token_ok,
                 request.httprequest.path,
                 request.website.id if request.website else None,
                 _get_client_ip(),
-                {k: v for k, v in post.items() if k != "authorized_trigger"},
             )
-            return {"success": False, "message": "Formulario no habilitado para crear solicitudes."}
+            return {
+                "success": False,
+                "reason": "unauthorized",
+                "message": "Tu formulario expiró o no se pudo validar. Recarga la página e inténtalo de nuevo.",
+            }
 
         if not all([invoice_name, phone, email]):
             return {"success": False, "message": "Faltan campos obligatorios."}

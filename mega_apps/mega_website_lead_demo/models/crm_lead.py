@@ -4,6 +4,8 @@ from datetime import timedelta
 from odoo import models, fields, api, _  # type:ignore
 from odoo.exceptions import UserError  # type:ignore
 
+from ..lead_security import SCOPE_LEAD_FORM, generate_lead_token
+
 _logger = logging.getLogger(__name__)
 
 
@@ -84,6 +86,14 @@ class CRMLead(models.Model):
             return f"{hours}h {minutes}m"
         else:
             return f"{minutes}m"
+
+    @api.model
+    def _get_website_lead_token(self):
+        """Token firmado por el servidor para autorizar el envío del
+        formulario público de leads. Se renderiza en el template junto al
+        csrf_token y se valida en el controlador antes de crear el lead.
+        """
+        return generate_lead_token(SCOPE_LEAD_FORM)
 
     def _cron_actualizar_tiempos(self):
         """CRON: Recalcula tiempos y alertas solo en leads que NO están en etapa final."""

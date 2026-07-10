@@ -5,6 +5,26 @@ import { rpc } from "@web/core/network/rpc";
 let leadModalInitialized = false;
 let whatsappDirectInitialized = false;
 
+let whatsappTrackToken = null;
+let whatsappTrackTokenPromise = null;
+
+async function getWhatsappTrackToken() {
+    if (whatsappTrackToken) {
+        return whatsappTrackToken;
+    }
+
+    if (!whatsappTrackTokenPromise) {
+        whatsappTrackTokenPromise = rpc("/lead/whatsapp/token", {})
+            .then((result) => {
+                whatsappTrackToken = (result && result.token) || null;
+                return whatsappTrackToken;
+            })
+            .catch(() => null);
+    }
+
+    return whatsappTrackTokenPromise;
+}
+
 function storeUtmParams() {
     const params = new URLSearchParams(window.location.search);
 
@@ -60,6 +80,24 @@ async function initLeadModal() {
         messageBox.style.display = "none";
     }
 
+    function showReloadHint() {
+        if (!messageBox) {
+            return;
+        }
+
+        const reloadLink = document.createElement("a");
+        reloadLink.href = "#";
+        reloadLink.className = "alert-link ms-1";
+        reloadLink.textContent = "Recargar página";
+        reloadLink.addEventListener("click", (linkEv) => {
+            linkEv.preventDefault();
+            window.location.reload();
+        });
+
+        messageBox.appendChild(document.createTextNode(" "));
+        messageBox.appendChild(reloadLink);
+    }
+
     function resetFormState() {
         form.reset();
         submitBtn.disabled = false;
@@ -106,6 +144,11 @@ async function initLeadModal() {
                     "danger",
                     result.message || "❌ No pudimos procesar tu solicitud. Intenta nuevamente."
                 );
+
+                if (result.reason === "unauthorized") {
+                    showReloadHint();
+                }
+
                 submitBtn.disabled = false;
                 return;
             }
@@ -142,6 +185,9 @@ function initWhatsappDirectButtons() {
 
     whatsappDirectInitialized = true;
 
+    // Pre-cargar el token de servidor para que esté listo antes del primer clic.
+    getWhatsappTrackToken();
+
     buttons.forEach((button) => {
         button.addEventListener("click", async (ev) => {
             ev.preventDefault();
@@ -157,7 +203,9 @@ function initWhatsappDirectButtons() {
             button.dataset.loading = "1";
 
             try {
+                const token = await getWhatsappTrackToken();
                 const payload = buildWhatsappTrackingPayload(button);
+                payload.lead_token = token;
 
                 const result = await rpc("/lead/whatsapp/track", payload);
 

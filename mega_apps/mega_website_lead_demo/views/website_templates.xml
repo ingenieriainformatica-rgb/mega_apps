@@ -83,6 +83,9 @@
                                     <!-- CSRF -->
                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
+                                    <!-- Token de autorización de servidor (anti-bot / anti-spam) -->
+                                    <input type="hidden" name="lead_token" t-att-value="request.env['crm.lead']._get_website_lead_token()"/>
+
                                     <div class="row g-3">
 
                                         <!-- Nombre -->
