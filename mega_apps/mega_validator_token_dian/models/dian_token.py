@@ -6,8 +6,6 @@ import logging
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 
-from httplib2 import FailedToDecompressContent
-
 import xlsxwriter  # type: ignore
 
 from odoo import fields, models, _  # type: ignore
@@ -159,7 +157,7 @@ class MegaDianToken(models.Model):
                 ),
                 is_reconciled=False,
             )
-            return FailedToDecompressContent
+            return False
 
         # 1) Coincidencia por referencia
         reference_matches = candidate_moves.filtered(
@@ -255,9 +253,9 @@ class MegaDianToken(models.Model):
                     if is_refund
                     else _("Coincide NIT, referencia y total, pero no el IVA.")
                 ),
-                is_reconciled=True,
+                is_reconciled=False,
             )
-            return True
+            return False
 
         if len(partial_by_total) > 1:
             self._write_line_result(
@@ -415,8 +413,8 @@ class MegaDianToken(models.Model):
 
     def _amounts_equal_total(self, left, right):
         """
-        Compara totales con tolerancia de 1 peso colombiano.
-        Cubre diferencias de redondeo normales entre DIAN y Odoo.
+        Compara totales con tolerancia acordada de negocio: $500 COP
+        (no solo redondeo).
         Solo se usa para comparar total ajustado vs total DIAN.
         """
         diff = abs(Decimal(str(left or 0.0)) - Decimal(str(right or 0.0)))
@@ -768,7 +766,7 @@ class MegaDianToken(models.Model):
         diff_total = round(total_dian - total_odoo_adjusted, 2)
 
         has_iva_diff = abs(diff_iva) >= 0.01
-        has_total_diff = abs(diff_total) > 1.00
+        has_total_diff = abs(diff_total) > 500.00
 
         fecha_dian = line.fecha_emision_dian
         fecha_odoo = line.fecha_factura_odoo
@@ -820,8 +818,7 @@ class MegaDianToken(models.Model):
 
         sheet.write(row, 17, line.validation_status or "", status_fmt)
         sheet.write(row, 18, line.validation_note or "", status_fmt)
-        conciliado = bool(line.move_id) and abs(diff_iva) <= 500.0 and abs(diff_total) <= 500.0
-        sheet.write(row, 19, "Sí" if conciliado else "No", formats["boolean"])
+        sheet.write(row, 19, "Sí" if line.is_reconciled else "No", formats["boolean"])
 
         sheet.write_number(row, 20, diff_iva, diff_iva_fmt)
         sheet.write_number(row, 21, diff_total, diff_total_fmt)
@@ -831,8 +828,13 @@ class MegaDianToken(models.Model):
     # ============================================================
     def action_process_validated(self):
         self.ensure_one()
-        # Aquí podríamos agregar lógica adicional si es necesario, pero en este caso
-        # simplemente cambiamos el estado a 'validated' para marcarlo como finalizado.
+        if not self.file_ids:
+            raise UserError(_("No hay registros para validar en este Token DIAN."))
+        if any(line.validation_status == "pending" for line in self.file_ids):
+            raise UserError(_(
+                "No se puede validar: existen registros sin procesar (estado Pendiente). "
+                "Debes ejecutar 'Procesar' antes de validar."
+            ))
         self.state = "validated"
 
 
