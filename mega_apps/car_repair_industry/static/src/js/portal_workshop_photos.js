@@ -1448,6 +1448,8 @@ publicWidget.registry.WorkshopSpareEditLine = publicWidget.Widget.extend({
     async _onDeleteLine(delBtn) {
         const lineId = delBtn.dataset.lineId;
         if (!lineId) return;
+        const tr = delBtn.closest("tr");
+        const requestBlock = delBtn.closest(".mb-4");
         delBtn.disabled = true;
         try {
             const resp = await fetch("/my/workshop/spares/line/remove", {
@@ -1458,7 +1460,13 @@ publicWidget.registry.WorkshopSpareEditLine = publicWidget.Widget.extend({
             const data = await resp.json();
             const result = data.result || {};
             if (result.ok) {
-                delBtn.closest("tr")?.remove();
+                tr?.remove();
+                if (result.request_deleted) {
+                    requestBlock?.remove();
+                    if (this.el.querySelectorAll(".mb-4").length === 0) {
+                        window.location.reload();
+                    }
+                }
             } else {
                 alert(result.msg || "No se puede eliminar esta línea.");
                 delBtn.disabled = false;

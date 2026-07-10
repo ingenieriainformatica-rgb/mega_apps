@@ -1664,8 +1664,22 @@ class CarRepairPortalWorkshop(http.Controller):
             self._get_repair(line.request_id.repair_id.id)
         except Exception:
             return {'error': 'forbidden'}
+
+        spare_req = line.request_id
+        repair = spare_req.repair_id
         line.unlink()
-        return {'ok': True}
+
+        spare_req.invalidate_recordset(['line_ids'])
+        request_deleted = False
+        if not spare_req.line_ids:
+            repair.message_post(
+                body=_("Solicitud de repuestos eliminada: sin repuestos restantes. Usuario: %s.")
+                     % request.env.user.display_name
+            )
+            spare_req.unlink()
+            request_deleted = True
+
+        return {'ok': True, 'request_deleted': request_deleted}
 
     @http.route('/my/workshop/spares/line/add', type='json', auth='user', website=True, methods=['POST'])
     def workshop_spare_line_add(self, request_id=None, catalog_id=None, quantity=None, note='', **kw):
