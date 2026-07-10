@@ -803,13 +803,13 @@
                                 <p class="workshop-form-section-subtitle">Plantilla: <strong t-esc="selected_template.name"/></p>
                             </div>
                         </div>
-                        <div class="table-responsive">
-                            <table class="workshop-checklist-create-table table align-middle mb-0">
+                        <div class="table-responsive ws-checklist-wrapper">
+                            <table class="workshop-checklist-create-table ws-checklist-3col table align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th style="width: 50%;">Ítem</th>
                                         <th style="width: 180px;">Estado</th>
-                                        <th>Observación</th>
+                                        <th class="ws-obs-header">Observación</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -917,11 +917,15 @@
                     </div>
 
                     <div class="workshop-form-actionbar">
-                        <a href="/my/workshop" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold">
-                            Cancelar
+                        <a href="/my/workshop" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold"
+                           title="Cancelar">
+                            <i class="fa fa-times me-1"/>Cancelar
                         </a>
-                        <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold" type="submit">
-                            <i class="fa fa-check-circle me-2"/>Crear orden de servicio
+                        <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold" type="submit"
+                                title="Crear orden de servicio">
+                            <i class="fa fa-check-circle"/>
+                            <span class="ws-btn-full ms-2">Crear orden de servicio</span>
+                            <span class="ws-btn-short ms-1">Crear</span>
                         </button>
                     </div>
                 </form>
