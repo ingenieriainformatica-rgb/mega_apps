@@ -1197,6 +1197,69 @@ class FleetRepair(models.Model):
 
         return res
 
+    def unlink(self):
+        if not self.env.user.has_group('car_repair_industry.group_fleet_repair_delete_order'):
+            raise UserError(_(
+                "No tiene permisos para eliminar órdenes de taller. "
+                "Solicite el permiso «Puede eliminar órdenes de taller» a un administrador."
+            ))
+
+        for repair in self:
+            if repair.state != 'draft':
+                raise UserError(_(
+                    "La OT %s está en estado «%s» y no puede eliminarse. "
+                    "Solo se pueden eliminar órdenes en borrador."
+                ) % (repair.sequence or repair.display_name, repair.get_state_label()))
+
+            blockers = []
+            if repair.diagnose_id:
+                blockers.append(_("Diagnóstico vinculado (ref: %s)") % (repair.diagnose_id.name or repair.diagnose_id.id))
+            if repair.workorder_id:
+                blockers.append(_("Orden de trabajo vinculada (ref: %s)") % (repair.workorder_id.name or repair.workorder_id.id))
+            if repair.sale_order_id:
+                blockers.append(_("Pedido de venta: %s") % repair.sale_order_id.name)
+                if repair.sale_order_id.invoice_ids:
+                    blockers.append(_("%d factura(s) vinculadas al pedido de venta") % len(repair.sale_order_id.invoice_ids))
+            if repair.timesheet_ids:
+                blockers.append(_("%d línea(s) de horas registradas") % len(repair.timesheet_ids))
+            if repair.road_test_ids:
+                blockers.append(_("%d prueba(s) de ruta") % len(repair.road_test_ids))
+            if repair.spare_request_ids:
+                blockers.append(_("%d solicitud(es) de repuestos") % len(repair.spare_request_ids))
+            if repair.external_evidence_ids:
+                blockers.append(_("%d evidencia(s) fotográfica(s)") % len(repair.external_evidence_ids))
+            all_checklist = repair.reception_checklist_line_ids | repair.technical_checklist_line_ids
+            if all_checklist:
+                blockers.append(_("%d ítem(s) de checklist diligenciados") % len(all_checklist))
+            if repair.child_ids:
+                blockers.append(_("%d sub-OT(s) asociadas") % len(repair.child_ids))
+
+            if blockers:
+                raise UserError(
+                    _("No se puede eliminar la OT %s:\n• %s")
+                    % (repair.sequence or repair.display_name, "\n• ".join(blockers))
+                )
+
+        # Eliminar líneas de checklist con contexto interno autorizado antes de que el ORM
+        # ejecute el cascade, evitando que el guard de group_checklist_technical_manager
+        # bloquee la operación. Este contexto no puede llegar por RPC porque perm_unlink
+        # de fleet.repair.reception.checklist.line requiere group_checklist_technical_manager.
+        checklist_lines = self.env['fleet.repair.reception.checklist.line'].sudo().search(
+            [('repair_id', 'in', self.ids)]
+        )
+        if checklist_lines:
+            checklist_lines.with_context(_authorized_repair_cascade=True).sudo().unlink()
+
+        _logger.info(
+            "[FleetRepairUnlink] user=%s uid=%d sequences=%s ids=%s ts=%s",
+            self.env.user.login,
+            self.env.uid,
+            [r.sequence for r in self],
+            self.ids,
+            fields.Datetime.now(),
+        )
+
+        return super().unlink()
 
 
 class ir_attachment(models.Model):

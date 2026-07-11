@@ -153,6 +153,12 @@ class FleetRepairReceptionChecklistLine(models.Model):
     )
 
     def unlink(self):
+        # Cascade autorizado desde FleetRepair.unlink(): el contexto _authorized_repair_cascade
+        # es establecido por código Python interno (nunca llega por RPC porque perm_unlink
+        # en este modelo requiere group_checklist_technical_manager, y el llamador usa sudo()).
+        if self.env.context.get('_authorized_repair_cascade'):
+            return super().unlink()
+
         tiene_grupo = self.env.user.has_group(
             'car_repair_industry.group_checklist_technical_manager'
         )
