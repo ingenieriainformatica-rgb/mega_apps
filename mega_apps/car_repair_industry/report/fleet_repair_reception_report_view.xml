@@ -338,13 +338,6 @@
                                                 <t t-else="">
                                                     <span style="font-size:10px; color:#aaa;">No disponible</span>
                                                 </t>
-                                                <div class="rr-img-caption">
-                                                    <t t-if="ev.evidence_category">
-                                                        <strong><t t-esc="dict(ev._fields['evidence_category'].selection).get(ev.evidence_category, '')"/></strong>
-                                                        <t t-if="ev.description">&#160;—&#160;</t>
-                                                    </t>
-                                                    <t t-esc="ev.description or ev.name"/>
-                                                </div>
                                             </td>
                                         </t>
                                         <t t-foreach="range(3 - len(row_evs))" t-as="pad">
