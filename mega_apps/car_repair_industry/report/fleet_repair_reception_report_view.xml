@@ -5,280 +5,390 @@
         <template id="report_car_repair_reception_document">
             <t t-call="web.external_layout">
                 <div class="page">
+                    <style>
+                        .rr-section-header td {
+                            background: #1a2744;
+                            color: #ffffff;
+                            font-weight: bold;
+                            text-transform: uppercase;
+                            font-size: 10px;
+                            letter-spacing: 0.8px;
+                            padding: 5px 8px;
+                            border: 1px solid #1a2744;
+                        }
+                        .rr-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 11px;
+                            margin-bottom: 10px;
+                        }
+                        .rr-label {
+                            background: #eef1f8;
+                            color: #1a2744;
+                            font-weight: bold;
+                            padding: 4px 8px;
+                            border: 1px solid #c8d3e8;
+                            vertical-align: top;
+                            width: 20%;
+                        }
+                        .rr-value {
+                            padding: 4px 8px;
+                            border: 1px solid #c8d3e8;
+                            vertical-align: top;
+                        }
+                        .rr-th {
+                            background: #eef1f8;
+                            color: #1a2744;
+                            font-weight: bold;
+                            padding: 4px 8px;
+                            border: 1px solid #c8d3e8;
+                            font-size: 10px;
+                            text-align: left;
+                        }
+                        .rr-badge-good {
+                            display: inline-block;
+                            background: #d4edda;
+                            color: #155724;
+                            border-radius: 3px;
+                            padding: 1px 6px;
+                            font-size: 10px;
+                            font-weight: bold;
+                        }
+                        .rr-badge-regular {
+                            display: inline-block;
+                            background: #fff3cd;
+                            color: #856404;
+                            border-radius: 3px;
+                            padding: 1px 6px;
+                            font-size: 10px;
+                            font-weight: bold;
+                        }
+                        .rr-badge-bad {
+                            display: inline-block;
+                            background: #f8d7da;
+                            color: #721c24;
+                            border-radius: 3px;
+                            padding: 1px 6px;
+                            font-size: 10px;
+                            font-weight: bold;
+                        }
+                        .rr-badge-na {
+                            display: inline-block;
+                            background: #e9ecef;
+                            color: #495057;
+                            border-radius: 3px;
+                            padding: 1px 6px;
+                            font-size: 10px;
+                        }
+                        .rr-img-cell {
+                            padding: 6px;
+                            border: 1px solid #c8d3e8;
+                            text-align: center;
+                            vertical-align: top;
+                            width: 33%;
+                        }
+                        .rr-img-caption {
+                            font-size: 9px;
+                            color: #555;
+                            margin-top: 3px;
+                        }
+                        .rr-ot-pill {
+                            display: inline-block;
+                            background: #1a2744;
+                            color: #ffffff;
+                            padding: 5px 16px;
+                            border-radius: 4px;
+                            font-size: 16px;
+                            font-weight: bold;
+                            letter-spacing: 1px;
+                        }
+                        .rr-title-main {
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: #1a2744;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                            margin: 0;
+                        }
+                        .rr-signature-label {
+                            font-size: 11px;
+                            font-weight: bold;
+                            color: #1a2744;
+                        }
+                        .rr-no-break { page-break-inside: avoid; }
+                    </style>
 
-                    <!-- Título principal -->
-                    <div style="text-align:center; margin-bottom:14px; border-bottom:2px solid #333; padding-bottom:8px;">
-                        <h2 style="margin:0; font-size:16px; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">
-                            Acta de Recepción / Orden de Trabajo
-                        </h2>
+                    <!-- CABECERA DEL DOCUMENTO -->
+                    <div style="margin-bottom:14px; border-bottom:2px solid #1a2744; padding-bottom:10px;">
+                        <table style="width:100%; border-collapse:collapse;">
+                            <tr>
+                                <td style="vertical-align:middle; width:65%;">
+                                    <div class="rr-title-main">Acta de Recepción / Orden de Trabajo</div>
+                                    <div style="font-size:10px; color:#555; margin-top:4px;">
+                                        Fecha:&#160;<t t-esc="o.receipt_date.strftime('%d/%m/%Y') if o.receipt_date else '—'"/>
+                                        &#160;&#160;|&#160;&#160;Estado:&#160;<strong><t t-esc="dict(o._fields['state'].selection).get(o.state, o.state)"/></strong>
+                                    </div>
+                                </td>
+                                <td style="vertical-align:middle; text-align:right; width:35%;">
+                                    <span class="rr-ot-pill">OT&#160;<t t-esc="o.sequence or str(o.id)"/></span>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
 
-                    <!-- Sección 1: Información de la OT -->
-                    <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
-                        <tr style="background:#f5f5f5;">
-                            <td colspan="4" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
-                                Información de la Orden
-                            </td>
-                        </tr>
+                    <!-- SECCIÓN 1: INFORMACIÓN DE LA ORDEN -->
+                    <table class="rr-table rr-no-break">
+                        <tr class="rr-section-header"><td colspan="4">Información de la Orden</td></tr>
                         <tr>
-                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">N° OT</td>
-                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.sequence or str(o.id)"/>
-                            </td>
-                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Fecha recepción</td>
-                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.receipt_date.strftime('%d/%m/%Y') if o.receipt_date else '—'"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Sede</td>
-                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                            <td class="rr-label">Sede / Tipo</td>
+                            <td class="rr-value" style="width:30%;">
                                 <t t-esc="dict(o._fields['customer_type'].selection).get(o.customer_type, '—')"/>
                             </td>
-                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Asesor recepción</td>
-                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                            <td class="rr-label">Asesor recepción</td>
+                            <td class="rr-value" style="width:30%;">
                                 <t t-esc="o.portal_advisor_id.name or '—'"/>
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Concepto</td>
-                            <td colspan="3" style="padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.name or '—'"/>
-                            </td>
+                            <td class="rr-label">Concepto / Motivo</td>
+                            <td class="rr-value" colspan="3"><t t-esc="o.name or '—'"/></td>
                         </tr>
                     </table>
 
-                    <!-- Sección 2: Datos del Cliente -->
-                    <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
-                        <tr style="background:#f5f5f5;">
-                            <td colspan="4" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
-                                Datos del Cliente
-                            </td>
-                        </tr>
+                    <!-- SECCIÓN 2: DATOS DEL CLIENTE -->
+                    <table class="rr-table rr-no-break">
+                        <tr class="rr-section-header"><td colspan="4">Datos del Cliente</td></tr>
                         <tr>
-                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Cliente</td>
-                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.client_id.name or '—'"/>
-                            </td>
-                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Tipo documento</td>
-                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
+                            <td class="rr-label">Cliente</td>
+                            <td class="rr-value" style="width:30%;"><t t-esc="o.client_id.name or '—'"/></td>
+                            <td class="rr-label">Tipo documento</td>
+                            <td class="rr-value" style="width:30%;">
                                 <t t-esc="o.client_id.l10n_latam_identification_type_id.name or '—'"/>
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">N° documento</td>
-                            <td style="padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.client_id.vat or '—'"/>
-                            </td>
-                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Teléfono</td>
-                            <td style="padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.client_phone or o.client_mobile or '—'"/>
-                            </td>
+                            <td class="rr-label">N° documento</td>
+                            <td class="rr-value"><t t-esc="o.client_id.vat or '—'"/></td>
+                            <td class="rr-label">Teléfono</td>
+                            <td class="rr-value"><t t-esc="o.client_phone or o.client_mobile or '—'"/></td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Correo</td>
-                            <td colspan="3" style="padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.client_email or '—'"/>
-                            </td>
+                            <td class="rr-label">Correo</td>
+                            <td class="rr-value" colspan="3"><t t-esc="o.client_email or '—'"/></td>
                         </tr>
                         <t t-if="o.delivered_by_name">
                             <tr>
-                                <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Entrega vehículo</td>
-                                <td style="padding:4px 6px; border:1px solid #ddd;">
-                                    <t t-esc="o.delivered_by_name"/>
-                                </td>
-                                <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Cel. quien entrega</td>
-                                <td style="padding:4px 6px; border:1px solid #ddd;">
-                                    <t t-esc="o.delivered_by_phone or '—'"/>
-                                </td>
+                                <td class="rr-label">Entrega vehículo</td>
+                                <td class="rr-value"><t t-esc="o.delivered_by_name"/></td>
+                                <td class="rr-label">Cel. quien entrega</td>
+                                <td class="rr-value"><t t-esc="o.delivered_by_phone or '—'"/></td>
                             </tr>
                         </t>
                     </table>
 
-                    <!-- Sección 3: Datos del Vehículo -->
-                    <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
-                        <tr style="background:#f5f5f5;">
-                            <td colspan="4" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
-                                Datos del Vehículo
+                    <!-- SECCIÓN 3: DATOS DEL VEHÍCULO -->
+                    <table class="rr-table rr-no-break">
+                        <tr class="rr-section-header"><td colspan="4">Datos del Vehículo</td></tr>
+                        <tr>
+                            <td class="rr-label">Placa</td>
+                            <td class="rr-value" style="width:30%;">
+                                <strong><t t-esc="o.license_plate or '—'"/></strong>
                             </td>
+                            <td class="rr-label">Marca</td>
+                            <td class="rr-value" style="width:30%;"><t t-esc="o.vehicle_brand_id.name or '—'"/></td>
                         </tr>
                         <tr>
-                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Placa</td>
-                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.license_plate or '—'"/>
-                            </td>
-                            <td style="width:20%; padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Marca</td>
-                            <td style="width:30%; padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.vehicle_brand_id.name or '—'"/>
-                            </td>
+                            <td class="rr-label">Línea / Modelo</td>
+                            <td class="rr-value"><t t-esc="o.model_id.name or '—'"/></td>
+                            <td class="rr-label">Año modelo</td>
+                            <td class="rr-value"><t t-esc="o.model_year or '—'"/></td>
                         </tr>
                         <tr>
-                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Línea / Modelo</td>
-                            <td style="padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.model_id.name or '—'"/>
-                            </td>
-                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Año modelo</td>
-                            <td style="padding:4px 6px; border:1px solid #ddd;">
-                                <t t-esc="o.model_year or '—'"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Kilometraje</td>
-                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                            <td class="rr-label">Kilometraje</td>
+                            <td class="rr-value">
                                 <t t-esc="'%.0f km' % o.reception_mileage if o.reception_mileage else '—'"/>
                             </td>
-                            <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Nivel combustible</td>
-                            <td style="padding:4px 6px; border:1px solid #ddd;">
+                            <td class="rr-label">Nivel combustible</td>
+                            <td class="rr-value">
                                 <t t-esc="dict(o._fields['reception_fuel_level'].selection).get(o.reception_fuel_level, '—')"/>
                             </td>
                         </tr>
                         <t t-if="o.engine_displacement or o.vin_sn">
                             <tr>
-                                <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">Cilindraje</td>
-                                <td style="padding:4px 6px; border:1px solid #ddd;">
-                                    <t t-esc="o.engine_displacement or '—'"/>
-                                </td>
-                                <td style="padding:4px 6px; border:1px solid #ddd; font-weight:bold;">VIN / Chasis</td>
-                                <td style="padding:4px 6px; border:1px solid #ddd;">
-                                    <t t-esc="o.vin_sn or '—'"/>
-                                </td>
+                                <td class="rr-label">Cilindraje</td>
+                                <td class="rr-value"><t t-esc="o.engine_displacement or '—'"/></td>
+                                <td class="rr-label">VIN / Chasis</td>
+                                <td class="rr-value"><t t-esc="o.vin_sn or '—'"/></td>
                             </tr>
                         </t>
                     </table>
 
-                    <!-- Sección 4: Servicios Solicitados -->
+                    <!-- SECCIÓN 4: SERVICIOS SOLICITADOS -->
                     <t t-set="service_lines" t-value="o.fleet_repair_line"/>
-                    <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
-                        <tr style="background:#f5f5f5;">
-                            <td colspan="2" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
-                                Servicios Solicitados
-                            </td>
-                        </tr>
+                    <table class="rr-table">
+                        <tr class="rr-section-header"><td colspan="2">Servicios Solicitados</td></tr>
                         <t t-if="service_lines">
-                            <tr style="background:#fafafa;">
-                                <th style="padding:4px 6px; border:1px solid #ddd; width:40%;">Servicio</th>
-                                <th style="padding:4px 6px; border:1px solid #ddd;">Detalle / Motivo</th>
+                            <tr>
+                                <th class="rr-th" style="width:40%;">Servicio</th>
+                                <th class="rr-th">Detalle / Motivo</th>
                             </tr>
                             <t t-foreach="service_lines" t-as="line">
                                 <tr>
-                                    <td style="padding:4px 6px; border:1px solid #ddd; vertical-align:top;">
-                                        <t t-esc="line.service_type.name or '—'"/>
-                                    </td>
-                                    <td style="padding:4px 6px; border:1px solid #ddd; vertical-align:top;">
-                                        <t t-esc="line.service_detail or '—'"/>
-                                    </td>
+                                    <td class="rr-value"><t t-esc="line.service_type.name or '—'"/></td>
+                                    <td class="rr-value"><t t-esc="line.service_detail or '—'"/></td>
                                 </tr>
                             </t>
                         </t>
                         <t t-else="">
                             <tr>
-                                <td colspan="2" style="padding:6px; border:1px solid #ddd; color:#777;">Sin servicios registrados.</td>
+                                <td class="rr-value" colspan="2" style="color:#777;">Sin servicios registrados.</td>
                             </tr>
                         </t>
                     </table>
 
-                    <!-- Sección 5: Observaciones -->
+                    <!-- SECCIÓN 5: OBSERVACIONES -->
                     <t t-if="o.reception_general_observations or o.description or o.valuables_description">
-                        <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
-                            <tr style="background:#f5f5f5;">
-                                <td colspan="2" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
-                                    Observaciones
-                                </td>
-                            </tr>
+                        <table class="rr-table rr-no-break">
+                            <tr class="rr-section-header"><td colspan="2">Observaciones</td></tr>
                             <t t-if="o.description">
                                 <tr>
-                                    <td style="width:25%; padding:4px 6px; border:1px solid #ddd; font-weight:bold; vertical-align:top;">Motivo de ingreso</td>
-                                    <td style="padding:4px 6px; border:1px solid #ddd; white-space:pre-line;"><t t-esc="o.description"/></td>
+                                    <td class="rr-label" style="width:25%;">Motivo de ingreso</td>
+                                    <td class="rr-value" style="white-space:pre-line;"><t t-esc="o.description"/></td>
                                 </tr>
                             </t>
                             <t t-if="o.reception_general_observations">
                                 <tr>
-                                    <td style="width:25%; padding:4px 6px; border:1px solid #ddd; font-weight:bold; vertical-align:top;">Obs. generales</td>
-                                    <td style="padding:4px 6px; border:1px solid #ddd; white-space:pre-line;"><t t-esc="o.reception_general_observations"/></td>
+                                    <td class="rr-label">Obs. generales</td>
+                                    <td class="rr-value" style="white-space:pre-line;"><t t-esc="o.reception_general_observations"/></td>
                                 </tr>
                             </t>
                             <t t-if="o.valuables_description">
                                 <tr>
-                                    <td style="width:25%; padding:4px 6px; border:1px solid #ddd; font-weight:bold; vertical-align:top;">Objetos de valor</td>
-                                    <td style="padding:4px 6px; border:1px solid #ddd; white-space:pre-line;"><t t-esc="o.valuables_description"/></td>
+                                    <td class="rr-label">Objetos de valor</td>
+                                    <td class="rr-value" style="white-space:pre-line;"><t t-esc="o.valuables_description"/></td>
                                 </tr>
                             </t>
                         </table>
                     </t>
 
-                    <!-- Sección 6: Checklist de Recepción -->
+                    <!-- SECCIÓN 6: CHECKLIST DE RECEPCIÓN -->
                     <t t-set="checklist_lines" t-value="o.reception_checklist_line_ids"/>
                     <t t-if="checklist_lines">
-                        <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
-                            <tr style="background:#f5f5f5;">
-                                <td colspan="3" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
+                        <table class="rr-table">
+                            <tr class="rr-section-header">
+                                <td colspan="3">
                                     Checklist de Recepción
                                     <t t-if="o.reception_checklist_template_id">
                                         — <span style="font-weight:normal; font-style:italic;"><t t-esc="o.reception_checklist_template_id.name"/></span>
                                     </t>
                                 </td>
                             </tr>
-                            <tr style="background:#fafafa;">
-                                <th style="padding:4px 6px; border:1px solid #ddd; width:50%;">Ítem</th>
-                                <th style="padding:4px 6px; border:1px solid #ddd; width:15%; text-align:center;">Estado</th>
-                                <th style="padding:4px 6px; border:1px solid #ddd;">Observación</th>
+                            <tr>
+                                <th class="rr-th" style="width:55%;">Ítem</th>
+                                <th class="rr-th" style="width:15%; text-align:center;">Estado</th>
+                                <th class="rr-th">Observación</th>
                             </tr>
                             <t t-foreach="checklist_lines" t-as="line">
                                 <tr>
-                                    <td style="padding:4px 6px; border:1px solid #ddd;"><t t-esc="line.name"/></td>
-                                    <td style="padding:4px 6px; border:1px solid #ddd; text-align:center; font-weight:bold;">
-                                        <t t-esc="line.get_pdf_state_label()"/>
+                                    <td class="rr-value"><t t-esc="line.name"/></td>
+                                    <td class="rr-value" style="text-align:center;">
+                                        <t t-if="line.state == 'good'">
+                                            <span class="rr-badge-good"><t t-esc="line.get_pdf_state_label()"/></span>
+                                        </t>
+                                        <t t-elif="line.state == 'regular'">
+                                            <span class="rr-badge-regular"><t t-esc="line.get_pdf_state_label()"/></span>
+                                        </t>
+                                        <t t-elif="line.state == 'bad'">
+                                            <span class="rr-badge-bad"><t t-esc="line.get_pdf_state_label()"/></span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="rr-badge-na"><t t-esc="line.get_pdf_state_label()"/></span>
+                                        </t>
                                     </td>
-                                    <td style="padding:4px 6px; border:1px solid #ddd; color:#555;">
-                                        <t t-esc="line.observation or ''"/>
-                                    </td>
+                                    <td class="rr-value" style="color:#444; font-size:10px;"><t t-esc="line.observation or ''"/></td>
                                 </tr>
                             </t>
                         </table>
                     </t>
 
-                    <!-- Sección 7: Evidencias fotográficas -->
+                    <!-- SECCIÓN 7: EVIDENCIAS FOTOGRÁFICAS -->
                     <t t-set="reception_evidences" t-value="o.external_evidence_ids.filtered(lambda e: e.evidence_type == 'recepcion' and e.active)"/>
                     <t t-if="reception_evidences">
-                        <table style="width:100%; margin-bottom:12px; border-collapse:collapse; font-size:11px;">
-                            <tr style="background:#f5f5f5;">
-                                <td colspan="3" style="padding:4px 6px; font-weight:bold; border:1px solid #ccc; text-transform:uppercase; letter-spacing:.5px; font-size:10px;">
-                                    Evidencias Fotográficas de Recepción
-                                </td>
+                        <t t-set="img_evs" t-value="list(reception_evidences.filtered(lambda e: e.is_image))"/>
+                        <t t-set="other_evs" t-value="list(reception_evidences.filtered(lambda e: not e.is_image))"/>
+
+                        <table class="rr-table">
+                            <tr class="rr-section-header">
+                                <td colspan="3">Evidencias Fotográficas de Recepción</td>
                             </tr>
-                            <tr style="background:#fafafa;">
-                                <th style="padding:4px 6px; border:1px solid #ddd; width:35%;">Archivo</th>
-                                <th style="padding:4px 6px; border:1px solid #ddd; width:20%;">Categoría</th>
-                                <th style="padding:4px 6px; border:1px solid #ddd;">Descripción</th>
-                            </tr>
-                            <t t-foreach="reception_evidences" t-as="ev">
-                                <tr>
-                                    <td style="padding:4px 6px; border:1px solid #ddd; word-break:break-all;"><t t-esc="ev.name"/></td>
-                                    <td style="padding:4px 6px; border:1px solid #ddd;">
-                                        <t t-esc="dict(ev._fields['evidence_category'].selection).get(ev.evidence_category, '—')"/>
-                                    </td>
-                                    <td style="padding:4px 6px; border:1px solid #ddd; color:#555;">
-                                        <t t-esc="ev.description or ''"/>
-                                    </td>
-                                </tr>
-                            </t>
                         </table>
+
+                        <t t-if="img_evs">
+                            <table class="rr-table">
+                                <t t-foreach="range(0, len(img_evs), 3)" t-as="ri">
+                                    <t t-set="row_evs" t-value="img_evs[ri:ri+3]"/>
+                                    <tr style="page-break-inside:avoid;">
+                                        <t t-foreach="row_evs" t-as="ev">
+                                            <t t-set="img_uri" t-value="ev.get_image_data_uri()"/>
+                                            <td class="rr-img-cell">
+                                                <t t-if="img_uri">
+                                                    <img t-att-src="img_uri"
+                                                         style="max-width:100%; max-height:110px; border:1px solid #ddd;"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <span style="font-size:10px; color:#aaa;">No disponible</span>
+                                                </t>
+                                                <div class="rr-img-caption">
+                                                    <t t-if="ev.evidence_category">
+                                                        <strong><t t-esc="dict(ev._fields['evidence_category'].selection).get(ev.evidence_category, '')"/></strong>
+                                                        <t t-if="ev.description">&#160;—&#160;</t>
+                                                    </t>
+                                                    <t t-esc="ev.description or ev.name"/>
+                                                </div>
+                                            </td>
+                                        </t>
+                                        <t t-foreach="range(3 - len(row_evs))" t-as="pad">
+                                            <td class="rr-img-cell" style="border-color:#e8e8e8;"></td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </table>
+                        </t>
+
+                        <t t-if="other_evs">
+                            <table class="rr-table" style="margin-top:6px;">
+                                <tr>
+                                    <th class="rr-th" style="width:35%;">Archivo</th>
+                                    <th class="rr-th" style="width:20%;">Categoría</th>
+                                    <th class="rr-th">Descripción</th>
+                                </tr>
+                                <t t-foreach="other_evs" t-as="ev">
+                                    <tr>
+                                        <td class="rr-value" style="word-break:break-all;"><t t-esc="ev.name"/></td>
+                                        <td class="rr-value">
+                                            <t t-esc="dict(ev._fields['evidence_category'].selection).get(ev.evidence_category, '—')"/>
+                                        </td>
+                                        <td class="rr-value" style="color:#555;"><t t-esc="ev.description or ''"/></td>
+                                    </tr>
+                                </t>
+                            </table>
+                        </t>
                     </t>
 
-                    <!-- Sección 8: Firmas -->
-                    <div style="margin-top:40px;">
+                    <!-- SECCIÓN 8: FIRMAS -->
+                    <div style="margin-top:50px; page-break-inside:avoid;">
                         <table style="width:100%; border-collapse:collapse;">
                             <tr>
-                                <td style="width:45%; text-align:center; padding-top:50px; border-top:1px solid #333;">
-                                    <div style="font-size:11px; font-weight:bold;">Firma del Asesor</div>
-                                    <div style="font-size:10px; color:#555; margin-top:4px;">
+                                <td style="width:45%; text-align:center; padding-top:52px; border-top:2px solid #1a2744;">
+                                    <div class="rr-signature-label">Firma del Asesor</div>
+                                    <div style="font-size:10px; color:#555; margin-top:3px;">
                                         <t t-esc="o.portal_advisor_id.name or ''"/>
                                     </div>
                                 </td>
                                 <td style="width:10%;"></td>
-                                <td style="width:45%; text-align:center; padding-top:50px; border-top:1px solid #333;">
-                                    <div style="font-size:11px; font-weight:bold;">Firma del Cliente</div>
-                                    <div style="font-size:10px; color:#555; margin-top:4px;">
+                                <td style="width:45%; text-align:center; padding-top:52px; border-top:2px solid #1a2744;">
+                                    <div class="rr-signature-label">Firma del Cliente</div>
+                                    <div style="font-size:10px; color:#555; margin-top:3px;">
                                         <t t-esc="o.client_id.name or ''"/>
                                     </div>
                                 </td>

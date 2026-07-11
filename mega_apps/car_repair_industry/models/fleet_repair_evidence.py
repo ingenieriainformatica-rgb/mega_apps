@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import base64
+import io
 import logging
 import re
 from pathlib import Path
@@ -101,6 +103,40 @@ class FleetRepairEvidence(models.Model):
                 "/car_repair/evidence/%s/image" % evidence.id
                 if evidence.is_image else False
             )
+
+    def get_image_data_uri(self):
+        """Download from Google Drive and return a base64 data URI for PDF embedding.
+
+        Called from QWeb report templates. Returns False on failure so the
+        template can fall back gracefully instead of rendering a broken <img>.
+        """
+        self.ensure_one()
+        if not self.is_image:
+            return False
+        drive_file_id = self.drive_file_id or self._extract_drive_file_id()
+        if not drive_file_id:
+            return False
+        try:
+            from googleapiclient.http import MediaIoBaseDownload  # type: ignore
+            drive_service = self.repair_id.sudo()._drive_get_service()
+            drive_request = drive_service.files().get_media(
+                fileId=drive_file_id,
+                supportsAllDrives=True,
+            )
+            buffer = io.BytesIO()
+            downloader = MediaIoBaseDownload(buffer, drive_request)
+            done = False
+            while not done:
+                _status, done = downloader.next_chunk()
+            mime = self.mime_type or 'image/jpeg'
+            b64 = base64.b64encode(buffer.getvalue()).decode('ascii')
+            return 'data:%s;base64,%s' % (mime, b64)
+        except Exception as error:
+            _logger.warning(
+                "[PDFEvidence] image embed failed for evidence %s (%s): %s",
+                self.id, self.name, error,
+            )
+            return False
 
     @api.constrains('external_url')
     def _check_external_url_is_google_drive(self):
