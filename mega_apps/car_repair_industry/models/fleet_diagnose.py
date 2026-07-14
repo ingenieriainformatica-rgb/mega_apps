@@ -64,6 +64,8 @@ class FleetDiagnose(models.Model):
     saleorder_count = fields.Integer(string="Sale Order", compute='_compute_saleorder_id')
     inv_count = fields.Integer(string="Invoice")
     timesheet_ids = fields.One2many('account.analytic.line', 'diagnose_id', string="Timesheet")
+    road_test_ids = fields.One2many(related='fleet_repair_id.road_test_ids', string='Pruebas de ruta')
+    spare_request_ids = fields.One2many(related='fleet_repair_id.spare_request_ids', string='Repuestos solicitados')
 
     _order = 'id desc'
 

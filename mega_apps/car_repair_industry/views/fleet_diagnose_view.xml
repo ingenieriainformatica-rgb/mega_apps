@@ -131,6 +131,54 @@
                                     </list>
                                 </field>
                             </page>
+
+                            <page name="road_tests" string="Pruebas de ruta"
+                                  invisible="not fleet_repair_id"
+                                  groups="car_repair_industry.group_fleet_repair_service_manager,car_repair_industry.group_fleet_repair_directeur_commercial,car_repair_industry.group_fleet_repair_portal_road_test">
+                                <field name="road_test_ids" readonly="1">
+                                    <list string="Pruebas de ruta"
+                                          create="0" delete="0" edit="0"
+                                          decoration-success="state == 'done'"
+                                          decoration-info="state == 'assigned'"
+                                          decoration-warning="state == 'in_progress'"
+                                          decoration-muted="state == 'cancelled'">
+                                        <field name="test_type"/>
+                                        <field name="requested_by_id"/>
+                                        <field name="requested_at"/>
+                                        <field name="driver_id"/>
+                                        <field name="state" widget="badge"
+                                               decoration-muted="state == 'requested'"
+                                               decoration-info="state == 'assigned'"
+                                               decoration-warning="state == 'in_progress'"
+                                               decoration-success="state == 'done'"
+                                               decoration-danger="state == 'cancelled'"/>
+                                        <field name="km_start" optional="hide"/>
+                                        <field name="km_end" optional="hide"/>
+                                        <field name="completed_at" optional="show"/>
+                                    </list>
+                                </field>
+                            </page>
+
+                            <page name="spare_requests" string="Repuestos solicitados"
+                                  invisible="not fleet_repair_id"
+                                  groups="car_repair_industry.group_fleet_repair_spare_warehouse,car_repair_industry.group_fleet_repair_service_manager,base.group_system">
+                                <field name="spare_request_ids" readonly="1">
+                                    <list string="Solicitudes de repuestos"
+                                          create="0" delete="0" edit="0"
+                                          decoration-info="state == 'requested'"
+                                          decoration-success="state == 'reviewed'"
+                                          decoration-muted="state == 'cancelled'">
+                                        <field name="request_date" string="Fecha"/>
+                                        <field name="requested_by_id" string="Técnico"/>
+                                        <field name="line_count" string="# Repuestos"/>
+                                        <field name="state" widget="badge"
+                                               decoration-info="state == 'requested'"
+                                               decoration-success="state == 'reviewed'"
+                                               decoration-danger="state == 'cancelled'"/>
+                                        <field name="warehouse_note" string="Obs. almacén" optional="show"/>
+                                    </list>
+                                </field>
+                            </page>
                         </notebook>
                     </sheet>
                     <chatter/>
