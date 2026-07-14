@@ -291,6 +291,7 @@ class FleetDiagnose(models.Model):
             'x_studio_descripcion': description,
             'warehouse_id': warehouse.id,
             'vehicle_plate': vehicle_plate or '',
+            'vehicle': vehicle_plate or '',
             'vehicle_model_id': vehicle_model.id if vehicle_model else False,
         }
 
@@ -332,7 +333,7 @@ class FleetDiagnose(models.Model):
         })
 
         return action
-    
+
     def action_view_sale_order(self):
         mod_obj = self.env['ir.model.data']
         act_obj = self.env['ir.actions.act_window']
