@@ -1835,6 +1835,55 @@
                                     <p class="text-muted fst-italic small mb-3">Sin pruebas de ruta registradas.</p>
                                 </t>
 
+                                <!-- Resultado de pruebas realizadas (visible para todos, solo lectura) -->
+                                <t t-foreach="repair.road_test_ids" t-as="rt">
+                                    <t t-if="rt.state == 'done' and (rt.result or rt.final_observations or rt.km_start or rt.km_end)">
+                                        <div class="card border-success mb-3">
+                                            <div class="card-header bg-success bg-opacity-10 fw-semibold small d-flex align-items-center gap-2">
+                                                <i class="fa fa-check-circle text-success"></i>
+                                                <t t-esc="rt.get_type_label()"/>
+                                                <span class="text-muted fw-normal ms-1">
+                                                    — realizada
+                                                    <t t-if="rt.completed_at">
+                                                        el <t t-esc="rt.completed_at.strftime('%d/%m/%Y %H:%M')"/>
+                                                    </t>
+                                                    <t t-if="rt.driver_id">
+                                                        por <t t-esc="rt.driver_id.name"/>
+                                                    </t>
+                                                </span>
+                                            </div>
+                                            <div class="card-body py-2">
+                                                <t t-if="rt.km_start or rt.km_end">
+                                                    <div class="d-flex gap-4 mb-2">
+                                                        <div t-if="rt.km_start">
+                                                            <span class="text-muted small">Km inicial:</span>
+                                                            <strong class="ms-1 small"><t t-esc="'%.1f' % rt.km_start"/> km</strong>
+                                                        </div>
+                                                        <div t-if="rt.km_end">
+                                                            <span class="text-muted small">Km final:</span>
+                                                            <strong class="ms-1 small"><t t-esc="'%.1f' % rt.km_end"/> km</strong>
+                                                        </div>
+                                                        <t t-if="rt.km_start and rt.km_end and rt.km_end > rt.km_start">
+                                                            <div>
+                                                                <span class="text-muted small">Recorrido:</span>
+                                                                <strong class="ms-1 small"><t t-esc="'%.1f' % (rt.km_end - rt.km_start)"/> km</strong>
+                                                            </div>
+                                                        </t>
+                                                    </div>
+                                                </t>
+                                                <t t-if="rt.result">
+                                                    <p class="small mb-1"><span class="fw-semibold">Resultado:</span></p>
+                                                    <p class="small text-muted mb-2" style="white-space:pre-line;"><t t-esc="rt.result"/></p>
+                                                </t>
+                                                <t t-if="rt.final_observations">
+                                                    <p class="small mb-1"><span class="fw-semibold">Observaciones finales:</span></p>
+                                                    <p class="small text-muted mb-0" style="white-space:pre-line;"><t t-esc="rt.final_observations"/></p>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+
                                 <!-- Formulario de actualización para el conductor asignado -->
                                 <t t-foreach="repair.road_test_ids" t-as="rt">
                                     <t t-if="rt.driver_id and rt.driver_id.id == request.env.user.id and rt.state in ('assigned', 'in_progress')">
