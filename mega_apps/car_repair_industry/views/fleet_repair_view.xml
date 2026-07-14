@@ -406,7 +406,9 @@
                     <field name="sequence"/>
                     <field name="name" string="Descripción"/>
                     <field name="client_id"/>
-                    <field name="phone"/>
+                    <field name="license_plate" string="Placa"/>
+                    <field name="vehicle_brand_id" string="Marca" optional="show"/>
+                    <field name="phone" optional="show"/>
                     <field name="receipt_date"/>
                     <field name="state"
                         optional="show"
@@ -415,8 +417,9 @@
                         decoration-warning="state in ('quote', 'saleorder', 'workorder')"
                         decoration-success="state in ('work_completed', 'invoiced', 'done')"
                         decoration-danger="state == 'cancel'"/>
-                    <field name="priority" optional="show" widget="badge" decoration-info="priority == '1'" decoration-danger="priority == '2'" />
-                    <field name="user_id"/>
+                    <field name="priority" optional="hide" widget="badge" decoration-info="priority == '1'" decoration-danger="priority == '2'" />
+                    <field name="user_id" optional="hide"/>
+                    <field name="portal_technician_id" string="Técnico"/>
                 </list>
             </field>
         </record>
