@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class FleetRoadTest(models.Model):
@@ -50,6 +51,10 @@ class FleetRoadTest(models.Model):
 
     def action_assign(self):
         self.ensure_one()
+        if not self.driver_id:
+            raise UserError(_(
+                "Debe seleccionar un Conductor/Responsable asignado antes de asignar la prueba de ruta."
+            ))
         self.write({'state': 'assigned'})
 
     def action_start(self):
