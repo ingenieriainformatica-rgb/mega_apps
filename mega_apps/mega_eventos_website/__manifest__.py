@@ -1,6 +1,6 @@
 {
     "name": "Mega Eventos Website",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.1.0",
     "category": "MegaTecnicentro/Website",
     "sequence": -450,
     "summary": "Landing pública de eventos, exclusiva del Website 1",
@@ -8,6 +8,7 @@
     "website": "https://megabaterias.co",
     "depends": [
         "website",
+        "mega_colombia_jersey_landing",
     ],
     "data": [
         "views/mega_eventos_templates.xml",

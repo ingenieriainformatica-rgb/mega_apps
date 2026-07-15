@@ -6,6 +6,8 @@
         <field name="model">mega.jersey.contest.participant</field>
         <field name="arch" type="xml">
             <list string="Participantes Concurso Camiseta Selección">
+                <field name="code" optional="show"/>
+                <field name="registration_source"/>
                 <field name="name"/>
                 <field name="vat"/>
                 <field name="vat_normalized" optional="hide"/>
@@ -28,6 +30,12 @@
         <field name="arch" type="xml">
             <form string="Participante Concurso Camiseta Selección">
                 <sheet>
+                    <group>
+                        <group string="Inscripción">
+                            <field name="code" readonly="1"/>
+                            <field name="registration_source"/>
+                        </group>
+                    </group>
                     <group>
                         <group string="Datos personales">
                             <field name="name"/>
@@ -64,6 +72,7 @@
         <field name="model">mega.jersey.contest.participant</field>
         <field name="arch" type="xml">
             <search string="Buscar participantes">
+                <field name="code"/>
                 <field name="name"/>
                 <field name="vat"/>
                 <field name="vat_normalized"/>
@@ -73,10 +82,13 @@
                 <field name="license_plate_normalized"/>
                 <field name="vehicle_info"/>
                 <field name="service_acquired"/>
+                <filter string="Concurso Camiseta" name="source_jersey_contest" domain="[('registration_source', '=', 'jersey_contest')]"/>
+                <filter string="Mega Eventos" name="source_mega_eventos" domain="[('registration_source', '=', 'mega_eventos')]"/>
                 <filter string="Nuevos" name="state_new" domain="[('state', '=', 'new')]"/>
                 <filter string="Procesados" name="state_processed" domain="[('state', '=', 'processed')]"/>
-                <filter string="Válidos para sorteo" name="valid_for_draw" domain="[('accept_data_policy', '=', True), ('accept_commercial_info', '=', True)]"/>
+                <filter string="Válidos para sorteo" name="valid_for_draw" domain="[('registration_source', '=', 'jersey_contest'), ('accept_data_policy', '=', True), ('accept_commercial_info', '=', True)]"/>
                 <group expand="0" string="Agrupar por">
+                    <filter string="Origen" name="group_registration_source" context="{'group_by': 'registration_source'}"/>
                     <filter string="Sitio web" name="group_website" context="{'group_by': 'website_id'}"/>
                     <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
                     <filter string="Servicio adquirido" name="group_service_acquired" context="{'group_by': 'service_acquired'}"/>

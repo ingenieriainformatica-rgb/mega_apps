@@ -86,6 +86,7 @@ class MegaJerseyContestDraw(models.Model):
 
     def _get_valid_participant_domain(self):
         return [
+            ("registration_source", "=", "jersey_contest"),
             ("accept_data_policy", "=", True),
             ("accept_commercial_info", "=", True),
         ]

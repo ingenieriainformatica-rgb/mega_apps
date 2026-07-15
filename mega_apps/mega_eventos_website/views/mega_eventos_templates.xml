@@ -14,6 +14,7 @@
                         --mega-dark-tile: #0f172a;
                         --mega-brand-green: #10b981;
                         --mega-ring: rgba(0, 0, 0, 0.10);
+                        --mega-muted: #647084;
                     }
                     body {
                         margin: 0;
@@ -101,16 +102,43 @@
                     .mega-eventos-tile--light .mega-eventos-tile__icon--paper {
                         filter: brightness(0);
                     }
+                    .mega-eventos-tile__content {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 12px;
+                        flex: 1 1 auto;
+                        min-width: 0;
+                    }
                     .mega-eventos-tile__title {
                         margin: 0;
                         font-weight: 800;
                         line-height: 1.3;
                         font-size: 19px;
                     }
+                    .mega-eventos-tile__cta {
+                        appearance: none;
+                        border: 2px solid currentColor;
+                        background: transparent;
+                        color: inherit;
+                        font-weight: 700;
+                        font-size: 14px;
+                        padding: 8px 20px;
+                        border-radius: 999px;
+                        cursor: pointer;
+                    }
+                    .mega-eventos-tile--light .mega-eventos-tile__cta:hover {
+                        background: var(--mega-ink);
+                        color: #ffffff;
+                    }
+                    .mega-eventos-tile--dark .mega-eventos-tile__cta:hover {
+                        background: #ffffff;
+                        color: var(--mega-dark-tile);
+                    }
 
                     .mega-eventos-promo__legal {
                         margin-top: 20px;
-                        color: var(--mega-muted, #647084);
+                        color: var(--mega-muted);
                         text-align: center;
                         font-size: 12px;
                         opacity: 0.9;
@@ -137,6 +165,131 @@
                         font-weight: 600;
                         text-align: center;
                     }
+
+                    /* Modal de inscripción */
+                    .mega-eventos-modal-overlay {
+                        position: fixed;
+                        inset: 0;
+                        z-index: 1000;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 20px;
+                        background: rgba(7, 20, 38, 0.55);
+                    }
+                    .mega-eventos-modal-overlay[hidden] { display: none; }
+                    .mega-eventos-modal {
+                        position: relative;
+                        width: 100%;
+                        max-width: 560px;
+                        max-height: 90vh;
+                        overflow-y: auto;
+                        background: #ffffff;
+                        border-radius: 14px;
+                        padding: 28px;
+                        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+                    }
+                    .mega-eventos-modal__close {
+                        position: absolute;
+                        top: 14px;
+                        right: 14px;
+                        border: 0;
+                        background: transparent;
+                        font-size: 24px;
+                        line-height: 1;
+                        cursor: pointer;
+                        color: var(--mega-muted);
+                    }
+                    .mega-eventos-modal__title {
+                        margin: 0 0 6px;
+                        font-size: 22px;
+                        color: var(--mega-ink);
+                    }
+                    .mega-eventos-modal__subtitle {
+                        margin: 0 0 18px;
+                        font-size: 14px;
+                        color: var(--mega-muted);
+                    }
+                    .mega-eventos-modal__alert {
+                        margin: 0 0 16px;
+                        padding: 10px 14px;
+                        border-radius: 8px;
+                        font-size: 14px;
+                    }
+                    .mega-eventos-modal__alert--error {
+                        background: #fff3f3;
+                        border: 1px solid #f0b8b8;
+                        color: #9b1c1c;
+                    }
+                    .mega-eventos-modal__alert--success {
+                        background: #ecfdf5;
+                        border: 1px solid #a7f0d3;
+                        color: #05683f;
+                    }
+                    .mega-eventos-modal__form {
+                        display: grid;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        gap: 14px;
+                    }
+                    .mega-eventos-field { display: flex; flex-direction: column; gap: 6px; }
+                    .mega-eventos-field--wide { grid-column: 1 / -1; }
+                    .mega-eventos-field label { font-size: 13px; font-weight: 700; color: var(--mega-ink); }
+                    .mega-eventos-field input {
+                        min-height: 42px;
+                        border: 1px solid #cbd6e4;
+                        border-radius: 6px;
+                        padding: 8px 12px;
+                        font-size: 14px;
+                        font-family: inherit;
+                    }
+                    .mega-eventos-field input:focus {
+                        outline: none;
+                        border-color: var(--mega-brand-green);
+                        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+                    }
+                    .mega-eventos-check {
+                        grid-column: 1 / -1;
+                        display: flex;
+                        gap: 10px;
+                        align-items: flex-start;
+                        font-size: 13px;
+                        line-height: 1.4;
+                        color: var(--mega-ink);
+                    }
+                    .mega-eventos-check input { margin-top: 3px; width: 16px; height: 16px; flex: 0 0 auto; }
+                    .mega-eventos-check a { color: var(--mega-brand-green); font-weight: 700; }
+                    .mega-eventos-modal__actions {
+                        grid-column: 1 / -1;
+                        display: flex;
+                        gap: 12px;
+                        margin-top: 4px;
+                    }
+                    .mega-eventos-modal__submit {
+                        flex: 1 1 auto;
+                        min-height: 46px;
+                        border: 0;
+                        border-radius: 6px;
+                        background: var(--mega-brand-green);
+                        color: #ffffff;
+                        font-weight: 700;
+                        font-size: 15px;
+                        cursor: pointer;
+                    }
+                    .mega-eventos-modal__submit:disabled { opacity: 0.6; cursor: not-allowed; }
+                    .mega-eventos-modal__cancel {
+                        min-height: 46px;
+                        padding: 0 20px;
+                        border: 1px solid #cbd6e4;
+                        border-radius: 6px;
+                        background: #ffffff;
+                        color: var(--mega-ink);
+                        font-weight: 700;
+                        cursor: pointer;
+                    }
+                    @media (max-width: 640px) {
+                        .mega-eventos-modal__form { grid-template-columns: 1fr; }
+                        .mega-eventos-modal { padding: 22px; }
+                    }
                 </style>
             </head>
             <body>
@@ -154,26 +307,224 @@
                     <div class="mega-eventos-promo__grid">
                         <div class="mega-eventos-tile mega-eventos-tile--dark">
                             <img class="mega-eventos-tile__icon mega-eventos-tile__icon--ink" src="/mega_eventos_website/static/src/img/icons/oil.svg" alt=""/>
-                            <p class="mega-eventos-tile__title">10% cambio de aceite</p>
+                            <div class="mega-eventos-tile__content">
+                                <p class="mega-eventos-tile__title">10% cambio de aceite</p>
+                                <button
+                                    type="button"
+                                    class="mega-eventos-tile__cta js-mega-eventos-open"
+                                    data-service="cambio_aceite"
+                                    data-label="10% cambio de aceite"
+                                >Inscribirme</button>
+                            </div>
                         </div>
 
                         <div class="mega-eventos-tile mega-eventos-tile--light">
                             <img class="mega-eventos-tile__icon mega-eventos-tile__icon--paper" src="/mega_eventos_website/static/src/img/icons/tools.svg" alt=""/>
-                            <p class="mega-eventos-tile__title">10% trabajos autorizados</p>
+                            <div class="mega-eventos-tile__content">
+                                <p class="mega-eventos-tile__title">10% trabajos autorizados</p>
+                                <button
+                                    type="button"
+                                    class="mega-eventos-tile__cta js-mega-eventos-open"
+                                    data-service="trabajos_autorizados"
+                                    data-label="10% trabajos autorizados"
+                                >Inscribirme</button>
+                            </div>
                         </div>
 
                         <div class="mega-eventos-tile mega-eventos-tile--dark">
                             <img class="mega-eventos-tile__icon mega-eventos-tile__icon--paper" src="/mega_eventos_website/static/src/img/icons/maintenance.svg" alt=""/>
-                            <p class="mega-eventos-tile__title">70% en MegaCombo 7 servicios</p>
+                            <div class="mega-eventos-tile__content">
+                                <p class="mega-eventos-tile__title">70% en MegaCombo 7 servicios</p>
+                                <button
+                                    type="button"
+                                    class="mega-eventos-tile__cta js-mega-eventos-open"
+                                    data-service="mega_combo"
+                                    data-label="70% en MegaCombo 7 servicios"
+                                >Inscribirme</button>
+                            </div>
                         </div>
 
                         <div class="mega-eventos-tile mega-eventos-tile--light">
                             <img class="mega-eventos-tile__icon mega-eventos-tile__icon--ink" src="/mega_eventos_website/static/src/img/icons/battery.svg" alt=""/>
-                            <p class="mega-eventos-tile__title">Revisión GRATIS de batería</p>
+                            <div class="mega-eventos-tile__content">
+                                <p class="mega-eventos-tile__title">Revisión GRATIS de batería</p>
+                                <button
+                                    type="button"
+                                    class="mega-eventos-tile__cta js-mega-eventos-open"
+                                    data-service="revision_bateria"
+                                    data-label="Revisión GRATIS de batería"
+                                >Inscribirme</button>
+                            </div>
                         </div>
                     </div>
                     <div class="mega-eventos-promo__legal">Fechas y cupos sujetos a confirmación*</div>
                 </section>
+
+                <div id="mega-eventos-modal-overlay" class="mega-eventos-modal-overlay" hidden="hidden">
+                    <div class="mega-eventos-modal" role="dialog" aria-modal="true" aria-labelledby="mega-eventos-modal-title">
+                        <button type="button" class="mega-eventos-modal__close" id="mega-eventos-modal-close" aria-label="Cerrar">&#215;</button>
+                        <h2 id="mega-eventos-modal-title" class="mega-eventos-modal__title">Inscribirme</h2>
+                        <p class="mega-eventos-modal__subtitle">Estás solicitando: <strong id="mega-eventos-modal-benefit"></strong></p>
+
+                        <div id="mega-eventos-modal-alert" class="mega-eventos-modal__alert" hidden="hidden"></div>
+
+                        <form id="mega-eventos-modal-form" class="mega-eventos-modal__form">
+                            <input type="hidden" name="service_acquired" id="mega-eventos-field-service"/>
+                            <div class="mega-eventos-field">
+                                <label for="mega-eventos-field-name">Nombre completo *</label>
+                                <input id="mega-eventos-field-name" name="name" type="text" required="required"/>
+                            </div>
+                            <div class="mega-eventos-field">
+                                <label for="mega-eventos-field-vat">Cédula *</label>
+                                <input id="mega-eventos-field-vat" name="vat" type="text" required="required"/>
+                            </div>
+                            <div class="mega-eventos-field">
+                                <label for="mega-eventos-field-phone">Teléfono *</label>
+                                <input id="mega-eventos-field-phone" name="phone" type="tel" required="required"/>
+                            </div>
+                            <div class="mega-eventos-field">
+                                <label for="mega-eventos-field-email">Correo electrónico *</label>
+                                <input id="mega-eventos-field-email" name="email" type="email" required="required"/>
+                            </div>
+                            <div class="mega-eventos-field mega-eventos-field--wide">
+                                <label for="mega-eventos-field-street">Dirección *</label>
+                                <input id="mega-eventos-field-street" name="street" type="text" required="required"/>
+                            </div>
+                            <div class="mega-eventos-field">
+                                <label for="mega-eventos-field-plate">Placa *</label>
+                                <input id="mega-eventos-field-plate" name="license_plate" type="text" required="required"/>
+                            </div>
+                            <div class="mega-eventos-field">
+                                <label for="mega-eventos-field-vehicle">Marca y modelo *</label>
+                                <input id="mega-eventos-field-vehicle" name="vehicle_info" type="text" required="required"/>
+                            </div>
+
+                            <label class="mega-eventos-check">
+                                <input type="checkbox" id="mega-eventos-field-accept" required="required"/>
+                                <span>
+                                    Autorizo el tratamiento de mis datos personales y uso de imagen por parte de CENTRO DE SERVICIO AUTOMOTRIZ MEGA S.A.S., conforme a la
+                                    Política HABEAS-DATA v1 (pendiente de enlace).
+                                </span>
+                            </label>
+
+                            <div class="mega-eventos-modal__actions">
+                                <button type="submit" class="mega-eventos-modal__submit" id="mega-eventos-modal-submit">Inscribirme</button>
+                                <button type="button" class="mega-eventos-modal__cancel" id="mega-eventos-modal-cancel">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script type="text/javascript">
+                    //<![CDATA[
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var overlay = document.getElementById('mega-eventos-modal-overlay');
+                        var form = document.getElementById('mega-eventos-modal-form');
+                        var alertBox = document.getElementById('mega-eventos-modal-alert');
+                        var submitButton = document.getElementById('mega-eventos-modal-submit');
+                        var serviceField = document.getElementById('mega-eventos-field-service');
+                        var benefitLabel = document.getElementById('mega-eventos-modal-benefit');
+                        var acceptField = document.getElementById('mega-eventos-field-accept');
+
+                        function openModal(serviceValue, label) {
+                            form.reset();
+                            form.hidden = false;
+                            form.style.display = '';
+                            serviceField.value = serviceValue;
+                            benefitLabel.textContent = label;
+                            alertBox.hidden = true;
+                            alertBox.className = 'mega-eventos-modal__alert';
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Inscribirme';
+                            overlay.hidden = false;
+                            document.body.style.overflow = 'hidden';
+                        }
+
+                        function closeModal() {
+                            overlay.hidden = true;
+                            document.body.style.overflow = '';
+                        }
+
+                        document.querySelectorAll('.js-mega-eventos-open').forEach(function (button) {
+                            button.addEventListener('click', function () {
+                                openModal(button.dataset.service, button.dataset.label);
+                            });
+                        });
+
+                        document.getElementById('mega-eventos-modal-close').addEventListener('click', closeModal);
+                        document.getElementById('mega-eventos-modal-cancel').addEventListener('click', closeModal);
+
+                        overlay.addEventListener('click', function (ev) {
+                            if (ev.target === ev.currentTarget) {
+                                closeModal();
+                            }
+                        });
+
+                        document.addEventListener('keydown', function (ev) {
+                            if (ev.key === 'Escape' && !overlay.hidden) {
+                                closeModal();
+                            }
+                        });
+
+                        form.addEventListener('submit', function (ev) {
+                            ev.preventDefault();
+
+                            var payload = {
+                                name: form.name.value,
+                                vat: form.vat.value,
+                                phone: form.phone.value,
+                                email: form.email.value,
+                                street: form.street.value,
+                                license_plate: form.license_plate.value,
+                                vehicle_info: form.vehicle_info.value,
+                                service_acquired: serviceField.value,
+                                accept_data_policy: acceptField.checked,
+                            };
+
+                            submitButton.disabled = true;
+                            submitButton.textContent = 'Enviando...';
+
+                            fetch('/mega-eventos/inscribirme', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    jsonrpc: '2.0',
+                                    method: 'call',
+                                    params: payload,
+                                }),
+                            })
+                                .then(function (response) { return response.json(); })
+                                .then(function (data) {
+                                    var result = (data && data.result) || {};
+                                    if (result.success) {
+                                        alertBox.className = 'mega-eventos-modal__alert mega-eventos-modal__alert--success';
+                                        alertBox.textContent = 'Inscripción exitosa. Tu código es ' + result.code + '.';
+                                        alertBox.hidden = false;
+                                        form.hidden = true;
+                                        form.style.display = 'none';
+                                        form.reset();
+                                    } else {
+                                        var errors = (result.errors && result.errors.length)
+                                            ? result.errors
+                                            : ['No se pudo completar la inscripción.'];
+                                        alertBox.className = 'mega-eventos-modal__alert mega-eventos-modal__alert--error';
+                                        alertBox.textContent = errors.join(' ');
+                                        alertBox.hidden = false;
+                                        submitButton.disabled = false;
+                                        submitButton.textContent = 'Inscribirme';
+                                    }
+                                })
+                                .catch(function () {
+                                    alertBox.className = 'mega-eventos-modal__alert mega-eventos-modal__alert--error';
+                                    alertBox.textContent = 'Ocurrió un error de conexión. Intenta de nuevo.';
+                                    alertBox.hidden = false;
+                                    submitButton.disabled = false;
+                                    submitButton.textContent = 'Inscribirme';
+                                });
+                        });
+                    });
+                    //]]>
+                </script>
             </body>
         </html>
     </template>

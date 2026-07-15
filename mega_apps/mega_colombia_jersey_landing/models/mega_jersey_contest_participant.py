@@ -1,4 +1,6 @@
 import re
+import secrets
+import string
 
 from psycopg2 import IntegrityError, sql  # type: ignore
 
@@ -10,11 +12,15 @@ DUPLICATE_PARTICIPANT_MESSAGE = (
     "Ya existe una inscripción registrada para esta cédula y esta placa."
 )
 LEGACY_VAT_CONSTRAINT = "mega_jersey_contest_participant_vat_normalized_uniq"
+CODE_PREFIX = "MEGA-"
+CODE_ALPHABET = "".join(
+    ch for ch in string.ascii_uppercase + string.digits if ch not in "O0I1"
+)
 
 
 class MegaJerseyContestParticipant(models.Model):
     _name = "mega.jersey.contest.participant"
-    _description = "Participante Concurso Camiseta Selección Colombia"
+    _description = "Participante Concurso Camiseta Selección Colombia / Mega Eventos"
     _order = "create_date desc"
 
     name = fields.Char(string="Nombre completo", required=True)
@@ -45,6 +51,8 @@ class MegaJerseyContestParticipant(models.Model):
             ("mega_combo", "MegaCombo"),
             ("mecanica_especializada", "Mecánica especializada"),
             ("cambio_aceite", "Cambio de aceite"),
+            ("trabajos_autorizados", "Trabajos autorizados"),
+            ("revision_bateria", "Revisión de batería"),
         ],
         string="Servicio adquirido",
         required=True,
@@ -61,6 +69,25 @@ class MegaJerseyContestParticipant(models.Model):
         ],
         default="new",
     )
+    registration_source = fields.Selection(
+        [
+            ("jersey_contest", "Concurso Camiseta Selección"),
+            ("mega_eventos", "Mega Eventos"),
+        ],
+        string="Origen de la inscripción",
+        required=True,
+        default="jersey_contest",
+        index=True,
+    )
+    code = fields.Char(string="Código", readonly=True, copy=False, index=True)
+
+    _sql_constraints = [
+        (
+            "code_uniq",
+            "unique(code)",
+            "Ya existe una inscripción con este código.",
+        ),
+    ]
 
     @api.depends("vat")
     def _compute_vat_normalized(self):
@@ -83,6 +110,16 @@ class MegaJerseyContestParticipant(models.Model):
         return re.sub(r"[^A-Z0-9]", "", (license_plate or "").upper())
 
     @api.model
+    def _generate_unique_code(self):
+        for _attempt in range(20):
+            candidate = CODE_PREFIX + "".join(
+                secrets.choice(CODE_ALPHABET) for _ in range(6)
+            )
+            if not self.sudo().search_count([("code", "=", candidate)]):
+                return candidate
+        raise ValidationError("No se pudo generar un código único, intenta de nuevo.")
+
+    @api.model
     def _validate_participant_values(self, vals_list, existing_records=None):
         seen = {}
         existing_records = existing_records or self.browse()
@@ -98,6 +135,13 @@ class MegaJerseyContestParticipant(models.Model):
             )
             vat = vals.get("vat", existing_record.vat)
             license_plate = vals.get("license_plate", existing_record.license_plate)
+            registration_source = vals.get(
+                "registration_source",
+                existing_record.registration_source or "jersey_contest",
+            )
+            service_acquired = vals.get(
+                "service_acquired", existing_record.service_acquired
+            )
 
             vat_normalized = self._normalize_vat(vat)
             license_plate_normalized = self._normalize_license_plate(license_plate)
@@ -106,14 +150,21 @@ class MegaJerseyContestParticipant(models.Model):
             if not license_plate_normalized:
                 raise ValidationError("La placa debe contener al menos una letra o número.")
 
-            participant_key = (vat_normalized, license_plate_normalized)
+            participant_key = (
+                registration_source,
+                vat_normalized,
+                license_plate_normalized,
+                service_acquired,
+            )
             if participant_key in seen:
                 raise ValidationError(DUPLICATE_PARTICIPANT_MESSAGE)
             seen[participant_key] = index
 
             domain = [
+                ("registration_source", "=", registration_source),
                 ("vat_normalized", "=", vat_normalized),
                 ("license_plate_normalized", "=", license_plate_normalized),
+                ("service_acquired", "=", service_acquired),
             ]
             if existing_records:
                 domain.append(("id", "not in", existing_records.ids))
@@ -174,6 +225,9 @@ class MegaJerseyContestParticipant(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         self._validate_participant_values(vals_list)
+        for vals in vals_list:
+            if not vals.get("code"):
+                vals["code"] = self._generate_unique_code()
         try:
             return super().create(vals_list)
         except IntegrityError:
