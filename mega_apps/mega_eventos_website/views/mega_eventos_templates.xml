@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="template_mega_eventos_landing" name="Mega Eventos">
+        <html lang="es">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <title>Eventos Mega</title>
+                <meta name="description" content="Conoce los próximos eventos y actívate con las novedades de Mega."/>
+                <style>
+                    * { box-sizing: border-box; }
+                    :root {
+                        --mega-ink: #071426;
+                        --mega-dark-tile: #0f172a;
+                        --mega-brand-green: #10b981;
+                        --mega-ring: rgba(0, 0, 0, 0.10);
+                    }
+                    body {
+                        margin: 0;
+                        min-height: 100vh;
+                        display: flex;
+                        flex-direction: column;
+                        font-family: Arial, Helvetica, sans-serif;
+                        color: var(--mega-ink);
+                        background: #ffffff;
+                    }
+                    body > footer {
+                        margin-top: auto;
+                    }
+                    .mega-eventos-brand-header {
+                        display: grid;
+                        place-items: center;
+                        padding: 10px 16px;
+                        background: var(--mega-brand-green);
+                    }
+                    .mega-eventos-brand-header__card {
+                        display: grid;
+                        place-items: center;
+                        width: 100%;
+                        max-width: 820px;
+                        min-height: 60px;
+                        padding: 8px 12px;
+                        border-radius: 12px;
+                        outline: 1px solid var(--mega-ring);
+                        background: rgba(255, 255, 255, 0.95);
+                    }
+                    .mega-eventos-brand-header__logo {
+                        display: block;
+                        max-height: 60px;
+                        width: auto;
+                        max-width: 100%;
+                        object-fit: contain;
+                    }
+                    @media (max-width: 640px) {
+                        .mega-eventos-brand-header__logo { max-height: 46px; }
+                    }
+
+                    .mega-eventos-promo {
+                        padding: 44px 16px 56px;
+                        background: #ffffff;
+                    }
+                    .mega-eventos-promo__grid {
+                        width: 100%;
+                        max-width: 820px;
+                        margin: 0 auto;
+                        display: grid;
+                        grid-template-columns: 1fr;
+                        gap: 20px;
+                    }
+                    .mega-eventos-tile {
+                        display: flex;
+                        align-items: center;
+                        gap: 24px;
+                        text-align: left;
+                        padding: 26px 32px;
+                        border-radius: 16px;
+                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10);
+                        outline: 1px solid rgba(0, 0, 0, 0.08);
+                    }
+                    .mega-eventos-tile--light {
+                        background: #ffffff;
+                        color: var(--mega-ink);
+                    }
+                    .mega-eventos-tile--dark {
+                        background: var(--mega-dark-tile);
+                        color: #ffffff;
+                        outline-color: rgba(0, 0, 0, 0.25);
+                    }
+                    .mega-eventos-tile__icon {
+                        display: block;
+                        flex: 0 0 auto;
+                        width: 66px;
+                        height: 66px;
+                        object-fit: contain;
+                    }
+                    /* icons/oil.svg and icons/battery.svg are drawn in dark ink; invert to white on a dark tile */
+                    .mega-eventos-tile--dark .mega-eventos-tile__icon--ink {
+                        filter: brightness(0) invert(1);
+                    }
+                    /* icons/tools.svg and icons/maintenance.svg are drawn in white; force to dark ink on a light tile */
+                    .mega-eventos-tile--light .mega-eventos-tile__icon--paper {
+                        filter: brightness(0);
+                    }
+                    .mega-eventos-tile__title {
+                        margin: 0;
+                        font-weight: 800;
+                        line-height: 1.3;
+                        font-size: 19px;
+                    }
+
+                    .mega-eventos-promo__legal {
+                        margin-top: 20px;
+                        color: var(--mega-muted, #647084);
+                        text-align: center;
+                        font-size: 12px;
+                        opacity: 0.9;
+                    }
+
+                    @media (max-width: 640px) {
+                        .mega-eventos-tile { padding: 18px 18px; gap: 16px; }
+                        .mega-eventos-tile__icon { width: 48px; height: 48px; }
+                        .mega-eventos-tile__title { font-size: 16px; }
+                    }
+
+                    .mega-eventos-footer__logo {
+                        display: block;
+                        max-height: 48px;
+                        width: auto;
+                        max-width: 100%;
+                        object-fit: contain;
+                        margin: 0 auto 6px;
+                    }
+                    .mega-eventos-footer__text {
+                        margin: 0;
+                        color: var(--mega-ink);
+                        font-size: 14px;
+                        font-weight: 600;
+                        text-align: center;
+                    }
+                </style>
+            </head>
+            <body>
+                <header class="mega-eventos-brand-header">
+                    <div class="mega-eventos-brand-header__card">
+                        <img
+                            class="mega-eventos-brand-header__logo"
+                            src="/mega_eventos_website/static/src/img/megatecnicentro-logo.svg"
+                            alt="Mega Tecnicentro"
+                        />
+                    </div>
+                </header>
+
+                <section class="mega-eventos-promo">
+                    <div class="mega-eventos-promo__grid">
+                        <div class="mega-eventos-tile mega-eventos-tile--dark">
+                            <img class="mega-eventos-tile__icon mega-eventos-tile__icon--ink" src="/mega_eventos_website/static/src/img/icons/oil.svg" alt=""/>
+                            <p class="mega-eventos-tile__title">10% cambio de aceite</p>
+                        </div>
+
+                        <div class="mega-eventos-tile mega-eventos-tile--light">
+                            <img class="mega-eventos-tile__icon mega-eventos-tile__icon--paper" src="/mega_eventos_website/static/src/img/icons/tools.svg" alt=""/>
+                            <p class="mega-eventos-tile__title">10% trabajos autorizados</p>
+                        </div>
+
+                        <div class="mega-eventos-tile mega-eventos-tile--dark">
+                            <img class="mega-eventos-tile__icon mega-eventos-tile__icon--paper" src="/mega_eventos_website/static/src/img/icons/maintenance.svg" alt=""/>
+                            <p class="mega-eventos-tile__title">70% en MegaCombo 7 servicios</p>
+                        </div>
+
+                        <div class="mega-eventos-tile mega-eventos-tile--light">
+                            <img class="mega-eventos-tile__icon mega-eventos-tile__icon--ink" src="/mega_eventos_website/static/src/img/icons/battery.svg" alt=""/>
+                            <p class="mega-eventos-tile__title">Revisión GRATIS de batería</p>
+                        </div>
+                    </div>
+                    <div class="mega-eventos-promo__legal">Fechas y cupos sujetos a confirmación*</div>
+                </section>
+            </body>
+        </html>
+    </template>
+</odoo>
