@@ -290,6 +290,47 @@
                         .mega-eventos-modal__form { grid-template-columns: 1fr; }
                         .mega-eventos-modal { padding: 22px; }
                     }
+
+                    .mega-eventos-modal__success {
+                        text-align: center;
+                        padding: 12px 0 4px;
+                    }
+                    .mega-eventos-modal__success[hidden] { display: none; }
+                    .mega-eventos-modal__success-icon {
+                        display: inline-grid;
+                        place-items: center;
+                        width: 64px;
+                        height: 64px;
+                        margin: 0 auto 16px;
+                        border-radius: 50%;
+                        background: var(--mega-brand-green);
+                        color: #ffffff;
+                        font-size: 32px;
+                        font-weight: 800;
+                    }
+                    .mega-eventos-modal__success-title {
+                        margin: 0 0 10px;
+                        font-size: 22px;
+                        color: var(--mega-ink);
+                    }
+                    .mega-eventos-modal__success-code {
+                        margin: 0 0 14px;
+                        font-size: 15px;
+                        color: var(--mega-ink);
+                    }
+                    .mega-eventos-modal__success-code strong {
+                        color: #05683f;
+                        background: #ecfdf5;
+                        border: 1px solid #a7f0d3;
+                        border-radius: 6px;
+                        padding: 2px 10px;
+                    }
+                    .mega-eventos-modal__success-text {
+                        margin: 0 0 22px;
+                        font-size: 15px;
+                        line-height: 1.5;
+                        color: #354157;
+                    }
                 </style>
             </head>
             <body>
@@ -312,7 +353,7 @@
                                 <button
                                     type="button"
                                     class="mega-eventos-tile__cta js-mega-eventos-open"
-                                    data-service="cambio_aceite"
+                                    data-service="eventos_cambio_aceite"
                                     data-label="10% cambio de aceite"
                                 >Inscribirme</button>
                             </div>
@@ -338,7 +379,7 @@
                                 <button
                                     type="button"
                                     class="mega-eventos-tile__cta js-mega-eventos-open"
-                                    data-service="mega_combo"
+                                    data-service="eventos_mega_combo"
                                     data-label="70% en MegaCombo 7 servicios"
                                 >Inscribirme</button>
                             </div>
@@ -412,6 +453,16 @@
                                 <button type="button" class="mega-eventos-modal__cancel" id="mega-eventos-modal-cancel">Cancelar</button>
                             </div>
                         </form>
+
+                        <div id="mega-eventos-modal-success" class="mega-eventos-modal__success" hidden="hidden">
+                            <div class="mega-eventos-modal__success-icon">&#10003;</div>
+                            <h3 class="mega-eventos-modal__success-title">¡Ya aseguraste tu bono!</h3>
+                            <p class="mega-eventos-modal__success-code">Tu código es <strong id="mega-eventos-success-code"></strong></p>
+                            <p class="mega-eventos-modal__success-text">
+                                Por favor agenda tu cita con un asesor de Mega Tecnicentro para hacer válido tu beneficio.
+                            </p>
+                            <button type="button" class="mega-eventos-modal__submit" id="mega-eventos-modal-success-close">Cerrar</button>
+                        </div>
                     </div>
                 </div>
 
@@ -425,17 +476,25 @@
                         var serviceField = document.getElementById('mega-eventos-field-service');
                         var benefitLabel = document.getElementById('mega-eventos-modal-benefit');
                         var acceptField = document.getElementById('mega-eventos-field-accept');
+                        var successView = document.getElementById('mega-eventos-modal-success');
+                        var successCode = document.getElementById('mega-eventos-success-code');
+                        var successCloseButton = document.getElementById('mega-eventos-modal-success-close');
+
+                        function updateSubmitState() {
+                            submitButton.disabled = !form.checkValidity();
+                        }
 
                         function openModal(serviceValue, label) {
                             form.reset();
                             form.hidden = false;
                             form.style.display = '';
+                            successView.hidden = true;
                             serviceField.value = serviceValue;
                             benefitLabel.textContent = label;
                             alertBox.hidden = true;
                             alertBox.className = 'mega-eventos-modal__alert';
-                            submitButton.disabled = false;
                             submitButton.textContent = 'Inscribirme';
+                            updateSubmitState();
                             overlay.hidden = false;
                             document.body.style.overflow = 'hidden';
                         }
@@ -444,6 +503,10 @@
                             overlay.hidden = true;
                             document.body.style.overflow = '';
                         }
+
+                        form.addEventListener('input', updateSubmitState);
+                        form.addEventListener('change', updateSubmitState);
+                        successCloseButton.addEventListener('click', closeModal);
 
                         document.querySelectorAll('.js-mega-eventos-open').forEach(function (button) {
                             button.addEventListener('click', function () {
@@ -497,12 +560,12 @@
                                 .then(function (data) {
                                     var result = (data && data.result) || {};
                                     if (result.success) {
-                                        alertBox.className = 'mega-eventos-modal__alert mega-eventos-modal__alert--success';
-                                        alertBox.textContent = 'Inscripción exitosa. Tu código es ' + result.code + '.';
-                                        alertBox.hidden = false;
+                                        alertBox.hidden = true;
                                         form.hidden = true;
                                         form.style.display = 'none';
                                         form.reset();
+                                        successCode.textContent = result.code;
+                                        successView.hidden = false;
                                     } else {
                                         var errors = (result.errors && result.errors.length)
                                             ? result.errors

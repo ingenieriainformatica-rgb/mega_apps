@@ -17,9 +17,9 @@ REQUIRED_FIELDS = (
     "vehicle_info",
 )
 SERVICE_OPTIONS = {
-    "cambio_aceite",
+    "eventos_cambio_aceite",
     "trabajos_autorizados",
-    "mega_combo",
+    "eventos_mega_combo",
     "revision_bateria",
 }
 

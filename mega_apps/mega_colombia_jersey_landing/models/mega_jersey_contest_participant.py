@@ -11,6 +11,7 @@ from odoo.exceptions import ValidationError  # type: ignore
 DUPLICATE_PARTICIPANT_MESSAGE = (
     "Ya existe una inscripción registrada para esta cédula y esta placa."
 )
+DUPLICATE_PLATE_MESSAGE = "Esta placa ya tiene un bono registrado."
 LEGACY_VAT_CONSTRAINT = "mega_jersey_contest_participant_vat_normalized_uniq"
 CODE_PREFIX = "MEGA-"
 CODE_ALPHABET = "".join(
@@ -51,8 +52,10 @@ class MegaJerseyContestParticipant(models.Model):
             ("mega_combo", "MegaCombo"),
             ("mecanica_especializada", "Mecánica especializada"),
             ("cambio_aceite", "Cambio de aceite"),
-            ("trabajos_autorizados", "Trabajos autorizados"),
-            ("revision_bateria", "Revisión de batería"),
+            ("trabajos_autorizados", "10% trabajos autorizados"),
+            ("revision_bateria", "Revisión GRATIS de batería"),
+            ("eventos_cambio_aceite", "10% cambio de aceite"),
+            ("eventos_mega_combo", "70% en MegaCombo 7 servicios"),
         ],
         string="Servicio adquirido",
         required=True,
@@ -150,27 +153,39 @@ class MegaJerseyContestParticipant(models.Model):
             if not license_plate_normalized:
                 raise ValidationError("La placa debe contener al menos una letra o número.")
 
-            participant_key = (
-                registration_source,
-                vat_normalized,
-                license_plate_normalized,
-                service_acquired,
-            )
+            if registration_source == "mega_eventos":
+                # Mega Eventos: una sola inscripción por placa, sin importar
+                # la cédula o el beneficio solicitado.
+                participant_key = (registration_source, license_plate_normalized)
+                duplicate_message = DUPLICATE_PLATE_MESSAGE
+                domain = [
+                    ("registration_source", "=", registration_source),
+                    ("license_plate_normalized", "=", license_plate_normalized),
+                ]
+            else:
+                participant_key = (
+                    registration_source,
+                    vat_normalized,
+                    license_plate_normalized,
+                    service_acquired,
+                )
+                duplicate_message = DUPLICATE_PARTICIPANT_MESSAGE
+                domain = [
+                    ("registration_source", "=", registration_source),
+                    ("vat_normalized", "=", vat_normalized),
+                    ("license_plate_normalized", "=", license_plate_normalized),
+                    ("service_acquired", "=", service_acquired),
+                ]
+
             if participant_key in seen:
-                raise ValidationError(DUPLICATE_PARTICIPANT_MESSAGE)
+                raise ValidationError(duplicate_message)
             seen[participant_key] = index
 
-            domain = [
-                ("registration_source", "=", registration_source),
-                ("vat_normalized", "=", vat_normalized),
-                ("license_plate_normalized", "=", license_plate_normalized),
-                ("service_acquired", "=", service_acquired),
-            ]
             if existing_records:
                 domain.append(("id", "not in", existing_records.ids))
 
             if self.sudo().search_count(domain):
-                raise ValidationError(DUPLICATE_PARTICIPANT_MESSAGE)
+                raise ValidationError(duplicate_message)
 
     def init(self):
         constraint_names = [
