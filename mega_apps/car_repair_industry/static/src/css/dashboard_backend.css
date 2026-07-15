@@ -38,6 +38,9 @@
 .activity_block_left.nth6{
     background : #6d73bb;
 }
+.activity_block_left.nth7{
+    background : #e67e22;
+}
 .activity_block .activity_block_left i{
     color: #ffffff;
     font-size: 40px;

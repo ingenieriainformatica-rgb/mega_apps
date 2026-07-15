@@ -19,7 +19,7 @@
             <h4 class="mt16 dashboard_data_h2">Car Repair Details</h4>
 
             <div class="col-md-12 mt64 row activity_content_main">
-                <div class="col-md-3" t-on-click="clickCarRepair">
+                <div class="col-md-4 mb-3" t-on-click="clickCarRepair">
                     <a class="CarRepairList">
                         <div class="activity_block">
                             <div class="activity_block_left nth1">
@@ -32,7 +32,7 @@
                         </div>
                     </a>
                 </div>
-                <div class="col-md-3" t-on-click= "clickAssignedtoTechnicians">
+                <div class="col-md-4 mb-3" t-on-click= "clickAssignedtoTechnicians">
                     <a class="AssignedtoTechnicians" data-activity_type="Assigned to Technicians" data-domain="[('state','=','in_progress')]">
                         <div class="activity_block">
                             <div class="activity_block_left nth2">
@@ -45,7 +45,7 @@
                         </div>
                     </a>
                 </div>
-                <div class="col-md-3" t-on-click= "clickCarDiagnosis">
+                <div class="col-md-4 mb-3" t-on-click= "clickCarDiagnosis">
                     <a class="CarDiagnosis">
                         <div class="activity_block">
                             <div class="activity_block_left nth3">
@@ -58,7 +58,20 @@
                         </div>
                     </a>
                 </div>
-                <div class="col-md-3" t-on-click="clickCarRepair">
+                <div class="col-md-4 mb-3" t-on-click="clickRoadTests">
+                    <a class="RoadTests">
+                        <div class="activity_block">
+                            <div class="activity_block_left nth7">
+                                <i class="fa fa-road"></i>
+                            </div>
+                            <div class="activity_block_right">
+                                <span class="a_name" t-esc="fleet_road_test_count" /><br/>
+                                <div class="a_name" data-activity_type="Pruebas de ruta pendientes">Pruebas de ruta pendientes</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4 mb-3" t-on-click="clickCarRepair">
                     <a class="CarRepairList" data-activity_type="Fleet Repair Done" data-domain="[('state','=','done')]">
                         <div class="activity_block">
                             <div class="activity_block_left nth4">
@@ -72,8 +85,8 @@
                     </a>
                 </div>
 
-                <h4 class="mt64 mb32 dashboard_data_h2 col-12">Other Details</h4>
-                <div class="col-md-3" t-on-click="clickWorkOrders">
+                <h4 class="mt-5 mb-3 dashboard_data_h2 col-12">Other Details</h4>
+                <div class="col-md-3 mb-3" t-on-click="clickWorkOrders">
                     <a class="WorkOrders">
                         <div class="activity_block">
                             <div class="activity_block_left nth5">
@@ -86,7 +99,7 @@
                         </div>
                     </a>
                 </div>
-                <div class="col-md-3" t-on-click="clickServiceType">
+                <div class="col-md-3 mb-3" t-on-click="clickServiceType">
                     <a class="a_name ServiceType">
                         <div class="activity_block">
                             <div class="activity_block_left nth6">

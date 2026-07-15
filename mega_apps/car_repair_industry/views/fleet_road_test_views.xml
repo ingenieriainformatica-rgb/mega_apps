@@ -10,6 +10,7 @@
                   decoration-info="state == 'assigned'"
                   decoration-warning="state == 'in_progress'"
                   decoration-muted="state == 'cancelled'">
+                <field name="repair_sequence" string="# Orden"/>
                 <field name="repair_id"/>
                 <field name="test_type"/>
                 <field name="requested_by_id"/>

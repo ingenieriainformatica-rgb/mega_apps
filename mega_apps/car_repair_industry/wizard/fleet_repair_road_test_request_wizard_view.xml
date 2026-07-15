@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_fleet_road_test_request_wizard_form" model="ir.ui.view">
+        <field name="name">fleet.road.test.request.wizard.form</field>
+        <field name="model">fleet.road.test.request.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Solicitar prueba de ruta">
+                <group>
+                    <field name="repair_id"/>
+                    <field name="test_type" widget="radio"/>
+                </group>
+                <group string="Observación">
+                    <field name="notes" nolabel="1" colspan="2"
+                           placeholder="Observaciones opcionales sobre la prueba solicitada…"/>
+                </group>
+                <footer>
+                    <button name="action_confirm"
+                            string="Solicitar prueba"
+                            type="object"
+                            class="oe_highlight"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

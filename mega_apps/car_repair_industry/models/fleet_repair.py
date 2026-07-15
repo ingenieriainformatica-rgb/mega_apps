@@ -885,22 +885,17 @@ class FleetRepair(models.Model):
         return True
 
     def action_flow_request_road_test(self):
-        self.write({
-            'service_flow_state': 'road_test_requested',
-            'road_test_requested_at': fields.Datetime.now(),
-            'closure_result': 'requires_road_test',
-        })
-        self._notify_repair_group(
-            'car_repair_industry.group_fleet_repair_service_manager',
-            _("Solicitud de prueba de ruta"),
-        )
-        for repair in self:
-            repair._notify_repair_user(
-                repair.road_test_user_id,
-                _("Se le asignó una prueba de ruta"),
-                _("Orden: %s") % (repair.sequence or repair.display_name),
-            )
-        return True
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Solicitar prueba de ruta'),
+            'res_model': 'fleet.road.test.request.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_repair_id': self.id,
+            },
+        }
 
     def action_flow_start_road_test(self):
         self.write({

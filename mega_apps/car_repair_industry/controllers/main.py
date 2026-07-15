@@ -3,6 +3,7 @@
 
 import base64
 from odoo import http, _
+from odoo.exceptions import AccessError
 from odoo.http import request
 from datetime import datetime, timedelta
 
@@ -128,6 +129,12 @@ class Appointment(http.Controller):
         fleet_repair_d = request.env['fleet.repair'].sudo().search([('state', '=', 'done')])
         fleet_workorder = request.env['fleet.workorder'].sudo().search([])
         fleet_service_type = request.env['service.type'].sudo().search([])
+        try:
+            fleet_road_test_count = request.env['fleet.road.test'].search_count([
+                ('state', 'in', ['requested', 'assigned', 'in_progress']),
+            ])
+        except AccessError:
+            fleet_road_test_count = 0
         dashboard_data = {
             'fleet_repair_count': len(fleet_repair),
             'fleet_diagnos_count': len(fleet_diagnose),
@@ -135,5 +142,6 @@ class Appointment(http.Controller):
             'fleet_repair_d_count': len(fleet_repair_d),
             'fleet_workorder_count': len(fleet_workorder),
             'fleet_service_type_count': len(fleet_service_type),
+            'fleet_road_test_count': fleet_road_test_count,
         }
         return dashboard_data

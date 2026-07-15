@@ -29,6 +29,7 @@ export class FleetRepairDasboard extends Component{
                 self.fleet_repair_d_count = result.fleet_repair_d_count;
                 self.fleet_workorder_count = result.fleet_workorder_count;
                 self.fleet_service_type_count = result.fleet_service_type_count;
+                self.fleet_road_test_count = result.fleet_road_test_count;
             });
             return Promise.all([def]);
 
@@ -111,8 +112,22 @@ export class FleetRepairDasboard extends Component{
         {
             on_reverse_breadcrumb: this.on_reverse_breadcrumb
         });
-    
-    }  
+
+    }
+
+    clickRoadTests (ev) {
+        ev.preventDefault();
+        this.action.doAction({
+            name: 'Pruebas de ruta pendientes',
+            type: 'ir.actions.act_window',
+            res_model: 'fleet.road.test',
+            res_id: false,
+            views: [[false, 'list'], [false, 'form']],
+            domain: [['state', 'in', ['requested', 'assigned', 'in_progress']]],
+        }, {
+            on_reverse_breadcrumb: this.on_reverse_breadcrumb,
+        });
+    }
 
 }
 

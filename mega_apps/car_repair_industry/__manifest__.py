@@ -36,6 +36,7 @@
         'wizard/fleet_repair_assign_to_head_tech_view.xml',
         'wizard/fleet_diagnose_assign_to_technician_view.xml',
         'wizard/fleet_repair_drive_upload_wizard_view.xml',
+        'wizard/fleet_repair_road_test_request_wizard_view.xml',
         'views/fleet_repair_view.xml',
         'views/fleet_repair_service_checklist_view.xml',
         'views/fleet_repair_reception_checklist_views.xml',

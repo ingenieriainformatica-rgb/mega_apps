@@ -13,6 +13,9 @@ class FleetRoadTest(models.Model):
         'fleet.repair', string='Orden de trabajo',
         required=True, ondelete='cascade', index=True,
     )
+    repair_sequence = fields.Char(
+        related='repair_id.sequence', string='# Orden', store=False,
+    )
     test_type = fields.Selection([
         ('before', 'Antes de la reparación'),
         ('during', 'Durante la reparación'),
