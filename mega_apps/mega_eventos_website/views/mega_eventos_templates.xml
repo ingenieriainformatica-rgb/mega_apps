@@ -58,7 +58,7 @@
 
                     .mega-eventos-promo {
                         padding: 48px 16px 56px;
-                        background: linear-gradient(180deg, #f4faf8 0%, #ffffff 220px);
+                        background: linear-gradient(180deg, #f4faf8 0%, #ffffff 260px);
                     }
                     .mega-eventos-intro {
                         max-width: 620px;
@@ -521,7 +521,7 @@
                                 <input type="checkbox" id="mega-eventos-field-accept" required="required"/>
                                 <span>
                                     Autorizo el tratamiento de mis datos personales y uso de imagen por parte de CENTRO DE SERVICIO AUTOMOTRIZ MEGA S.A.S., conforme a la
-                                    Política HABEAS-DATA v1 (pendiente de enlace).
+                                    Política HABEAS-DATA
                                 </span>
                             </label>
 
