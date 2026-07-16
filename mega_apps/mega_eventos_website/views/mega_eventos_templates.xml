@@ -202,11 +202,15 @@
                     }
 
                     .mega-eventos-promo__legal {
-                        margin-top: 26px;
-                        color: var(--mega-muted);
+                        display: table;
+                        margin: 26px auto 0;
+                        padding: 6px 16px;
+                        border-radius: 999px;
+                        background: rgba(255, 255, 255, 0.85);
+                        color: #3a4a5c;
+                        font-weight: 600;
                         text-align: center;
                         font-size: 12px;
-                        opacity: 0.9;
                     }
 
 @media (max-width: 640px) {
@@ -308,6 +312,9 @@
                         padding: 8px 12px;
                         font-size: 14px;
                         font-family: inherit;
+                    }
+                    .mega-eventos-field input.js-mega-eventos-uppercase {
+                        text-transform: uppercase;
                     }
                     .mega-eventos-field input:focus {
                         outline: none;
@@ -500,7 +507,7 @@
                             <input type="hidden" name="service_acquired" id="mega-eventos-field-service"/>
                             <div class="mega-eventos-field">
                                 <label for="mega-eventos-field-name">Nombre completo *</label>
-                                <input id="mega-eventos-field-name" name="name" type="text" required="required"/>
+                                <input id="mega-eventos-field-name" name="name" type="text" class="js-mega-eventos-uppercase" required="required"/>
                             </div>
                             <div class="mega-eventos-field">
                                 <label for="mega-eventos-field-vat">Cédula *</label>
@@ -520,11 +527,11 @@
                             </div>
                             <div class="mega-eventos-field">
                                 <label for="mega-eventos-field-plate">Placa *</label>
-                                <input id="mega-eventos-field-plate" name="license_plate" type="text" required="required"/>
+                                <input id="mega-eventos-field-plate" name="license_plate" type="text" class="js-mega-eventos-uppercase" required="required"/>
                             </div>
                             <div class="mega-eventos-field">
                                 <label for="mega-eventos-field-vehicle">Marca y modelo *</label>
-                                <input id="mega-eventos-field-vehicle" name="vehicle_info" type="text" required="required"/>
+                                <input id="mega-eventos-field-vehicle" name="vehicle_info" type="text" class="js-mega-eventos-uppercase" required="required"/>
                             </div>
 
                             <label class="mega-eventos-check">
@@ -594,6 +601,15 @@
                         form.addEventListener('input', updateSubmitState);
                         form.addEventListener('change', updateSubmitState);
                         successCloseButton.addEventListener('click', closeModal);
+
+                        form.querySelectorAll('.js-mega-eventos-uppercase').forEach(function (input) {
+                            input.addEventListener('input', function () {
+                                var selectionStart = input.selectionStart;
+                                var selectionEnd = input.selectionEnd;
+                                input.value = input.value.toUpperCase();
+                                input.setSelectionRange(selectionStart, selectionEnd);
+                            });
+                        });
 
                         document.querySelectorAll('.js-mega-eventos-open').forEach(function (button) {
                             button.addEventListener('click', function () {

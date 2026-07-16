@@ -22,6 +22,7 @@ SERVICE_OPTIONS = {
     "eventos_mega_combo",
     "revision_bateria",
 }
+UPPERCASE_FIELDS = ("name", "license_plate", "vehicle_info")
 
 
 class MegaEventosController(http.Controller):
@@ -57,6 +58,8 @@ class MegaEventosController(http.Controller):
             field_name: (post.get(field_name) or "").strip()
             for field_name in REQUIRED_FIELDS
         }
+        for field_name in UPPERCASE_FIELDS:
+            form[field_name] = form[field_name].upper()
         service_acquired = (post.get("service_acquired") or "").strip()
         accept_data_policy = bool(post.get("accept_data_policy"))
 
