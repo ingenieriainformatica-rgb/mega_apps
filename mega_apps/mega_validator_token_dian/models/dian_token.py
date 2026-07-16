@@ -1032,14 +1032,3 @@ class MegaDianToken(models.Model):
             raise UserError(_("El token ya se encuentra en estado Borrador."))
 
         self.state = "draft"
-
-        return {
-            "type": "ir.actions.client",
-            "tag": "display_notification",
-            "params": {
-                "title": _("Token DIAN"),
-                "message": _("El token volvió a estado Borrador."),
-                "type": "success",
-                "sticky": False,
-            },
-        }
