@@ -58,6 +58,12 @@
             <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
         </record>
 
+        <record id="group_fleet_repair_portal_quoter" model="res.groups">
+            <field name="name">Portal - Cotizador</field>
+            <field name="category_id" ref="car_repair_industry.module_category_fleet_repair"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
+        </record>
+
         <record id="group_checklist_technical_manager" model="res.groups">
             <field name="name">Administrador Checklist</field>
             <field name="category_id" ref="car_repair_industry.module_category_fleet_repair"/>
@@ -209,6 +215,14 @@
             <field name="global" eval="False"/>
             <field name="domain_force">[('road_test_user_id', '=', user.id)]</field>
             <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_portal_road_test'))]"/>
+        </record>
+
+        <record id="car_repair_rule_portal_quoter_repair" model="ir.rule">
+            <field name="name">Portal cotizador - órdenes asignadas</field>
+            <field name="model_id" ref="model_fleet_repair"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[('purchase_quote_user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_portal_quoter'))]"/>
         </record>
 
         <!-- Reglas solicitudes de repuestos - portal técnico solo ve las suyas -->
