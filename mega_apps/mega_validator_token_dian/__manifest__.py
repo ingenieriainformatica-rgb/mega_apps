@@ -11,8 +11,9 @@
         "mail",
     ],
     "data": [
-        "security/ir.model.access.csv",
         "security/group.xml",
+        "security/ir.model.access.csv",
+        "sequences/ir_sequence.xml",
         "views/token_dian_name_views.xml",
         "wizard/dian_token_upload_wizard.xml",
         "views/token_dian_file_views.xml",

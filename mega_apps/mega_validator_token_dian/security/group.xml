@@ -1,7 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="group_token_dian_reset_to_draft" model="res.groups">
-        <field name="name">Token DIAN - Return to a draft</field>
-        <field name="category_id" ref="base.module_category_hidden"/>
+
+    <record id="module_category_dian" model="ir.module.category">
+        <field name="name">Conciliación DIAN</field>
+        <field name="sequence">95</field>
     </record>
+
+    <record id="group_dian_user" model="res.groups">
+        <field name="name">Usuario Conciliación DIAN</field>
+        <field name="category_id" ref="module_category_dian"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Puede consultar tokens DIAN y sus líneas, crear tokens y subir archivos.
+No puede procesar, validar, exportar, devolver a borrador ni eliminar.</field>
+    </record>
+
+    <record id="group_dian_manager" model="res.groups">
+        <field name="name">Responsable Conciliación DIAN</field>
+        <field name="category_id" ref="module_category_dian"/>
+        <field name="implied_ids" eval="[(4, ref('group_dian_user')), (4, ref('account.group_account_invoice'))]"/>
+        <field name="comment">Incluye los permisos de Usuario Conciliación DIAN.
+Puede procesar, exportar y validar tokens DIAN.
+Incluye el grupo "Facturación" de Contabilidad, necesario para consultar facturas de proveedor durante la conciliación.
+No puede devolver tokens a borrador ni eliminar tokens validados.</field>
+    </record>
+
+    <record id="group_dian_admin" model="res.groups">
+        <field name="name">Administrador Conciliación DIAN</field>
+        <field name="category_id" ref="module_category_dian"/>
+        <field name="implied_ids" eval="[(4, ref('group_dian_manager'))]"/>
+        <field name="comment">Incluye los permisos de Responsable Conciliación DIAN.
+Puede devolver tokens DIAN a borrador.
+Puede eliminar únicamente tokens en estado Borrador (regla ya aplicada en el modelo mega.dian.token).
+La purga de cargas incorrectas (líneas) queda pendiente para una fase posterior.</field>
+    </record>
+
 </odoo>

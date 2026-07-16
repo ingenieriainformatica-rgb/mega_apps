@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <search string="Buscar Token DIAN">
                 <field name="name"/>
+                <field name="token_code"/>
                 <field name="date_start"/>
                 <field name="date_end"/>
                 <separator/>
@@ -28,6 +29,7 @@
         <field name="model">mega.dian.token</field>
         <field name="arch" type="xml">
             <list string="Token DIAN">
+                <field name="token_code" string="Consecutivo"/>
                 <field name="name"/>
                 <field name="date_start"/>
                 <field name="date_end"/>
@@ -51,15 +53,15 @@
                 <header>
                     <button name="action_open_upload_wizard" type="object" string="Subir archivo" class="btn-primary" invisible="not id or state != 'draft'" confirm="¿Estás seguro de cargar el archivo del Token DIAN?"/>
 
-                    <button name="action_process_token" type="object" string="Procesar" class="btn-primary" icon="fa-cogs" invisible="not id or state != 'loaded'" confirm="¿Estás seguro de procesar este Token DIAN? El sistema validará todos los registros cargados."/>
+                    <button name="action_process_token" type="object" string="Procesar" class="btn-primary" icon="fa-cogs" invisible="not id or state != 'loaded'" groups="mega_validator_token_dian.group_dian_manager" confirm="¿Estás seguro de procesar este Token DIAN? El sistema validará todos los registros cargados."/>
 
-                    <button name="action_export_excel" type="object" class="btn-danger" invisible="not file_ids" icon="fa-download" help="Exportar a Excel"/>
+                    <button name="action_export_excel" type="object" class="btn-danger" invisible="not file_ids" icon="fa-download" help="Exportar a Excel" groups="mega_validator_token_dian.group_dian_manager"/>
 
-                    <button name="action_process_validated" type="object" string="Procesado y validado" class="btn-primary" icon="fa-refresh" invisible="not id or state not in ['loaded', 'processed']" confirm="¿Estás seguro de marcar este Token DIAN como Validado? Esta acción no tiene vuelta atrás."/>
+                    <button name="action_process_validated" type="object" string="Procesado y validado" class="btn-primary" icon="fa-refresh" invisible="not id or state not in ['loaded', 'processed']" groups="mega_validator_token_dian.group_dian_manager" confirm="¿Estás seguro de marcar este Token DIAN como Validado? Esta acción no tiene vuelta atrás."/>
 
                     <button name="action_open_file_ids_list" type="object" string="Ver registros" class="btn-secondary" invisible="not id or state not in ['validated']"/>
 
-                    <button name="action_reset_to_draft" type="object" string="Volver a borrador" class="btn-secondary" icon="fa-undo" groups="mega_validator_token_dian.group_token_dian_reset_to_draft" confirm="¿Estás seguro de regresar este Token DIAN al estado Borrador? Esta acción debe realizarse únicamente si el proceso requiere corrección o reproceso."/>
+                    <button name="action_reset_to_draft" type="object" string="Volver a borrador" class="btn-secondary" icon="fa-undo" groups="mega_validator_token_dian.group_dian_admin" confirm="¿Estás seguro de regresar este Token DIAN al estado Borrador? Esta acción debe realizarse únicamente si el proceso requiere corrección o reproceso."/>
 
                     <field name="state" widget="statusbar" statusbar_visible="draft,loaded,processed,validated,error"/>
                 </header>
@@ -68,8 +70,11 @@
                     <widget name="web_ribbon" title="TOKEN VALIDADO" bg_color="text-bg-success" invisible="state != 'validated'"/>
                     <widget name="web_ribbon" title="TOKEN CON ERROR" bg_color="text-bg-danger" invisible="state != 'error'"/>
                     <div class="oe_title">
+                        <span class="o_form_label text-muted">
+                            <field name="token_code"/>
+                        </span>
                         <h1>
-                            <field name="name" placeholder="Nombre del token DIAN" readonly="state != 'draft'"/>
+                            <field name="name"/>
                         </h1>
                     </div>
                     <group col="4">
@@ -78,6 +83,14 @@
                         </group>
                         <group col="2">
                             <field name="date_end" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <group col="4">
+                        <group col="2">
+                            <field name="create_uid" string="Creado por" readonly="1"/>
+                        </group>
+                        <group col="2">
+                            <field name="create_date" string="Fecha de creación" readonly="1"/>
                         </group>
                     </group>
                     <notebook>

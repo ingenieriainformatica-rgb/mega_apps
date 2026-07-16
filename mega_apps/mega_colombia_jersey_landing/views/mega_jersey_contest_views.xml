@@ -194,7 +194,8 @@
     <!-- Menús -->
     <menuitem
         id="menu_mega_jersey_contest_root"
-        name="Concurso Camiseta Selección"
+        name="Mega Eventos"
+        web_icon="mega_colombia_jersey_landing,static/description/icon.png"
         sequence="80"/>
 
     <menuitem

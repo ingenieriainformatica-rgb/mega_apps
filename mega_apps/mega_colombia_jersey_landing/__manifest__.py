@@ -1,5 +1,5 @@
 {
-    "name": "Mega Colombia Jersey Landing",
+    "name": "Mega Eventos",
     "version": "18.0.1.1.0",
     "category": "MegaTecnicentro/Website",
     "sequence": -450,

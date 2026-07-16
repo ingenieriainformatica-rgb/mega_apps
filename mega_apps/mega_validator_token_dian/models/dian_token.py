@@ -8,8 +8,8 @@ from datetime import datetime
 
 import xlsxwriter  # type: ignore
 
-from odoo import fields, models, _  # type: ignore
-from odoo.exceptions import UserError  # type: ignore
+from odoo import api, fields, models, _  # type: ignore
+from odoo.exceptions import UserError, AccessError, ValidationError  # type: ignore
 
 _logger = logging.getLogger(__name__)
 
@@ -26,10 +26,27 @@ class MegaDianToken(models.Model):
         "Documento soporte con no obligados": "in_invoice",
     }
 
+    _GROUP_MANAGER = "mega_validator_token_dian.group_dian_manager"
+    _GROUP_ADMIN = "mega_validator_token_dian.group_dian_admin"
+
+    _SPANISH_MONTHS = {
+        1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril",
+        5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
+        9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre",
+    }
+
     name = fields.Char(
         string="Nombre del token",
-        required=True,
+        compute="_compute_name",
+        store=True,
         tracking=True,
+    )
+
+    token_code = fields.Char(
+        string="Consecutivo",
+        readonly=True,
+        copy=False,
+        index=True,
     )
 
     date_start = fields.Date(
@@ -75,6 +92,42 @@ class MegaDianToken(models.Model):
         for rec in self:
             rec.file_count = len(rec.file_ids)
 
+    @api.depends("date_start", "date_end")
+    def _compute_name(self):
+        for rec in self:
+            rec.name = rec._format_date_range(rec.date_start, rec.date_end)
+
+    def _format_date_range(self, date_start, date_end):
+        if not date_start or not date_end:
+            return _("Nuevo Token DIAN")
+
+        month_start = self._SPANISH_MONTHS.get(date_start.month, "")
+        month_end = self._SPANISH_MONTHS.get(date_end.month, "")
+
+        if date_start.year == date_end.year and date_start.month == date_end.month:
+            return "%02d al %02d de %s del %s" % (
+                date_start.day, date_end.day, month_start, date_start.year,
+            )
+
+        if date_start.year == date_end.year:
+            return "%02d de %s al %02d de %s del %s" % (
+                date_start.day, month_start, date_end.day, month_end, date_start.year,
+            )
+
+        return "%02d de %s del %s al %02d de %s del %s" % (
+            date_start.day, month_start, date_start.year,
+            date_end.day, month_end, date_end.year,
+        )
+
+    @api.constrains("date_start", "date_end")
+    def _check_date_range(self):
+        for rec in self:
+            if rec.date_start and rec.date_end and rec.date_end < rec.date_start:
+                raise ValidationError(_(
+                    "La fecha final (%(date_end)s) no puede ser anterior "
+                    "a la fecha inicial (%(date_start)s)."
+                ) % {"date_end": rec.date_end, "date_start": rec.date_start})
+
     def action_open_upload_wizard(self):
         self.ensure_one()
         if not self.id:
@@ -92,16 +145,30 @@ class MegaDianToken(models.Model):
         }
 
     # ============================================================
+    # CONTROL DE PERMISOS (defensa en profundidad, no depender solo
+    # del atributo groups= de las vistas: estos métodos son también
+    # invocables por RPC/API directamente).
+    # ============================================================
+    def _check_dian_group(self, group_xmlid, action_label):
+        if not self.env.user.has_group(group_xmlid):
+            raise AccessError(_(
+                "No tienes permisos suficientes para %s. "
+                "Solicita a un administrador que te asigne el rol correspondiente "
+                "de Conciliación DIAN."
+            ) % action_label)
+
+    # ============================================================
     # PROCESAMIENTO / CONCILIACIÓN
     # ============================================================
     def action_process_token(self):
         self.ensure_one()
+        self._check_dian_group(self._GROUP_MANAGER, _("procesar tokens DIAN"))
 
         if not self.file_ids:
             raise UserError(_("No existen registros para procesar en este token DIAN."))
 
-        move_model = self.env["account.move"].sudo()
-        partner_model = self.env["res.partner"].sudo()
+        move_model = self.env["account.move"]
+        partner_model = self.env["res.partner"]
 
         all_reconciled = True
 
@@ -139,7 +206,49 @@ class MegaDianToken(models.Model):
         line_total = self._to_amount(line.total)
         line_iva = self._to_amount(line.iva)
 
-        partner = self._find_partner_by_vat(partner_model, nit_emisor)
+        # No se busca ninguna factura sin un proveedor identificado de forma
+        # inequívoca: NIT vacío, sin coincidencia o ambiguo NUNCA debe derivar
+        # en una búsqueda entre todos los proveedores.
+        if not nit_emisor:
+            self._write_line_result(
+                line=line,
+                status="not_found",
+                note=_(
+                    "El NIT emisor de la DIAN viene vacío; no fue posible identificar "
+                    "al proveedor. No se realizó búsqueda de facturas."
+                ),
+                is_reconciled=False,
+            )
+            return False
+
+        partners_found = self._find_partner_by_vat(partner_model, nit_emisor)
+
+        if not partners_found:
+            self._write_line_result(
+                line=line,
+                status="not_found",
+                note=_(
+                    "No existe un proveedor en Odoo con NIT '%s'. "
+                    "No se realizó búsqueda de facturas."
+                ) % nit_emisor,
+                is_reconciled=False,
+            )
+            return False
+
+        if len(partners_found) > 1:
+            self._write_line_result(
+                line=line,
+                status="not_found",
+                note=_(
+                    "Se encontraron %s proveedores distintos en Odoo con NIT '%s'. "
+                    "No se realizó búsqueda de facturas; se requiere depurar el "
+                    "maestro de terceros."
+                ) % (len(partners_found), nit_emisor),
+                is_reconciled=False,
+            )
+            return False
+
+        partner = partners_found
 
         ref_candidates = self._build_reference_candidates(prefijo=prefijo, folio=folio)
         candidate_moves = self._find_candidate_moves(
@@ -179,8 +288,8 @@ class MegaDianToken(models.Model):
 
         # 2) Coincidencia exacta: referencia + IVA + total ajustado (sin retenciones)
         exact_matches = reference_matches.filtered(
-            lambda m: self._amounts_equal(self._get_move_dian_iva(m), line_iva)
-            and self._amounts_equal_total(self._get_move_dian_total_adjusted(m), line_total)
+            lambda m: self._amounts_equal_with_tolerance(self._get_move_dian_iva(m), line_iva)
+            and self._amounts_equal_with_tolerance(self._get_move_dian_total_adjusted(m), line_total)
         )
 
         if len(exact_matches) == 1:
@@ -212,7 +321,7 @@ class MegaDianToken(models.Model):
 
         # 3) Coincidencia parcial por referencia + IVA
         partial_by_iva = reference_matches.filtered(
-            lambda m: self._amounts_equal(self._get_move_dian_iva(m), line_iva)
+            lambda m: self._amounts_equal_with_tolerance(self._get_move_dian_iva(m), line_iva)
         )
 
         if len(partial_by_iva) == 1:
@@ -240,7 +349,7 @@ class MegaDianToken(models.Model):
 
         # 4) Coincidencia parcial por referencia + total ajustado (sin retenciones)
         partial_by_total = reference_matches.filtered(
-            lambda m: self._amounts_equal_total(self._get_move_dian_total_adjusted(m), line_total)
+            lambda m: self._amounts_equal_with_tolerance(self._get_move_dian_total_adjusted(m), line_total)
         )
 
         if len(partial_by_total) == 1:
@@ -266,12 +375,29 @@ class MegaDianToken(models.Model):
             )
             return False
 
-        # 5) Coincidencia solo por referencia — montos no coinciden
-        move = reference_matches[:1]
-        if move:
+        # 5) Coincidencia solo por referencia — montos no coinciden.
+        # Prohibido elegir un candidato arbitrario: con más de un candidato
+        # por referencia, el resultado debe ser "multiple", nunca tomar
+        # reference_matches[0] silenciosamente.
+        if len(reference_matches) > 1:
+            self._write_line_result(
+                line=line,
+                status="multiple",
+                note=(
+                    _("Se encontraron múltiples notas crédito candidatas por referencia, "
+                      "sin coincidencia de IVA ni total.")
+                    if is_refund
+                    else _("Se encontraron múltiples facturas candidatas por referencia, "
+                           "sin coincidencia de IVA ni total.")
+                ),
+                is_reconciled=False,
+            )
+            return False
+
+        if len(reference_matches) == 1:
             self._write_line_match(
                 line=line,
-                move=move,
+                move=reference_matches,
                 status="partial",
                 note=(
                     _("La nota crédito coincide por referencia, pero el IVA o el total no coincide.")
@@ -298,9 +424,16 @@ class MegaDianToken(models.Model):
         return self._DIAN_TIPO_TO_MOVE_TYPE.get(tipo_documento)
 
     def _find_partner_by_vat(self, partner_model, vat):
+        """
+        Retorna TODOS los terceros que coinciden con el NIT (sin limit=1),
+        para que el llamador pueda detectar ambigüedad y evitar elegir uno
+        arbitrariamente. La normalización avanzada del NIT (dígito de
+        verificación, contactos comerciales/hijos) queda para una fase
+        posterior; aquí solo se corrige la selección automática silenciosa.
+        """
         if not vat:
             return partner_model.browse()
-        return partner_model.search([("vat", "ilike", vat)], limit=1)
+        return partner_model.search([("vat", "ilike", vat)])
 
     def _find_candidate_moves(self, move_model, partner, move_type="in_invoice"):
         domain = [
@@ -402,20 +535,12 @@ class MegaDianToken(models.Model):
     def _to_amount(self, value):
         return float(value or 0.0)
 
-    def _amounts_equal(self, left, right, precision="0.01"):
+    def _amounts_equal_with_tolerance(self, left, right):
         """
-        Compara montos con redondeo decimal a 2 posiciones (tolerancia 0.01).
-        Se usa para IVA y otras comparaciones de precisión estricta.
-        """
-        left_dec = Decimal(str(left or 0.0)).quantize(Decimal(precision), rounding=ROUND_HALF_UP)
-        right_dec = Decimal(str(right or 0.0)).quantize(Decimal(precision), rounding=ROUND_HALF_UP)
-        return left_dec == right_dec
-
-    def _amounts_equal_total(self, left, right):
-        """
-        Compara totales con tolerancia acordada de negocio: $500 COP
-        (no solo redondeo).
-        Solo se usa para comparar total ajustado vs total DIAN.
+        Compara montos con la tolerancia acordada de negocio: diferencia
+        absoluta <= $500 COP. Se usa tanto para IVA como para Total, de
+        forma que una diferencia de unos pocos pesos en cualquiera de los
+        dos no impida marcar el documento como conciliado.
         """
         diff = abs(Decimal(str(left or 0.0)) - Decimal(str(right or 0.0)))
         return diff <= Decimal("500.00")
@@ -585,6 +710,7 @@ class MegaDianToken(models.Model):
         - resaltado visual cuando existan diferencias
         """
         self.ensure_one()
+        self._check_dian_group(self._GROUP_MANAGER, _("exportar el token DIAN a Excel"))
 
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {"in_memory": True})
@@ -765,7 +891,10 @@ class MegaDianToken(models.Model):
         diff_iva = round(iva_dian - iva_odoo, 2)
         diff_total = round(total_dian - total_odoo_adjusted, 2)
 
-        has_iva_diff = abs(diff_iva) >= 0.01
+        # Mismo umbral de tolerancia de negocio ($500 COP) usado en la
+        # conciliación (_amounts_equal_with_tolerance), para que el resaltado
+        # visual del Excel sea consistente con el estado de validación.
+        has_iva_diff = abs(diff_iva) > 500.00
         has_total_diff = abs(diff_total) > 500.00
 
         fecha_dian = line.fecha_emision_dian
@@ -828,6 +957,7 @@ class MegaDianToken(models.Model):
     # ============================================================
     def action_process_validated(self):
         self.ensure_one()
+        self._check_dian_group(self._GROUP_MANAGER, _("validar tokens DIAN"))
         if not self.file_ids:
             raise UserError(_("No hay registros para validar en este Token DIAN."))
         if any(line.validation_status == "pending" for line in self.file_ids):
@@ -858,6 +988,28 @@ class MegaDianToken(models.Model):
         }
 
     # ============================================================
+    # "name" es 100% calculado a partir de date_start/date_end: se
+    # descarta cualquier valor recibido para ese campo, incluso por
+    # RPC/API directo, para que nunca quede desincronizado de las
+    # fechas (no depender solo de que la vista lo muestre sin widget).
+    # "token_code" es el consecutivo asignado por ir.sequence al crear.
+    # ============================================================
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            vals.pop("name", None)
+            vals.pop("token_code", None)
+            vals["token_code"] = self.env["ir.sequence"].next_by_code(
+                "mega.dian.token"
+            ) or _("Nuevo")
+        return super().create(vals_list)
+
+    def write(self, vals):
+        vals.pop("name", None)
+        vals.pop("token_code", None)
+        return super().write(vals)
+
+    # ============================================================
     # Unlink override para evitar eliminación de tokens no borrador
     # ============================================================
     def unlink(self):
@@ -874,6 +1026,7 @@ class MegaDianToken(models.Model):
     # ============================================================
     def action_reset_to_draft(self):
         self.ensure_one()
+        self._check_dian_group(self._GROUP_ADMIN, _("devolver tokens DIAN a borrador"))
 
         if self.state == "draft":
             raise UserError(_("El token ya se encuentra en estado Borrador."))

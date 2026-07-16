@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <menuitem id="menu_mega_dian_root" name="Dian" parent="account.menu_finance_configuration" sequence="1100"/>
+    <menuitem id="menu_mega_dian_root" name="Dian" parent="account.menu_finance_configuration" sequence="1100" groups="mega_validator_token_dian.group_dian_user"/>
 
-    <menuitem id="menu_mega_dian_config" name="Token DIAN" parent="mega_validator_token_dian.menu_mega_dian_root" action="mega_validator_token_dian.action_mega_dian_token" sequence="10"/>
+    <menuitem id="menu_mega_dian_config" name="Token DIAN" parent="mega_validator_token_dian.menu_mega_dian_root" action="mega_validator_token_dian.action_mega_dian_token" sequence="10" groups="mega_validator_token_dian.group_dian_user"/>
 
 </odoo>
