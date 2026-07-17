@@ -179,9 +179,9 @@
             <!-- Encabezado cotización: datos del Cotizador (solo para roles con acceso) -->
             <group string="Cotización" name="quoter_info" groups="car_repair_industry.group_fleet_repair_portal_quoter,car_repair_industry.group_fleet_repair_spare_warehouse,car_repair_industry.group_fleet_repair_service_manager,base.group_system">
               <group>
-                <field name="quoter_user_id" readonly="state in ('quoted', 'cancelled')"/>
-                <field name="pricelist_id" readonly="state in ('quoted', 'cancelled')"/>
-                <field name="currency_id" readonly="1"/>
+                <field name="quoter_user_id" readonly="state in ('quoted', 'cancelled')" domain="[('groups_id.name', '=', 'Portal - Cotizador')]" options="{'no_create': True, 'no_open': True}"/>
+                <field name="pricelist_id" invisible="1"/>
+                <field name="currency_id" invisible="1"/>
               </group>
               <group>
                 <field name="warehouse_id" readonly="state in ('quoted', 'cancelled')"/>
