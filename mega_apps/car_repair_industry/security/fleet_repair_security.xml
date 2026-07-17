@@ -285,5 +285,22 @@
             <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_service_manager'))]"/>
         </record>
 
+        <!-- Reglas portal Cotizador: ve solicitudes de reparaciones que le asignaron -->
+        <record id="car_repair_spare_request_rule_portal_quoter" model="ir.rule">
+            <field name="name">Solicitud repuestos - cotizador solo las asignadas</field>
+            <field name="model_id" ref="model_fleet_repair_spare_request"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[('repair_id.purchase_quote_user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_portal_quoter'))]"/>
+        </record>
+
+        <record id="car_repair_spare_request_line_rule_portal_quoter" model="ir.rule">
+            <field name="name">Líneas repuestos - cotizador solo las asignadas</field>
+            <field name="model_id" ref="model_fleet_repair_spare_request_line"/>
+            <field name="global" eval="False"/>
+            <field name="domain_force">[('request_id.repair_id.purchase_quote_user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('car_repair_industry.group_fleet_repair_portal_quoter'))]"/>
+        </record>
+
     </data>
 </odoo>

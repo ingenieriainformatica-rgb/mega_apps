@@ -26,6 +26,11 @@ class FleetRepairBranch(models.Model):
         related='sequence_id.number_next_actual',
         readonly=False,
     )
+    warehouse_id = fields.Many2one(
+        'stock.warehouse',
+        string='Almacén',
+        help='Almacén que se asignará automáticamente a las solicitudes de repuestos de esta sede.',
+    )
 
     _sql_constraints = [
         ('customer_type_uniq', 'unique(customer_type)', 'Ya existe una configuración para esta sede.'),
