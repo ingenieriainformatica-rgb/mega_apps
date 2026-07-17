@@ -135,6 +135,12 @@ class Appointment(http.Controller):
             ])
         except AccessError:
             fleet_road_test_count = 0
+        try:
+            spare_quote_request_count = request.env['fleet.repair.spare.request'].search_count([
+                ('state', '=', 'requested'),
+            ])
+        except AccessError:
+            spare_quote_request_count = 0
         dashboard_data = {
             'fleet_repair_count': len(fleet_repair),
             'fleet_diagnos_count': len(fleet_diagnose),
@@ -143,5 +149,6 @@ class Appointment(http.Controller):
             'fleet_workorder_count': len(fleet_workorder),
             'fleet_service_type_count': len(fleet_service_type),
             'fleet_road_test_count': fleet_road_test_count,
+            'spare_quote_request_count': spare_quote_request_count,
         }
         return dashboard_data

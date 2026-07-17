@@ -30,6 +30,7 @@ export class FleetRepairDasboard extends Component{
                 self.fleet_workorder_count = result.fleet_workorder_count;
                 self.fleet_service_type_count = result.fleet_service_type_count;
                 self.fleet_road_test_count = result.fleet_road_test_count;
+                self.spare_quote_request_count = result.spare_quote_request_count;
             });
             return Promise.all([def]);
 
@@ -113,6 +114,14 @@ export class FleetRepairDasboard extends Component{
             on_reverse_breadcrumb: this.on_reverse_breadcrumb
         });
 
+    }
+
+    clickSpareQuote (ev) {
+        ev.preventDefault();
+        this.action.doAction('car_repair_industry.action_spare_request_all', {
+            additionalContext: { search_default_requested: 1 },
+            on_reverse_breadcrumb: this.on_reverse_breadcrumb,
+        });
     }
 
     clickRoadTests (ev) {

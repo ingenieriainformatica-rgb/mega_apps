@@ -58,6 +58,19 @@
                         </div>
                     </a>
                 </div>
+                <div class="col-md-4 mb-3" t-on-click="clickSpareQuote">
+                    <a class="SpareQuote">
+                        <div class="activity_block">
+                            <div class="activity_block_left nth8" style="background: #27ae60;">
+                                <i class="fa fa-tags"></i>
+                            </div>
+                            <div class="activity_block_right">
+                                <span class="a_name" t-esc="spare_quote_request_count" /><br/>
+                                <div class="a_name" data-activity_type="Solicitudes de cotización">Solicitudes de cotización</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
                 <div class="col-md-4 mb-3" t-on-click="clickRoadTests">
                     <a class="RoadTests">
                         <div class="activity_block">

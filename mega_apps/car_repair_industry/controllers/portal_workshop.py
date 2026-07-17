@@ -1723,6 +1723,7 @@ _WORKSHOP_PORTAL_GROUPS = [
     'car_repair_industry.group_fleet_repair_portal_advisor',
     'car_repair_industry.group_fleet_repair_portal_technician',
     'car_repair_industry.group_fleet_repair_portal_road_test',
+    'car_repair_industry.group_fleet_repair_portal_quoter',
     'car_repair_industry.group_fleet_repair_service_manager',
     'car_repair_industry.group_fleet_repair_directeur_commercial',
 ]

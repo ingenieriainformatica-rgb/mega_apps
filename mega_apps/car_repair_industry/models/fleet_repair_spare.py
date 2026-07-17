@@ -54,6 +54,9 @@ class FleetRepairSpareRequest(models.Model):
         ondelete='cascade',
         index=True,
     )
+    repair_sequence = fields.Char(
+        related='repair_id.sequence', string='# Orden', store=False,
+    )
     requested_by_id = fields.Many2one(
         'res.users',
         string='Técnico solicitante',
