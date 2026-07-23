@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+  
+    <record id="view_move_form_inherit_long_numeric_for_bank_cash" model="ir.ui.view">
+      <field name="name">account.move.form.long.numeric.bank.cash</field>
+      <field name="model">account.move</field>
+      <field name="inherit_id" ref="account.view_move_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='line_ids']//field[@name='account_id']" position="attributes">
+            <attribute name="domain">[('company_ids','in',[company_id]),('deprecated','=',False)] + ( [('long_numeric_code','=',True)] or [])</attribute>
+            <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+      </field>
+    </record>
+
+    <record id="view_move_form_inherit_long_numeric_for_bank_cash_clientes" model="ir.ui.view">
+      <field name="name">account.move.form.long.numeric.bank.cash.clientes</field>
+      <field name="model">account.move</field>
+      <field name="inherit_id" ref="account.view_move_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='invoice_line_ids']//field[@name='account_id']" position="attributes">
+            <attribute name="domain">[('company_ids','in',[company_id]),('deprecated','=',False)] + ( [('long_numeric_code','=',True)] or [])</attribute>
+            <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+      </field>
+    </record>
+
+    <record id="view_move_form_account_journal" model="ir.ui.view">
+      <field name="name">account.move.form.account.journal</field>
+      <field name="model">account.journal</field>
+      <field name="inherit_id" ref="account.view_account_journal_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='default_account_id']" position="attributes">
+            <attribute name="domain">[('company_ids','in',[company_id]),('deprecated','=',False)] + ( [('long_numeric_code','=',True)] or [])</attribute>
+            <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+      </field>
+    </record>
+
+    <record id="view_move_product_category" model="ir.ui.view">
+      <field name="name">product.category.form.account.domain</field>
+      <field name="model">product.category</field>
+      <field name="inherit_id" ref="product.product_category_form_view"/>
+      <field name="priority" eval="50"/>
+      <field name="arch" type="xml">
+
+        <!-- Cuenta de diferencia de precio -->
+        <xpath expr="//field[@name='property_account_creditor_price_difference_categ']" position="attributes">
+          <attribute name="domain">
+            [('company_ids','in', allowed_company_ids),
+            ('deprecated','=', False),
+            ('long_numeric_code','=', True)]
+          </attribute>
+          <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+
+        <!-- Cuenta de ingresos -->
+        <xpath expr="//field[@name='property_account_income_categ_id']" position="attributes">
+          <attribute name="domain">
+            [('company_ids','in', allowed_company_ids),
+            ('deprecated','=', False),
+            ('long_numeric_code','=', True)]
+          </attribute>
+          <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+
+        <!-- Cuenta de gastos -->
+        <xpath expr="//field[@name='property_account_expense_categ_id']" position="attributes">
+          <attribute name="domain">
+            [('company_ids','in', allowed_company_ids),
+            ('deprecated','=', False),
+            ('long_numeric_code','=', True)]
+          </attribute>
+          <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+
+        <!-- Cuenta de valoración de existencias -->
+        <xpath expr="//field[@name='property_stock_valuation_account_id']" position="attributes">
+          <attribute name="domain">
+            [('company_ids','in', allowed_company_ids),
+            ('deprecated','=', False),
+            ('long_numeric_code','=', True)]
+          </attribute>
+          <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+
+        <!-- Cuenta de entrada de existencias -->
+        <xpath expr="//field[@name='property_stock_account_input_categ_id']" position="attributes">
+          <attribute name="domain">
+            [('company_ids','in', allowed_company_ids),
+            ('deprecated','=', False),
+            ('long_numeric_code','=', True)]
+          </attribute>
+          <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+
+        <!-- Cuenta de salida de existencias -->
+        <xpath expr="//field[@name='property_stock_account_output_categ_id']" position="attributes">
+          <attribute name="domain">
+            [('company_ids','in', allowed_company_ids),
+            ('deprecated','=', False),
+            ('long_numeric_code','=', True)]
+          </attribute>
+          <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+
+        <!-- Cuenta de producción  -->
+        <xpath expr="//field[@name='property_stock_account_production_cost_id']" position="attributes">
+          <attribute name="domain">
+            [('company_ids','in', allowed_company_ids),
+            ('deprecated','=', False),
+            ('long_numeric_code','=', True)]
+          </attribute>
+          <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+
+      </field>
+    </record>
+
+    <record id="view_category_downpayment_domain" model="ir.ui.view">
+      <field name="name">product.category.form.downpayment.domain</field>
+      <field name="model">product.category</field>
+      <!-- hereda de la vista de VENTAS que agrega el campo de anticipo -->
+      <field name="inherit_id" ref="sale.view_category_property_form"/>
+      <field name="priority" eval="90"/>
+      <field name="arch" type="xml">
+
+        <xpath expr="//field[@name='property_account_downpayment_categ_id']" position="attributes">
+          <attribute name="domain">
+            [('company_ids','in', allowed_company_ids),
+            ('deprecated','=', False),
+            ('long_numeric_code','=', True),
+            ('account_type','not in', ['asset_receivable','liability_payable', 'asset_cash','liability_credit_card','off_balance'])]
+          </attribute>
+          <attribute name="options">{'no_create': True, 'no_quick_create': True, 'no_open': True}</attribute>
+        </xpath>
+
+      </field>
+    </record>
+
+  </data>
+</odoo>
+

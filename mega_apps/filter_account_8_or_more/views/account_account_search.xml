@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_account_search_inherit_long_numeric" model="ir.ui.view">
+      <field name="name">account.account.search.long.numeric</field>
+      <field name="model">account.account</field>
+      <field name="inherit_id" ref="account.view_account_search"/>
+      <field name="arch" type="xml">
+        <xpath expr="//search" position="inside">
+          <separator/>
+          <filter string="Códigos 8+ dígitos" name="long_numeric_codes" domain="[('long_numeric_code','=',True)]"/>
+        </xpath>
+      </field>
+    </record>
+
+
+    <record id="view_account_account_form_inherit" model="ir.ui.view">
+        <field name="name">account.account.form.inherit</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_form"/>
+        <field name="arch" type="xml">
+            <!-- Insertamos en el notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Cuenta de movimiento!!!">
+                    <group>
+                        <field name="long_numeric_code" string="¿Cuentas de movimientos?" widget="boolean_toggle"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    
+
+</odoo>
