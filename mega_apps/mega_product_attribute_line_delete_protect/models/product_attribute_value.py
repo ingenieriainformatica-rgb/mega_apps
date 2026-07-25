@@ -6,13 +6,13 @@ from odoo.exceptions import UserError  # type: ignore
 _GROUP = "mega_product_attribute_line_delete_protect.group_product_attribute_line_manager"
 
 
-class ProductTemplateAttributeLine(models.Model):
-    _inherit = "product.template.attribute.line"
+class ProductAttributeValue(models.Model):
+    _inherit = "product.attribute.value"
 
     def _check_attribute_manager(self):
-        # env.su is True only for genuine superuser contexts (module
-        # install/upgrade XML data loading with uid == SUPERUSER_ID), never
-        # for a regular user's own sudo() call - this module makes none.
+        # See product_attribute.py: env.su only reflects genuine superuser
+        # contexts (e.g. module install/upgrade data loading), never a
+        # regular user's own sudo() call from this module.
         if self.env.su or self.env.user.has_group(_GROUP):
             return
         raise UserError(_(
