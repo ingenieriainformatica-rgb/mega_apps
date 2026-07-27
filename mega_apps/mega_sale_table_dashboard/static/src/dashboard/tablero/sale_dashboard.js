@@ -8,9 +8,6 @@ import { rpc } from "@web/core/network/rpc";
 
 // ── Componentes existentes (sin cambios) ─────────────────────────
 import { DateFilterBar } from "../filter/filter";
-import { Informe } from "../informe/informe";
-import { InvoiceList } from "../InvoiceList/invoice_list";
-import { Advisor } from "../advisor/advisor";
 
 // ── Componentes nuevos Sprint 1 ──────────────────────────────────
 import { KpiBanner } from "../kpi_banner/kpi_banner";
@@ -23,9 +20,6 @@ export default class MegaSaleDashboard extends Component {
     static components = {
         Layout,
         DateFilterBar,
-        Informe,
-        InvoiceList,
-        Advisor,
         KpiBanner,
         KpiBannerSkeleton,
     };
@@ -40,6 +34,7 @@ export default class MegaSaleDashboard extends Component {
         this.display     = { controlPanel: {} };
         this.statistics  = useState(useService("sales.statistics"));
         this.notification = useService("notification");
+        this.actionService = useService("action");
 
         this.state = useState({
             loadingWarehouses: false,
@@ -132,6 +127,25 @@ export default class MegaSaleDashboard extends Component {
         } catch (e) {
             this.notification.add("Error cargando diarios del almacén.", { type: "danger" });
         }
+    }
+
+    openInvoice(ev) {
+        const raw = ev.currentTarget?.dataset?.id;
+        const invoiceId = raw ? parseInt(raw, 10) : NaN;
+
+        if (!Number.isInteger(invoiceId) || invoiceId <= 0) {
+            this.notification.add("ID de factura invalido.", { type: "warning" });
+            return;
+        }
+
+        this.actionService.doAction({
+            type: "ir.actions.act_window",
+            res_model: "account.move",
+            res_id: invoiceId,
+            views: [[false, "form"]],
+            view_mode: "form",
+            target: "new",
+        });
     }
 }
 

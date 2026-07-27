@@ -50,29 +50,192 @@
         />
 
         <!-- ── Layout de 3 columnas (existente, sin cambios) ───── -->
-        <div class="container-fluid mb-5 mt-3">
-          <div class="row g-3">
+        <div class="container-fluid mega-warehouse-dashboard mb-5 mt-3">
+          <t t-set="groups" t-value="statistics.sales.groups || []"/>
 
-            <!-- Columna 1: KPI por sede/diario -->
-            <div class="col-12 col-lg-3">
-              <Informe
-                data="statistics.sales.groups"
-                grand="statistics.sales.grand"
-                option="statistics.isReadyWarehouse"
-              />
+          <t t-if="!groups.length">
+            <div class="text-muted text-center py-4">
+              <i class="fa fa-info-circle me-1"/> Sin datos para el filtro seleccionado
             </div>
+          </t>
 
-            <!-- Columna 2: Asesores -->
-            <div class="col-12 col-lg-4">
-              <Advisor data="statistics.sales.groups"/>
-            </div>
+          <t t-foreach="groups" t-as="g" t-key="g.warehouse.id">
+            <details class="mega-warehouse-accordion" t-att-open="g_index &lt; 2 ? true : undefined">
+              <summary class="mega-warehouse-summary">
+                <span class="mega-warehouse-accent"/>
+                <span class="mega-warehouse-title text-truncate" t-att-title="g.warehouse.name">
+                  <t t-esc="g.warehouse.name"/>
+                </span>
+                <i class="fa fa-chevron-down mega-accordion-chevron"/>
+              </summary>
 
-            <!-- Columna 3: Listado de movimientos -->
-            <div class="col-12 col-lg-5">
-              <InvoiceList invoicesList="statistics.sales.groups"/>
-            </div>
+              <div class="mega-warehouse-content">
+                <section class="mega-summary-section">
+                  <div class="mega-section-title">
+                    <i class="fa fa-file-text-o"/>
+                    <span>Resumen de facturas y notas credito</span>
+                  </div>
 
-          </div>
+                  <div class="row g-3">
+                    <t t-foreach="g.journals || []" t-as="j" t-key="j.journal.id">
+                      <t t-set="kpi" t-value="j.is_credit_note_journal and j.notas_credito or j.facturado"/>
+                      <div class="col-12 col-md-6">
+                        <div class="mega-summary-card">
+                          <div class="mega-summary-card-title text-truncate" t-att-title="j.journal.name">
+                            <t t-esc="j.journal.name"/>
+                          </div>
+                          <div class="mega-summary-card-label">
+                            <t t-if="j.is_credit_note_journal">Notas credito</t>
+                            <t t-else="">Facturado</t>
+                          </div>
+                          <div class="mega-summary-card-value">
+                            Subtotal: $ <t t-esc="(((kpi &amp;&amp; kpi.subtotal_untaxed) || 0)).toLocaleString()"/>
+                          </div>
+                          <div class="mega-summary-card-meta">
+                            <span>$ <t t-esc="(((kpi &amp;&amp; kpi.total_sales) || 0)).toLocaleString()"/></span>
+                            <span class="mega-summary-dot">-</span>
+                            <span class="mega-summary-count">
+                              <t t-esc="((kpi &amp;&amp; kpi.count_invoices) || 0)"/>
+                              <t t-if="j.is_credit_note_journal"> notas</t>
+                              <t t-else=""> facturas</t>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </t>
+                  </div>
+                </section>
+
+                <details class="mega-inner-accordion">
+                  <summary class="mega-inner-summary">
+                    <span>
+                      <i class="fa fa-user me-2"/>
+                      Asesores
+                    </span>
+                    <i class="fa fa-chevron-down mega-accordion-chevron"/>
+                  </summary>
+
+                  <div class="mega-inner-content">
+                    <t t-foreach="g.journals || []" t-as="j" t-key="j.journal.id">
+                      <t t-set="rowsAdvisor" t-value="j.conceptos_totales || []"/>
+                      <t t-if="rowsAdvisor.length">
+                        <div class="mega-journal-header d-flex align-items-start justify-content-between gap-2 mt-3 mb-2">
+                          <div class="fw-bold text-truncate" t-att-title="j.journal.name" style="color:#1A3C6B;">
+                            <t t-esc="j.journal.name"/>
+                          </div>
+
+                          <t t-if="j.is_credit_note_journal">
+                            <span class="badge mega-journal-badge rounded-pill bg-light text-dark border">
+                              <i class="fa fa-rotate-left me-1"/> Nota credito
+                            </span>
+                          </t>
+                          <t t-else="">
+                            <span class="badge mega-journal-badge rounded-pill bg-light text-dark border">
+                              <i class="fa fa-book me-1"/> Diario
+                            </span>
+                          </t>
+                        </div>
+
+                        <div class="mega-result-table table-responsive bg-white">
+                          <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                              <tr>
+                                <th>#</th>
+                                <th>Asesor</th>
+                                <th>Subtotal</th>
+                                <th>Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <t t-foreach="rowsAdvisor" t-as="inv" t-key="(inv.concepto || ('row_' + inv_index))">
+                                <tr>
+                                  <td><t t-esc="inv.count"/></td>
+                                  <td><t t-esc="inv.concepto"/></td>
+                                  <td class="text-truncate">
+                                    $ <t t-esc="(inv.subtotal_untaxed || 0).toLocaleString()"/>
+                                  </td>
+                                  <td class="text-muted">
+                                    $ <t t-esc="(inv.total_sales || 0).toLocaleString()"/>
+                                  </td>
+                                </tr>
+                              </t>
+                            </tbody>
+                          </table>
+                        </div>
+                      </t>
+                    </t>
+                  </div>
+                </details>
+
+                <details class="mega-inner-accordion">
+                  <summary class="mega-inner-summary">
+                    <span>
+                      <i class="fa fa-bar-chart me-2"/>
+                      Movimientos por diario
+                    </span>
+                    <i class="fa fa-chevron-down mega-accordion-chevron"/>
+                  </summary>
+
+                  <div class="mega-inner-content">
+                    <t t-foreach="g.journals || []" t-as="j" t-key="j.journal.id">
+                      <t t-set="rows" t-value="j.moves || []"/>
+                      <t t-if="rows.length">
+                        <div class="mega-journal-panel mb-3 rounded-4 overflow-hidden">
+                          <div class="mega-journal-header d-flex justify-content-between align-items-center px-3 py-2 bg-white">
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="fw-semibold text-truncate" style="max-width: 60vw; color:#1A3C6B;" t-att-title="j.journal.name">
+                                <t t-esc="j.journal.name"/>
+                              </div>
+                            </div>
+
+                            <span class="badge mega-journal-badge rounded-pill bg-light text-dark border">
+                              <t t-esc="rows.length"/> registros
+                            </span>
+                          </div>
+
+                          <div class="mega-result-table table-responsive bg-white">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                              <thead class="table-light">
+                                <tr>
+                                  <th style="width:130px">Numero</th>
+                                  <th style="min-width:220px">Cliente</th>
+                                  <th style="min-width:260px">Concepto</th>
+                                  <th style="width:130px">Fecha</th>
+                                  <th class="text-end" style="width:170px">Subtotal</th>
+                                  <th class="text-end" style="width:170px">Total</th>
+                                </tr>
+                              </thead>
+
+                              <tbody>
+                                <t t-foreach="rows" t-as="inv" t-key="inv.id">
+                                  <tr class="cursor-pointer"
+                                      t-on-click="openInvoice"
+                                      t-att-data-id="inv.id"
+                                      title="Abrir documento"
+                                      style="cursor:pointer;">
+                                    <td class="fw-semibold"><t t-esc="inv.number"/></td>
+                                    <td class="text-truncate"><t t-esc="inv.partner"/></td>
+                                    <td class="text-truncate"><t t-esc="inv.concepto"/></td>
+                                    <td class="text-muted"><t t-esc="inv.invoice_date"/></td>
+                                    <td class="text-end">
+                                      $ <t t-esc="(inv.subtotal_untaxed || 0).toLocaleString()"/>
+                                    </td>
+                                    <td class="text-end fw-semibold">
+                                      $ <t t-esc="(inv.total || 0).toLocaleString()"/>
+                                    </td>
+                                  </tr>
+                                </t>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </t>
+                    </t>
+                  </div>
+                </details>
+              </div>
+            </details>
+          </t>
         </div>
 
       </t>

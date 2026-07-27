@@ -41,23 +41,23 @@
               <t t-foreach="wh.journals" t-as="j" t-key="j.journal.id">
                 <div class="col-12 col-md-6 col-lg-12">
 
-                  <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                    <div class="card-body p-3">
+                  <div class="card mega-result-card mega-kpi-result-card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-body mega-result-body p-3">
 
                       <!-- Título del diario -->
-                      <div class="d-flex align-items-start justify-content-between gap-2">
+                      <div class="mega-journal-header d-flex align-items-start justify-content-between gap-2">
                         <div class="fw-bold text-truncate" t-att-title="j.journal.name" style="color:#1A3C6B;">
                           <t t-esc="j.journal.name"/>
                         </div>
 
                         <!-- Badge: Diario o Nota crédito -->
                         <t t-if="j.is_credit_note_journal">
-                          <span class="badge rounded-pill bg-light text-dark border">
+                          <span class="badge mega-journal-badge rounded-pill bg-light text-dark border">
                             <i class="fa fa-rotate-left me-1"/> Nota crédito
                           </span>
                         </t>
                         <t t-else="">
-                          <span class="badge rounded-pill bg-light text-dark border">
+                          <span class="badge mega-journal-badge rounded-pill bg-light text-dark border">
                             <i class="fa fa-book me-1"/> Diario
                           </span>
                         </t>

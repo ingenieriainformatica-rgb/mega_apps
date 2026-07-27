@@ -15,7 +15,7 @@
         <div class="mega-filter-divider"/>
 
         <!-- Shortcuts de período -->
-        <div class="d-flex align-items-center gap-2">
+        <div class="mega-shortcut-group d-flex align-items-center gap-2">
           <t t-foreach="shortcuts" t-as="sc" t-key="sc.key">
             <button
               t-att-class="state.activeShortcut === sc.key
@@ -30,10 +30,10 @@
         <div class="mega-filter-divider"/>
 
         <!-- Rango de fechas con Odoo DatePicker nativo -->
-        <div class="d-flex align-items-center gap-3">
+        <div class="mega-date-range d-flex align-items-center gap-3">
 
           <!-- Desde -->
-          <div class="d-flex align-items-center gap-2">
+          <div class="mega-date-field d-flex align-items-center gap-2">
             <span class="mega-filter-label">Desde</span>
             <div t-ref="dateFromAnchor">
               <button class="mega-date-btn" t-on-click="openDateFrom">
@@ -46,7 +46,7 @@
           <span style="color:rgba(33,37,41,.20); font-size:16px;">→</span>
 
           <!-- Hasta -->
-          <div class="d-flex align-items-center gap-2">
+          <div class="mega-date-field d-flex align-items-center gap-2">
             <span class="mega-filter-label">Hasta</span>
             <div t-ref="dateToAnchor">
               <button class="mega-date-btn" t-on-click="openDateTo">
@@ -60,7 +60,7 @@
       </div>
 
       <!-- ══ Fila 2: Sede y Diario ════════════════════════════════ -->
-      <div class="d-flex align-items-center gap-4 flex-wrap mt-3">
+      <div class="mega-filter-select-row d-flex align-items-center gap-4 flex-wrap mt-3">
 
         <span class="mega-filter-section-label">
           <i class="fa fa-filter me-1"/>Vista
@@ -69,7 +69,7 @@
         <div class="mega-filter-divider"/>
 
         <!-- Sede -->
-        <div class="d-flex align-items-center gap-2">
+        <div class="mega-select-wrapper d-flex align-items-center gap-2">
           <span class="mega-filter-icon"><i class="fa fa-building-o"/></span>
           <select
             class="form-select mega-select"
@@ -86,7 +86,7 @@
         </div>
 
         <!-- Diario -->
-        <div class="d-flex align-items-center gap-2">
+        <div class="mega-select-wrapper d-flex align-items-center gap-2">
           <span class="mega-filter-icon"><i class="fa fa-book"/></span>
           <select
             class="form-select mega-select"

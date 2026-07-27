@@ -11,14 +11,14 @@
 
     <!-- ✅ Por sede -->
     <t t-foreach="groups" t-as="g" t-key="g.warehouse.id">
-      <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden"
+      <div class="card mega-result-card border-0 shadow-sm mb-4 rounded-4 overflow-hidden"
            style="box-shadow: 0 12px 26px rgba(0,0,0,.08);">
 
         <!-- Header sede -->
-        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3"
+        <div class="card-header mega-result-header bg-white d-flex justify-content-between align-items-center py-3"
              style="border-bottom: 1px solid rgba(26,60,107,.08);">
           <div class="d-flex align-items-center gap-2">
-            <span style="width:10px;height:28px;border-radius:8px;display:inline-block;background:#7FB342;"></span>
+            <span class="mega-result-accent" style="width:10px;height:28px;border-radius:8px;display:inline-block;background:#7FB342;"></span>
             <div>
               <div class="fw-bold text-uppercase" style="color:#1A3C6B;">
                 <t t-esc="g.warehouse.name"/>
@@ -27,13 +27,13 @@
             </div>
           </div>
 
-          <span class="badge rounded-pill bg-light text-dark border"
+          <span class="badge mega-journal-badge rounded-pill bg-light text-dark border"
                 style="padding:6px 10px;">
             <i class="fa fa-layer-group me-1"/> <t t-esc="(g.journals || []).length"/> diarios
           </span>
         </div>
 
-        <div class="card-body p-3 p-lg-4">
+        <div class="card-body mega-result-body p-3 p-lg-4">
 
           <!-- ✅ Por diario (panel) -->
           <t t-foreach="(g.journals || [])" t-as="j" t-key="j.journal.id">
@@ -42,11 +42,11 @@
             <!-- (Opcional) Ocultar diarios sin filas -->
             <t t-if="rows.length">
 
-              <div class="mb-3 rounded-4 overflow-hidden"
+              <div class="mega-journal-panel mb-3 rounded-4 overflow-hidden"
                    style="border:1px solid rgba(26,60,107,.10); background: rgba(26,60,107,.02);">
 
                 <!-- Header diario -->
-                <div class="d-flex justify-content-between align-items-center px-3 py-2 bg-white"
+                <div class="mega-journal-header d-flex justify-content-between align-items-center px-3 py-2 bg-white"
                      style="border-bottom: 1px solid rgba(26,60,107,.08);">
                   <div class="d-flex align-items-center gap-2">
                     <!-- <span class="badge rounded-pill bg-light text-dark border">
@@ -70,13 +70,13 @@
                     </t> -->
                   </div>
 
-                  <span class="badge rounded-pill bg-light text-dark border">
+                  <span class="badge mega-journal-badge rounded-pill bg-light text-dark border">
                     <t t-esc="rows.length"/> registros
                   </span>
                 </div>
 
                 <!-- Tabla -->
-                <div class="table-responsive bg-white">
+                <div class="mega-result-table table-responsive bg-white">
                   <table class="table table-sm table-hover align-middle mb-0">
                     <thead class="table-light">
                       <tr>

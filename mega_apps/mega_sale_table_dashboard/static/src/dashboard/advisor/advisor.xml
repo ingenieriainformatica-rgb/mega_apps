@@ -10,14 +10,14 @@
     </t>
 
     <t t-foreach="advisors" t-as="g" t-key="g.warehouse.id">
-        <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden"
+        <div class="card mega-result-card border-0 shadow-sm mb-4 rounded-4 overflow-hidden"
            style="box-shadow: 0 12px 26px rgba(0,0,0,.08);">
 
             <!-- Header sede -->
-            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3"
+            <div class="card-header mega-result-header bg-white d-flex justify-content-between align-items-center py-3"
                 style="border-bottom: 1px solid rgba(26,60,107,.08);">
                 <div class="d-flex align-items-center gap-2">
-                    <span style="width:10px;height:28px;border-radius:8px;display:inline-block;background:#003ff1;"></span>
+                    <span class="mega-result-accent" style="width:10px;height:28px;border-radius:8px;display:inline-block;background:#003ff1;"></span>
                     <div>
                     <div class="fw-bold text-uppercase" style="color:#1A3C6B;">
                         <t t-esc="g.warehouse.name"/>
@@ -27,32 +27,32 @@
                 </div>
             </div>
 
-            <div class="card-body p-3 p-lg-4">
+            <div class="card-body mega-result-body p-3 p-lg-4">
                 <!-- ✅ Por asesor -->
                 <t t-foreach="(g.journals || [])" t-as="j" t-key="j.journal.id">
 
                     <t t-set="rowsAdvisor" t-value="j.conceptos_totales || []"/>
                     <t t-if="rowsAdvisor.length">
                         <!-- Título del diario -->
-                        <div class="d-flex align-items-start justify-content-between gap-2 mt-3 mb-2">
+                        <div class="mega-journal-header d-flex align-items-start justify-content-between gap-2 mt-3 mb-2">
                             <div class="fw-bold text-truncate" t-att-title="j.journal.name" style="color:#1A3C6B;">
                             <t t-esc="j.journal.name"/>
                             </div>
 
                             <!-- Badge: Diario o Nota crédito -->
                             <t t-if="j.is_credit_note_journal">
-                            <span class="badge rounded-pill bg-light text-dark border">
+                            <span class="badge mega-journal-badge rounded-pill bg-light text-dark border">
                                 <i class="fa fa-rotate-left me-1"/> Nota crédito
                             </span>
                             </t>
                             <t t-else="">
-                            <span class="badge rounded-pill bg-light text-dark border">
+                            <span class="badge mega-journal-badge rounded-pill bg-light text-dark border">
                                 <i class="fa fa-book me-1"/> Diario
                             </span>
                             </t>
                         </div>
 
-                        <div class="table-responsive bg-white">
+                        <div class="mega-result-table table-responsive bg-white">
                             <table class="table table-sm table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
@@ -63,7 +63,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <t t-foreach="rowsAdvisor" t-as="inv" t-key="(inv.concepto || ('row_' + loop.index0))">
+                                    <t t-foreach="rowsAdvisor" t-as="inv" t-key="(inv.concepto || ('row_' + inv_index))">
 
                                         <tr>
                                             <td><t t-esc="inv.count"/></td>
