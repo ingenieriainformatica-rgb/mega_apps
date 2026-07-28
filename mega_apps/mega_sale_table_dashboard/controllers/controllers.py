@@ -4,7 +4,7 @@ from odoo import http  # type: ignore
 from .services.sales import (  # type: ignore
     get_sales_data,
 )
-from .services.utils import get_active_warehouses, get_sale_journals  # type: ignore
+from .services.utils import get_active_warehouses, get_sale_journals, get_advisors  # type: ignore
 
 _logger = logging.getLogger(__name__)
 
@@ -17,6 +17,7 @@ class SalesControllerDashboard(http.Controller):
         date_to = kw.get("date_to")
         warehouse_id = kw.get("warehouse_id")
         journal_id = kw.get("journal_id")
+        advisor_id = kw.get("advisor_id")
         try:
             return {
                 "sales": get_sales_data(
@@ -24,11 +25,25 @@ class SalesControllerDashboard(http.Controller):
                     date_to=date_to,
                     warehouse_id=warehouse_id,
                     journal_id=journal_id,
+                    advisor_id=advisor_id,
                 )
             }
         except Exception as e:
             _logger.error(f"Error getting sales statistics: {str(e)}")
             return {"error": "Failed to fetch sales statistics"}
+
+    @http.route("/mega_dashboard/get/advisors", type="json", auth="user")
+    def get_advisors_route(self, **kw):
+        try:
+            return {
+                "ok": True,
+                "items": [
+                    {"id": p.id, "name": p.name} for p in get_advisors()
+                ],
+            }
+        except Exception as e:
+            _logger.error(f"Error getting advisors: {str(e)}")
+            return {"error": "Failed to fetch advisors"}
 
     @http.route("/mega_dashboard/get/warehouses", type="json", auth="user")
     def get_warehouses(self, **kw):

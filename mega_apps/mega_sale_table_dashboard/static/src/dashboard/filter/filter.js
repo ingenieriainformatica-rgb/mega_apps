@@ -24,6 +24,8 @@ export class DateFilterBar extends Component {
         loadingWarehouses: { type: Boolean, optional: true },
         journals:          { type: Array,   optional: true },
         loadingJournals:   { type: Boolean, optional: true },
+        advisors:          { type: Array,   optional: true },
+        loadingAdvisors:   { type: Boolean, optional: true },
     };
 
     setup() {
@@ -34,6 +36,7 @@ export class DateFilterBar extends Component {
             date_to:        def.date_to,
             warehouse_id:   "allHeadquarters",
             journal_id:     "allJournal",
+            advisor_id:     "allAdvisors",
             activeShortcut: "month",
         });
 
@@ -144,6 +147,14 @@ export class DateFilterBar extends Component {
     }
 
     // ─────────────────────────────────────────────────────────────
+    // Cambio de asesor → recarga
+    // ─────────────────────────────────────────────────────────────
+    onChangeAdvisor(ev) {
+        this.state.advisor_id = ev.target.value || "allAdvisors";
+        this._emit();
+    }
+
+    // ─────────────────────────────────────────────────────────────
     // Emite el filtro actualizado al componente padre
     // ─────────────────────────────────────────────────────────────
     _emit() {
@@ -152,6 +163,7 @@ export class DateFilterBar extends Component {
             date_to:      this.state.date_to,
             warehouse_id: this.state.warehouse_id,
             journal_id:   this.state.journal_id,
+            advisor_id:   this.state.advisor_id,
         });
     }
 }

@@ -11,6 +11,8 @@
         onChangeWarehouse.bind="onChangeWarehouse"
         journals="state.journals"
         loadingJournals="state.loadingJournals"
+        advisors="state.advisors"
+        loadingAdvisors="state.loadingAdvisors"
       />
 
       <!-- ══════════════════════════════════════════════════════════
@@ -60,7 +62,7 @@
           </t>
 
           <t t-foreach="groups" t-as="g" t-key="g.warehouse.id">
-            <details class="mega-warehouse-accordion" t-att-open="g_index &lt; 2 ? true : undefined">
+            <details class="mega-warehouse-accordion">
               <summary class="mega-warehouse-summary">
                 <span class="mega-warehouse-accent"/>
                 <span class="mega-warehouse-title text-truncate" t-att-title="g.warehouse.name">

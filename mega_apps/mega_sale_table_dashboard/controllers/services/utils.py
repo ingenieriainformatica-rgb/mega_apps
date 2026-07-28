@@ -64,3 +64,9 @@ def get_sale_journals(warehouse_id=None):
 
     journals = Journal.search(domain, order="name")
     return journals
+
+
+def get_advisors():
+    """Contactos marcados como asesor (res.partner.is_advisor = True)."""
+    Partner = request.env["res.partner"].sudo()
+    return Partner.search([("is_advisor", "=", True)], order="name")

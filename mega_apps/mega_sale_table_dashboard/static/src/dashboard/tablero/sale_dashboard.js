@@ -41,10 +41,15 @@ export default class MegaSaleDashboard extends Component {
             warehouses:        [],
             journals:          [],
             loadingJournals:   false,
+            advisors:          [],
+            loadingAdvisors:   false,
         });
 
         // Carga de sedes para el filtro (independiente del auto-load de datos)
         this.loadWarehouses();
+
+        // Carga de asesores para el filtro (lista fija, no depende de sede/diario)
+        this.loadAdvisors();
 
         // Auto-load: carga datos del mes actual al entrar al dashboard
         this._autoLoad();
@@ -61,6 +66,7 @@ export default class MegaSaleDashboard extends Component {
             date_to,
             warehouse_id: "allHeadquarters",
             journal_id:   "allJournal",
+            advisor_id:   "allAdvisors",
         });
     }
 
@@ -82,6 +88,19 @@ export default class MegaSaleDashboard extends Component {
     }
 
     // ─────────────────────────────────────────────────────────────
+    // Carga la lista de asesores para el selector (res.partner.is_advisor)
+    // ─────────────────────────────────────────────────────────────
+    async loadAdvisors() {
+        try {
+            const res = await rpc("/mega_dashboard/get/advisors", {});
+            this.state.advisors = res?.items || [];
+            this.state.loadingAdvisors = this.state.advisors.length > 0;
+        } catch (e) {
+            this.notification.add("Error cargando asesores.", { type: "danger" });
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
     // onClickFilter: recibe el payload del FilterBar y aplica.
     //
     // Cambios v2:
@@ -93,6 +112,7 @@ export default class MegaSaleDashboard extends Component {
         const date_to      = payload?.date_to;
         const warehouse_id = payload?.warehouse_id || "allHeadquarters";
         const journal_id   = payload?.journal_id   ?? null;
+        const advisor_id   = payload?.advisor_id   ?? null;
 
         if (!date_from || !date_to) {
             this.notification.add(
@@ -110,7 +130,7 @@ export default class MegaSaleDashboard extends Component {
             return;
         }
 
-        await this.statistics.setRange({ date_from, date_to, warehouse_id, journal_id });
+        await this.statistics.setRange({ date_from, date_to, warehouse_id, journal_id, advisor_id });
     }
 
     // ─────────────────────────────────────────────────────────────

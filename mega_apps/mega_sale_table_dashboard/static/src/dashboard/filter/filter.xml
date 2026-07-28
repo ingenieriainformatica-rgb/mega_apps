@@ -105,6 +105,26 @@
           </select>
         </div>
 
+        <!-- Asesor -->
+        <div class="mega-select-wrapper d-flex align-items-center gap-2">
+          <span class="mega-filter-icon"><i class="fa fa-user-o"/></span>
+          <select
+            class="form-select mega-select"
+            t-on-change="onChangeAdvisor"
+            t-att-disabled="!props.loadingWarehouses">
+            <option value="allAdvisors"
+                    t-att-selected="state.advisor_id === 'allAdvisors'">
+              Todos los asesores
+            </option>
+            <t t-foreach="props.advisors or []" t-as="a" t-key="a.id">
+              <option t-att-value="a.id"
+                      t-att-selected="state.advisor_id == a.id">
+                <t t-esc="a.name"/>
+              </option>
+            </t>
+          </select>
+        </div>
+
         <!-- Spinner inicial -->
         <t t-if="!props.loadingWarehouses">
           <span class="text-muted d-flex align-items-center gap-1" style="font-size:13px;">
