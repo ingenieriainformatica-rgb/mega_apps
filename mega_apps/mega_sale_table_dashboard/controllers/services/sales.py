@@ -319,6 +319,11 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
             conceptos_list = [{"concepto": k, **val} for k, val in conceptos.items()]
             conceptos_list.sort(key=lambda x: x["total_sales"], reverse=True)
 
+            # Solo se muestra el diario si tiene facturas o notas crédito en
+            # el período/filtro actual - evita tarjetas vacías ($0 - 0 facturas).
+            if not (has_invoices or has_credit_notes):
+                continue
+
             wh_block["journals"].append({
                 "journal": {"id": j.id, "name": j.name},
                 "is_credit_note_journal": has_credit_notes and not has_invoices,
@@ -336,6 +341,7 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
                 "moves": moves,
             })
 
+        # La sede completa solo se muestra si le quedó al menos un diario con datos.
         if wh_block["journals"]:
             groups.append(wh_block)
 
