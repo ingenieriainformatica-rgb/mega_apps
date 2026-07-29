@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+  <!-- Categoría propia del módulo (no depende de ningún XML ID de otro
+       módulo/categoría estándar, cuya existencia puede variar entre
+       instalaciones). Se usa para el grupo existente. -->
+  <record id="category_contacts_general" model="ir.module.category">
+    <field name="name">Contactos (Mega)</field>
+    <field name="description">Permisos relacionados con el formulario de contactos personalizado por Mega.</field>
+    <field name="sequence">35</field>
+  </record>
+
   <!-- Grupo existente: solo controla la visibilidad del campo "Empresa
        relacionada" (parent_id) en el formulario de contactos. Se conserva
        tal cual, solo se corrige la categoría (antes apuntaba, por error de
@@ -7,7 +16,7 @@
        datos: la asignación es manual desde Ajustes. -->
   <record id="group_contact_company_menu_lock" model="res.groups">
     <field name="name">Company, Module Contact</field>
-    <field name="category_id" ref="base.module_category_contacts"/>
+    <field name="category_id" ref="category_contacts_general"/>
   </record>
 
   <!-- Categoría propia para la corrección controlada de identificación. -->
