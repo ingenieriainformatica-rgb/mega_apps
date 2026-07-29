@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_credit_note_vehicle_backfill_wizard_form" model="ir.ui.view">
+        <field name="name">mega.credit.note.vehicle.backfill.wizard.form</field>
+        <field name="model">mega.credit.note.vehicle.backfill.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Actualizar Vehículo en Notas Crédito Históricas">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="note_type" widget="radio"/>
+                    </group>
+                </group>
+                <group string="Resultado" invisible="state == 'draft'">
+                    <field name="count_found"/>
+                    <field name="count_to_update"/>
+                    <field name="count_skipped"/>
+                </group>
+                <footer>
+                    <button name="action_preview" type="object" string="Vista previa" class="btn-secondary"
+                            groups="mega_credit_note_copy_invoice_data.group_credit_note_vehicle_backfill"/>
+                    <button name="action_update" type="object" string="Actualizar" class="btn-primary"
+                            invisible="state != 'preview' or count_to_update == 0"
+                            confirm="Se copiará el vehículo desde la factura origen a las notas crédito encontradas. ¿Continuar?"
+                            groups="mega_credit_note_copy_invoice_data.group_credit_note_vehicle_backfill"/>
+                    <button string="Cerrar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_credit_note_vehicle_backfill_wizard" model="ir.actions.act_window">
+        <field name="name">Actualizar Vehículo en Notas Crédito Históricas</field>
+        <field name="res_model">mega.credit.note.vehicle.backfill.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="groups_id" eval="[(4, ref('group_credit_note_vehicle_backfill'))]"/>
+    </record>
+
+</odoo>

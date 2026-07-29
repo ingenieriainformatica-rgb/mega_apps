@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_credit_note_vehicle_backfill_wizard,mega.credit.note.vehicle.backfill.wizard,model_mega_credit_note_vehicle_backfill_wizard,mega_credit_note_copy_invoice_data.group_credit_note_vehicle_backfill,1,1,1,1

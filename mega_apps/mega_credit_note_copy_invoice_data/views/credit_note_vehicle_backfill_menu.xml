@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- account.menu_finance_receivables ("Customers") no exige un grupo propio
+         mas alla del menu raiz "Invoicing" (account.group_account_invoice o
+         account.group_account_readonly). account.menu_finance_configuration
+         SI exige ademas account.group_account_manager en su propio menuitem,
+         lo que ocultaria esta entrada a cualquier usuario que solo tenga
+         nuestro grupo backfill (sin ser tambien Gerente de Contabilidad) —
+         por eso NO se anida ahi. -->
+    <menuitem id="menu_credit_note_vehicle_backfill"
+              name="Actualizar Vehículo en Notas Crédito Históricas"
+              parent="account.menu_finance_receivables"
+              action="action_credit_note_vehicle_backfill_wizard"
+              groups="mega_credit_note_copy_invoice_data.group_credit_note_vehicle_backfill"
+              sequence="900"/>
+
+</odoo>
