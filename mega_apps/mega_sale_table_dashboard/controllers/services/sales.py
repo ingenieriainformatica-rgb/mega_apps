@@ -194,6 +194,86 @@ def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_typ
 
 
 # ─────────────────────────────────────────────────────────────────
+# Totales por cliente (empresa/contacto de la factura)
+# ─────────────────────────────────────────────────────────────────
+
+def _get_partner_totals_grouped(journals, date_from=None, date_to=None, move_type=None, negate=False, advisor_name=None):
+    """
+    Totales agrupados por (warehouse_id, journal_id, cliente).
+    Devuelve dict: (wh_id, journal_id) -> { partner_id -> {count, subtotal_untaxed, total_sales, partner_name, vat} }
+    """
+    Move = request.env["account.move"].sudo()
+
+    if not journals:
+        return {}
+
+    domain = [
+        ("company_id", "=", request.env.company.id),
+        ("state", "not in", ("draft", "cancel")),
+        ("journal_id", "in", journals.ids),
+    ]
+    if move_type:
+        domain.append(("move_type", "=", move_type))
+    if date_from:
+        domain.append(("invoice_date", ">=", date_from))
+    if date_to:
+        domain.append(("invoice_date", "<=", date_to))
+    if advisor_name:
+        domain.append(("x_studio_concepto", "=ilike", advisor_name))
+
+    sign = -1.0 if negate else 1.0
+
+    rows = Move.read_group(
+        domain=domain,
+        fields=["amount_untaxed:sum", "amount_total:sum", "id:count", "journal_id", "partner_id"],
+        groupby=["journal_id", "partner_id"],
+        lazy=False,
+    )
+
+    # journal_id -> wh_id (primera bodega)
+    j_wh_map = {j.id: (getattr(j, JOURNAL_WH_FIELD).ids or [None])[0] for j in journals}
+
+    # NIT de cada cliente en un solo query (evita N+1)
+    partner_ids = [r["partner_id"][0] for r in rows if r.get("partner_id")]
+    partners = request.env["res.partner"].sudo().browse(partner_ids)
+    vat_map = {p.id: (p.vat or "") for p in partners}
+
+    out = defaultdict(lambda: defaultdict(lambda: {
+        "count": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0,
+        "partner_name": "", "vat": "",
+    }))
+
+    for r in rows:
+        j_id = r["journal_id"][0] if r.get("journal_id") else None
+        if not j_id:
+            continue
+
+        wh_id = j_wh_map.get(j_id)
+        if not wh_id:
+            continue
+
+        if r.get("partner_id"):
+            p_id, p_name = r["partner_id"]
+        else:
+            p_id, p_name = 0, "SIN CLIENTE"
+
+        key = (wh_id, j_id)
+
+        cnt = int(r.get("__count", 0) or r.get("id_count", 0) or 0)
+        untaxed = float(r.get("amount_untaxed", 0.0) or r.get("amount_untaxed_sum", 0.0) or 0.0)
+        total = float(r.get("amount_total", 0.0) or r.get("amount_total_sum", 0.0) or 0.0)
+
+        bucket = out[key][p_id]
+        bucket["partner_name"] = p_name
+        bucket["vat"] = vat_map.get(p_id, "")
+        bucket["count"] += cnt
+        bucket["subtotal_untaxed"] += untaxed * sign
+        bucket["total_sales"] += total * sign
+
+    return out
+
+
+# ─────────────────────────────────────────────────────────────────
 # Totales globales rápidos — read_group sin cargar recordsets
 # Usados para calcular el período anterior de forma eficiente.
 # ─────────────────────────────────────────────────────────────────
@@ -273,6 +353,10 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
     inv_concept = _get_concept_totals_grouped(journals, date_from, date_to, "out_invoice", negate=False, advisor_name=advisor_name)
     ref_concept = _get_concept_totals_grouped(journals, date_from, date_to, "out_refund", negate=True, advisor_name=advisor_name)
 
+    # 5b) Totales por cliente (facturas + NC)
+    inv_partner = _get_partner_totals_grouped(journals, date_from, date_to, "out_invoice", negate=False, advisor_name=advisor_name)
+    ref_partner = _get_partner_totals_grouped(journals, date_from, date_to, "out_refund", negate=True, advisor_name=advisor_name)
+
     # 6) Armar respuesta por sede → diarios
     groups = []
     grand = {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
@@ -319,6 +403,28 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
             conceptos_list = [{"concepto": k, **val} for k, val in conceptos.items()]
             conceptos_list.sort(key=lambda x: x["total_sales"], reverse=True)
 
+            clientes = {}
+            for p_id, v in inv_partner.get(key, {}).items():
+                clientes[p_id] = {
+                    "partner_name": v["partner_name"],
+                    "vat": v["vat"],
+                    "count": int(v["count"]),
+                    "subtotal_untaxed": float(v["subtotal_untaxed"]),
+                    "total_sales": float(v["total_sales"]),
+                }
+            for p_id, v in ref_partner.get(key, {}).items():
+                if p_id not in clientes:
+                    clientes[p_id] = {
+                        "partner_name": v["partner_name"], "vat": v["vat"],
+                        "count": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0,
+                    }
+                clientes[p_id]["count"] += int(v["count"])
+                clientes[p_id]["subtotal_untaxed"] += float(v["subtotal_untaxed"])
+                clientes[p_id]["total_sales"] += float(v["total_sales"])
+
+            clientes_list = [val for val in clientes.values()]
+            clientes_list.sort(key=lambda x: x["total_sales"], reverse=True)
+
             # Solo se muestra el diario si tiene facturas o notas crédito en
             # el período/filtro actual - evita tarjetas vacías ($0 - 0 facturas).
             if not (has_invoices or has_credit_notes):
@@ -338,6 +444,7 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
                     "total_sales": float(r["total_sales"]),
                 },
                 "conceptos_totales": conceptos_list,
+                "clientes_totales": clientes_list,
                 "moves": moves,
             })
 

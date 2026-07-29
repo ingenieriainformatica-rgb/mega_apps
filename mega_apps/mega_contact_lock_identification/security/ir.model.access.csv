@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mega_contact_identification_correction,mega.contact.identification.correction,model_mega_contact_identification_correction,group_contact_identification_correction,1,1,1,0

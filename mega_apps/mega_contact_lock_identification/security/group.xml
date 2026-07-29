@@ -1,7 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+  <!-- Grupo existente: solo controla la visibilidad del campo "Empresa
+       relacionada" (parent_id) en el formulario de contactos. Se conserva
+       tal cual, solo se corrige la categoría (antes apuntaba, por error de
+       copiado, a la categoría de Inventario). No se le asignan usuarios por
+       datos: la asignación es manual desde Ajustes. -->
   <record id="group_contact_company_menu_lock" model="res.groups">
     <field name="name">Company, Module Contact</field>
-    <field name="category_id" ref="base.module_category_inventory"/>
+    <field name="category_id" ref="base.module_category_contacts"/>
+  </record>
+
+  <!-- Categoría propia para la corrección controlada de identificación. -->
+  <record id="category_contact_identification" model="ir.module.category">
+    <field name="name">Identificación de Contactos</field>
+    <field name="description">Permisos para corregir la identificación (NIT/cédula) de contactos con historial comercial o contable.</field>
+    <field name="sequence">36</field>
+  </record>
+
+  <!-- Grupo nuevo e independiente: NO reutiliza group_contact_company_menu_lock.
+       Sin usuarios asignados por datos: la asignación es manual, posterior
+       a la instalación, desde Ajustes > Usuarios y Compañías > Grupos. -->
+  <record id="group_contact_identification_correction" model="res.groups">
+    <field name="name">Mega Contactos / Corregir identificación</field>
+    <field name="category_id" ref="category_contact_identification"/>
+    <field name="comment">Permite corregir, mediante el asistente controlado, el tipo y número de identificación de contactos que ya tienen historial comercial o contable.</field>
   </record>
 </odoo>

@@ -5,9 +5,33 @@
         <field name="name">res.partner.form.lock.until.identification</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
+        <!-- Prioridad explícita: base_address_extended (city_id/city) también
+             hereda base.view_partner_form con prioridad por defecto (16).
+             Se fija más alta para garantizar que NUESTROS atributos sobre
+             esos mismos campos se apliquen al final y no se pierdan. -->
+        <field name="priority">20</field>
         <field name="arch" type="xml">
 
-            <!-- Alertas -->
+            <!-- Botón de corrección controlada: solo visible para el grupo
+                 dedicado, y solo tiene sentido si ya existe una identificación
+                 que corregir. La autorización real se revalida en Python
+                 (action_open_mega_identification_correction y write()). -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_mega_identification_correction"
+                        type="object"
+                        string="Corregir identificación"
+                        icon="fa-id-card"
+                        groups="mega_contact_lock_identification.group_contact_identification_correction"
+                        invisible="not vat"/>
+            </xpath>
+
+            <!-- Alertas: orden Persona/Empresa (ya es lo primero del formulario)
+                 -> Identificación -> Estado -> Ciudad -> resto.
+                 El País ya no es un paso manual: se precarga con el país de
+                 la compañía activa (ver default de country_id en Python) y
+                 el onchange de tipo de identificación ya corre con ese valor
+                 desde que se abre el formulario, así que no hace falta que
+                 el usuario lo vea/seleccione antes de identificarse. -->
             <xpath expr="//sheet" position="before">
                 <div class="alert alert-primary oe_edit_only fs-5 py-3" role="alert" invisible="vat">
                     <strong>1.</strong> Ingresa el
@@ -17,31 +41,67 @@
                         para habilitar los demás campos del contacto.
                 </div>
 
-                <div class="alert alert-warning oe_edit_only fs-5 py-3" role="alert" invisible="not vat or country_id">
-                    <strong>2.</strong> Selecciona el
-                    <span class="badge rounded-pill text-bg-warning">País</span>
-                        para continuar.
-                </div>
-
                 <div class="alert alert-info oe_edit_only fs-5 py-3" role="alert" invisible="not vat or not country_id or state_id">
-                    <strong>3.</strong> Selecciona el
+                    <strong>2.</strong> Selecciona el
                     <span class="badge rounded-pill text-bg-info">Estado</span>
                         para continuar.
                 </div>
 
-                <div class="alert alert-success oe_edit_only fs-5 py-3" role="alert" invisible="not vat or not country_id or not state_id or city">
-                    <strong>4.</strong> Ingresa la
+                <div class="alert alert-success oe_edit_only fs-5 py-3" role="alert" invisible="not vat or not country_id or not state_id or city_id or city">
+                    <strong>3.</strong> Ingresa la
                     <span class="badge rounded-pill text-bg-success">Ciudad</span>
                     para habilitar el resto de los campos.
                 </div>
             </xpath>
 
-            <!-- Ocultar label y bloque de dirección mientras no haya identificación -->
-            <xpath expr="//span[@name='address_name']" position="attributes">
+            <!-- El País vive dentro del bloque de dirección estándar de Odoo
+                 (o_address_format). Se oculta junto con el resto de la
+                 dirección hasta tener identificación: ya no hace falta que
+                 el usuario lo seleccione a mano de entrada, porque el
+                 default (país de la compañía activa) más el onchange que ya
+                 corre al abrir el formulario resuelven el tipo NIT/cédula
+                 sin intervención manual. Si el contacto termina siendo
+                 extranjero, el usuario puede corregir el país después de
+                 ingresar la identificación, como cualquier otro campo de
+                 dirección.
+
+                 IMPORTANTE: existen DOS <div class="o_address_format"> dentro
+                 de base.view_partner_form: el del encabezado del contacto y
+                 otro anidado en el sub-formulario de direcciones hijas
+                 (name="div_address", usado al crear/editar una dirección de
+                 entrega/facturación desde la pestaña "Contactos y
+                 Direcciones"). Se usa [not(@name)] para afectar solo el del
+                 encabezado; el de direcciones hijas se deja intacto para que
+                 nunca dependa de un vat propio (los hijos no lo necesitan). -->
+            <xpath expr="//div[hasclass('o_address_format')][not(@name)]/field[@name='street']" position="attributes">
                 <attribute name="invisible">not vat</attribute>
             </xpath>
-
-            <xpath expr="//div[@class='o_address_format']" position="attributes">
+            <xpath expr="//div[hasclass('o_address_format')][not(@name)]/field[@name='street2']" position="attributes">
+                <attribute name="invisible">not vat</attribute>
+            </xpath>
+            <!-- base_address_extended agrega city_id (ciudad estructurada,
+                 res.city) justo antes de city (texto libre) cuando el país
+                 exige ciudades estructuradas (country_id.enforce_cities,
+                 caso de Colombia). Con los dos campos activos a la vez el
+                 formulario mostraba "Medellín" duplicado. Se deja city_id
+                 como el único campo visible/usado en ese caso (además
+                 dispara el autocompletado nativo de C.P./Departamento vía
+                 res.city), y city solo se habilita para países que NO
+                 exigen ciudad estructurada. -->
+            <xpath expr="//div[hasclass('o_address_format')][not(@name)]/field[@name='city_id']" position="attributes">
+                <attribute name="invisible">not vat or not country_enforce_cities</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('o_address_format')][not(@name)]/field[@name='city']" position="attributes">
+                <attribute name="invisible">not vat or country_enforce_cities</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('o_address_format')][not(@name)]/field[@name='zip']" position="attributes">
+                <attribute name="invisible">not vat</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('o_address_format')][not(@name)]/field[@name='state_id']" position="attributes">
+                <attribute name="invisible">not vat</attribute>
+                <attribute name="readonly">not vat or not country_id</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('o_address_format')][not(@name)]//field[@name='country_id']" position="attributes">
                 <attribute name="invisible">not vat</attribute>
             </xpath>
 
@@ -54,10 +114,13 @@
                 <attribute name="readonly">not vat</attribute>
             </xpath>
 
+            <!-- "Empresa relacionada" (parent_id) queda oculto para todos en
+                 el encabezado del formulario, sin importar el grupo. El
+                 grupo group_contact_company_menu_lock se conserva definido
+                 (no se elimina), pero deja de tener efecto práctico aquí: ya
+                 no controla la visibilidad de ningún campo. -->
             <xpath expr="//field[@name='parent_id']" position="attributes">
-                <attribute name="groups">mega_contact_lock_identification.group_contact_company_menu_lock</attribute>
-                <attribute name="invisible">is_company</attribute>
-                <attribute name="readonly">not vat</attribute>
+                <attribute name="invisible">1</attribute>
             </xpath>
 
             <xpath expr="//field[@name='function']" position="attributes">
@@ -90,10 +153,6 @@
 
             <xpath expr="//field[@name='category_id']" position="attributes">
                 <attribute name="readonly">not vat</attribute>
-            </xpath>
-
-            <xpath expr="//field[@name='state_id']" position="attributes">
-                <attribute name="readonly">not vat or not country_id</attribute>
             </xpath>
 
         </field>

@@ -172,6 +172,69 @@
                 <details class="mega-inner-accordion">
                   <summary class="mega-inner-summary">
                     <span>
+                      <i class="fa fa-building me-2"/>
+                      Clientes
+                    </span>
+                    <i class="fa fa-chevron-down mega-accordion-chevron"/>
+                  </summary>
+
+                  <div class="mega-inner-content">
+                    <t t-foreach="g.journals || []" t-as="j" t-key="j.journal.id">
+                      <t t-set="rowsClients" t-value="j.clientes_totales || []"/>
+                      <t t-if="rowsClients.length">
+                        <div class="mega-journal-header d-flex align-items-start justify-content-between gap-2 mt-3 mb-2">
+                          <div class="fw-bold text-truncate" t-att-title="j.journal.name" style="color:#1A3C6B;">
+                            <t t-esc="j.journal.name"/>
+                          </div>
+
+                          <t t-if="j.is_credit_note_journal">
+                            <span class="badge mega-journal-badge rounded-pill bg-light text-dark border">
+                              <i class="fa fa-rotate-left me-1"/> Nota credito
+                            </span>
+                          </t>
+                          <t t-else="">
+                            <span class="badge mega-journal-badge rounded-pill bg-light text-dark border">
+                              <i class="fa fa-book me-1"/> Diario
+                            </span>
+                          </t>
+                        </div>
+
+                        <div class="mega-result-table table-responsive bg-white">
+                          <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                              <tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th>NIT</th>
+                                <th>Subtotal</th>
+                                <th>Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <t t-foreach="rowsClients" t-as="inv" t-key="(inv.partner_name || ('row_' + inv_index))">
+                                <tr>
+                                  <td><t t-esc="inv.count"/></td>
+                                  <td class="text-truncate" t-att-title="inv.partner_name"><t t-esc="inv.partner_name"/></td>
+                                  <td class="text-muted"><t t-esc="inv.vat"/></td>
+                                  <td class="text-truncate">
+                                    $ <t t-esc="(inv.subtotal_untaxed || 0).toLocaleString()"/>
+                                  </td>
+                                  <td class="text-muted">
+                                    $ <t t-esc="(inv.total_sales || 0).toLocaleString()"/>
+                                  </td>
+                                </tr>
+                              </t>
+                            </tbody>
+                          </table>
+                        </div>
+                      </t>
+                    </t>
+                  </div>
+                </details>
+
+                <details class="mega-inner-accordion">
+                  <summary class="mega-inner-summary">
+                    <span>
                       <i class="fa fa-bar-chart me-2"/>
                       Movimientos por diario
                     </span>

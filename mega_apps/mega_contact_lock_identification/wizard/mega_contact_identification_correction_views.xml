@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_mega_contact_identification_correction_form" model="ir.ui.view">
+        <field name="name">mega.contact.identification.correction.form</field>
+        <field name="model">mega.contact.identification.correction</field>
+        <field name="arch" type="xml">
+            <form string="Corregir identificación">
+                <div class="alert alert-warning" role="alert" invisible="not company_partner_warning">
+                    <field name="company_partner_warning" readonly="1" nolabel="1"/>
+                </div>
+                <div class="alert alert-danger" role="alert" invisible="not dian_warning">
+                    <field name="dian_warning" readonly="1" nolabel="1"/>
+                </div>
+                <div class="alert alert-info" role="alert" invisible="not merge_warning">
+                    <field name="merge_warning" readonly="1" nolabel="1"/>
+                </div>
+                <group>
+                    <field name="partner_id" readonly="1"/>
+                    <group string="Valor actual">
+                        <field name="current_identification_type_id"/>
+                        <field name="current_vat"/>
+                    </group>
+                    <group string="Valor nuevo">
+                        <field name="new_identification_type_id"/>
+                        <field name="new_vat"/>
+                    </group>
+                    <field name="reason" placeholder="Explique por qué es necesaria esta corrección…"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirmar corrección" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>
