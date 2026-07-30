@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Parent: account.menu_finance_reports ("Informes") no exige ningun grupo
+         propio mas alla de account.group_account_readonly / account.group_account_invoice,
+         que ya hereda del menu raiz "Facturacion" (account.menu_finance). No usar
+         menu_finance_configuration (Account Manager) ni otra carpeta administrativa,
+         para no bloquear el menu a usuarios de facturacion normales que si deben verlo. -->
+    <menuitem id="menu_sale_supplier_trace_wizard"
+              name="Trazabilidad de proveedor por venta"
+              parent="account.menu_finance_reports"
+              action="action_sale_supplier_trace_wizard"
+              groups="mega_sale_supplier_trace_xlsx.group_sale_supplier_trace_user"
+              sequence="25"/>
+
+</odoo>

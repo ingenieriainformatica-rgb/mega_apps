@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="module_category_sale_supplier_trace" model="ir.module.category">
+        <field name="name">Trazabilidad de Proveedor por Venta</field>
+        <field name="description">Acceso al asistente de trazabilidad de proveedor por venta. No otorga ningun permiso contable adicional; el usuario sigue necesitando su acceso normal de Facturacion/Contabilidad para ver el menu (heredado del menu padre "Informes").</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="group_sale_supplier_trace_user" model="res.groups">
+        <field name="name">Consultar trazabilidad de proveedor</field>
+        <field name="category_id" ref="module_category_sale_supplier_trace"/>
+        <field name="comment">Permite abrir el asistente y usar la Vista previa. No permite descargar el archivo XLSX.</field>
+    </record>
+
+    <record id="group_sale_supplier_trace_export" model="res.groups">
+        <field name="name">Exportar trazabilidad de proveedor</field>
+        <field name="category_id" ref="module_category_sale_supplier_trace"/>
+        <field name="comment">Permite ademas descargar el archivo XLSX generado por el asistente.</field>
+        <field name="implied_ids" eval="[(4, ref('group_sale_supplier_trace_user'))]"/>
+    </record>
+
+</odoo>
