@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_account_payment_register_form_inherit_multi_writeoff" model="ir.ui.view">
+            <field name="name">account.payment.register.form.multi.writeoff</field>
+            <field name="model">account.payment.register</field>
+            <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+            <field name="arch" type="xml">
+
+                <!-- Agregar campos invisibles -->
+                <xpath expr="//field[@name='hide_writeoff_section']" position="after">
+                    <field name="writeoff_lines_total" invisible="1"/>
+                    <field name="writeoff_lines_total_difference" invisible="1"/>
+                </xpath>
+
+                <!-- Reemplazar completamente el div que contiene writeoff_account_id y writeoff_label -->
+                <xpath expr="//div[@class='o_inner_group grid col-lg-12 p-0'][.//field[@name='writeoff_account_id']]" position="replace"/>
+
+                <!-- Agregar nuestros campos después de group2 (ancho completo debajo de las dos columnas) -->
+                <!-- <xpath expr="//group[@name='group2']" position="after"> -->
+                <xpath expr="//group[group[@name='group1']]" position="after">
+
+                    <!-- Lista de Líneas de Writeoff (ancho completo) -->
+                    <group col="1" invisible="not show_payment_difference or payment_difference_handling == 'open'">
+                        <label for="writeoff_line_ids" string="Post Difference In" class="fw-bold"/>
+                        <field name="writeoff_line_ids" nolabel="1" widget="one2many">
+                            <list editable="bottom">
+                                <field name="sequence" widget="handle"/>
+                                <field name="account_id"
+                                       options="{'no_create': True, 'no_open': True}"
+                                       domain="[('deprecated', '=', False)]"
+                                       required="1"/>
+                                <field name="label"
+                                       placeholder="e.g., Discount, Bank Fees"
+                                       required="1"/>
+                                <field name="amount"
+                                       sum="Total Writeoff"
+                                       widget="monetary"
+                                       required="1"/>
+                                <field name="currency_id" column_invisible="1"/>
+                                <field name="company_id" column_invisible="1"/>
+                            </list>
+                        </field>
+
+                        <!-- Panel informativo -->
+                        <div class="alert alert-info" role="alert" invisible="not writeoff_line_ids">
+                            <div class="row">
+                                <div class="col-4">
+                                    <label for="payment_difference" class="fw-bold"/>
+                                    <field name="payment_difference"
+                                           readonly="1"
+                                           class="d-block"
+                                           widget="monetary"/>
+                                </div>
+                                <div class="col-4">
+                                    <label for="writeoff_lines_total" class="fw-bold"/>
+                                    <field name="writeoff_lines_total"
+                                           readonly="1"
+                                           class="d-block"
+                                           widget="monetary"/>
+                                </div>
+                                <div class="col-4">
+                                    <label for="writeoff_lines_total_difference" class="fw-bold"/>
+                                    <field name="writeoff_lines_total_difference"
+                                           readonly="1"
+                                           class="d-block"
+                                           widget="monetary"/>
+                                </div>
+                            </div>
+                            <hr class="my-2"/>
+                                <!-- <i class="fa fa-info-circle me-1"/> -->
+                            <small class="text-muted">The sum of all writeoff lines must equal the payment difference.</small>
+                        </div>
+                    </group>
+
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

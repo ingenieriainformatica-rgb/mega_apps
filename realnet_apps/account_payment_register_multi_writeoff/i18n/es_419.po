@@ -1,0 +1,175 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* account_payment_register_multi_writeoff
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e-20251109\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-19 13:08+0000\n"
+"PO-Revision-Date: 2025-11-19 13:08+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: account_payment_register_multi_writeoff
+#: model_terms:ir.ui.view,arch_db:account_payment_register_multi_writeoff.view_account_payment_register_form_inherit_multi_writeoff
+msgid ""
+"<small class=\"text-muted\">The sum of all writeoff lines must equal the "
+"payment difference.</small>"
+msgstr ""
+"<small class=\"text-muted\">La suma de todas las líneas de ajuste debe ser "
+"igual a la diferencia de pago.</small>"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__account_id
+msgid "Account"
+msgstr "Cuenta"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,help:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__account_id
+msgid "Account where the writeoff will be posted"
+msgstr "Cuenta donde se registrará el ajuste"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__amount
+msgid "Amount"
+msgstr "Importe"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,help:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__amount
+msgid "Amount of the writeoff (always positive)"
+msgstr "Importe del ajuste (siempre positivo)"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__currency_id
+msgid "Currency"
+msgstr "Moneda"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__display_name
+msgid "Display Name"
+msgstr "Nombre a mostrar"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__id
+msgid "ID"
+msgstr "ID"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__label
+msgid "Label"
+msgstr "Etiqueta"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,help:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__label
+msgid "Label for the journal item"
+msgstr "Etiqueta para el asiento contable"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model,name:account_payment_register_multi_writeoff.model_account_payment_register
+msgid "Pay"
+msgstr "Pagar"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__payment_register_id
+msgid "Payment Register"
+msgstr "Registro de Pago"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model,name:account_payment_register_multi_writeoff.model_account_payment_register_writeoff_line
+msgid "Payment Register Writeoff Line"
+msgstr "Línea de Ajuste de Registro de Pago"
+
+#. module: account_payment_register_multi_writeoff
+#: model_terms:ir.ui.view,arch_db:account_payment_register_multi_writeoff.view_account_payment_register_form_inherit_multi_writeoff
+msgid "Post Difference In"
+msgstr "Contabilizar la diferencia en"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,help:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__payment_register_id
+msgid "Reference to the payment register wizard"
+msgstr "Referencia al asistente de registro de pago"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__sequence
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: account_payment_register_multi_writeoff
+#. odoo-python
+#: code:addons/account_payment_register_multi_writeoff/models/account_payment_register_writeoff_line.py:0
+msgid "The amount of writeoff line '%(label)s' cannot be zero."
+msgstr "El valor de las linea de ajuste '%(label)s' no puede ser cero."
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,help:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__currency_id
+msgid "The payment's currency."
+msgstr "La moneda del pago."
+
+#. module: account_payment_register_multi_writeoff
+#. odoo-python
+#: code:addons/account_payment_register_multi_writeoff/models/account_payment_register.py:0
+msgid ""
+"The sum of writeoff lines (%(total)s) must equal the payment difference "
+"(%(diff)s). Current difference: %(current)s"
+msgstr "La suma de las líneas de ajuste (%(total)s) debe ser igual a la diferencia de pago "
+"(%(diff)s). Diferencia actual: %(current)s"
+
+#. module: account_payment_register_multi_writeoff
+#: model_terms:ir.ui.view,arch_db:account_payment_register_multi_writeoff.view_account_payment_register_form_inherit_multi_writeoff
+msgid "Total Writeoff"
+msgstr "Total de Ajustes"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,help:account_payment_register_multi_writeoff.field_account_payment_register_writeoff_line__sequence
+msgid "Used to order the writeoff lines"
+msgstr "Utilizado para ordenar las líneas de ajuste"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register__writeoff_line_ids
+msgid "Writeoff Lines"
+msgstr "Líneas de Ajuste"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register__writeoff_lines_total
+msgid "Writeoff Lines Total"
+msgstr "Total de Líneas de Ajuste"
+
+#. module: account_payment_register_multi_writeoff
+#: model:ir.model.fields,field_description:account_payment_register_multi_writeoff.field_account_payment_register__writeoff_lines_total_difference
+msgid "Writeoff Lines Total Difference"
+msgstr "Diferencia Total de Líneas de Ajuste"
+
+#. module: account_payment_register_multi_writeoff
+#: model_terms:ir.ui.view,arch_db:account_payment_register_multi_writeoff.view_account_payment_register_form_inherit_multi_writeoff
+msgid "e.g., Discount, Bank Fees"
+msgstr "ej., Descuento, Comisiones Bancarias"
