@@ -21,7 +21,7 @@
 
   <!-- Categoría propia para la corrección controlada de identificación. -->
   <record id="category_contact_identification" model="ir.module.category">
-    <field name="name">Identificación de Contactos</field>
+    <field name="name">Este contacto tiene movimientos asociados</field>
     <field name="description">Permisos para corregir la identificación (NIT/cédula) de contactos con historial comercial o contable.</field>
     <field name="sequence">36</field>
   </record>
