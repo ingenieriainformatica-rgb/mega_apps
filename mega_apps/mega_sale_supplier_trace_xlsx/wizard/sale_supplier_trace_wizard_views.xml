@@ -80,7 +80,7 @@
                 </sheet>
                 <footer>
                     <button name="action_preview" type="object" string="Vista previa" class="btn-secondary" invisible="1"/>
-                    <button name="action_generate_xlsx" type="object" string="Descargar Excel"
+                    <button name="action_generate_xlsx" type="object" string="Generar Excel"
                             class="btn-primary"
                             groups="mega_sale_supplier_trace_xlsx.group_sale_supplier_trace_export"/>
                     <button name="action_close" type="object" string="Cerrar" class="btn-secondary"/>
