@@ -26,7 +26,15 @@ export class DateFilterBar extends Component {
         loadingJournals:   { type: Boolean, optional: true },
         advisors:          { type: Array,   optional: true },
         loadingAdvisors:   { type: Boolean, optional: true },
+        companies:         { type: Array,   optional: true },
     };
+
+    static stateOptions = [
+        { value: "posted", label: "Confirmadas (por defecto)" },
+        { value: "draft", label: "Cotizaciones/borrador" },
+        { value: "cancel", label: "Canceladas" },
+        { value: "all", label: "Todos los estados" },
+    ];
 
     setup() {
         const def = getCurrentMonthRange();
@@ -37,6 +45,8 @@ export class DateFilterBar extends Component {
             warehouse_id:   "allHeadquarters",
             journal_id:     "allJournal",
             advisor_id:     "allAdvisors",
+            company_id:     "allCompanies",
+            state_filter:   "posted",
             activeShortcut: "month",
         });
 
@@ -93,6 +103,10 @@ export class DateFilterBar extends Component {
 
     openDateFrom() { this.dateFromPicker.open(); }
     openDateTo()   { this.dateToPicker.open();   }
+
+    get stateOptions() {
+        return DateFilterBar.stateOptions;
+    }
 
     // ─────────────────────────────────────────────────────────────
     // Shortcuts de período
@@ -155,6 +169,22 @@ export class DateFilterBar extends Component {
     }
 
     // ─────────────────────────────────────────────────────────────
+    // Cambio de empresa → recarga
+    // ─────────────────────────────────────────────────────────────
+    onChangeCompany(ev) {
+        this.state.company_id = ev.target.value || "allCompanies";
+        this._emit();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Cambio de estado del documento → recarga
+    // ─────────────────────────────────────────────────────────────
+    onChangeState(ev) {
+        this.state.state_filter = ev.target.value || "posted";
+        this._emit();
+    }
+
+    // ─────────────────────────────────────────────────────────────
     // Emite el filtro actualizado al componente padre
     // ─────────────────────────────────────────────────────────────
     _emit() {
@@ -164,6 +194,8 @@ export class DateFilterBar extends Component {
             warehouse_id: this.state.warehouse_id,
             journal_id:   this.state.journal_id,
             advisor_id:   this.state.advisor_id,
+            company_id:   this.state.company_id,
+            state_filter: this.state.state_filter,
         });
     }
 }

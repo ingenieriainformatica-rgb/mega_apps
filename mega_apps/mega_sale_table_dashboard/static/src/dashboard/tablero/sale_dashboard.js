@@ -14,6 +14,14 @@ import { KpiBanner } from "../kpi_banner/kpi_banner";
 import { KpiBannerSkeleton } from "../skeleton/skeleton";
 import { getCurrentMonthRange } from "../utils/format";
 
+// ── Sección gráfica (indicadores + gráficas) ─────────────────────
+import { KpiIndicators } from "../analytics/kpi_indicators/kpi_indicators";
+import { AdvisorChart } from "../analytics/advisor_chart/advisor_chart";
+import { ClientAdvisorChart } from "../analytics/client_advisor_chart/client_advisor_chart";
+import { EvolutionChart } from "../analytics/evolution_chart/evolution_chart";
+import { DistributionChart } from "../analytics/distribution_chart/distribution_chart";
+import { TopProductsChart } from "../analytics/top_products_chart/top_products_chart";
+
 
 export default class MegaSaleDashboard extends Component {
     static template = "mega_dashboard.SaleDashboard";
@@ -22,6 +30,12 @@ export default class MegaSaleDashboard extends Component {
         DateFilterBar,
         KpiBanner,
         KpiBannerSkeleton,
+        KpiIndicators,
+        AdvisorChart,
+        ClientAdvisorChart,
+        EvolutionChart,
+        DistributionChart,
+        TopProductsChart,
     };
     static props = {
         action:            Object,
@@ -43,6 +57,7 @@ export default class MegaSaleDashboard extends Component {
             loadingJournals:   false,
             advisors:          [],
             loadingAdvisors:   false,
+            companies:         [],
         });
 
         // Carga de sedes para el filtro (independiente del auto-load de datos)
@@ -50,6 +65,9 @@ export default class MegaSaleDashboard extends Component {
 
         // Carga de asesores para el filtro (lista fija, no depende de sede/diario)
         this.loadAdvisors();
+
+        // Carga de compañías permitidas (para el filtro de empresa).
+        this.loadCompanies();
 
         // Auto-load: carga datos del mes actual al entrar al dashboard
         this._autoLoad();
@@ -101,6 +119,19 @@ export default class MegaSaleDashboard extends Component {
     }
 
     // ─────────────────────────────────────────────────────────────
+    // Carga las compañías permitidas (respeta allowed_company_ids).
+    // El selector solo se muestra si hay más de una.
+    // ─────────────────────────────────────────────────────────────
+    async loadCompanies() {
+        try {
+            const res = await rpc("/mega_dashboard/get/companies", {});
+            this.state.companies = res?.items || [];
+        } catch (e) {
+            this.notification.add("Error cargando compañías.", { type: "danger" });
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
     // onClickFilter: recibe el payload del FilterBar y aplica.
     //
     // Cambios v2:
@@ -113,6 +144,8 @@ export default class MegaSaleDashboard extends Component {
         const warehouse_id = payload?.warehouse_id || "allHeadquarters";
         const journal_id   = payload?.journal_id   ?? null;
         const advisor_id   = payload?.advisor_id   ?? null;
+        const company_id   = payload?.company_id   ?? null;
+        const state_filter = payload?.state_filter ?? "posted";
 
         if (!date_from || !date_to) {
             this.notification.add(
@@ -130,7 +163,10 @@ export default class MegaSaleDashboard extends Component {
             return;
         }
 
-        await this.statistics.setRange({ date_from, date_to, warehouse_id, journal_id, advisor_id });
+        await this.statistics.setRange({
+            date_from, date_to, warehouse_id, journal_id, advisor_id,
+            company_id, state_filter,
+        });
     }
 
     // ─────────────────────────────────────────────────────────────

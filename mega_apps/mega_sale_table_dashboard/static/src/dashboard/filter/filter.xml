@@ -125,6 +125,44 @@
           </select>
         </div>
 
+        <!-- Empresa (solo si el usuario tiene más de una compañía permitida) -->
+        <t t-if="props.companies and props.companies.length > 1">
+          <div class="mega-select-wrapper d-flex align-items-center gap-2">
+            <span class="mega-filter-icon"><i class="fa fa-industry"/></span>
+            <select
+              class="form-select mega-select"
+              t-on-change="onChangeCompany"
+              t-att-disabled="!props.loadingWarehouses">
+              <option value="allCompanies"
+                      t-att-selected="state.company_id === 'allCompanies'">
+                Todas las empresas
+              </option>
+              <t t-foreach="props.companies or []" t-as="c" t-key="c.id">
+                <option t-att-value="c.id"
+                        t-att-selected="state.company_id == c.id">
+                  <t t-esc="c.name"/>
+                </option>
+              </t>
+            </select>
+          </div>
+        </t>
+
+        <!-- Estado del documento -->
+        <div class="mega-select-wrapper d-flex align-items-center gap-2">
+          <span class="mega-filter-icon"><i class="fa fa-flag-o"/></span>
+          <select
+            class="form-select mega-select"
+            t-on-change="onChangeState"
+            t-att-disabled="!props.loadingWarehouses">
+            <t t-foreach="stateOptions" t-as="opt" t-key="opt.value">
+              <option t-att-value="opt.value"
+                      t-att-selected="state.state_filter === opt.value">
+                <t t-esc="opt.label"/>
+              </option>
+            </t>
+          </select>
+        </div>
+
         <!-- Spinner inicial -->
         <t t-if="!props.loadingWarehouses">
           <span class="text-muted d-flex align-items-center gap-1" style="font-size:13px;">

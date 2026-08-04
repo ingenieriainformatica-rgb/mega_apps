@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="mega_dashboard.TopProductsChart">
+    <ChartCanvas
+      config="config"
+      title="props.title || 'Top 30 productos más vendidos'"
+      isLoading="props.isLoading"
+      height="760"
+      emptyLabel="props.emptyLabel"
+    />
+  </t>
+</templates>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="mega_dashboard.EvolutionChart">
+    <ChartCanvas
+      config="config"
+      title="'Evolución de ventas' + (granularityLabel ? ' (' + granularityLabel + ')' : '')"
+      isLoading="props.isLoading"
+      height="320"
+    />
+  </t>
+</templates>

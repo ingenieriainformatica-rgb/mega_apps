@@ -60,3 +60,54 @@ export function calcDelta(current, prev) {
     if (!p || isNaN(c) || isNaN(p)) return null;
     return ((c - p) / Math.abs(p)) * 100;
 }
+
+/**
+ * Paleta de colores compartida por todas las gráficas del tablero
+ * (misma familia que ya usan el KpiBanner y el acordeón de sedes).
+ */
+export const CHART_COLORS = [
+    "#1A3C6B", "#7FB342", "#C0392B", "#0D6EFD",
+    "#9C27B0", "#F39C12", "#17A2B8", "#8D6E63",
+];
+
+/** "$ 1.234.567" — formato monetario colombiano usado en tooltips/ejes. */
+export function formatCOP(value) {
+    return "$ " + formatCurrency(value, 0);
+}
+
+/**
+ * Callback de Chart.js para truncar etiquetas largas en los ejes (nombres
+ * de asesor/cliente/producto) sin afectar el tooltip -Chart.js muestra el
+ * título del tooltip a partir de `data.labels` original, no del texto
+ * truncado que dibuja el eje-. Uso: `ticks: { callback: tickTruncate(22) }`.
+ */
+export function tickTruncate(maxLen = 22) {
+    return function (value) {
+        const label = this.getLabelForValue ? this.getLabelForValue(value) : value;
+        if (typeof label !== "string" || label.length <= maxLen) return label;
+        return label.slice(0, maxLen - 1) + "…";
+    };
+}
+
+/** Opciones base de Chart.js: leyenda, tooltip en COP, sin animación larga. */
+export function baseChartOptions(overrides = {}) {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 250 },
+        plugins: {
+            legend: { display: true, labels: { boxWidth: 12, font: { size: 11 } } },
+            tooltip: {
+                callbacks: {
+                    label(ctx) {
+                        const raw = ctx.parsed.y ?? ctx.parsed.x ?? ctx.parsed;
+                        const label = ctx.dataset.label ? ctx.dataset.label + ": " : "";
+                        return label + formatCOP(raw);
+                    },
+                },
+            },
+            ...(overrides.plugins || {}),
+        },
+        ...overrides,
+    };
+}

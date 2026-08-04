@@ -13,6 +13,7 @@
         loadingJournals="state.loadingJournals"
         advisors="state.advisors"
         loadingAdvisors="state.loadingAdvisors"
+        companies="state.companies"
       />
 
       <!-- ══════════════════════════════════════════════════════════
@@ -51,9 +52,85 @@
           isLoading="statistics.isLoading"
         />
 
+        <!-- ══════════════════════════════════════════════════════════
+             Sección gráfica: indicadores + gráficas.
+             Usa statistics.sales.analytics, calculado en el backend a
+             partir de los MISMOS documentos que la tabla de abajo, por
+             lo que sus totales siempre coinciden con "grand_net".
+             ══════════════════════════════════════════════════════════ -->
+        <div class="container-fluid mega-analytics-section mt-3">
+          <t t-set="an" t-value="statistics.sales.analytics or {}"/>
+          <t t-set="hasAnalyticsData" t-value="an.kpis and an.kpis.count_docs"/>
+
+          <div class="mega-page-section-header">
+            <i class="fa fa-bar-chart"/>
+            <span>Análisis gráfico</span>
+          </div>
+
+          <!-- Sin datos: un solo aviso para toda la sección (indicadores +
+               gráficas), en vez de tarjetas en cero y cajas vacías sueltas. -->
+          <t t-if="!statistics.isLoading and !hasAnalyticsData">
+            <div class="text-muted text-center py-4">
+              <i class="fa fa-info-circle me-1"/> No hay datos para los filtros seleccionados
+            </div>
+          </t>
+
+          <t t-if="statistics.isLoading or hasAnalyticsData">
+            <!-- Primera fila: indicadores generales -->
+            <KpiIndicators kpis="an.kpis" isLoading="statistics.isLoading"/>
+
+            <!-- Segunda fila: ventas por asesor / por empresa y asesor -->
+            <div class="row g-3 mt-1">
+              <div class="col-12 col-xl-6">
+                <AdvisorChart rows="an.by_advisor" isLoading="statistics.isLoading"/>
+              </div>
+              <div class="col-12 col-xl-6">
+                <ClientAdvisorChart rows="an.by_client_advisor" isLoading="statistics.isLoading"/>
+              </div>
+            </div>
+
+            <!-- Tercera fila: evolución de ventas / distribución adicional -->
+            <div class="row g-3 mt-1">
+              <div class="col-12 col-xl-6">
+                <EvolutionChart timeseries="an.timeseries" isLoading="statistics.isLoading"/>
+              </div>
+              <div class="col-12 col-xl-6">
+                <DistributionChart distribution="an.distribution" isLoading="statistics.isLoading"/>
+              </div>
+            </div>
+
+            <!-- Cuarta fila: top productos con inventario / top servicios,
+                 por separado -mezclados, la mano de obra (servicios) tapaba
+                 los productos reales con inventario-. -->
+            <div class="row g-3 mt-1">
+              <div class="col-12 col-xl-6">
+                <TopProductsChart
+                  rows="an.top_products"
+                  isLoading="statistics.isLoading"
+                  title="'Top 30 productos con inventario más vendidos'"
+                  emptyLabel="'No hay productos con inventario para los filtros seleccionados'"
+                />
+              </div>
+              <div class="col-12 col-xl-6">
+                <TopProductsChart
+                  rows="an.top_services"
+                  isLoading="statistics.isLoading"
+                  title="'Top 30 servicios más vendidos'"
+                  emptyLabel="'No hay servicios para los filtros seleccionados'"
+                />
+              </div>
+            </div>
+          </t>
+        </div>
+
         <!-- ── Layout de 3 columnas (existente, sin cambios) ───── -->
         <div class="container-fluid mega-warehouse-dashboard mb-5 mt-3">
           <t t-set="groups" t-value="statistics.sales.groups || []"/>
+
+          <div class="mega-page-section-header">
+            <i class="fa fa-list-alt"/>
+            <span>Detalle por sede y diario</span>
+          </div>
 
           <t t-if="!groups.length">
             <div class="text-muted text-center py-4">

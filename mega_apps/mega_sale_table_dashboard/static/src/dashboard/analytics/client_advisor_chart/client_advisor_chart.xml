@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="mega_dashboard.ClientAdvisorChart">
+    <ChartCanvas
+      config="config"
+      title="'Ventas por empresa (cliente) y asesor'"
+      isLoading="props.isLoading"
+      height="360"
+    />
+  </t>
+</templates>

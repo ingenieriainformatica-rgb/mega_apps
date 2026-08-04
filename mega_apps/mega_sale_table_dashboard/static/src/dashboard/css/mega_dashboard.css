@@ -1007,3 +1007,167 @@
     font-size: 1.1rem;
   }
 }
+
+/* =============================================================
+   MEGA DASHBOARD — Sección gráfica (indicadores + gráficas)
+   ============================================================= */
+
+.mega-analytics-section {
+  max-width: none;
+  width: 100%;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.mega-analytics-indicators {
+  margin-bottom: 4px;
+}
+
+.mega-chart-card {
+  border: 1px solid rgba(26, 60, 107, .10);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, .05);
+  padding: 16px 18px 14px;
+}
+
+.mega-chart-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1A3C6B;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  margin-bottom: 10px;
+}
+
+.mega-chart-body {
+  position: relative;
+  width: 100%;
+}
+
+.mega-chart-body canvas {
+  max-width: 100%;
+}
+
+.mega-chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(33, 37, 41, .30);
+  text-align: center;
+}
+
+.mega-chart-empty .mega-empty-icon {
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+}
+
+.mega-chart-empty .mega-empty-text {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+  padding: 0 12px;
+}
+
+/* Feedback de carga al refiltrar: la gráfica anterior se atenúa en vez
+   de desaparecer/mostrar un mensaje que compite visualmente con ella. */
+.mega-chart-canvas-dimmed {
+  opacity: .35;
+  transition: opacity .15s ease;
+}
+
+.mega-chart-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, .35);
+  color: #1A3C6B;
+  font-size: 1.4rem;
+  pointer-events: none;
+}
+
+/* Separadores de sección de la página (Análisis gráfico / Detalle) */
+.mega-page-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 2px 14px;
+  margin-bottom: 4px;
+  border-bottom: 2px solid rgba(26, 60, 107, .10);
+  color: #1A3C6B;
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.mega-page-section-header i {
+  color: #7FB342;
+  font-size: 16px;
+}
+
+/* Pestañas de dimensión de la gráfica de distribución adicional */
+.mega-dimension-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mega-dimension-tab {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(26, 60, 107, .18);
+  background: transparent;
+  color: rgba(33, 37, 41, .55);
+  cursor: pointer;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+
+.mega-dimension-tab:hover {
+  border-color: #1A3C6B;
+  color: #1A3C6B;
+}
+
+.mega-dimension-tab.active {
+  background: #1A3C6B;
+  border-color: #1A3C6B;
+  color: #fff;
+}
+
+/* Tablet: 5 selects de filtro (sede/diario/asesor/empresa/estado) ya no
+   caben en una sola fila cómodamente -se compactan antes de saltar al
+   layout apilado de mobile (768px)-. */
+@media (max-width: 1200px) {
+  .mega-select {
+    min-width: 160px;
+  }
+
+  .mega-filter-select-row {
+    row-gap: 10px !important;
+    column-gap: 16px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .mega-analytics-section {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .mega-chart-card {
+    padding: 12px 14px 12px;
+  }
+
+  .mega-page-section-header {
+    font-size: 13px;
+    padding-bottom: 10px;
+  }
+}

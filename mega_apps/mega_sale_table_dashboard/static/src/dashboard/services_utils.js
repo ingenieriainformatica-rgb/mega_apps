@@ -46,6 +46,8 @@ const statisticsService = {
             warehouse_id: null,
             journal_id: null,
             advisor_id: null,
+            company_id: null,
+            state_filter: "posted",
 
             // ── Timer para auto-refresh (desactivado por defecto) ─
             _timer: null,
@@ -65,6 +67,8 @@ const statisticsService = {
                     const warehouse_id = this.warehouse_id;
                     const journal_id = this.journal_id;
                     const advisor_id = this.advisor_id;
+                    const company_id = this.company_id;
+                    const state_filter = this.state_filter;
 
                     this.date_from = date_from;
                     this.date_to = date_to;
@@ -75,6 +79,8 @@ const statisticsService = {
                         warehouse_id,
                         journal_id,
                         advisor_id,
+                        company_id,
+                        state_filter,
                     });
 
                     Object.assign(this, updates, {
@@ -91,7 +97,7 @@ const statisticsService = {
             // ─────────────────────────────────────────────────────
             // setRange(): actualiza filtros y dispara recarga.
             // ─────────────────────────────────────────────────────
-            async setRange({ date_from, date_to, warehouse_id, journal_id, advisor_id }) {
+            async setRange({ date_from, date_to, warehouse_id, journal_id, advisor_id, company_id, state_filter }) {
                 const norm = normalizeRange(
                     { date_from, date_to },
                     getCurrentMonthRange()
@@ -101,6 +107,8 @@ const statisticsService = {
                 this.warehouse_id = parseIdOrAll(warehouse_id);
                 this.journal_id = parseIdOrAll(journal_id);
                 this.advisor_id = parseIdOrAll(advisor_id);
+                this.company_id = parseIdOrAll(company_id);
+                this.state_filter = state_filter || "posted";
                 await this.reload();
             },
 

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="mega_dashboard.ChartCanvas">
+    <div class="mega-chart-card h-100">
+      <t t-if="props.title">
+        <div class="mega-chart-title">
+          <t t-esc="props.title"/>
+        </div>
+      </t>
+
+      <div class="mega-chart-body" t-att-style="'height:' + (props.height || 280) + 'px'">
+        <!-- Primera carga sin datos aún: placeholder de carga a pantalla completa -->
+        <t t-if="props.isLoading and !hasData">
+          <div class="mega-chart-empty">
+            <i class="fa fa-spinner fa-spin mega-empty-icon"/>
+            <p class="mega-empty-text">Cargando…</p>
+          </div>
+        </t>
+        <!-- Sin datos (y no está cargando): mensaje de "no hay datos" -->
+        <t t-elif="!props.isLoading and !hasData">
+          <div class="mega-chart-empty">
+            <i class="fa fa-bar-chart mega-empty-icon"/>
+            <p class="mega-empty-text">
+              <t t-esc="props.emptyLabel || 'No hay datos para los filtros seleccionados'"/>
+            </p>
+          </div>
+        </t>
+        <!-- Refiltrando con datos previos visibles: se atenúa la gráfica
+             anterior en vez de ocultarla, para que se sienta más fluido. -->
+        <t t-if="props.isLoading and hasData">
+          <div class="mega-chart-loading-overlay">
+            <i class="fa fa-spinner fa-spin"/>
+          </div>
+        </t>
+        <canvas
+          t-ref="canvas"
+          t-att-class="props.isLoading and hasData ? 'mega-chart-canvas-dimmed' : ''"
+          t-att-style="!hasData ? 'display:none' : ''"
+        />
+      </div>
+    </div>
+  </t>
+</templates>

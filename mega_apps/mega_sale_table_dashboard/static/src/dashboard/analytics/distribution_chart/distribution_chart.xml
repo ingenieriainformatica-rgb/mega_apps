@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="mega_dashboard.DistributionChart">
+    <div class="h-100 d-flex flex-column">
+      <div class="mega-dimension-tabs mb-2">
+        <t t-foreach="availableDimensions" t-as="dim" t-key="dim.key">
+          <button
+            type="button"
+            t-att-class="'mega-dimension-tab' + (state.dimension === dim.key ? ' active' : '')"
+            t-on-click="() => this.selectDimension(dim.key)"
+          >
+            <t t-esc="dim.label"/>
+          </button>
+        </t>
+      </div>
+      <div class="flex-grow-1">
+        <ChartCanvas config="config" title="'Distribución adicional'" isLoading="props.isLoading" height="290"/>
+      </div>
+    </div>
+  </t>
+</templates>

@@ -2,13 +2,15 @@ import logging
 from collections import defaultdict
 from datetime import date as date_cls, timedelta
 from odoo.http import request  # type: ignore
-from .utils import get_active_warehouses  # type: ignore
+from . import analytics  # type: ignore
+from .utils import get_active_warehouses, get_allowed_company_ids, state_domain as _state_domain  # type: ignore
 
 _logger = logging.getLogger(__name__)
 
 JOURNAL_WH_FIELD = "warehouse_ids"
 ALL_HEADQUARTERS = "allHeadquarters"
 ALL_JOURNAL = "allJournal"
+ALL_TEAMS = "allTeams"
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -44,13 +46,12 @@ def _get_previous_period_dates(date_from, date_to):
 # Consultas de diarios
 # ─────────────────────────────────────────────────────────────────
 
-def _get_journals_for_warehouses(warehouses, journal_id=None):
+def _get_journals_for_warehouses(warehouses, journal_id=None, company_ids=None):
     """Trae diarios de venta mapeados a las bodegas dadas (y opcional filtra 1 diario)."""
     Journal = request.env["account.journal"].sudo()
-    company = request.env.company
 
     domain = [
-        ("company_id", "=", company.id),
+        ("company_id", "in", company_ids or get_allowed_company_ids()),
         ("type", "=", "sale"),
         (JOURNAL_WH_FIELD, "in", warehouses.ids),
     ]
@@ -64,7 +65,7 @@ def _get_journals_for_warehouses(warehouses, journal_id=None):
 # KPIs agrupados — versión detallada (período actual, con moves)
 # ─────────────────────────────────────────────────────────────────
 
-def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_type=None, negate=False, advisor_name=None):
+def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_type=None, negate=False, advisor_name=None, team_id=None, state_filter=None, company_ids=None):
     """
     KPIs agrupados por (warehouse_id, journal_id).
     move_type: 'out_invoice' o 'out_refund'
@@ -73,16 +74,14 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
                   distinguir mayúsculas/minúsculas)
     """
     Move = request.env["account.move"].sudo()
-    company = request.env.company
 
     if not journals:
         return {}, {}
 
     domain = [
-        ("company_id", "=", company.id),
-        ("state", "not in", ("draft", "cancel")),
+        ("company_id", "in", company_ids or get_allowed_company_ids()),
         ("journal_id", "in", journals.ids),
-    ]
+    ] + _state_domain(state_filter)
     if move_type:
         domain.append(("move_type", "=", move_type))
     if date_from:
@@ -91,6 +90,8 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
         domain.append(("invoice_date", "<=", date_to))
     if advisor_name:
         domain.append(("x_studio_concepto", "=ilike", advisor_name))
+    if team_id:
+        domain.append(("team_id", "=", int(team_id)))
 
     moves = Move.search(domain)
     sign = -1.0 if negate else 1.0
@@ -132,7 +133,7 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
 # Totales por concepto (asesor)
 # ─────────────────────────────────────────────────────────────────
 
-def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_type=None, negate=False, advisor_name=None):
+def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_type=None, negate=False, advisor_name=None, team_id=None, state_filter=None, company_ids=None):
     """
     Totales agrupados por (warehouse_id, journal_id, concepto).
     Devuelve dict: (wh_id, journal_id) -> { concepto -> {count, subtotal_untaxed, total_sales} }
@@ -143,10 +144,9 @@ def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_typ
         return {}
 
     domain = [
-        ("company_id", "=", request.env.company.id),
-        ("state", "not in", ("draft", "cancel")),
+        ("company_id", "in", company_ids or get_allowed_company_ids()),
         ("journal_id", "in", journals.ids),
-    ]
+    ] + _state_domain(state_filter)
     if move_type:
         domain.append(("move_type", "=", move_type))
     if date_from:
@@ -155,6 +155,8 @@ def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_typ
         domain.append(("invoice_date", "<=", date_to))
     if advisor_name:
         domain.append(("x_studio_concepto", "=ilike", advisor_name))
+    if team_id:
+        domain.append(("team_id", "=", int(team_id)))
 
     sign = -1.0 if negate else 1.0
 
@@ -197,7 +199,7 @@ def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_typ
 # Totales por cliente (empresa/contacto de la factura)
 # ─────────────────────────────────────────────────────────────────
 
-def _get_partner_totals_grouped(journals, date_from=None, date_to=None, move_type=None, negate=False, advisor_name=None):
+def _get_partner_totals_grouped(journals, date_from=None, date_to=None, move_type=None, negate=False, advisor_name=None, team_id=None, state_filter=None, company_ids=None):
     """
     Totales agrupados por (warehouse_id, journal_id, cliente).
     Devuelve dict: (wh_id, journal_id) -> { partner_id -> {count, subtotal_untaxed, total_sales, partner_name, vat} }
@@ -208,10 +210,9 @@ def _get_partner_totals_grouped(journals, date_from=None, date_to=None, move_typ
         return {}
 
     domain = [
-        ("company_id", "=", request.env.company.id),
-        ("state", "not in", ("draft", "cancel")),
+        ("company_id", "in", company_ids or get_allowed_company_ids()),
         ("journal_id", "in", journals.ids),
-    ]
+    ] + _state_domain(state_filter)
     if move_type:
         domain.append(("move_type", "=", move_type))
     if date_from:
@@ -220,6 +221,8 @@ def _get_partner_totals_grouped(journals, date_from=None, date_to=None, move_typ
         domain.append(("invoice_date", "<=", date_to))
     if advisor_name:
         domain.append(("x_studio_concepto", "=ilike", advisor_name))
+    if team_id:
+        domain.append(("team_id", "=", int(team_id)))
 
     sign = -1.0 if negate else 1.0
 
@@ -278,7 +281,7 @@ def _get_partner_totals_grouped(journals, date_from=None, date_to=None, move_typ
 # Usados para calcular el período anterior de forma eficiente.
 # ─────────────────────────────────────────────────────────────────
 
-def _get_grand_totals_fast(journals, date_from=None, date_to=None, move_type=None, negate=False, advisor_name=None):
+def _get_grand_totals_fast(journals, date_from=None, date_to=None, move_type=None, negate=False, advisor_name=None, team_id=None, state_filter=None, company_ids=None):
     """
     Retorna totales globales usando read_group agrupado por journal_id.
     Eficiente: no carga registros individuales en memoria Python.
@@ -289,10 +292,9 @@ def _get_grand_totals_fast(journals, date_from=None, date_to=None, move_type=Non
         return {"count_invoices": 0, "subtotal_untaxed": 0.0, "total_sales": 0.0}
 
     domain = [
-        ("company_id", "=", request.env.company.id),
-        ("state", "not in", ("draft", "cancel")),
+        ("company_id", "in", company_ids or get_allowed_company_ids()),
         ("journal_id", "in", journals.ids),
-    ]
+    ] + _state_domain(state_filter)
     if move_type:
         domain.append(("move_type", "=", move_type))
     if date_from:
@@ -301,6 +303,8 @@ def _get_grand_totals_fast(journals, date_from=None, date_to=None, move_type=Non
         domain.append(("invoice_date", "<=", date_to))
     if advisor_name:
         domain.append(("x_studio_concepto", "=ilike", advisor_name))
+    if team_id:
+        domain.append(("team_id", "=", int(team_id)))
 
     rows = Move.read_group(
         domain=domain,
@@ -333,29 +337,33 @@ def _resolve_advisor_name(advisor_id):
     return partner.name if partner.exists() else None
 
 
-def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=None, advisor_id=None):
+def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=None, advisor_id=None, team_id=None, state_filter=None, company_id=None):
     # 1) Normalizar tokens ALL
     wh_id = _norm_id(warehouse_id, ALL_HEADQUARTERS)   # None => todas sedes
     j_id = _norm_id(journal_id, ALL_JOURNAL)           # None => todos diarios
     advisor_name = _resolve_advisor_name(advisor_id)   # None => todos los asesores
+    t_id = _norm_id(team_id, ALL_TEAMS)                # None => todos los equipos
+    company_ids = get_allowed_company_ids(company_id)  # respeta allowed_company_ids
 
-    # 2) Bodegas activas
-    warehouses = get_active_warehouses(wh_id)
+    # 2) Bodegas activas (de las compañías permitidas / seleccionada)
+    warehouses = get_active_warehouses(wh_id, company_id=company_id)
 
     # 3) Diarios por bodegas
-    journals = _get_journals_for_warehouses(warehouses, journal_id=j_id)
+    journals = _get_journals_for_warehouses(warehouses, journal_id=j_id, company_ids=company_ids)
+
+    _kw = dict(team_id=t_id, state_filter=state_filter, company_ids=company_ids)
 
     # 4) KPIs detallados por (warehouse, journal) — período actual
-    inv_kpi, inv_detail = _get_kpis_grouped(warehouses, journals, date_from, date_to, "out_invoice", negate=False, advisor_name=advisor_name)
-    ref_kpi, ref_detail = _get_kpis_grouped(warehouses, journals, date_from, date_to, "out_refund", negate=True, advisor_name=advisor_name)
+    inv_kpi, inv_detail = _get_kpis_grouped(warehouses, journals, date_from, date_to, "out_invoice", negate=False, advisor_name=advisor_name, **_kw)
+    ref_kpi, ref_detail = _get_kpis_grouped(warehouses, journals, date_from, date_to, "out_refund", negate=True, advisor_name=advisor_name, **_kw)
 
     # 5) Totales por concepto (facturas + NC)
-    inv_concept = _get_concept_totals_grouped(journals, date_from, date_to, "out_invoice", negate=False, advisor_name=advisor_name)
-    ref_concept = _get_concept_totals_grouped(journals, date_from, date_to, "out_refund", negate=True, advisor_name=advisor_name)
+    inv_concept = _get_concept_totals_grouped(journals, date_from, date_to, "out_invoice", negate=False, advisor_name=advisor_name, **_kw)
+    ref_concept = _get_concept_totals_grouped(journals, date_from, date_to, "out_refund", negate=True, advisor_name=advisor_name, **_kw)
 
     # 5b) Totales por cliente (facturas + NC)
-    inv_partner = _get_partner_totals_grouped(journals, date_from, date_to, "out_invoice", negate=False, advisor_name=advisor_name)
-    ref_partner = _get_partner_totals_grouped(journals, date_from, date_to, "out_refund", negate=True, advisor_name=advisor_name)
+    inv_partner = _get_partner_totals_grouped(journals, date_from, date_to, "out_invoice", negate=False, advisor_name=advisor_name, **_kw)
+    ref_partner = _get_partner_totals_grouped(journals, date_from, date_to, "out_refund", negate=True, advisor_name=advisor_name, **_kw)
 
     # 6) Armar respuesta por sede → diarios
     groups = []
@@ -461,8 +469,8 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
 
     # 8) Período anterior — misma duración, desplazado atrás
     prev_from, prev_to = _get_previous_period_dates(date_from, date_to)
-    prev_inv = _get_grand_totals_fast(journals, prev_from, prev_to, "out_invoice", negate=False, advisor_name=advisor_name)
-    prev_ref = _get_grand_totals_fast(journals, prev_from, prev_to, "out_refund", negate=True, advisor_name=advisor_name)
+    prev_inv = _get_grand_totals_fast(journals, prev_from, prev_to, "out_invoice", negate=False, advisor_name=advisor_name, **_kw)
+    prev_ref = _get_grand_totals_fast(journals, prev_from, prev_to, "out_refund", negate=True, advisor_name=advisor_name, **_kw)
     prev_net = {
         "count_invoices": prev_inv["count_invoices"] + prev_ref["count_invoices"],
         "subtotal_untaxed": prev_inv["subtotal_untaxed"] + prev_ref["subtotal_untaxed"],
@@ -475,6 +483,13 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
         j = request.env["account.journal"].sudo().browse(j_id)
         if j.exists():
             selected_journal = {"id": j.id, "name": j.name}
+
+    # 10) Sección gráfica — reutiliza los mismos `journals` (misma sede,
+    # diario, empresas permitidas y equipo/asesor/estado) para que sus
+    # totales coincidan siempre con los de `grand_net` de arriba.
+    sales_analytics = analytics.get_sales_analytics(
+        journals, date_from, date_to, advisor_name=advisor_name, team_id=t_id, state_filter=state_filter,
+    )
 
     return {
         "ok": True,
@@ -495,4 +510,5 @@ def get_sales_data(date_from=None, date_to=None, warehouse_id=None, journal_id=N
             "grand_net": prev_net,
         },
         "groups": groups,
+        "analytics": sales_analytics,
     }
