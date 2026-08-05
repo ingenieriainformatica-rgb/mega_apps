@@ -1292,7 +1292,7 @@
                     </t>
 
                     <!-- 3. Checklist técnico -->
-                    <div id="workshop-checklist-tecnico" class="accordion-item" t-if="is_technician or is_internal_manager">
+                    <div id="workshop-checklist-tecnico" class="accordion-item" t-if="is_advisor or is_technician or is_road_test or is_internal_manager">
                         <h2 class="accordion-header" id="heading-checklist-tecnico">
                             <button class="accordion-button collapsed" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#collapse-checklist-tecnico"
@@ -1588,7 +1588,7 @@
                     </div>
 
                     <!-- 5. Solicitud de repuestos -->
-                    <div class="accordion-item" id="workshop-spare-request-section" t-if="is_technician or is_internal_manager"
+                    <div class="accordion-item" id="workshop-spare-request-section" t-if="is_advisor or is_technician or is_road_test or is_internal_manager"
                          t-att-data-repair-id="repair.id"
                          t-att-data-catalog-url="'/my/workshop/spare-catalog'"
                          t-att-data-submit-url="'/my/workshop/order/%s/spares/submit' % repair.id">

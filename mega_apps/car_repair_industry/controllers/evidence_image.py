@@ -82,10 +82,7 @@ class FleetRepairEvidenceImageController(http.Controller):
             or user.has_group('car_repair_industry.group_fleet_repair_directeur_commercial')
         ):
             return True
-        if (
-            user.has_group('car_repair_industry.group_fleet_repair_portal_advisor')
-            and repair.portal_advisor_id.id == user.id
-        ):
+        if user.has_group('car_repair_industry.group_fleet_repair_portal_advisor'):
             return True
         if (
             user.has_group('car_repair_industry.group_fleet_repair_portal_technician')
