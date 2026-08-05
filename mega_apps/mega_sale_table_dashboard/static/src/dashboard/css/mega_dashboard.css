@@ -80,10 +80,14 @@
   transform: translateY(-1px);
 }
 
-/* Barra de color superior (color se inyecta inline por JS) */
-.mega-kpi-topbar {
-  height: 4px;
-  display: block;
+/* Barra de color lateral (color se inyecta inline por JS) */
+.mega-kpi-accent {
+  width: 4px;
+  flex: 0 0 auto;
+}
+
+.min-w-0 {
+  min-width: 0;
 }
 
 .mega-kpi-label {
@@ -193,7 +197,7 @@
 .mega-filter-bar {
   background: #fff;
   border-bottom: 1px solid rgba(0, 0, 0, .08);
-  padding: 14px 32px 16px;
+  padding: 10px 24px 10px;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -201,7 +205,7 @@
 }
 
 .mega-filter-row {
-  min-height: 42px;
+  min-height: 36px;
 }
 
 /* Etiqueta de sección del filtro */
@@ -214,15 +218,17 @@
   white-space: nowrap;
 }
 
-/* Botones de shortcuts de período */
+/* Botones de shortcuts de período — fondo tenue por defecto para que se
+   lean como botones (no solo texto con borde) y den algo de profundidad. */
 .mega-shortcut-btn {
   font-size: 13px;
   font-weight: 600;
-  padding: 7px 18px;
+  padding: 6px 16px;
   border-radius: 999px;
-  border: 1.5px solid rgba(26, 60, 107, .22);
-  background: transparent;
-  color: rgba(33, 37, 41, .60);
+  border: 1px solid rgba(26, 60, 107, .16);
+  background: rgba(26, 60, 107, .045);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+  color: rgba(33, 37, 41, .65);
   cursor: pointer;
   transition: all .15s ease;
   white-space: nowrap;
@@ -233,7 +239,7 @@
 .mega-shortcut-btn:hover {
   border-color: #1A3C6B;
   color: #1A3C6B;
-  background: rgba(26, 60, 107, .06);
+  background: rgba(26, 60, 107, .09);
 }
 
 .mega-shortcut-active {
@@ -265,7 +271,7 @@
 /* Separador vertical entre shortcuts y fechas */
 .mega-filter-divider {
   width: 1px;
-  height: 28px;
+  height: 24px;
   background: rgba(0, 0, 0, .10);
   flex-shrink: 0;
 }
@@ -280,22 +286,26 @@
   letter-spacing: .2px;
 }
 
-/* Ícono antes del select */
+/* Ícono antes del select — tenue: la fila de "Vista" es secundaria frente
+   al rango de fechas, por eso pesa menos visualmente. */
 .mega-filter-icon {
-  font-size: 15px;
-  color: rgba(26, 60, 107, .50);
+  font-size: 13px;
+  color: rgba(26, 60, 107, .38);
   flex-shrink: 0;
 }
 
-/* Selects del filtro */
+/* Selects del filtro — más chicos y livianos que los controles de fecha,
+   a propósito: refuerza que "cuándo" es el filtro principal y "qué ver"
+   (sede/diario/asesor) es secundario. */
 .mega-select {
-  min-width: 200px;
-  max-width: 300px;
-  font-size: 14px;
-  height: 38px;
-  border-radius: 8px !important;
-  border: 1.5px solid rgba(26, 60, 107, .18) !important;
-  color: #212529;
+  min-width: 170px;
+  max-width: 260px;
+  font-size: 13px;
+  height: 32px;
+  border-radius: 7px !important;
+  border: 1px solid rgba(26, 60, 107, .14) !important;
+  background-color: #fff !important;
+  color: rgba(33, 37, 41, .78);
   font-weight: 500;
   transition: border-color .15s ease, box-shadow .15s ease;
 }
@@ -309,14 +319,20 @@
   box-shadow: 0 0 0 3px rgba(26, 60, 107, .10) !important;
 }
 
-/* Segunda fila del filtro (Sede / Diario / Asesor) - separada con más aire */
+/* Segunda fila del filtro (Sede / Diario / Asesor) — envuelta en una franja
+   gris tenue en vez de una línea punteada: da profundidad (se lee "detrás"
+   del rango de fechas) y comprime el espacio vertical entre filas. */
 .mega-filter-select-row {
-  padding-top: 14px;
-  margin-top: 14px !important;
-  border-top: 1px dashed rgba(26, 60, 107, .10);
+  padding: 7px 12px !important;
+  margin-top: 8px !important;
+  background: rgba(26, 60, 107, .035);
+  border: 1px solid rgba(26, 60, 107, .06);
+  border-radius: 9px;
 }
 
-/* Botón de fecha (reemplaza el <input type="date"> con Odoo DatePicker) */
+/* Botón de fecha (reemplaza el <input type="date"> con Odoo DatePicker) —
+   es el control más usado del tablero, por eso queda más marcado (borde
+   más grueso, texto en negrita, sombra propia) que los selects de abajo. */
 .mega-date-btn {
   display: inline-flex;
   align-items: center;
@@ -324,11 +340,12 @@
   height: 38px;
   padding: 0 16px;
   border-radius: 8px;
-  border: 1.5px solid rgba(26, 60, 107, .18);
+  border: 1.5px solid rgba(26, 60, 107, .22);
   background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
   color: #1A3C6B;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   transition: all .15s ease;
   white-space: nowrap;

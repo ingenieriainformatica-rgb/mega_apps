@@ -9,11 +9,11 @@
           <t t-foreach="metrics" t-as="metric" t-key="metric.id">
             <div class="col-6 col-md-4 col-lg">
 
-              <div class="mega-kpi-card h-100">
-                <!-- Barra de color superior (distinta por KPI) -->
-                <div class="mega-kpi-topbar" t-att-style="'background:' + metric.color"/>
+              <div class="mega-kpi-card h-100 d-flex">
+                <!-- Barra de color lateral (distinta por KPI) -->
+                <div class="mega-kpi-accent" t-att-style="'background:' + metric.color"/>
 
-                <div class="p-3">
+                <div class="p-3 flex-grow-1 min-w-0">
                   <!-- Label -->
                   <div class="mega-kpi-label">
                     <i t-att-class="'fa ' + metric.icon + ' me-1'"/>
