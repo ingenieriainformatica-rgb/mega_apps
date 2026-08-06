@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import io
 import json
 import re
+import zipfile
 from odoo import _, fields, http
 from pathlib import Path
 
@@ -1717,6 +1719,48 @@ class CarRepairPortalWorkshop(http.Controller):
             'technician_note': note_clean or False,
         })
         return {'ok': True, 'line_id': line.id, 'name': catalog.name, 'quantity': qty, 'note': note_clean}
+
+    @http.route('/my/workshop/order/<int:repair_id>/evidence/download', type='http', auth='user', website=True, methods=['POST'])
+    def workshop_evidence_download(self, repair_id, **post):
+        try:
+            repair = self._get_repair(repair_id)
+        except (AccessError, MissingError):
+            return request.not_found()
+        if not (self._is_advisor() or self._is_internal_manager()):
+            return request.render('car_repair_industry.portal_workshop_forbidden', {})
+
+        try:
+            ids = [int(eid) for eid in request.httprequest.form.getlist('evidence_ids')]
+        except (TypeError, ValueError):
+            ids = []
+        evidences = request.env['fleet.repair.evidence'].sudo().browse(ids).filtered(
+            lambda e: e.repair_id.id == repair.id and e.is_image
+        )
+        if not evidences:
+            return request.redirect('/my/workshop/order/%s' % repair.id)
+
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as archive:
+            for evidence in evidences:
+                content = evidence._drive_download_bytes()
+                if not content:
+                    continue
+                archive.writestr(self._evidence_zip_filename(evidence), content)
+        buffer.seek(0)
+
+        zip_filename = 'evidencias_%s.zip' % re.sub(r'[^A-Za-z0-9_-]+', '_', repair.sequence or str(repair.id))
+        return request.make_response(
+            buffer.getvalue(),
+            headers=[
+                ('Content-Type', 'application/zip'),
+                ('Content-Disposition', 'attachment; filename="%s"' % zip_filename),
+                ('Content-Length', len(buffer.getvalue())),
+            ],
+        )
+
+    def _evidence_zip_filename(self, evidence):
+        safe_name = re.sub(r'[\\/]+', '_', (evidence.name or 'evidencia').strip()) or 'evidencia'
+        return '%s_%s_%s' % (evidence.evidence_type, evidence.id, safe_name)
 
 
 _WORKSHOP_PORTAL_GROUPS = [

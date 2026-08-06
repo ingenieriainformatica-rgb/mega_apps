@@ -104,20 +104,17 @@ class FleetRepairEvidence(models.Model):
                 if evidence.is_image else False
             )
 
-    def get_image_data_uri(self):
-        """Download from Google Drive and return a base64 data URI for PDF embedding.
-
-        Called from QWeb report templates. Returns False on failure so the
-        template can fall back gracefully instead of rendering a broken <img>.
-        """
+    def _drive_download_bytes(self):
+        """Download the raw file content from Google Drive. Returns None on failure."""
         self.ensure_one()
-        if not self.is_image:
-            return False
         drive_file_id = self.drive_file_id or self._extract_drive_file_id()
         if not drive_file_id:
-            return False
+            return None
         try:
             from googleapiclient.http import MediaIoBaseDownload  # type: ignore
+        except ImportError:
+            return None
+        try:
             drive_service = self.repair_id.sudo()._drive_get_service()
             drive_request = drive_service.files().get_media(
                 fileId=drive_file_id,
@@ -128,15 +125,28 @@ class FleetRepairEvidence(models.Model):
             done = False
             while not done:
                 _status, done = downloader.next_chunk()
-            mime = self.mime_type or 'image/jpeg'
-            b64 = base64.b64encode(buffer.getvalue()).decode('ascii')
-            return 'data:%s;base64,%s' % (mime, b64)
+            return buffer.getvalue()
         except Exception as error:
             _logger.warning(
-                "[PDFEvidence] image embed failed for evidence %s (%s): %s",
-                self.id, self.name, error,
+                "Google Drive download failed for evidence %s: %s", self.id, error,
             )
+            return None
+
+    def get_image_data_uri(self):
+        """Download from Google Drive and return a base64 data URI for PDF embedding.
+
+        Called from QWeb report templates. Returns False on failure so the
+        template can fall back gracefully instead of rendering a broken <img>.
+        """
+        self.ensure_one()
+        if not self.is_image:
             return False
+        content = self._drive_download_bytes()
+        if not content:
+            return False
+        mime = self.mime_type or 'image/jpeg'
+        b64 = base64.b64encode(content).decode('ascii')
+        return 'data:%s;base64,%s' % (mime, b64)
 
     @api.constrains('external_url')
     def _check_external_url_is_google_drive(self):
