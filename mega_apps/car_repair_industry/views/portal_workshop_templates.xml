@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <template id="portal_user_dropdown_role_badge" inherit_id="portal.user_dropdown" name="Taller - Badge de rol en el menú de usuario">
+        <xpath expr="//span[@t-if='_user_name']" position="after">
+            <span t-if="user_id.car_repair_portal_profile"
+                  class="badge rounded-pill bg-primary ms-2 align-middle"
+                  t-field="user_id.car_repair_portal_profile"/>
+        </xpath>
+    </template>
+
     <template id="portal_workshop_forbidden" name="Portal taller sin acceso">
         <t t-call="website.layout">
             <div class="container my-5">
