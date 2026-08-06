@@ -14,7 +14,7 @@ class Appointment(http.Controller):
     def appointment(self, **post):
         return request.render("car_repair_industry.appointment_form")
 
-    @http.route('/appointment/confirm', auth='public', type='http', website=True)
+    @http.route('/appointment/confirm', auth='public', type='http', website=True, sitemap=False)
     def appointment_confirm(self, **post):
         if post:
             meeting = request.env['calendar.event'].sudo()
@@ -54,11 +54,11 @@ class Appointment(http.Controller):
 
             return request.render("car_repair_industry.appointment_confirm", values)
 
-    @http.route('/service-repair', auth='public', type='http', website=True)
+    @http.route('/service-repair', auth='public', type='http', website=True, sitemap=False)
     def service_repair_form(self, **post):
         return request.render("car_repair_industry.service_repair_form")
 
-    @http.route('/service/repair/form/submit', auth='public', type='http', website=True)
+    @http.route('/service/repair/form/submit', auth='public', type='http', website=True, sitemap=False)
     def service_repair_form_submit(self, **post):
         if post:
             car_repair = request.env['fleet.repair'].sudo()
@@ -103,14 +103,14 @@ class Appointment(http.Controller):
                     car_repair_obj.update({'images_ids': [(4, attachment_id.id)]})
             return request.render("car_repair_industry.service_repair_form_submit", values)
 
-    @http.route('/feedback/form/<model("fleet.repair"):repair>', auth='public', type='http', website=True)
+    @http.route('/feedback/form/<model("fleet.repair"):repair>', auth='public', type='http', website=True, sitemap=False)
     def feedback_form(self, repair, **post):
         values = {
             'fleet_repair_id': repair.id
         }
         return request.render("car_repair_industry.feedback_form", values)
 
-    @http.route('/feedback/form/submit', auth='public', type='http', website=True, csrf=False)
+    @http.route('/feedback/form/submit', auth='public', type='http', website=True, csrf=False, sitemap=False)
     def feedbacksubmit(self, **post):
         if post:
             car_repair = request.env['fleet.repair'].sudo().browse(int(post.get('fleet_repair')))
@@ -121,7 +121,7 @@ class Appointment(http.Controller):
             car_repair.update(values)
         return request.render("car_repair_industry.review_submit", values)
 
-    @http.route('/fleet_repair/dashboard_data', type="json", auth='user')
+    @http.route('/fleet_repair/dashboard_data', type="json", auth='user', sitemap=False)
     def fleet_repair_dashboard_data(self):
         fleet_repair = request.env['fleet.repair'].sudo().search([])
         fleet_diagnose = request.env['fleet.diagnose'].sudo().search([])
