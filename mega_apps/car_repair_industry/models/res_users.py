@@ -8,7 +8,7 @@ class ResUsers(models.Model):
 
     car_repair_portal_profile = fields.Selection(
         selection=[
-            ('advisor', 'Asesor de recepción'),
+            ('advisor', 'Asesor comercial'),
             ('technician', 'Técnico mecánico'),
             ('road_test', 'Técnico de ruta'),
             ('quoter', 'Cotizador'),
