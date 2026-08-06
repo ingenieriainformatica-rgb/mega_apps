@@ -96,7 +96,7 @@ class MegaDianTokenFile(models.Model):
 
     validation_note = fields.Text(string="Observación validación", readonly=True)
 
-    is_reconciled = fields.Boolean(string="Conciliado", tracking=True)
+    is_reconciled = fields.Boolean(string="Conciliado")
 
     impuestos_info = fields.Text(
         string="Impuestos DIAN",

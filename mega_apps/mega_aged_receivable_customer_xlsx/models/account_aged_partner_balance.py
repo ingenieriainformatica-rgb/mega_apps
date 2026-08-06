@@ -97,3 +97,14 @@ class AgedReceivableCustomHandler(models.AbstractModel):
                 column for column in options['columns']
                 if column['expression_label'] not in MEGA_CUSTOM_LABELS
             ]
+        else:
+            seen_custom_labels = set()
+            columns = []
+            for column in options['columns']:
+                label = column['expression_label']
+                if label in MEGA_CUSTOM_LABELS:
+                    if label in seen_custom_labels:
+                        continue
+                    seen_custom_labels.add(label)
+                columns.append(column)
+            options['columns'] = columns

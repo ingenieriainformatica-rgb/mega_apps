@@ -87,6 +87,17 @@ class TestAgedReceivableCustomerXlsx(TestAccountReportsCommon):
     # Data-content tests
     # -------------------------------------------------------------------
 
+    def test_partner_name_header_is_not_duplicated(self):
+        """ Only the leading custom 'Cliente' column should be exported, even if an old duplicate
+        report column with the same expression label still exists in the database. """
+        self._invoice(self.partner_a, 100.0, self.old_date)
+
+        options = self._get_screen_options(partner_ids=self.partner_a.ids)
+        rows, _sheet = self._export_xlsx_rows(options)
+        header = self._find_header_row(rows)
+
+        self.assertEqual(header.count('Cliente'), 1)
+
     def test_partner_name_repeated_for_several_invoices_same_customer(self):
         """ Scenarios 1 & 9: one customer with several pending invoices; the client column
         must be repeated on every one of its detail rows, and per-customer totals stay correct. """
