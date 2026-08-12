@@ -52,6 +52,30 @@
                     <span class="badge rounded-pill text-bg-success">Ciudad</span>
                     para habilitar el resto de los campos.
                 </div>
+
+                <div class="alert alert-warning oe_edit_only fs-5 py-3" role="alert" invisible="not vat or not country_id or not state_id or (not city_id and not city) or street">
+                    <strong>4.</strong> Ingresa la
+                    <span class="badge rounded-pill text-bg-warning">Dirección</span>
+                    usando la nomenclatura exigida por la DIAN para que quede correctamente estructurada:
+                    <div class="mt-2">
+                        <span class="badge rounded-pill text-bg-secondary">CL</span> Calle
+                        <span class="badge rounded-pill text-bg-secondary ms-2">CR</span> Carrera
+                        <span class="badge rounded-pill text-bg-secondary ms-2">AV</span> Avenida
+                        <span class="badge rounded-pill text-bg-secondary ms-2">AC</span> Avenida Calle
+                        <span class="badge rounded-pill text-bg-secondary ms-2">AK</span> Avenida Carrera
+                        <span class="badge rounded-pill text-bg-secondary ms-2">DG</span> Diagonal
+                        <span class="badge rounded-pill text-bg-secondary ms-2">TV</span> Transversal
+                        <span class="badge rounded-pill text-bg-secondary ms-2">AUT</span> Autopista
+                        <span class="badge rounded-pill text-bg-secondary ms-2">CRT</span> Carretera
+                        <span class="badge rounded-pill text-bg-secondary ms-2">KM</span> Kilómetro
+                        <span class="badge rounded-pill text-bg-secondary ms-2">VRD</span> Vereda
+                        <span class="badge rounded-pill text-bg-secondary ms-2">URB</span> Urbanización
+                        <span class="badge rounded-pill text-bg-secondary ms-2">BRR</span> Barrio
+                        <span class="badge rounded-pill text-bg-secondary ms-2">MZ</span> Manzana
+                        <span class="badge rounded-pill text-bg-secondary ms-2">PQ</span> Parque
+                    </div>
+                    <div class="mt-1">Ejemplo: <strong>CL 45 23 10</strong></div>
+                </div>
             </xpath>
 
             <!-- El País vive dentro del bloque de dirección estándar de Odoo
@@ -73,11 +97,16 @@
                  Direcciones"). Se usa [not(@name)] para afectar solo el del
                  encabezado; el de direcciones hijas se deja intacto para que
                  nunca dependa de un vat propio (los hijos no lo necesitan). -->
+            <!-- Calle y calle 2 permanecen ocultas hasta tener ciudad (no
+                 solo vat): asi el usuario no llega a diligenciar direccion
+                 sin haber completado pais/estado/ciudad primero, y solo ve
+                 estos campos junto con la guia de nomenclatura DIAN (alerta
+                 paso 4). -->
             <xpath expr="//div[hasclass('o_address_format')][not(@name)]/field[@name='street']" position="attributes">
-                <attribute name="invisible">not vat</attribute>
+                <attribute name="invisible">not vat or not country_id or not state_id or (not city_id and not city)</attribute>
             </xpath>
             <xpath expr="//div[hasclass('o_address_format')][not(@name)]/field[@name='street2']" position="attributes">
-                <attribute name="invisible">not vat</attribute>
+                <attribute name="invisible">not vat or not country_id or not state_id or (not city_id and not city)</attribute>
             </xpath>
             <!-- base_address_extended agrega city_id (ciudad estructurada,
                  res.city) justo antes de city (texto libre) cuando el país
@@ -123,36 +152,40 @@
                 <attribute name="invisible">1</attribute>
             </xpath>
 
+            <!-- Estos campos vienen despues del bloque de direccion en el
+                 formulario base: ademas de requerir identificacion, quedan
+                 condicionados a tener la calle diligenciada (paso 4 de la
+                 guia de nomenclatura DIAN). -->
             <xpath expr="//field[@name='function']" position="attributes">
-                <attribute name="readonly">not vat</attribute>
+                <attribute name="readonly">not vat or not street</attribute>
             </xpath>
 
             <xpath expr="//field[@name='phone']" position="attributes">
-                <attribute name="readonly">not vat</attribute>
+                <attribute name="readonly">not vat or not street</attribute>
             </xpath>
 
             <xpath expr="//field[@name='mobile']" position="attributes">
-                <attribute name="readonly">not vat</attribute>
+                <attribute name="readonly">not vat or not street</attribute>
             </xpath>
 
             <xpath expr="//field[@name='email']" position="attributes">
-                <attribute name="readonly">not vat</attribute>
+                <attribute name="readonly">not vat or not street</attribute>
             </xpath>
 
             <xpath expr="//field[@name='website']" position="attributes">
-                <attribute name="readonly">not vat</attribute>
+                <attribute name="readonly">not vat or not street</attribute>
             </xpath>
 
             <xpath expr="//field[@name='title']" position="attributes">
-                <attribute name="readonly">not vat</attribute>
+                <attribute name="readonly">not vat or not street</attribute>
             </xpath>
 
             <xpath expr="//field[@name='lang']" position="attributes">
-                <attribute name="readonly">not vat</attribute>
+                <attribute name="readonly">not vat or not street</attribute>
             </xpath>
 
             <xpath expr="//field[@name='category_id']" position="attributes">
-                <attribute name="readonly">not vat</attribute>
+                <attribute name="readonly">not vat or not street</attribute>
             </xpath>
 
         </field>
