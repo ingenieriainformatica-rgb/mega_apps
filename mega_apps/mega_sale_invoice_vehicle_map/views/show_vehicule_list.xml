@@ -3,9 +3,9 @@
     <record id="view_out_invoice_list_inherit_vehicle" model="ir.ui.view">
         <field name="name">account.out.invoice.list.inherit.vehicle</field>
         <field name="model">account.move</field>
-        <field name="inherit_id" ref="studio_customization.odoo_studio_account__0e08dc54-199a-4774-8a57-e1d6b505c1ad"/>
+        <field name="inherit_id" ref="account.view_out_invoice_tree"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='x_studio_descripcin_2']" position="after">
+            <xpath expr="//list" position="inside">
                 <field name="vehicle" string="Vehículo" optional="show"/>
             </xpath>
         </field>
