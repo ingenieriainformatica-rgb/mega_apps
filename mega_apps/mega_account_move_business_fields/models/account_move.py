@@ -10,3 +10,8 @@ class AccountMove(models.Model):
         copy=True,
         index=True,
     )
+    mega_descripcion_general = fields.Char(
+        string="Descripción general",
+        copy=True,
+        index=True,
+    )
