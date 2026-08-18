@@ -4,7 +4,7 @@
 {
     "name": "Mega - Taller",
     "version": "1.0",
-    "depends": ['base', 'sale', 'purchase', 'account', 'sale_stock', 'mail', 'product', 'stock', 'fleet','sale_management', 'website', 'calendar', 'hr_timesheet','web'],
+    "depends": ['base', 'sale', 'purchase', 'account', 'sale_stock', 'mail', 'product', 'stock', 'fleet','sale_management', 'website', 'calendar', 'hr_timesheet','web', 'mega_sale_order_business_fields'],
     "author": "Jorge Alberto Quiroz Sierra",
     "summary": "Fleet repair vehicle repair car Maintenance auto-fleet service repair Car Maintenance Repair workshop automobile repair Automotive Service repair Automotive repair machine repair workshop equipment repair service Repair auto repair shop Auto Shop repair",
     "description": """

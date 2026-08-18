@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Muestra el campo administrado por código mega_descripcion en el
+         formulario estándar de sale.order, junto a los datos del cliente.
+         No se ancla en el campo de Studio x_studio_descripcion: ese campo
+         solo existe en el árbol de vista combinado una vez que la vista de
+         Studio se aplica, algo que no ha ocurrido todavía cuando esta vista
+         se carga durante una actualización completa de módulos, así que
+         anclar ahí rompe cualquier actualización (mismo caso ya resuelto en
+         mega_account_move_business_fields para account.move). -->
+    <record id="view_order_form_inherit_mega_descripcion" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.mega.descripcion</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='partner_details']" position="inside">
+                <field name="mega_descripcion"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -6,7 +6,7 @@
     "author": "Jorge Alberto Quiroz Sierra",
     "category": "MegaTecnicentro/ValidateSaleOrder",
     "website": "https://mega.realnet.com.co/",
-    "depends": ["sale"],
+    "depends": ["sale", "mega_sale_order_business_fields"],
     "data": [
         "views/sale_order_inherit_views.xml",
     ],

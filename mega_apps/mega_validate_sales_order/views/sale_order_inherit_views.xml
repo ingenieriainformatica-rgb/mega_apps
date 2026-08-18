@@ -17,12 +17,16 @@
         </field>
     </record>
 
-    <record id="view_order_form_lock_lines_v18_studio" model="ir.ui.view">
-      <field name="name">sale.order.form.lock.lines.v18.studio</field>
+    <!-- Reemplaza el campo de Studio x_studio_descripcion por el campo
+         mega_descripcion (mega_sale_order_business_fields), que ahora vive
+         en la vista estándar sale.view_order_form en vez de la vista de
+         Studio. -->
+    <record id="view_order_form_lock_lines_v18_mega_descripcion" model="ir.ui.view">
+      <field name="name">sale.order.form.lock.lines.v18.mega.descripcion</field>
       <field name="model">sale.order</field>
-      <field name="inherit_id" ref="studio_customization.odoo_studio_sale_ord_3434a9cc-c592-421e-bec5-63c2fd7c3561"/>
+      <field name="inherit_id" ref="sale.view_order_form"/>
       <field name="arch" type="xml">
-        <xpath expr="//field[@name='x_studio_descripcion']" position="attributes">
+        <xpath expr="//field[@name='mega_descripcion']" position="attributes">
           <attribute name="readonly">(state == 'sale' and invoice_count &gt; 0)</attribute>
         </xpath>
       </field>

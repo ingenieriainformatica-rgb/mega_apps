@@ -290,7 +290,7 @@ class FleetDiagnose(models.Model):
             'state': 'draft',
             'diagnose_id': self.id,
             'fleet_repair_id': self.fleet_repair_id.id,
-            'x_studio_descripcion': description,
+            'mega_descripcion': description,
             'warehouse_id': warehouse.id,
             'vehicle_plate': vehicle_plate or '',
             'vehicle': vehicle_plate or '',
