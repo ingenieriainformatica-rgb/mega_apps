@@ -5,7 +5,7 @@
     "author": "Jorge Alberto Quiroz Sierra",
     "category": "MegaTecnicentro/EdiNote",
     "website": "https://mega.realnet.com.co/",
-    "depends": ["account_edi_ubl_cii", "l10n_co_dian", "account"],
+    "depends": ["account_edi_ubl_cii", "l10n_co_dian", "account", "mega_account_move_business_fields"],
     "data": [
         'report/invoice_report_compact.xml',
         'report/invoice_report_desc.xml',

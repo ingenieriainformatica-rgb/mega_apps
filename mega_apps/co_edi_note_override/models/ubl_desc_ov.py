@@ -8,12 +8,12 @@ class AccountEdiXmlUBL20(models.AbstractModel):
     _inherit = 'account.edi.xml.ubl_20'
 
     def _prepend_custom_description_note(self, data, move):
-        """Inserta x_studio_descripcin_1 como primera nota (cbc:Note) si existe.
+        """Inserta mega_descripcion_general como primera nota (cbc:Note) si existe.
            Soporta invoice, credit_note y debit_note.
         """
         try:
             inv_vals = data.get('vals') or {}
-            raw_desc = getattr(move, 'x_studio_descripcin_1', '') or ''
+            raw_desc = move.mega_descripcion_general or ''
             # Normaliza y recorta por prudencia DIAN (cbc:Note máx. 12 chars aprox.)
             desc = ' '.join(raw_desc.split()).strip()[:12]
             if not desc:

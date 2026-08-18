@@ -114,7 +114,7 @@ class SaleSupplierTraceXlsxBuilder(models.AbstractModel):
             move.partner_id.display_name,
             move.partner_id.vat or '',
             getattr(move, 'vehicle', '') or '',
-            getattr(move, 'x_studio_descripcin_1', '') or '',
+            getattr(move, 'mega_descripcion_general', '') or '',
             move.invoice_user_id.name or '',
             product.display_name,
             product.default_code or '',

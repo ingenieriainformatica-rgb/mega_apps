@@ -3,10 +3,10 @@
 
     <!-- 1) Insertar una nueva COLUMNA al inicio del bloque de fechas -->
     <!-- <xpath expr="//div[@id='informations']//div[@name='invoice_date']" position="before">
-      <t t-if="o.x_studio_descripcin_1">
+      <t t-if="o.mega_descripcion_general">
         <div class="col" name="general_description_col">
           <strong>Descripción general</strong>
-          <div class="o-general-desc" t-esc="(o.x_studio_descripcin_1 or '')[:12]"/>
+          <div class="o-general-desc" t-esc="(o.mega_descripcion_general or '')[:12]"/>
         </div>
       </t>
     </xpath> -->

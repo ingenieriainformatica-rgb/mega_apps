@@ -14,6 +14,7 @@
         "sale_stock",
         "purchase_stock",
         "stock_account",
+        "mega_account_move_business_fields",
     ],
     "data": [
         "security/security_groups.xml",
