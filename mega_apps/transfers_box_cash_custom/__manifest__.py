@@ -5,7 +5,7 @@
     "author": "Jorge Alberto Quiroz Sierra",
     "category": "MegaTecnicentro/TransladosInternos",
     "website": "https://mega.realnet.com.co/",
-    "depends": ["account"],
+    "depends": ["account", "mega_account_move_business_fields"],
     "data": [
         'security/groups.xml',
         'security/ir.model.access.csv',

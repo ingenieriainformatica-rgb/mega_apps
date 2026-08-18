@@ -8,7 +8,7 @@
         <field name="arch" type="xml">
             <!-- Lo insertamos después del cliente -->
             <xpath expr="//list/field[@name='invoice_date_due']" position="after">
-                <field name="x_studio_concepto" optional="hide"/>
+                <field name="mega_concepto" optional="hide"/>
             </xpath>
         </field>
     </record>

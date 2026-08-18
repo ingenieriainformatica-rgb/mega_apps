@@ -25,9 +25,9 @@ class SaleOrder(models.Model):
 
         order = self[:1]  # normalmente es 1
         if order.advisor_id:
-            # ✅ Pasar el nombre del asesor al campo Concepto (Studio)
-            if "x_studio_concepto" in self.env["account.move"]._fields:
-                vals["x_studio_concepto"] = order.advisor_id.name
+            # ✅ Pasar el nombre del asesor al campo Concepto (mega_account_move_business_fields)
+            if "mega_concepto" in self.env["account.move"]._fields:
+                vals["mega_concepto"] = order.advisor_id.name
 
         return vals
 

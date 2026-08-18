@@ -8,7 +8,7 @@
         <field name="inherit_id" ref="account.view_account_invoice_report_search"/>
         <field name="arch" type="xml">
             <xpath expr="//search" position="inside">
-                <field name="x_studio_concepto" string="Concepto"/>
+                <field name="mega_concepto" string="Concepto"/>
             </xpath>
         </field>
     </record>
@@ -20,7 +20,7 @@
         <field name="inherit_id" ref="account.account_invoice_report_view_tree"/>
         <field name="arch" type="xml">
         <xpath expr="//list//field[@name='partner_id']" position="after">
-            <field name="x_studio_concepto" string="Concepto" optional="show"/>
+            <field name="mega_concepto" string="Concepto" optional="show"/>
         </xpath>
         </field>
     </record>

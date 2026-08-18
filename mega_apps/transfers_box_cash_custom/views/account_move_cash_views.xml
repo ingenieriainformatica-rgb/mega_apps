@@ -98,7 +98,7 @@
                         domain="[('journal_id.is_cash_transfer','=', True)]"
                         invisible="1"/>
             </xpath>
-            
+
         </field>
     </record>
     <!-- ocultar de la lista -->
@@ -114,7 +114,7 @@
 
             <!-- Insertar columna Concepto (ref) -->
             <xpath expr="//list/field[@name='name']" position="after">
-                <field name="x_studio_concepto" string="Concepto" column_invisible="context.get('page_origin') != 'transfers_box'"/>
+                <field name="mega_concepto" string="Concepto" column_invisible="context.get('page_origin') != 'transfers_box'"/>
             </xpath>
 
             <!-- Insertar columna de estado como badge (después del nombre/numero) -->
@@ -191,7 +191,7 @@
                 <attribute name="domain">(context.get('page_origin') == 'transfers_box') and [('company_ids','in',[company_id]),('deprecated','=',False),'|','&amp;',('account_type','=','liability_payable'),('reconcile','=',True),('account_type','in',['asset_cash','asset_bank'])] or []</attribute>
                 <attribute name="options">{'no_create': True}</attribute>
             </xpath>             -->
-            
+
         </field>
     </record>
     <!-- Acción personalizada para transferencias entre cajas -->

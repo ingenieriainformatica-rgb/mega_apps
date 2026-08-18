@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Muestra el campo administrado por código mega_concepto en el formulario
+         estándar de account.move. No toca la vista de Studio
+         (studio_customization.odoo_studio_account__...) que sigue mostrando
+         x_studio_concepto de forma independiente. -->
+    <record id="view_move_form_inherit_mega_concepto" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.mega.concepto</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="mega_concepto"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

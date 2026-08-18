@@ -10,6 +10,7 @@
     "depends": [
         "sale",
         "contacts",
+        "mega_account_move_business_fields",
     ],
     "data": [
         "views/res_partner_view.xml",
@@ -19,4 +20,4 @@
     "installable": True,
     "application": False,
     "license": "LGPL-3",
-}
+}#type:ignore

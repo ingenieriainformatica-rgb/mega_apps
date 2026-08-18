@@ -3,9 +3,15 @@
     <record id="view_account_move_form_inherit_concepto_edit" model="ir.ui.view">
         <field name="name">account.move.form.inherit.mega.concepto.always.readonly</field>
         <field name="model">account.move</field>
-        <field name="inherit_id" ref="studio_customization.odoo_studio_account__d2366bcb-bf6f-450f-a35e-d0c145b61f2f"/>
+        <!-- mega_concepto lo agrega mega_account_move_business_fields con
+             prioridad 16 (default). Forzamos priority=200 aquí para
+             garantizar que esa vista se aplique primero: con prioridades
+             iguales Odoo ordena por id de registro, no por dependencia
+             de módulos, y esta vista puede terminar con un id menor. -->
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="priority" eval="200"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='x_studio_concepto']" position="attributes">
+            <xpath expr="//field[@name='mega_concepto']" position="attributes">
                 <attribute name="readonly">context.get('default_move_type') == 'out_invoice'</attribute>
             </xpath>
         </field>

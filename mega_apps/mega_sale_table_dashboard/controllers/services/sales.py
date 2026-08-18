@@ -70,7 +70,7 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
     KPIs agrupados por (warehouse_id, journal_id).
     move_type: 'out_invoice' o 'out_refund'
     negate=True => valores en negativo
-    advisor_name: si se da, filtra por x_studio_concepto (comparación sin
+    advisor_name: si se da, filtra por mega_concepto (comparación sin
                   distinguir mayúsculas/minúsculas)
     """
     Move = request.env["account.move"].sudo()
@@ -89,7 +89,7 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
     if date_to:
         domain.append(("invoice_date", "<=", date_to))
     if advisor_name:
-        domain.append(("x_studio_concepto", "=ilike", advisor_name))
+        domain.append(("mega_concepto", "=ilike", advisor_name))
     if team_id:
         domain.append(("team_id", "=", int(team_id)))
 
@@ -121,7 +121,7 @@ def _get_kpis_grouped(warehouses, journals, date_from=None, date_to=None, move_t
             "journal_id": mv.journal_id.id,
             "journal": mv.journal_id.name or "",
             "move_type": mv.move_type,
-            "concepto": getattr(mv, "x_studio_concepto", "") or "",
+            "concepto": getattr(mv, "mega_concepto", "") or "",
             "subtotal_untaxed": float(mv.amount_untaxed) * sign,
             "total": float(mv.amount_total) * sign,
         })
@@ -154,7 +154,7 @@ def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_typ
     if date_to:
         domain.append(("invoice_date", "<=", date_to))
     if advisor_name:
-        domain.append(("x_studio_concepto", "=ilike", advisor_name))
+        domain.append(("mega_concepto", "=ilike", advisor_name))
     if team_id:
         domain.append(("team_id", "=", int(team_id)))
 
@@ -162,8 +162,8 @@ def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_typ
 
     rows = Move.read_group(
         domain=domain,
-        fields=["amount_untaxed:sum", "amount_total:sum", "id:count", "journal_id", "x_studio_concepto"],
-        groupby=["journal_id", "x_studio_concepto"],
+        fields=["amount_untaxed:sum", "amount_total:sum", "id:count", "journal_id", "mega_concepto"],
+        groupby=["journal_id", "mega_concepto"],
         lazy=False,
     )
 
@@ -181,7 +181,7 @@ def _get_concept_totals_grouped(journals, date_from=None, date_to=None, move_typ
         if not wh_id:
             continue
 
-        concepto = (r.get("x_studio_concepto") or "").strip() or "SIN CONCEPTO"
+        concepto = (r.get("mega_concepto") or "").strip() or "SIN CONCEPTO"
         key = (wh_id, j_id)
 
         cnt = int(r.get("__count", 0) or r.get("id_count", 0) or 0)
@@ -220,7 +220,7 @@ def _get_partner_totals_grouped(journals, date_from=None, date_to=None, move_typ
     if date_to:
         domain.append(("invoice_date", "<=", date_to))
     if advisor_name:
-        domain.append(("x_studio_concepto", "=ilike", advisor_name))
+        domain.append(("mega_concepto", "=ilike", advisor_name))
     if team_id:
         domain.append(("team_id", "=", int(team_id)))
 
@@ -302,7 +302,7 @@ def _get_grand_totals_fast(journals, date_from=None, date_to=None, move_type=Non
     if date_to:
         domain.append(("invoice_date", "<=", date_to))
     if advisor_name:
-        domain.append(("x_studio_concepto", "=ilike", advisor_name))
+        domain.append(("mega_concepto", "=ilike", advisor_name))
     if team_id:
         domain.append(("team_id", "=", int(team_id)))
 

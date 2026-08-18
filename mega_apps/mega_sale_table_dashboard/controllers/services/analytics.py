@@ -41,7 +41,7 @@ def _base_domain(journals, date_from=None, date_to=None, move_type=None, advisor
     if date_to:
         domain.append(("invoice_date", "<=", date_to))
     if advisor_name:
-        domain.append(("x_studio_concepto", "=ilike", advisor_name))
+        domain.append(("mega_concepto", "=ilike", advisor_name))
     if team_id:
         domain.append(("team_id", "=", int(team_id)))
     return domain
@@ -127,7 +127,7 @@ def _get_general_kpis(journals, date_from=None, date_to=None, advisor_name=None,
         if date_to:
             line_domain.append(("move_id.invoice_date", "<=", date_to))
         if advisor_name:
-            line_domain.append(("move_id.x_studio_concepto", "=ilike", advisor_name))
+            line_domain.append(("move_id.mega_concepto", "=ilike", advisor_name))
         if team_id:
             line_domain.append(("move_id.team_id", "=", int(team_id)))
 
@@ -151,10 +151,10 @@ def _get_general_kpis(journals, date_from=None, date_to=None, advisor_name=None,
 
 
 def _get_advisor_breakdown(journals, date_from=None, date_to=None, advisor_name=None, team_id=None, state_filter=None):
-    totals = _grouped_net_totals(journals, ["x_studio_concepto"], date_from, date_to, advisor_name, team_id, state_filter)
+    totals = _grouped_net_totals(journals, ["mega_concepto"], date_from, date_to, advisor_name, team_id, state_filter)
     rows = []
     for key, v in totals.items():
-        name = (v["labels"].get("x_studio_concepto") or "").strip() or "Sin asesor"
+        name = (v["labels"].get("mega_concepto") or "").strip() or "Sin asesor"
         rows.append({
             "advisor": name,
             "total_sales": v["total"],
@@ -177,7 +177,7 @@ def _get_client_advisor_breakdown(journals, date_from=None, date_to=None, adviso
     navegador -con un filtro de sede muy específico puede haber cientos de
     clientes distintos, cada uno con pocas compras-.
     """
-    totals = _grouped_net_totals(journals, ["partner_id", "x_studio_concepto"], date_from, date_to, advisor_name, team_id, state_filter)
+    totals = _grouped_net_totals(journals, ["partner_id", "mega_concepto"], date_from, date_to, advisor_name, team_id, state_filter)
 
     client_totals = defaultdict(float)
     client_names = {}
@@ -197,7 +197,7 @@ def _get_client_advisor_breakdown(journals, date_from=None, date_to=None, adviso
         p_id = key[0] or 0
         if p_id not in top_client_ids:
             continue
-        advisor = (v["labels"].get("x_studio_concepto") or "").strip() or "Sin asesor"
+        advisor = (v["labels"].get("mega_concepto") or "").strip() or "Sin asesor"
         rows.append({
             "client": client_names.get(p_id, "Sin cliente"),
             "advisor": advisor,
@@ -239,7 +239,7 @@ def _get_top_products(journals, date_from=None, date_to=None, advisor_name=None,
         if date_to:
             domain.append(("move_id.invoice_date", "<=", date_to))
         if advisor_name:
-            domain.append(("move_id.x_studio_concepto", "=ilike", advisor_name))
+            domain.append(("move_id.mega_concepto", "=ilike", advisor_name))
         if team_id:
             domain.append(("move_id.team_id", "=", int(team_id)))
 
@@ -378,7 +378,7 @@ def _get_distribution(journals, date_from=None, date_to=None, advisor_name=None,
     # consulta agregada evita ese intermedio; sigue respetando el mismo
     # filtro (diarios ya resueltos según sede/empresa permitidas) y no
     # se expone a input del usuario sin parametrizar.
-    if journals and "x_studio_concepto" in request.env["account.move"]._fields:
+    if journals and "mega_concepto" in request.env["account.move"]._fields:
         # Estado: se elige entre 3 fragmentos fijos definidos en Python
         # (nunca se interpola texto libre del usuario en el SQL).
         if not state_filter or state_filter == "posted":
@@ -407,7 +407,7 @@ def _get_distribution(journals, date_from=None, date_to=None, advisor_name=None,
                AND aml.display_type = 'product'
                AND (%(date_from)s IS NULL OR am.invoice_date >= %(date_from)s)
                AND (%(date_to)s IS NULL OR am.invoice_date <= %(date_to)s)
-               AND (%(advisor)s IS NULL OR am.x_studio_concepto ILIKE %(advisor)s)
+               AND (%(advisor)s IS NULL OR am.mega_concepto ILIKE %(advisor)s)
                AND (%(team_id)s IS NULL OR am.team_id = %(team_id)s)
              GROUP BY pc.complete_name
              ORDER BY subtotal DESC

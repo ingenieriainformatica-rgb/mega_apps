@@ -5,7 +5,7 @@ from odoo.exceptions import UserError  #type:ignore
 _logger = logging.getLogger(__name__)
 
 STATE_POSTED = "posted"
-FIELD_CONCEPTO = "x_studio_concepto"
+FIELD_CONCEPTO = "mega_concepto"
 
 
 class AccountMove(models.Model):
